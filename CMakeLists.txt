@@ -26,6 +26,8 @@ include_directories(${BOOSTER_INC})
 set(SRC
 	src/main.cpp
 	src/strusWebService.cpp
+	src/master.cpp
+	src/ping.cpp
 )
 
 include_directories(
