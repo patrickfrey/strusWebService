@@ -14,6 +14,10 @@ class master : public cppcms::application {
 		
 	public:
 		master( strusWebService &service );
+		void register_common_pages( );
+
+	private:
+		void not_found_404( );
 };
 
 } // namespace apps

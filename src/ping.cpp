@@ -14,6 +14,7 @@ ping::ping( strusWebService &service )
 
 void ping::ping_cmd( )
 {
+	response( ).content_type( "application/json" );
 	response( ).out( ) << "PONG";
 }
 
