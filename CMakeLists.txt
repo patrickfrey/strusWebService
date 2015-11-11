@@ -23,11 +23,16 @@ find_path(BOOSTER_INC booster/shared_ptr.h)
 include_directories(${CPPCMS_INC})
 include_directories(${BOOSTER_INC})
 
+add_subdirectory( tests )
+
+enable_testing( )
+
 set(SRC
 	src/main.cpp
 	src/strusWebService.cpp
 	src/master.cpp
 	src/ping.cpp
+	src/storage.cpp
 )
 
 include_directories(
@@ -39,7 +44,7 @@ link_directories(
 )
 
 add_executable(strusWebService ${SRC})
-target_link_libraries(strusWebService ${BOOSTER} ${CPPCMS} strus_storage)
+target_link_libraries(strusWebService ${BOOSTER} ${CPPCMS} strus_storage strus_error strus_database_leveldb)
 
 ADD_CUSTOM_TARGET(run @echo runs the web service)
 ADD_CUSTOM_COMMAND(
@@ -47,4 +52,12 @@ ADD_CUSTOM_COMMAND(
   COMMAND strusWebService
   ARGS -c ./config.js
   TARGET run
+)
+
+ADD_CUSTOM_TARGET(debugrun @echo runs the web service in debugger)
+ADD_CUSTOM_COMMAND(
+  COMMENT "debugrun"
+  COMMAND gdb
+  ARGS --args strusWebService -c ./config.js
+  TARGET debugrun
 )

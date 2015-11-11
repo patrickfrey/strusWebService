@@ -3,6 +3,7 @@
 
 #include <cppcms/url_dispatcher.h>  
 #include <cppcms/http_response.h>
+#include <cppcms/json.h>
 
 namespace apps {
 
@@ -15,7 +16,10 @@ ping::ping( strusWebService &service )
 void ping::ping_cmd( )
 {
 	response( ).content_type( "application/json" );
-	response( ).out( ) << "PONG";
+	cppcms::json::value j;  
+	j["result"] = "ok";
+	j["ping"] = "pong";
+	response( ).out( ) << j << std::endl;
 }
 
 } // namespace apps

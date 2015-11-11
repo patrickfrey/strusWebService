@@ -1,6 +1,6 @@
 {
 	"strusWebServer" : {
-		"storage" : "database=leveldb; path=./storage; cache=64M"
+		"storage_basedir" : "database=leveldb; path=./storage; cache=64M"
 	},
 	
 	"service" : {

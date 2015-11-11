@@ -20,14 +20,18 @@ void master::register_common_pages( )
 	service.dispatcher( ).assign( ".*", &master::not_found_404, this );
 }
 
-void master::not_found_404( )
+void master::report_error( unsigned int code, const std::string &msg )
 {
 	response( ).content_type( "application/json" );
-	int err_code = 404;
 	cppcms::json::value j;  
-	j["err_code"] = 404;
-	j["err_msg"] = "No such API found";
-	response( ).out( ) << j;
+	j["err_code"] = code;
+	j["err_msg"] = msg;
+	response( ).out( ) << j << std::endl;
+}
+
+void master::not_found_404( )
+{
+	report_error( 404, "No API found on this URL." );
 }
 
 } // namespace apps
