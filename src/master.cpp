@@ -29,6 +29,14 @@ void master::report_error( unsigned int code, const std::string &msg )
 	response( ).out( ) << j << std::endl;
 }
 
+void master::report_ok( )
+{
+	response( ).content_type( "application/json" );
+	cppcms::json::value j;  
+	j["result"] = "ok";
+	response( ).out( ) << j << std::endl;
+}
+
 void master::not_found_404( )
 {
 	report_error( 404, "No API found on this URL." );

@@ -3,7 +3,7 @@
 
 #include "master.hpp"
 #include "ping.hpp"
-#include "storage.hpp"
+#include "index.hpp"
 
 #include <cppcms/application.h>  
 
@@ -14,7 +14,7 @@ class strusWebService : public cppcms::application {
 	public:
 		apps::master master;
 		apps::ping ping;
-		apps::storage storage;
+		apps::index index;
 
 	public:
 		strusWebService( cppcms::service &srv );

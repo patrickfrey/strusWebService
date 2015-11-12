@@ -6,11 +6,11 @@ strusWebService::strusWebService( cppcms::service &srv )
 	: cppcms::application( srv ),
 	master( *this ),
 	ping( *this ),
-	storage( *this )
+	index( *this )
 {
 	add( master );
 	add( ping );
-	add( storage );
+	add( index );
 	
 	master.register_common_pages( );
 }

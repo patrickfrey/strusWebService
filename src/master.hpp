@@ -17,6 +17,7 @@ class master : public cppcms::application {
 		void register_common_pages( );
 
 	protected:
+		void report_ok( );
 		void report_error( unsigned int code, const std::string &msg );
 		void not_found_404( );
 };

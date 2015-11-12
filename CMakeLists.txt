@@ -23,16 +23,16 @@ find_path(BOOSTER_INC booster/shared_ptr.h)
 include_directories(${CPPCMS_INC})
 include_directories(${BOOSTER_INC})
 
-add_subdirectory( tests )
-
 enable_testing( )
+
+add_subdirectory( tests )
 
 set(SRC
 	src/main.cpp
 	src/strusWebService.cpp
 	src/master.cpp
 	src/ping.cpp
-	src/storage.cpp
+	src/index.cpp
 )
 
 include_directories(
