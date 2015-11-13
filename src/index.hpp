@@ -20,6 +20,8 @@ class index : public master {
 	protected:
 		strus::ErrorBufferInterface *g_errorhnd;
 		void prepare_strus_environment( );
+		std::string get_storage_directory( const std::string &base_storage_dir, const std::string &name );
+		std::string get_storage_config( const std::string &base_storage_dir, const std::string &name );
 		strus::DatabaseInterface *dbi;
 		strus::StorageInterface *sti;
 		

@@ -5,6 +5,9 @@
 #include <cppcms/http_response.h>
 #include <cppcms/json.h>
 
+#include <booster/locale/format.h>
+#include <sstream>
+
 // TODO: sort out, copied from testRandomCollection.cpp, actually there
 // I would prefer 4 to 5 files at most!
 #include "strus/reference.hpp"
@@ -12,17 +15,14 @@
 #include "strus/lib/error.hpp"
 #include "strus/lib/database_leveldb.hpp"
 #include "strus/lib/storage.hpp"
-#include "strus/lib/queryproc.hpp"
-#include "strus/lib/queryeval.hpp"
 #include "strus/errorBufferInterface.hpp"
-#include "strus/queryProcessorInterface.hpp"
-#include "strus/postingJoinOperatorInterface.hpp"
-#include "strus/postingIteratorInterface.hpp"
 #include "strus/storageClientInterface.hpp"
-#include "strus/storageTransactionInterface.hpp"
-#include "strus/storageDocumentInterface.hpp"
 
 #include "error_codes.hpp"
+
+#include <sys/stat.h>
+#include <cstring>
+#include <cerrno>
 
 // TODO: read from config
 #define NOF_THREADS 128
@@ -62,16 +62,49 @@ void index::prepare_strus_environment( )
 	}
 }
 
+std::string index::get_storage_directory( const std::string &base_storage_dir, const std::string &name )
+{
+	std::ostringstream ss;
+	
+	ss << booster::locale::format( "./storage/{1}" ) % name;
+	std::string directory = ss.str( );
+
+	return directory;	
+}
+
+std::string index::get_storage_config( const std::string &base_storage_dir, const std::string &name )
+{
+	std::ostringstream ss;
+	
+	ss << booster::locale::format( "path={1}" ) % get_storage_directory( base_storage_dir, name );
+	std::string config = ss.str( );
+
+	return config;
+}
+
 void index::create_cmd( const std::string name )
 {
+	prepare_strus_environment( );
+
 	// TODO: storage configuration must be read from json request and also
 	// read the basedir from the config
-	std::string config = "path=./storage";
-
-	prepare_strus_environment( );
+	std::string base_storage_dir = "./storage";
+	std::string config = get_storage_config( base_storage_dir, name );
 
 	if( dbi->exists( config ) ) {
 		report_error( ERROR_INDEX_CREATE_DATABASE_EXISTS, "An index with that name already exists" );
+		return;
+	}
+	
+	int res = mkdir( base_storage_dir.c_str( ), S_IRUSR | S_IWUSR | S_IXUSR );
+	if( res < 0 && errno != EEXIST ) {
+		report_error( ERROR_INDEX_CREATE_CMD_MKDIR_STORAGE_DIR, strerror( errno ) );
+		return;
+	}
+	
+	res = mkdir( get_storage_directory( base_storage_dir, name ).c_str( ), S_IRUSR | S_IWUSR | S_IXUSR );
+	if( res < 0 ) {
+		report_error( ERROR_INDEX_CREATE_CMD_MKDIR_STORAGE_DIR, strerror( errno ) );
 		return;
 	}
 	
@@ -97,11 +130,12 @@ void index::create_cmd( const std::string name )
 
 void index::delete_cmd( const std::string name )
 {
+	prepare_strus_environment( );
+
 	// TODO: storage configuration must be read from json request and also
 	// read the basedir from the config
-	std::string config = "path=./storage";
-	
-	prepare_strus_environment( );
+	std::string base_storage_dir = "./storage";
+	std::string config = get_storage_config( base_storage_dir, name );
 	
 	if( !dbi->exists( config ) ) {
 		report_error( ERROR_INDEX_DESTROY_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
