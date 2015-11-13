@@ -40,8 +40,6 @@ index::index( strusWebService &service )
 
 index::~index( )
 {
-	delete dbi;
-	delete sti;
 }
 
 void index::prepare_strus_environment( )
@@ -70,6 +68,8 @@ void index::create_cmd( const std::string name )
 	// read the basedir from the config
 	std::string config = "path=./storage";
 
+	prepare_strus_environment( );
+
 	if( dbi->exists( config ) ) {
 		report_error( ERROR_INDEX_CREATE_DATABASE_EXISTS, "An index with that name already exists" );
 		return;
@@ -79,10 +79,18 @@ void index::create_cmd( const std::string name )
 		report_error( ERROR_INDEX_CREATE_CMD_CREATE_DATABASE, g_errorhnd->fetchError( ) );
 		return;
 	}
-		
-	std::auto_ptr<strus::DatabaseClientInterface> database( dbi->createClient( config ) );
+	
+	strus::DatabaseClientInterface *database = dbi->createClient( config );
+	if( !database ) {
+		report_error( ERROR_INDEX_CREATE_CMD_CREATE_CLIENT, g_errorhnd->fetchError( ) );
+		return;
+	}
 
-	sti->createStorage( config, database.get( ) );
+	sti->createStorage( config, database );
+	
+	delete database;
+	delete dbi;
+	delete sti;
 			
 	report_ok( );
 }
@@ -92,6 +100,8 @@ void index::delete_cmd( const std::string name )
 	// TODO: storage configuration must be read from json request and also
 	// read the basedir from the config
 	std::string config = "path=./storage";
+	
+	prepare_strus_environment( );
 	
 	if( !dbi->exists( config ) ) {
 		report_error( ERROR_INDEX_DESTROY_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
@@ -103,6 +113,9 @@ void index::delete_cmd( const std::string name )
 		return;
 	}
 
+	delete dbi;
+	delete sti;
+	
 	report_ok( );
 }
 
