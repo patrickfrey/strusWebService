@@ -161,6 +161,12 @@ void index::stats_cmd( const std::string name )
 
 	std::string config = get_storage_config( storage_base_directory, name );
 
+	if( !dbi->exists( config ) ) {
+		report_error( ERROR_INDEX_STATS_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
+		close_strus_environment( );
+		return;
+	}
+
 	strus::DatabaseClientInterface *database = dbi->createClient( config );
 	if( !database ) {
 		report_error( ERROR_INDEX_STATS_CMD_CREATE_DATABASE_CLIENT, g_errorhnd->fetchError( ) );
