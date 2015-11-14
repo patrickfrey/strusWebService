@@ -37,10 +37,12 @@ index::index( strusWebService &service, std::string storage_base_directory )
 	// TODO: number of threads, depends on CppCMS running model, must pass
 	// parts of this config here
 	// TODO: stderr, really? how can we redirect to the booster log?
+	// TODO: do this once and not here (master?)
 	g_errorhnd = strus::createErrorBuffer_standard( stderr, NOF_THREADS );
 	
 	service.dispatcher( ).assign( "/index/create/(\\w+)", &index::create_cmd, this, 1 );
 	service.dispatcher( ).assign( "/index/delete/(\\w+)", &index::delete_cmd, this, 1 );
+	service.dispatcher( ).assign( "/index/stats/(\\w+)", &index::stats_cmd, this, 1 );
 	service.dispatcher( ).assign( "/index/list", &index::list_cmd, this );
 }
 
@@ -61,6 +63,12 @@ void index::prepare_strus_environment( )
 		report_error( ERROR_INDEX_CREATE_STORAGE_INTERFACE, g_errorhnd->fetchError( ) );
 		return;
 	}
+}
+
+void index::close_strus_environment( )
+{
+	delete dbi;
+	delete sti;
 }
 
 std::string index::get_storage_directory( const std::string &base_storage_dir, const std::string &name )
@@ -98,25 +106,28 @@ void index::create_cmd( const std::string name )
 	if( !boost::filesystem::create_directories(
 		get_storage_directory( storage_base_directory, name ), err ) ) {
 		report_error( ERROR_INDEX_CREATE_CMD_MKDIR_STORAGE_DIR, err.message( ) );
+		close_strus_environment( );
 		return;
 	}
 		
 	if( !dbi->createDatabase( config ) ) {
 		report_error( ERROR_INDEX_CREATE_CMD_CREATE_DATABASE, g_errorhnd->fetchError( ) );
+		close_strus_environment( );
 		return;
 	}
 	
 	strus::DatabaseClientInterface *database = dbi->createClient( config );
 	if( !database ) {
 		report_error( ERROR_INDEX_CREATE_CMD_CREATE_CLIENT, g_errorhnd->fetchError( ) );
+		close_strus_environment( );
 		return;
 	}
 
 	sti->createStorage( config, database );
 	
 	delete database;
-	delete dbi;
-	delete sti;
+
+	close_strus_environment( );
 			
 	report_ok( );
 }
@@ -129,18 +140,56 @@ void index::delete_cmd( const std::string name )
 	
 	if( !dbi->exists( config ) ) {
 		report_error( ERROR_INDEX_DESTROY_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
+		close_strus_environment( );
 		return;
 	}
 	
 	if( !dbi->destroyDatabase( config ) ) {
 		report_error( ERROR_INDEX_DESTROY_CMD_DESTROY_DATABASE, g_errorhnd->fetchError( ) );
+		close_strus_environment( );
+		return;
+	}
+	
+	close_strus_environment( );
+	
+	report_ok( );
+}
+
+void index::stats_cmd( const std::string name )
+{
+	prepare_strus_environment( );
+
+	std::string config = get_storage_config( storage_base_directory, name );
+
+	strus::DatabaseClientInterface *database = dbi->createClient( config );
+	if( !database ) {
+		report_error( ERROR_INDEX_STATS_CMD_CREATE_DATABASE_CLIENT, g_errorhnd->fetchError( ) );
 		return;
 	}
 
-	delete dbi;
-	delete sti;
+	strus::StorageClientInterface *storage = sti->createClient( config, database );
+	if( !storage ) {
+		delete database;
+		close_strus_environment( );
+		report_error( ERROR_INDEX_STATS_CMD_CREATE_STORAGE_CLIENT, g_errorhnd->fetchError( ) );
+		return;
+	}
 	
-	report_ok( );
+	strus::GlobalCounter nof_docs = storage->globalNofDocumentsInserted( );
+	
+	response( ).content_type( "application/json" );
+	cppcms::json::value j;
+	j["result"] = "ok";
+	j["stats"]["nofDocs"] = nof_docs;
+
+	// database pointer held by storage?!
+	//~ delete database;
+	
+	delete storage;
+	
+	close_strus_environment( );
+
+	response( ).out( ) << j << std::endl;	
 }
 
 void index::list_cmd( )
