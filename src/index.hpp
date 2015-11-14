@@ -30,6 +30,7 @@ class index : public master {
 	private:
 		void create_cmd( const std::string name );
 		void delete_cmd( const std::string name );
+		void list_cmd( );
 };
 
 } // namespace apps

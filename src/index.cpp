@@ -20,9 +20,7 @@
 
 #include "error_codes.hpp"
 
-#include <sys/stat.h>
-#include <cstring>
-#include <cerrno>
+#include <boost/filesystem.hpp>
 
 // TODO: read from config
 #define NOF_THREADS 128
@@ -40,6 +38,7 @@ index::index( strusWebService &service, std::string storage_base_directory )
 	
 	service.dispatcher( ).assign( "/index/create/(\\w+)", &index::create_cmd, this, 1 );
 	service.dispatcher( ).assign( "/index/delete/(\\w+)", &index::delete_cmd, this, 1 );
+	service.dispatcher( ).assign( "/index/list", &index::list_cmd, this );
 }
 
 index::~index( )
@@ -92,18 +91,13 @@ void index::create_cmd( const std::string name )
 		return;
 	}
 	
-	int res = mkdir( storage_base_directory.c_str( ), S_IRUSR | S_IWUSR | S_IXUSR );
-	if( res < 0 && errno != EEXIST ) {
-		report_error( ERROR_INDEX_CREATE_CMD_MKDIR_STORAGE_DIR, strerror( errno ) );
+	boost::system::error_code err;
+	if( !boost::filesystem::create_directories(
+		get_storage_directory( storage_base_directory, name ), err ) ) {
+		report_error( ERROR_INDEX_CREATE_CMD_MKDIR_STORAGE_DIR, err.message( ) );
 		return;
 	}
-	
-	res = mkdir( get_storage_directory( storage_base_directory, name ).c_str( ), S_IRUSR | S_IWUSR | S_IXUSR );
-	if( res < 0 ) {
-		report_error( ERROR_INDEX_CREATE_CMD_MKDIR_STORAGE_DIR, strerror( errno ) );
-		return;
-	}
-	
+		
 	if( !dbi->createDatabase( config ) ) {
 		report_error( ERROR_INDEX_CREATE_CMD_CREATE_DATABASE, g_errorhnd->fetchError( ) );
 		return;
@@ -143,6 +137,11 @@ void index::delete_cmd( const std::string name )
 	delete dbi;
 	delete sti;
 	
+	report_ok( );
+}
+
+void index::list_cmd( )
+{
 	report_ok( );
 }
 

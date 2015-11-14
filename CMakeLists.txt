@@ -11,6 +11,7 @@ set( STRUS_WEB_SERVICE_VERSION ${STRUS_WEB_SERVICE_MAJOR_VERSION}.${STRUS_WEB_SE
 set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" )
 include( cmake/standard_targets.cmake )
 include( cmake/find_strus_package.cmake )
+include( cmake/boost.cmake)
 
 find_strus_package( core )
 
@@ -44,7 +45,7 @@ link_directories(
 )
 
 add_executable(strusWebService ${SRC})
-target_link_libraries(strusWebService ${BOOSTER} ${CPPCMS} strus_storage strus_error strus_database_leveldb)
+target_link_libraries(strusWebService ${BOOSTER} ${CPPCMS} strus_storage strus_error strus_database_leveldb ${Boost_LIBRARIES})
 
 ADD_CUSTOM_TARGET(run @echo runs the web service)
 ADD_CUSTOM_COMMAND(
