@@ -29,10 +29,14 @@
 
 namespace apps {
 
-index::index( strusWebService &service )
-	: master( service )
+index::index( strusWebService &service, std::string storage_base_directory )
+	: master( service ),
+	storage_base_directory( storage_base_directory )
 {
-	prepare_strus_environment( );
+	// TODO: number of threads, depends on CppCMS running model, must pass
+	// parts of this config here
+	// TODO: stderr, really? how can we redirect to the booster log?
+	g_errorhnd = strus::createErrorBuffer_standard( stderr, NOF_THREADS );
 	
 	service.dispatcher( ).assign( "/index/create/(\\w+)", &index::create_cmd, this, 1 );
 	service.dispatcher( ).assign( "/index/delete/(\\w+)", &index::delete_cmd, this, 1 );
@@ -44,11 +48,6 @@ index::~index( )
 
 void index::prepare_strus_environment( )
 {	
-	// TODO: number of threads, depends on CppCMS running model, must pass
-	// parts of this config here
-	// TODO: stderr, really? how can we redirect to the booster log?
-	g_errorhnd = strus::createErrorBuffer_standard( stderr, NOF_THREADS );
-
 	dbi = strus::createDatabase_leveldb( g_errorhnd );
 	if( dbi == NULL ) {
 		report_error( ERROR_INDEX_CREATE_DATABASE_INTERFACE, g_errorhnd->fetchError( ) );
@@ -66,7 +65,7 @@ std::string index::get_storage_directory( const std::string &base_storage_dir, c
 {
 	std::ostringstream ss;
 	
-	ss << booster::locale::format( "./storage/{1}" ) % name;
+	ss << booster::locale::format( "{1}/{2}" ) % base_storage_dir % name;
 	std::string directory = ss.str( );
 
 	return directory;	
@@ -86,23 +85,20 @@ void index::create_cmd( const std::string name )
 {
 	prepare_strus_environment( );
 
-	// TODO: storage configuration must be read from json request and also
-	// read the basedir from the config
-	std::string base_storage_dir = "./storage";
-	std::string config = get_storage_config( base_storage_dir, name );
+	std::string config = get_storage_config( storage_base_directory, name );
 
 	if( dbi->exists( config ) ) {
 		report_error( ERROR_INDEX_CREATE_DATABASE_EXISTS, "An index with that name already exists" );
 		return;
 	}
 	
-	int res = mkdir( base_storage_dir.c_str( ), S_IRUSR | S_IWUSR | S_IXUSR );
+	int res = mkdir( storage_base_directory.c_str( ), S_IRUSR | S_IWUSR | S_IXUSR );
 	if( res < 0 && errno != EEXIST ) {
 		report_error( ERROR_INDEX_CREATE_CMD_MKDIR_STORAGE_DIR, strerror( errno ) );
 		return;
 	}
 	
-	res = mkdir( get_storage_directory( base_storage_dir, name ).c_str( ), S_IRUSR | S_IWUSR | S_IXUSR );
+	res = mkdir( get_storage_directory( storage_base_directory, name ).c_str( ), S_IRUSR | S_IWUSR | S_IXUSR );
 	if( res < 0 ) {
 		report_error( ERROR_INDEX_CREATE_CMD_MKDIR_STORAGE_DIR, strerror( errno ) );
 		return;
@@ -132,10 +128,7 @@ void index::delete_cmd( const std::string name )
 {
 	prepare_strus_environment( );
 
-	// TODO: storage configuration must be read from json request and also
-	// read the basedir from the config
-	std::string base_storage_dir = "./storage";
-	std::string config = get_storage_config( base_storage_dir, name );
+	std::string config = get_storage_config( storage_base_directory, name );
 	
 	if( !dbi->exists( config ) ) {
 		report_error( ERROR_INDEX_DESTROY_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
