@@ -156,7 +156,11 @@ void index::list_cmd( )
 	j["result"] = "ok";
 	std::vector<std::string> v;
 	for( dirlist::const_iterator it = dirs.begin( ); it != dirs.end( ); it++ ) {
-		v.push_back( it->path( ).native( ) );
+		std::string last;
+		for( boost::filesystem::path::iterator pit = it->path( ).begin( ); pit != it->path( ).end( ); pit++ ) {
+			last = pit->native( );
+		}
+		v.push_back( last );
 	}
 	j["indexes"] = v;
 
