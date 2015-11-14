@@ -24,6 +24,7 @@ void master::report_error( unsigned int code, const std::string &msg )
 {
 	response( ).content_type( "application/json" );
 	cppcms::json::value j;  
+	j["result"] = "error";
 	j["err_code"] = code;
 	j["err_msg"] = msg;
 	response( ).out( ) << j << std::endl;

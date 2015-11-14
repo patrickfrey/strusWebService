@@ -8,6 +8,11 @@
 #include <booster/locale/format.h>
 #include <sstream>
 
+#include <iterator>
+#include <algorithm>
+#include <vector>
+#include <boost/filesystem.hpp>
+
 // TODO: sort out, copied from testRandomCollection.cpp, actually there
 // I would prefer 4 to 5 files at most!
 #include "strus/reference.hpp"
@@ -19,8 +24,6 @@
 #include "strus/storageClientInterface.hpp"
 
 #include "error_codes.hpp"
-
-#include <boost/filesystem.hpp>
 
 // TODO: read from config
 #define NOF_THREADS 128
@@ -142,7 +145,22 @@ void index::delete_cmd( const std::string name )
 
 void index::list_cmd( )
 {
-	report_ok( );
+	typedef std::vector<boost::filesystem::directory_entry> dirlist;
+	dirlist dirs;
+	
+	std::copy( boost::filesystem::directory_iterator( storage_base_directory ),
+		boost::filesystem::directory_iterator( ), std::back_inserter( dirs ) );
+
+	response( ).content_type( "application/json" );
+	cppcms::json::value j;
+	j["result"] = "ok";
+	std::vector<std::string> v;
+	for( dirlist::const_iterator it = dirs.begin( ); it != dirs.end( ); it++ ) {
+		v.push_back( it->path( ).native( ) );
+	}
+	j["indexes"] = v;
+
+	response( ).out( ) << j << std::endl;
 }
 
 } // namespace apps
