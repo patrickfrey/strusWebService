@@ -40,6 +40,8 @@ index::index( strusWebService &service, std::string storage_base_directory )
 	// TODO: do this once and not here (master?)
 	g_errorhnd = strus::createErrorBuffer_standard( stderr, NOF_THREADS );
 	
+	initialize_default_create_parameters( );
+	
 	service.dispatcher( ).assign( "/index/create/(\\w+)", &index::create_cmd, this, 1 );
 	service.dispatcher( ).assign( "/index/delete/(\\w+)", &index::delete_cmd, this, 1 );
 	service.dispatcher( ).assign( "/index/stats/(\\w+)", &index::stats_cmd, this, 1 );
@@ -48,6 +50,14 @@ index::index( strusWebService &service, std::string storage_base_directory )
 
 index::~index( )
 {
+}
+
+void index::initialize_default_create_parameters( )
+{
+	default_create_parameters = service.settings( ).get<struct StorageCreateParameters>( "storage.default_create_parameters" );
+	cppcms::json::value j;
+	j["config"] = default_create_parameters;
+	std::cout << j << std::endl;
 }
 
 void index::prepare_strus_environment( )
@@ -188,9 +198,7 @@ void index::stats_cmd( const std::string name )
 	j["result"] = "ok";
 	j["stats"]["nofDocs"] = nof_docs;
 
-	// database pointer held by storage?!
-	//~ delete database;
-	
+	// database is deleted implicitely!
 	delete storage;
 	
 	close_strus_environment( );
@@ -203,6 +211,17 @@ void index::list_cmd( )
 	typedef std::vector<boost::filesystem::directory_entry> dirlist;
 	dirlist dirs;
 	
+	boost::filesystem::path dir( storage_base_directory );
+	if( exists( dir ) ) {
+		if( !is_directory( dir ) ) {
+			report_error( ERROR_INDEX_STATS_CMD_ILLEGAL_STORAGE_DIR, "Base storage directory is not a directory" );
+			return;
+		}
+	} else {
+		report_error( ERROR_INDEX_STATS_CMD_ILLEGAL_STORAGE_DIR, "Base storage directory does not exist" );
+		return;
+	}
+		  
 	std::copy( boost::filesystem::directory_iterator( storage_base_directory ),
 		boost::filesystem::directory_iterator( ), std::back_inserter( dirs ) );
 

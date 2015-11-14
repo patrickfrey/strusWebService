@@ -9,6 +9,22 @@
 
 #include <cppcms/json.h>
 
+#include <vector>
+
+struct MetadataDefiniton {
+	std::string name;
+	std::string type;
+};
+
+struct StorageCreateParameters {
+	std::vector<struct MetadataDefiniton> metadata;
+	bool compression;
+	size_t cache_size;
+	size_t max_nof_open_files;
+	size_t write_buffer_size;
+	size_t block_size;
+};
+
 namespace apps {
 
 class index : public master {
@@ -20,7 +36,9 @@ class index : public master {
 	protected:
 		std::string storage_base_directory;
 		strus::ErrorBufferInterface *g_errorhnd;
+		struct StorageCreateParameters default_create_parameters;
 		
+		void initialize_default_create_parameters( );
 		void prepare_strus_environment( );
 		void close_strus_environment( );
 		std::string get_storage_directory( const std::string &base_storage_dir, const std::string &name );
@@ -36,5 +54,60 @@ class index : public master {
 };
 
 } // namespace apps
+
+namespace cppcms {
+	namespace json {
+		
+template<>
+struct traits<MetadataDefiniton> {
+
+	static MetadataDefiniton get( value const &v )
+	{
+		MetadataDefiniton m;
+		if( v.type( ) != is_object) {
+			throw bad_value_cast( );
+		}
+		m.name = v.get<std::string>( "name" );
+		m.type = v.get<std::string>( "type" );
+		return m;
+	}
+	
+	static void set( value &v, MetadataDefiniton const &m )
+	{
+		v.set( "name", m.name );
+		v.set( "type", m.type );
+	}		
+};
+
+template<>
+struct traits<StorageCreateParameters> {
+	
+	static StorageCreateParameters get( value const &v )
+	{
+		StorageCreateParameters p;
+		if( v.type( ) != is_object) {
+			throw bad_value_cast( );
+		}
+		p.compression = v.get<bool>( "compression" );
+		p.cache_size = v.get<size_t>( "cache_size" );
+		p.max_nof_open_files = v.get<size_t>( "max_nof_open_files" );
+		p.write_buffer_size = v.get<size_t>( "write_buffer_size" );
+		p.block_size = v.get<size_t>( "block_size" );
+		p.metadata = v.get<std::vector<struct MetadataDefiniton> >( "metadata" );
+		return p;
+	}
+	
+	static void set( value &v, StorageCreateParameters const &p )
+	{
+		v.set( "compression", p.compression );
+		v.set( "cache_size", p.cache_size );
+		v.set( "max_nof_open_files", p.max_nof_open_files );
+		v.set( "write_buffer_size", p.write_buffer_size );
+		v.set( "block_size", p.block_size );
+		v.set( "metadata", p.metadata );
+	}
+};
+
+} } // namespace cppcms::json
 
 #endif
