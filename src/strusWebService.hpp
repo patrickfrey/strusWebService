@@ -2,7 +2,7 @@
 #define STRUS_WEB_SERVICE_HPP
 
 #include "master.hpp"
-#include "ping.hpp"
+#include "other.hpp"
 #include "index.hpp"
 
 #include <cppcms/application.h>  
@@ -13,7 +13,7 @@ class strusWebService : public cppcms::application {
 
 	public:
 		apps::master master;
-		apps::ping ping;
+		apps::other other;
 		apps::index index;
 
 	public:

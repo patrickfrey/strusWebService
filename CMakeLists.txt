@@ -15,6 +15,8 @@ include( cmake/boost.cmake)
 
 find_strus_package( core )
 
+configure_file( "${PROJECT_SOURCE_DIR}/src/version.hpp.in"  "${PROJECT_SOURCE_DIR}/src/version.hpp"  @ONLY )
+
 find_library(CPPCMS cppcms)
 find_library(BOOSTER booster)
 
@@ -32,7 +34,7 @@ set(SRC
 	src/main.cpp
 	src/strusWebService.cpp
 	src/master.cpp
-	src/ping.cpp
+	src/other.cpp
 	src/index.cpp
 )
 

@@ -1,5 +1,5 @@
-#ifndef PING_HPP
-#define PING_HPP
+#ifndef OTHER_HPP
+#define OTHER_HPP
 
 #include "master.hpp"
 
@@ -7,13 +7,14 @@
 
 namespace apps {
 
-class ping : public master {
+class other : public master {
 
 	public:
-		ping( strusWebService &service );
+		other( strusWebService &service );
 		
 	private:
 		void ping_cmd( );
+		void version_cmd( );
 };
 
 } // namespace apps
