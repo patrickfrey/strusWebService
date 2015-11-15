@@ -45,6 +45,8 @@ class index : public master {
 		struct StorageCreateParameters default_create_parameters;
 		
 		void initialize_default_create_parameters( );
+		// TODO: or can we pass to get with a different initialzer
+		//~ struct StorageCreateParameters merge_create_parameters( const struct StorageCreateParameters &defaults, const struct StorageCreateParameters &params );
 		void prepare_strus_environment( );
 		void close_strus_environment( );
 		
@@ -100,8 +102,8 @@ struct traits<StorageCreateParameters> {
 		p.cache_size = v.get<size_t>( "cache_size", LEVELDB_DATABASE_DEFAULT_LRU_CACHESIZE );
 		p.max_open_files = v.get<size_t>( "max_open_files", LEVELDB_DATABASE_DEFAULT_MAX_OPEN_FILES );
 		p.write_buffer_size = v.get<size_t>( "write_buffer_size", LEVELDB_DATABASE_DEFAULT_WRITE_BUFFER_SIZE );
-		p.block_size = v.get<size_t>( "block_size", LEVELDB_DATABASE_DEFAULT_BLOCK_SIZE );
-		p.metadata = v.get<std::vector<struct MetadataDefiniton> >( "metadata" );
+		p.block_size = v.get<size_t>( "block_size", LEVELDB_DATABASE_DEFAULT_BLOCK_SIZE );		
+		p.metadata = v.get<std::vector<struct MetadataDefiniton> >( "metadata", std::vector<struct MetadataDefiniton>( ) );
 		return p;
 	}
 	

@@ -3,6 +3,7 @@
 
 #include <cppcms/url_dispatcher.h>  
 #include <cppcms/http_response.h>
+#include <cppcms/http_request.h>
 #include <cppcms/json.h>
 
 #include <booster/locale/format.h>
@@ -12,6 +13,9 @@
 #include <iterator>
 #include <algorithm>
 #include <vector>
+#include <utility>
+#include <istream>
+
 #include <boost/filesystem.hpp>
 
 // TODO: sort out, copied from testRandomCollection.cpp, actually there
@@ -128,6 +132,32 @@ std::string index::get_storage_config( const std::string &base_storage_dir, cons
 
 void index::create_cmd( const std::string name )
 {
+	if( request( ).request_method( ) != "POST" ) {
+		report_error( ERROR_INDEX_ILLEGAL_METHOD, "Expecting POST method for creating a new index" );
+		return;
+	}
+
+	struct StorageCreateParameters params;
+	std::pair<void *, size_t> data = request( ).raw_post_data( );
+	std::istringstream is( std::string( reinterpret_cast<char const *>( data.first ), data.second ) );
+	cppcms::json::value p;
+	if( !p.load( is, true) ) {
+		report_error( ERROR_INDEX_ILLEGAL_JSON, "Illegal JSON received" );
+		return;
+	}
+	
+	if( p.type( "params" ) == cppcms::json::is_object ) {
+		try {
+			params = p.get<struct StorageCreateParameters>( "params" );
+		} catch( cppcms::json::bad_value_cast &e ) {
+			report_error( ERROR_INDEX_ILLEGAL_JSON, "Illegal storage creation parameter received" );
+			return;
+		}
+	} else {
+		report_error( ERROR_INDEX_ILLEGAL_JSON, "Expecting a JSON object as storage creation parameter" );
+		return;
+	}
+		
 	prepare_strus_environment( );
 
 	struct StorageCreateParameters combined_params;

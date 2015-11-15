@@ -6,8 +6,9 @@ add_test( NAME ping COMMAND curl http://localhost:8080/ping )
 
 add_test( NAME version COMMAND curl http://localhost:8080/version )
 
-add_test( NAME createA COMMAND curl http://localhost:8080/index/create/A )
-add_test( NAME createB COMMAND curl http://localhost:8080/index/create/B )
+# TODO: how to escape JSON as parameter, cmake is not really helpful here!
+add_test( NAME createA COMMAND curl -XPOST http://localhost:8080/index/create/A -d "{ 'params': {} }" )
+add_test( NAME createB COMMAND curl -XPOST http://localhost:8080/index/create/B -d "{ 'params': {} }" )
 
 add_test( NAME statsA COMMAND curl http://localhost:8080/index/stats/A )
 add_test( NAME statsB COMMAND curl http://localhost:8080/index/stats/B )
