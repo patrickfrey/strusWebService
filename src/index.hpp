@@ -2,6 +2,7 @@
 #define INDEX_HPP
 
 #include "master.hpp"
+#include "constants.hpp"
 
 #include "strus/lib/error.hpp"
 #include "strus/databaseInterface.hpp"
@@ -18,9 +19,10 @@ struct MetadataDefiniton {
 
 struct StorageCreateParameters {
 	std::vector<struct MetadataDefiniton> metadata;
+	// TODO: this depends on the database implementation
 	bool compression;
 	size_t cache_size;
-	size_t max_nof_open_files;
+	size_t max_open_files;
 	size_t write_buffer_size;
 	size_t block_size;
 };
@@ -88,11 +90,13 @@ struct traits<StorageCreateParameters> {
 		if( v.type( ) != is_object) {
 			throw bad_value_cast( );
 		}
-		p.compression = v.get<bool>( "compression" );
-		p.cache_size = v.get<size_t>( "cache_size" );
-		p.max_nof_open_files = v.get<size_t>( "max_nof_open_files" );
-		p.write_buffer_size = v.get<size_t>( "write_buffer_size" );
-		p.block_size = v.get<size_t>( "block_size" );
+		p.compression = v.get<bool>( "compression", LEVELDB_DATABASE_DEFAULT_COMPRESSION );
+		// TODO: we should introspect them via the database configuration for
+		// the specific implementation
+		p.cache_size = v.get<size_t>( "cache_size", LEVELDB_DATABASE_DEFAULT_LRU_CACHESIZE );
+		p.max_open_files = v.get<size_t>( "max_open_files", LEVELDB_DATABASE_DEFAULT_MAX_OPEN_FILES );
+		p.write_buffer_size = v.get<size_t>( "write_buffer_size", LEVELDB_DATABASE_DEFAULT_WRITE_BUFFER_SIZE );
+		p.block_size = v.get<size_t>( "block_size", LEVELDB_DATABASE_DEFAULT_BLOCK_SIZE );
 		p.metadata = v.get<std::vector<struct MetadataDefiniton> >( "metadata" );
 		return p;
 	}
@@ -101,7 +105,7 @@ struct traits<StorageCreateParameters> {
 	{
 		v.set( "compression", p.compression );
 		v.set( "cache_size", p.cache_size );
-		v.set( "max_nof_open_files", p.max_nof_open_files );
+		v.set( "max_open_files", p.max_open_files );
 		v.set( "write_buffer_size", p.write_buffer_size );
 		v.set( "block_size", p.block_size );
 		v.set( "metadata", p.metadata );
