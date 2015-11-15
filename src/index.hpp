@@ -44,7 +44,7 @@ class index : public master {
 		void prepare_strus_environment( );
 		void close_strus_environment( );
 		std::string get_storage_directory( const std::string &base_storage_dir, const std::string &name );
-		std::string get_storage_config( const std::string &base_storage_dir, const std::string &name );
+		std::string get_storage_config( const std::string &base_storage_dir, const struct StorageCreateParameters params, const std::string &name );
 		strus::DatabaseInterface *dbi;
 		strus::StorageInterface *sti;
 		

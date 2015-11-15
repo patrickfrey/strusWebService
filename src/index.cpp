@@ -91,7 +91,7 @@ std::string index::get_storage_directory( const std::string &base_storage_dir, c
 	return directory;	
 }
 
-std::string index::get_storage_config( const std::string &base_storage_dir, const std::string &name )
+std::string index::get_storage_config( const std::string &base_storage_dir, const struct StorageCreateParameters params, const std::string &name )
 {
 	std::ostringstream ss;
 	
@@ -105,7 +105,10 @@ void index::create_cmd( const std::string name )
 {
 	prepare_strus_environment( );
 
-	std::string config = get_storage_config( storage_base_directory, name );
+	struct StorageCreateParameters combined_params;
+	combined_params = default_create_parameters;
+
+	std::string config = get_storage_config( storage_base_directory, combined_params, name );
 
 	if( dbi->exists( config ) ) {
 		report_error( ERROR_INDEX_CREATE_DATABASE_EXISTS, "An index with that name already exists" );
@@ -146,7 +149,10 @@ void index::delete_cmd( const std::string name )
 {
 	prepare_strus_environment( );
 
-	std::string config = get_storage_config( storage_base_directory, name );
+	struct StorageCreateParameters combined_params;
+	combined_params = default_create_parameters;
+
+	std::string config = get_storage_config( storage_base_directory, combined_params, name );
 	
 	if( !dbi->exists( config ) ) {
 		report_error( ERROR_INDEX_DESTROY_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
@@ -169,7 +175,10 @@ void index::stats_cmd( const std::string name )
 {
 	prepare_strus_environment( );
 
-	std::string config = get_storage_config( storage_base_directory, name );
+	struct StorageCreateParameters combined_params;
+	combined_params = default_create_parameters;
+
+	std::string config = get_storage_config( storage_base_directory, combined_params, name );
 
 	if( !dbi->exists( config ) ) {
 		report_error( ERROR_INDEX_STATS_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
