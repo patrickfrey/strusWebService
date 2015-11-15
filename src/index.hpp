@@ -19,6 +19,8 @@ struct MetadataDefiniton {
 
 struct StorageCreateParameters {
 	std::vector<struct MetadataDefiniton> metadata;
+	// currently only one value "leveldb"
+	std::string database;
 	// TODO: this depends on the database implementation
 	bool compression;
 	size_t cache_size;
@@ -38,16 +40,17 @@ class index : public master {
 	protected:
 		std::string storage_base_directory;
 		strus::ErrorBufferInterface *g_errorhnd;
+		strus::DatabaseInterface *dbi;
+		strus::StorageInterface *sti;
 		struct StorageCreateParameters default_create_parameters;
 		
 		void initialize_default_create_parameters( );
 		void prepare_strus_environment( );
 		void close_strus_environment( );
+		
 		std::string get_storage_directory( const std::string &base_storage_dir, const std::string &name );
 		std::string get_storage_config( const std::string &base_storage_dir, const struct StorageCreateParameters params, const std::string &name );
-		strus::DatabaseInterface *dbi;
-		strus::StorageInterface *sti;
-		
+				
 	private:
 		void create_cmd( const std::string name );
 		void delete_cmd( const std::string name );
@@ -90,6 +93,7 @@ struct traits<StorageCreateParameters> {
 		if( v.type( ) != is_object) {
 			throw bad_value_cast( );
 		}
+		p.database = v.get<std::string>( "database", DEFAULT_DATABASE );
 		p.compression = v.get<bool>( "compression", LEVELDB_DATABASE_DEFAULT_COMPRESSION );
 		// TODO: we should introspect them via the database configuration for
 		// the specific implementation
@@ -103,6 +107,7 @@ struct traits<StorageCreateParameters> {
 	
 	static void set( value &v, StorageCreateParameters const &p )
 	{
+		v.set( "database", p.database );
 		v.set( "compression", p.compression );
 		v.set( "cache_size", p.cache_size );
 		v.set( "max_open_files", p.max_open_files );

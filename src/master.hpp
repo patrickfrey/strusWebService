@@ -2,6 +2,7 @@
 #define MASTER_HPP
 
 #include <cppcms/application.h>
+#include "version.hpp"
 
 namespace apps {
 

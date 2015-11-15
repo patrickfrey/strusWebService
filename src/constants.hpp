@@ -1,6 +1,11 @@
 #ifndef CONSTANTS_HPP
 #define CONSTANTS_HPP
 
+#include <string>
+
+// for now this is the only database implementation in the storage
+const std::string DEFAULT_DATABASE						= "leveldb";
+
 // from db_impl.cc, creating a default LRUCache if it is not provided
 const int LEVELDB_DATABASE_DEFAULT_LRU_CACHESIZE		= 8 << 20;
 

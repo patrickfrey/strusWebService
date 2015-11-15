@@ -6,6 +6,7 @@
 #include <cppcms/json.h>
 
 #include <booster/locale/format.h>
+#include <booster/log.h>
 #include <sstream>
 
 #include <iterator>
@@ -55,9 +56,11 @@ index::~index( )
 void index::initialize_default_create_parameters( )
 {
 	default_create_parameters = service.settings( ).get<struct StorageCreateParameters>( "storage.default_create_parameters" );
+
 	cppcms::json::value j;
 	j["config"] = default_create_parameters;
-	std::cout << j << std::endl;
+
+	BOOSTER_DEBUG( PACKAGE ) << "Default storage configuration parameters:" << j;
 }
 
 void index::prepare_strus_environment( )
@@ -94,10 +97,32 @@ std::string index::get_storage_directory( const std::string &base_storage_dir, c
 std::string index::get_storage_config( const std::string &base_storage_dir, const struct StorageCreateParameters params, const std::string &name )
 {
 	std::ostringstream ss;
+	std::ostringstream ss2;
+	bool first = true;
+	std::vector<struct MetadataDefiniton>::const_iterator it;
 	
-	ss << booster::locale::format( "path={1}" ) % get_storage_directory( base_storage_dir, name );
+	for( it = params.metadata.begin( ); it != params.metadata.end( ); it++ ) {
+		if( !first ) {
+			ss2 << ", ";		
+		} else {
+			first = false;
+		}
+		ss2 << it->name << " " << it->type;
+	}
+	
+	ss << booster::locale::format( "database={1}; path={2}; compression={3}; cache={4}; max_open_files={5}; write_buffer_size={6}; block_size={7}; metadata={8}" )
+		% params.database
+		% get_storage_directory( base_storage_dir, name )
+		% ( params.compression ? "yes" : "no" )
+		% params.cache_size
+		% params.max_open_files
+		% params.write_buffer_size
+		% params.block_size
+		% ss2.str( );
 	std::string config = ss.str( );
 
+	BOOSTER_DEBUG( PACKAGE ) << "Storage config string: " << config;
+	
 	return config;
 }
 
