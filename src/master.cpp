@@ -7,7 +7,6 @@
 #include <cppcms/http_response.h>
 #include <cppcms/http_request.h>
 #include <cppcms/http_content_type.h>
-#include <cppcms/json.h>
 
 #include <booster/log.h>
 
@@ -108,10 +107,15 @@ void master::report_error( unsigned int code, const std::string &msg )
 
 void master::report_ok( )
 {
+	cppcms::json::value j;
+	report_ok( j );
+}
+
+void master::report_ok( cppcms::json::value &j )
+{
 	std::vector<std::string> errors = handle_strus_errors( );
 	
 	response( ).content_type( "application/json" );
-	cppcms::json::value j;  
 	j["result"] = "ok";
 	if( !errors.empty( ) ) {
 		unsigned int pos = 0;

@@ -217,19 +217,18 @@ void index::stats_cmd( const std::string name )
 		return;
 	}
 	
-	strus::GlobalCounter nof_docs = storage->globalNofDocumentsInserted( );
+	struct StorageStatistics stats;
+	stats.nof_docs = storage->globalNofDocumentsInserted( );
 	
-	response( ).content_type( "application/json" );
-	cppcms::json::value j;
-	j["result"] = "ok";
-	j["stats"]["nofDocs"] = nof_docs;
-
 	// database is deleted implicitely!
 	delete storage;
 	
 	close_strus_environment( );
 
-	response( ).out( ) << j << std::endl;	
+	cppcms::json::value j;
+	j["stats"] = stats;
+	
+	report_ok( j );
 }
 
 void index::list_cmd( )
@@ -251,7 +250,6 @@ void index::list_cmd( )
 	std::copy( boost::filesystem::directory_iterator( storage_base_directory ),
 		boost::filesystem::directory_iterator( ), std::back_inserter( dirs ) );
 
-	response( ).content_type( "application/json" );
 	cppcms::json::value j;
 	j["result"] = "ok";
 	std::vector<std::string> v;
@@ -264,7 +262,7 @@ void index::list_cmd( )
 	}
 	j["indexes"] = v;
 
-	response( ).out( ) << j << std::endl;
+	report_ok( j );
 }
 
 } // namespace apps

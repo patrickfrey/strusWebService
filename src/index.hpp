@@ -25,6 +25,10 @@ struct StorageCreateParameters {
 	size_t block_size;
 };
 
+struct StorageStatistics {
+	size_t nof_docs;
+};
+
 namespace apps {
 
 class index : public master {
@@ -110,6 +114,15 @@ struct traits<StorageCreateParameters> {
 	}
 };
 
+template<>
+struct traits<StorageStatistics> {
+	
+	static void set( value &v, StorageStatistics const &s )
+	{
+		v.set( "nof_docs", s.nof_docs );
+	}
+};
+	
 } } // namespace cppcms::json
 
 #endif

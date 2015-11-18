@@ -39,6 +39,7 @@ class master : public cppcms::application {
 
 	protected:
 		void report_ok( );
+		void report_ok( cppcms::json::value &j );
 		void report_error( unsigned int code, const std::string &msg );
 		void not_found_404( );
 		std::vector<std::string> handle_strus_errors( );
