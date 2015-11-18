@@ -15,5 +15,5 @@ add_test( NAME statsB COMMAND curl -v http://localhost:8080/index/stats/B )
 
 add_test( NAME list COMMAND curl -v http://localhost:8080/index/list )
 
-add_test( NAME deleteA COMMAND curl -v http://localhost:8080/index/delete/A )
-add_test( NAME deteteB COMMAND curl -v http://localhost:8080/index/delete/B )
+add_test( NAME deleteA COMMAND curl -v -XPOST http://localhost:8080/index/delete/A )
+add_test( NAME deteteB COMMAND curl -v -XPOST http://localhost:8080/index/delete/B )

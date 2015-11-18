@@ -163,6 +163,11 @@ void index::create_cmd( const std::string name )
 
 void index::delete_cmd( const std::string name )
 {
+	if( request( ).request_method( ) != "POST" ) {
+		report_error( ERROR_INDEX_ILLEGAL_METHOD, "Expecting POST method for deleting an existing index" );
+		return;
+	}
+
 	prepare_strus_environment( );
 
 	struct StorageCreateParameters combined_params;

@@ -85,12 +85,12 @@ void master::report_error( unsigned int code, const std::string &msg )
 	response( ).content_type( "application/json" );
 	cppcms::json::value j;  
 	j["result"] = "error";
-	j["err_code"] = code;
-	j["err_msg"] = msg;
+	j["err"]["code"] = code;
+	j["err"]["msg"] = msg;
 	if( !errors.empty( ) ) {
 		unsigned int pos = 0;
 		for( std::vector<std::string>::const_iterator it = errors.begin( ); it != errors.end( ); it++, pos++ ) {
-			j["err_details"][pos] = *it;
+			j["err"]["details"][pos] = *it;
 		}
 	}
 	response( ).out( ) << j << std::endl;
@@ -114,7 +114,7 @@ void master::report_ok( )
 
 void master::not_found_404( )
 {
-	report_error( 404, "No API found on this URL." );
+	report_error( 404, "Illegal URL" );
 }
 
 } // namespace apps
