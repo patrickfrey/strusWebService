@@ -12,6 +12,8 @@
 #include "version.hpp"
 #include "error_codes.hpp"
 
+#include <vector>
+#include <string>
 #include <cstdio>
 
 namespace apps {
@@ -39,6 +41,7 @@ class master : public cppcms::application {
 		void report_ok( );
 		void report_error( unsigned int code, const std::string &msg );
 		void not_found_404( );
+		std::vector<std::string> handle_strus_errors( );
 };
 
 } // namespace apps
