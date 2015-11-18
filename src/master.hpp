@@ -42,6 +42,8 @@ class master : public cppcms::application {
 		void report_error( unsigned int code, const std::string &msg );
 		void not_found_404( );
 		std::vector<std::string> handle_strus_errors( );
+		bool ensure_post( );
+		bool ensure_json_request( );
 };
 
 } // namespace apps

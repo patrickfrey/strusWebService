@@ -1,10 +1,14 @@
 #ifndef ERROR_CODES_H
 #define ERROR_CODES_H
 
-const int ERROR_INDEX 									= 1000;
+const int ERROR_BASE									= 1000;
 
-const int ERROR_INDEX_ILLEGAL_METHOD					= ERROR_INDEX + 1;
-const int ERROR_INDEX_ILLEGAL_JSON						= ERROR_INDEX + 2;
+const int ERROR_ILLEGAL_METHOD							= ERROR_BASE + 1;
+const int ERROR_IILLEGAL_JSON							= ERROR_BASE + 2;
+
+const int ERROR_INDEX 									= 2000;
+
+const int ERROR_INDEX_ILLEGAL_JSON						= ERROR_INDEX + 1;
 
 const int ERROR_INDEX_CREATE_CMD						= ERROR_INDEX + 100;
 const int ERROR_INDEX_CREATE_DATABASE_EXISTS			= ERROR_INDEX_CREATE_CMD + 1;

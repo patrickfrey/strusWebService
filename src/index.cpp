@@ -93,12 +93,11 @@ std::string index::get_storage_config( const std::string &base_storage_dir, cons
 
 void index::create_cmd( const std::string name )
 {
-	if( request( ).request_method( ) != "POST" ) {
-		report_error( ERROR_INDEX_ILLEGAL_METHOD, "Expecting POST method for creating a new index" );
-		return;
-	}
+	if( !ensure_post( ) ) return;	
+	if( !ensure_json_request( ) ) return;
 
 	struct StorageCreateParameters params;
+	
 	std::pair<void *, size_t> data = request( ).raw_post_data( );
 	std::istringstream is( std::string( reinterpret_cast<char const *>( data.first ), data.second ) );
 	cppcms::json::value p;
@@ -163,10 +162,7 @@ void index::create_cmd( const std::string name )
 
 void index::delete_cmd( const std::string name )
 {
-	if( request( ).request_method( ) != "POST" ) {
-		report_error( ERROR_INDEX_ILLEGAL_METHOD, "Expecting POST method for deleting an existing index" );
-		return;
-	}
+	if( !ensure_post( ) ) return;
 
 	prepare_strus_environment( );
 

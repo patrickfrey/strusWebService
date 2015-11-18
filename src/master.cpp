@@ -5,6 +5,8 @@
 #include <cppcms/service.h>
 #include <cppcms/url_dispatcher.h>  
 #include <cppcms/http_response.h>
+#include <cppcms/http_request.h>
+#include <cppcms/http_content_type.h>
 #include <cppcms/json.h>
 
 #include <booster/log.h>
@@ -117,4 +119,25 @@ void master::not_found_404( )
 	report_error( 404, "Illegal URL" );
 }
 
+bool master::ensure_post( )
+{
+	if( request( ).request_method( ) != "POST" ) {
+		report_error( ERROR_ILLEGAL_METHOD, "Expecting HTTP method 'POST'" );
+		return false;
+	}
+	return true;
+}
+
+bool master::ensure_json_request( )
+{
+	cppcms::http::content_type content_type = request( ).content_type_parsed( );
+	std::string type = content_type.type( );
+	std::string subtype = content_type.subtype( );
+	if( type != "application" || subtype != "json" ) {
+		report_error( ERROR_IILLEGAL_JSON, "Expecting the content type of the body of the request to be 'application/json'" );
+		return false;;
+	}
+	return true;
+}
+	
 } // namespace apps
