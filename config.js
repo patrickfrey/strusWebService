@@ -1,6 +1,6 @@
 {
 	"protocol" : {
-		"pretty_print" : true
+		//"pretty_print" : false
 	},
 	
 	"storage" : {
