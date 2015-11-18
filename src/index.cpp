@@ -20,6 +20,7 @@
 
 #include "strus/databaseClientInterface.hpp"
 #include "strus/storageClientInterface.hpp"
+#include "strus/metaDataReaderInterface.hpp"
 
 namespace apps {
 
@@ -31,6 +32,7 @@ index::index( strusWebService &service, std::string storage_base_directory )
 	
 	service.dispatcher( ).assign( "/index/create/(\\w+)", &index::create_cmd, this, 1 );
 	service.dispatcher( ).assign( "/index/delete/(\\w+)", &index::delete_cmd, this, 1 );
+	service.dispatcher( ).assign( "/index/config/(\\w+)", &index::config_cmd, this, 1 );
 	service.dispatcher( ).assign( "/index/stats/(\\w+)", &index::stats_cmd, this, 1 );
 	service.dispatcher( ).assign( "/index/list", &index::list_cmd, this );
 }
@@ -186,6 +188,64 @@ void index::delete_cmd( const std::string name )
 	close_strus_environment( );
 	
 	report_ok( );
+}
+
+void index::config_cmd( const std::string name )
+{
+	prepare_strus_environment( );
+
+	struct StorageCreateParameters combined_params;
+	combined_params = default_create_parameters;
+
+	std::string configStr = get_storage_config( storage_base_directory, combined_params, name );
+
+	if( !dbi->exists( configStr ) ) {
+		report_error( ERROR_INDEX_CONFIG_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
+		close_strus_environment( );
+		return;
+	}
+
+	strus::DatabaseClientInterface *database = dbi->createClient( configStr );
+	if( !database ) {
+		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_DATABASE_CLIENT, g_errorhnd->fetchError( ) );
+		return;
+	}
+
+	strus::StorageClientInterface *storage = sti->createClient( configStr, database );
+	if( !storage ) {
+		delete database;
+		close_strus_environment( );
+		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_STORAGE_CLIENT, g_errorhnd->fetchError( ) );
+		return;
+	}
+
+	strus::MetaDataReaderInterface *metadata = storage->createMetaDataReader( );
+	if( !metadata ) {
+		delete database;
+		close_strus_environment( );
+		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_METADATA_READER, g_errorhnd->fetchError( ) );
+		return;
+	}
+	
+	struct StorageConfiguration config;
+	
+	for( strus::Index it = 0; it < metadata->nofElements( ); it++ ) {
+		struct MetadataDefiniton meta;
+		meta.name = metadata->getName( it );
+		meta.type = metadata->getType( it );		
+		config.metadata.push_back( meta );
+	}
+
+	// database is deleted implicitely!
+	delete storage;
+	//delete metadata;
+	
+	close_strus_environment( );
+
+	cppcms::json::value j;
+	j["config"] = config;
+	
+	report_ok( j );	
 }
 
 void index::stats_cmd( const std::string name )

@@ -25,6 +25,11 @@ struct StorageCreateParameters {
 	size_t block_size;
 };
 
+struct StorageConfiguration {
+	std::vector<struct MetadataDefiniton> metadata;
+	// TODO: more, most likely subset of 'StorageCreateParameters'
+};
+
 struct StorageStatistics {
 	size_t nof_docs;
 };
@@ -51,6 +56,7 @@ class index : public master {
 	private:
 		void create_cmd( const std::string name );
 		void delete_cmd( const std::string name );
+		void config_cmd( const std::string name );
 		void stats_cmd( const std::string name );
 		void list_cmd( );
 };
@@ -111,6 +117,25 @@ struct traits<StorageCreateParameters> {
 		v.set( "write_buffer_size", p.write_buffer_size );
 		v.set( "block_size", p.block_size );
 		v.set( "metadata", p.metadata );
+	}
+};
+
+template<>
+struct traits<StorageConfiguration> {
+	
+	static StorageConfiguration get( value const &v )
+	{
+		StorageConfiguration c;
+		if( v.type( ) != is_object) {
+			throw bad_value_cast( );
+		}		
+		c.metadata = v.get<std::vector<struct MetadataDefiniton> >( "metadata", std::vector<struct MetadataDefiniton>( ) );
+		return c;
+	}
+	
+	static void set( value &v, StorageConfiguration const &c )
+	{
+		v.set( "metadata", c.metadata );
 	}
 };
 
