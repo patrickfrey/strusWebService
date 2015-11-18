@@ -15,6 +15,10 @@
 		}
 	},
 	
+	"http" : {
+		"script" : "/strus"
+	},
+	
 	"service" : {
 		"api" : "http",
 		"ip" : "0.0.0.0",
@@ -24,6 +28,10 @@
 	},
 	
 	"logging" : {
-		"level" : "debug"
+		"level" : "debug",
+		//~ "file" : {
+			//~ "name" : "./strusWebService.log",
+			//~ "append" : true
+		//~ }
 	}
 }
