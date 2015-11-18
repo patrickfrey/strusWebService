@@ -40,7 +40,7 @@ index::index( strusWebService &service, std::string storage_base_directory )
 index::~index( )
 {
 }
-
+		
 void index::initialize_default_create_parameters( )
 {
 	default_create_parameters = service.settings( ).get<struct StorageCreateParameters>( "storage.default_create_parameters" );

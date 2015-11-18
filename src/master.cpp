@@ -39,6 +39,8 @@ master::master( strusWebService &service )
 	}
 	BOOSTER_DEBUG( PACKAGE ) << "Using '" << nof_threads << "' threads for strus logging buffers";
 	g_errorhnd = strus::createErrorBuffer_standard( logfile, nof_threads );
+	
+	protocol_pretty_printing = service.settings( ).get<bool>( "protocol.pretty_print", DEFAULT_PROTOCOL_PRETTY_PRINT );
 }
 
 void master::register_common_pages( )
@@ -102,7 +104,11 @@ void master::report_error( unsigned int code, const std::string &msg )
 			j["err"]["details"][pos] = *it;
 		}
 	}
-	response( ).out( ) << j << std::endl;
+	if( protocol_pretty_printing ) {
+		j.save( response( ).out( ), cppcms::json::readable );
+	} else {
+		j.save( response( ).out( ), cppcms::json::compact );
+	}
 }
 
 void master::report_ok( )
@@ -123,7 +129,11 @@ void master::report_ok( cppcms::json::value &j )
 			j["details"][pos] = *it;
 		}
 	}
-	response( ).out( ) << j << std::endl;
+	if( protocol_pretty_printing ) {
+		j.save( response( ).out( ), cppcms::json::readable );
+	} else {
+		j.save( response( ).out( ), cppcms::json::compact );
+	}
 }
 
 void master::not_found_404( )
@@ -147,7 +157,7 @@ bool master::ensure_json_request( )
 	std::string subtype = content_type.subtype( );
 	if( type != "application" || subtype != "json" ) {
 		report_error( ERROR_IILLEGAL_JSON, "Expecting the content type of the body of the request to be 'application/json'" );
-		return false;;
+		return false;
 	}
 	return true;
 }

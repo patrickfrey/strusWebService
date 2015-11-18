@@ -1,4 +1,8 @@
 {
+	"protocol" : {
+		"pretty_print" : true
+	},
+	
 	"storage" : {
 		"basedir" : "./storage",
 		"default_create_parameters" : {

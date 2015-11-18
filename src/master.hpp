@@ -30,6 +30,7 @@ class master : public cppcms::application {
 		strusWebService &service;
 		strus::DatabaseInterface *dbi;
 		strus::StorageInterface *sti;
+		bool protocol_pretty_printing;
 		
 	public:
 		master( strusWebService &service );
@@ -45,6 +46,7 @@ class master : public cppcms::application {
 		std::vector<std::string> handle_strus_errors( );
 		bool ensure_post( );
 		bool ensure_json_request( );
+
 };
 
 } // namespace apps

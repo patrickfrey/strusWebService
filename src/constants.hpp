@@ -25,4 +25,6 @@ const int LEVELDB_DATABASE_DEFAULT_COMPRESSION			= true;
 
 #define PACKAGE_STRUS "strus"
 
+const int DEFAULT_PROTOCOL_PRETTY_PRINT					= false;
+
 #endif
