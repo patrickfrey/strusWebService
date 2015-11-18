@@ -18,33 +18,15 @@
 
 #include <boost/filesystem.hpp>
 
-// TODO: sort out, copied from testRandomCollection.cpp, actually there
-// I would prefer 4 to 5 files at most!
-#include "strus/reference.hpp"
 #include "strus/databaseClientInterface.hpp"
-#include "strus/lib/error.hpp"
-#include "strus/lib/database_leveldb.hpp"
-#include "strus/lib/storage.hpp"
-#include "strus/errorBufferInterface.hpp"
 #include "strus/storageClientInterface.hpp"
-
-#include "error_codes.hpp"
-
-// TODO: read from config
-#define NOF_THREADS 128
 
 namespace apps {
 
 index::index( strusWebService &service, std::string storage_base_directory )
 	: master( service ),
 	storage_base_directory( storage_base_directory )
-{
-	// TODO: number of threads, depends on CppCMS running model, must pass
-	// parts of this config here
-	// TODO: stderr, really? how can we redirect to the booster log?
-	// TODO: do this once and not here (master?)
-	g_errorhnd = strus::createErrorBuffer_standard( stderr, NOF_THREADS );
-	
+{	
 	initialize_default_create_parameters( );
 	
 	service.dispatcher( ).assign( "/index/create/(\\w+)", &index::create_cmd, this, 1 );
@@ -65,27 +47,6 @@ void index::initialize_default_create_parameters( )
 	j["config"] = default_create_parameters;
 
 	BOOSTER_DEBUG( PACKAGE ) << "Default storage configuration parameters:" << j;
-}
-
-void index::prepare_strus_environment( )
-{	
-	dbi = strus::createDatabase_leveldb( g_errorhnd );
-	if( dbi == NULL ) {
-		report_error( ERROR_INDEX_CREATE_DATABASE_INTERFACE, g_errorhnd->fetchError( ) );
-		return;
-	}
-
-	sti = strus::createStorage( g_errorhnd );
-	if( sti == NULL ) {
-		report_error( ERROR_INDEX_CREATE_STORAGE_INTERFACE, g_errorhnd->fetchError( ) );
-		return;
-	}
-}
-
-void index::close_strus_environment( )
-{
-	delete dbi;
-	delete sti;
 }
 
 std::string index::get_storage_directory( const std::string &base_storage_dir, const std::string &name )
