@@ -31,7 +31,15 @@ master::master( strusWebService &service )
 	// redirecting the output to a tmpfile and reading and rewinding that
 	// one periodically seems to be the only hacky option right now
 	logfile = std::tmpfile( );
-	g_errorhnd = strus::createErrorBuffer_standard( logfile, NOF_THREADS );
+	
+	unsigned int nof_threads;
+	if( service.service( ).procs_no( ) == 0 ) {
+		nof_threads = service.service( ).threads_no( );
+	} else {
+		nof_threads = service.service( ).procs_no( ) * service.service( ).threads_no( );
+	}
+	BOOSTER_DEBUG( PACKAGE ) << "Using '" << nof_threads << "' threads for strus logging buffers";
+	g_errorhnd = strus::createErrorBuffer_standard( logfile, nof_threads );
 }
 
 void master::register_common_pages( )

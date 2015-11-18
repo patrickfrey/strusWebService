@@ -18,7 +18,9 @@
 	"service" : {
 		"api" : "http",
 		"ip" : "0.0.0.0",
-		"port" : 8080
+		"port" : 8080,
+		//"worker_processes" : 5,
+		//"worker_threads" : 3
 	},
 	
 	"logging" : {

@@ -25,7 +25,4 @@ const int LEVELDB_DATABASE_DEFAULT_COMPRESSION			= true;
 
 #define PACKAGE_STRUS "strus"
 
-// TODO: read from config
-#define NOF_THREADS 128
-
 #endif
