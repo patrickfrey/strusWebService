@@ -35,6 +35,7 @@ index::index( strusWebService &service, std::string storage_base_directory )
 	service.dispatcher( ).assign( "/index/config/(\\w+)", &index::config_cmd, this, 1 );
 	service.dispatcher( ).assign( "/index/stats/(\\w+)", &index::stats_cmd, this, 1 );
 	service.dispatcher( ).assign( "/index/list", &index::list_cmd, this );
+	service.dispatcher( ).assign( "/index/exists/(\\w+)", &index::exists_cmd, this, 1 );
 }
 
 index::~index( )
@@ -322,6 +323,23 @@ void index::list_cmd( )
 	}
 	j["indexes"] = v;
 
+	report_ok( j );
+}
+
+void index::exists_cmd( const std::string name )
+{
+	prepare_strus_environment( );
+
+	struct StorageCreateParameters combined_params;
+	combined_params = default_create_parameters;
+
+	std::string config = get_storage_config( storage_base_directory, combined_params, name );
+
+	cppcms::json::value j;
+	j["exists"] = dbi->exists( config );
+
+	close_strus_environment( );
+	
 	report_ok( j );
 }
 
