@@ -1,14 +1,11 @@
 #include "strusWebService.hpp"
 #include "other.hpp"
 #include "version.hpp"
+#include "constants.hpp"
 
 #include <cppcms/url_dispatcher.h>  
 #include <cppcms/http_response.h>
 #include <cppcms/json.h>
-
-// TODO: this should be exported IMHO
-//#include "strus/versionStorage.hpp"
-#define STRUS_VERSION_STRING "0.2.0"
 
 namespace apps {
 
