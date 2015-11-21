@@ -13,6 +13,8 @@ strusWebService::strusWebService( cppcms::service &srv )
 	add( master );
 	add( other );
 	add( index );
+	add( document );
+	add( query );
 	
 	master.register_common_pages( );
 }
