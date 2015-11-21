@@ -1,0 +1,35 @@
+# Compiled Object files
+*.o
+
+# Compiled Dynamic libraries
+*.so.0.*
+*.so.0
+*.so
+*.dylib
+
+# Compiled Static libraries
+*.a
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+CMakeLists.txt.user
+CTestTestfile.cmake.user
+cmake/uninstall.cmake
+DartConfiguration.tcl
+Testing/
+CPackConfig.cmake
+CPackConfig.cmake.user
+CPackSourceConfig.cmake.user
+CPackSourceConfig.cmake
+tests/cmake_install.cmake.user
+src/version.hpp
+
+# Compiled Programs
+strusWebService
+tests/curlJsonTester
+

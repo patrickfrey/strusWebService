@@ -27,6 +27,8 @@ find_path(BOOSTER_INC booster/shared_ptr.h)
 include_directories(${CPPCMS_INC})
 include_directories(${BOOSTER_INC})
 
+add_subdirectory( 3rdParty/curlpp )
+
 enable_testing( )
 
 add_subdirectory( tests )

@@ -1,5 +1,9 @@
 #include <iostream>
 
+#include "curlpp/cURLpp.hpp"
+#include "curlpp/Easy.hpp"
+#include "curlpp/Options.hpp"
+
 int main( int argc, char *argv[] )
 {
 	if( argc != 2 ) {
@@ -10,5 +14,8 @@ int main( int argc, char *argv[] )
 	std::string testname( argv[1] );
 	
 	std::cout << "Executing test '" << testname << "'" << std::endl;
+	
+	std::cout << curlpp::options::Url( "http://www.eurospider.com" );
+
 	return 0;
 }

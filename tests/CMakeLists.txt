@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 include_directories( "${PROJECT_SOURCE_DIR}/3rdParty/curlcpp/include" "${CURL_INCLUDE_DIRS}" )
 
 add_executable( curlJsonTester curlJsonTester.cpp)
-target_link_libraries( curlJsonTester "${CURL_INCLUDE_DIRS}")
+target_link_libraries( curlJsonTester "${CURL_LIBRARIES}" curlpp_static)
 
 add_test( NAME ping COMMAND curlJsonTester ping )
 
