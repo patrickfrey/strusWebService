@@ -5,28 +5,33 @@ include_directories( "${PROJECT_SOURCE_DIR}/3rdParty/curlcpp/include" "${CURL_IN
 add_executable( curlJsonTester curlJsonTester.cpp)
 target_link_libraries( curlJsonTester "${CURL_LIBRARIES}" curlpp_static)
 
+# other.cpp
+
 add_test( NAME ping COMMAND curlJsonTester ping )
 add_test( NAME version COMMAND curlJsonTester version )
 
-# basically nothing works down here!
+# error conditions
 
-# TODO: make a C command doing the starting in the backgroud,
-# the curl sending and comapring the result in JSON
-#add_test( NAME ping COMMAND ${SHELL} ${CMAKE_CURRENT_SOURCE_DIR}/tests/execute_test.sh ping )
+add_test( NAME post_not_get COMMAND curlJsonTester post_not_get )
+add_test( NAME invalid_json COMMAND curlJsonTester invalid_json )
 
-#add_test( NAME version COMMAND curl -v http://localhost:8080/version )
+# index.cpp
 
-# TODO: how to escape JSON as parameter, cmake is not really helpful here!
-#add_test( NAME createA COMMAND curl -v -XPOST -H "Content-Type: application/json" http://localhost:8080/index/create/A -d '{ "params": {} }' )
-#add_test( NAME createB COMMAND curl -v -XPOST -H "Content-Type: application/json" http://localhost:8080/index/create/B -d '{ "params": {} }' )
+add_test( NAME create_index_A_params_missing COMMAND curlJsonTester create_index_A_params_missing )
+add_test( NAME create_index_A COMMAND curlJsonTester create_index_A )
+add_test( NAME create_index_B COMMAND curlJsonTester create_index_B )
 
-#add_test( NAME statsA COMMAND curl -v http://localhost:8080/index/stats/A )
+add_test( NAME index_list COMMAND curlJsonTester index_list )
 
-#add_test( NAME configA COMMAND curl -v http://localhost:8080/index/config/A )
+add_test( NAME index_config_A COMMAND curlJsonTester index_config_A )
+add_test( NAME index_stats_A COMMAND curlJsonTester index_stats_A )
 
-#add_test( NAME list COMMAND curl -v http://localhost:8080/index/list )
+# document.cpp
 
-#add_test( NAME list COMMAND curl -v http://localhost:8080/document/insert -d '{ "doc" : { "id": 1 } }' )
+add_test( NAME document_insert COMMAND curlJsonTester document_insert )
 
-#add_test( NAME deleteA COMMAND curl -v -XPOST http://localhost:8080/index/delete/A )
-#add_test( NAME deteteB COMMAND curl -v -XPOST http://localhost:8080/index/delete/B )
+# index.cpp (cleaning up)
+
+add_test( NAME delete_index_A COMMAND curlJsonTester delete_index_A )
+add_test( NAME delete_index_B COMMAND curlJsonTester delete_index_B )
+

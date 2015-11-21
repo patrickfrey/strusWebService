@@ -24,16 +24,46 @@ int main( int argc, char *argv[] )
 		std::cerr << "ERROR: URL file '" << ss.str( ) << "' not openable." << std::endl;
 		return 1;
 	}
+	std::string method;
+	std::string urlstr;
+	std::getline( testurlfile, method );
+	std::getline( testurlfile, urlstr );
 	std::string line;
-	std::getline( testurlfile, line );
+	std::string data;
+	while( std::getline( testurlfile, line ) ) {
+		data.append( line );
+	}
 	testurlfile.close( );
 
 	std::ostringstream os;
 	curlpp::Easy request;
 	curlpp::options::WriteStream ws( &os );
 	request.setOpt( ws );
-	curlpp::options::Url url( line );
+	curlpp::options::Url url( urlstr );
 	request.setOpt( url );
+    request.setOpt( new curlpp::options::Verbose( true ) ); 
+    std::list<std::string> header;
+	std::istringstream is( data );
+    if( method.compare( "POST" ) == 0 ) {
+		request.setOpt( new curlpp::options::Post( true ) );
+		std::ostringstream ss3;
+		ss3 << "Content-Length: " << data.size( );
+		header.push_back( "Content-Type: application/json" );
+		header.push_back( ss3.str( ) );
+		request.setOpt( new curlpp::options::ReadStream( &is ) );
+		request.setOpt( new curlpp::options::InfileSize( data.size( ) ) );
+		request.setOpt( new curlpp::options::HttpHeader( header ) ); 
+
+
+  //~ std::istringstream myStream(argv[2]);
+  //~ int size = myStream.str().size();
+
+      //~ request.setOpt(new ReadStream(&myStream));
+      //~ request.setOpt(new InfileSize(size));
+      //~ request.setOpt(new Upload(true));
+
+	}
+    
 	request.perform( );
 	std::string res = os.str( );
 	
