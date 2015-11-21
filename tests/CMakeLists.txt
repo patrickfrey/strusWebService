@@ -6,6 +6,7 @@ add_executable( curlJsonTester curlJsonTester.cpp)
 target_link_libraries( curlJsonTester "${CURL_LIBRARIES}" curlpp_static)
 
 add_test( NAME ping COMMAND curlJsonTester ping )
+add_test( NAME version COMMAND curlJsonTester version )
 
 # basically nothing works down here!
 
