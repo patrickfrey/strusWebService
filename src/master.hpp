@@ -15,6 +15,7 @@
 #include <vector>
 #include <string>
 #include <cstdio>
+#include <map>
 
 namespace apps {
 

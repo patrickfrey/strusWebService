@@ -11,7 +11,8 @@ set( STRUS_WEB_SERVICE_VERSION ${STRUS_WEB_SERVICE_MAJOR_VERSION}.${STRUS_WEB_SE
 set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" )
 include( cmake/standard_targets.cmake )
 include( cmake/find_strus_package.cmake )
-include( cmake/boost.cmake)
+include( cmake/boost.cmake )
+include( cmake/FindCURL.cmake )
 
 find_strus_package( core )
 
@@ -36,6 +37,8 @@ set(SRC
 	src/master.cpp
 	src/other.cpp
 	src/index.cpp
+	src/document.cpp
+	src/query.cpp
 )
 
 include_directories(

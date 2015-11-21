@@ -1,10 +1,8 @@
-#include "strusWebService.hpp"
 #include "index.hpp"
+#include "strusWebService.hpp"
 
 #include <cppcms/url_dispatcher.h>  
-#include <cppcms/http_response.h>
 #include <cppcms/http_request.h>
-#include <cppcms/json.h>
 
 #include <booster/locale/format.h>
 #include <booster/log.h>

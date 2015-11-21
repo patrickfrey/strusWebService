@@ -4,6 +4,8 @@
 #include "master.hpp"
 #include "other.hpp"
 #include "index.hpp"
+#include "document.hpp"
+#include "query.hpp"
 
 #include <cppcms/application.h>  
 
@@ -15,6 +17,8 @@ class strusWebService : public cppcms::application {
 		apps::master master;
 		apps::other other;
 		apps::index index;
+		apps::document document;
+		apps::query query;
 
 	public:
 		strusWebService( cppcms::service &srv );

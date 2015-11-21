@@ -109,6 +109,7 @@ void master::report_error( unsigned int code, const std::string &msg )
 	} else {
 		j.save( response( ).out( ), cppcms::json::compact );
 	}
+	response( ).out( ) << std::endl;
 }
 
 void master::report_ok( )
@@ -134,6 +135,7 @@ void master::report_ok( cppcms::json::value &j )
 	} else {
 		j.save( response( ).out( ), cppcms::json::compact );
 	}
+	response( ).out( ) << std::endl;
 }
 
 void master::not_found_404( )

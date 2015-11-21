@@ -6,7 +6,9 @@ strusWebService::strusWebService( cppcms::service &srv )
 	: cppcms::application( srv ),
 	master( *this ),
 	other( *this ),
-	index( *this, settings( ).get<std::string>( "storage.basedir" ) )
+	index( *this, settings( ).get<std::string>( "storage.basedir" ) ),
+	document( *this ),
+	query( *this )
 {
 	add( master );
 	add( other );
