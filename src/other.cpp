@@ -18,21 +18,19 @@ other::other( strusWebService &service )
 
 void other::ping_cmd( )
 {
-	response( ).content_type( "application/json" );
-	cppcms::json::value j;  
-	j["result"] = "ok";
+	cppcms::json::value j;
 	j["ping"] = "pong";
-	response( ).out( ) << j << std::endl;
+	
+	report_ok( j );
 }
 
 void other::version_cmd( )
 {
-	response( ).content_type( "application/json" );
-	cppcms::json::value j;  
-	j["result"] = "ok";
+	cppcms::json::value j;
 	j["version"]["strus"] = STRUS_VERSION_STRING;
 	j["version"]["webservice"] = STRUS_WEB_SERVICE_VERSION_STRING;
-	response( ).out( ) << j << std::endl;
+	
+	report_ok( j );
 }
 
 } // namespace apps
