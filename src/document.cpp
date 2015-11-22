@@ -22,10 +22,8 @@ void document::insert_without_id_cmd( const std::string name )
 	if( !ensure_post( ) ) return;	
 	if( !ensure_json_request( ) ) return;
 
-	prepare_strus_environment( name );
+	get_strus_environment( name );
 
-	close_strus_environment( );
-			
 	report_ok( );
 }
 
@@ -34,10 +32,8 @@ void document::insert_cmd( const std::string name, const std::string id  )
 	if( !ensure_post( ) ) return;	
 	if( !ensure_json_request( ) ) return;
 
-	prepare_strus_environment( name );
+	get_strus_environment( name );
 
-	close_strus_environment( );
-			
 	report_ok( );
 }
 
@@ -46,10 +42,8 @@ void document::update_cmd( const std::string name, const std::string id )
 	if( !ensure_post( ) ) return;	
 	if( !ensure_json_request( ) ) return;
 
-	prepare_strus_environment( name );
+	get_strus_environment( name );
 
-	close_strus_environment( );
-			
 	report_ok( );
 }
 
@@ -57,19 +51,15 @@ void document::delete_cmd( const std::string name, const std::string id )
 {
 	if( !ensure_post( ) ) return;	
 
-	prepare_strus_environment( name );
+	get_strus_environment( name );
 	
-	close_strus_environment( );
-			
 	report_ok( );	
 }
 
 void document::get_cmd( const std::string name, const std::string id )
 {
-	prepare_strus_environment( name );
+	get_strus_environment( name );
 
-	close_strus_environment( );
-			
 	report_ok( );
 }
 

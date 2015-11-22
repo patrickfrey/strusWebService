@@ -30,8 +30,8 @@ class master : public cppcms::application {
 	public:
 		master( strusWebService &service );
 		void register_common_pages( );
-		void prepare_strus_environment( const std::string &name );
-		void close_strus_environment( );
+		void get_strus_environment( const std::string &name );
+		void close_strus_environment( const std::string &name );
 
 	protected:
 		void report_ok( );

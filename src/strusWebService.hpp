@@ -15,6 +15,7 @@
 #include "strus/databaseInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/storageObjectBuilderInterface.hpp"
 
 struct strusContext {
 	strus::DatabaseInterface *dbi;
@@ -45,6 +46,8 @@ class strusWebService : public cppcms::application {
 		std::vector<std::string> getStrusErrorDetails( );
 		std::string getStorageDirectory( const std::string &base_storage_dir, const std::string &name );
 		std::string getStorageConfig( const std::string &base_storage_dir, const struct StorageCreateParameters params, const std::string &name );
+		void deleteDataBaseInterface( const std::string &name );
+		void deleteStorageInterface( const std::string &name );
 };
 
 } // namespace apps

@@ -47,19 +47,23 @@ strusWebService::strusWebService( cppcms::service &srv )
 
 strus::DatabaseInterface *strusWebService::getDataBaseInterface( const std::string &name )
 {
-	if( context_map.find( name ) != context_map.end( ) ) {
+	std::map<std::string, struct strusContext>::iterator it;
+	it = context_map.find( name );
+	if( it == context_map.end( ) ) {
 		struct strusContext context;
 		memset( &context, 0, sizeof( context ) );
-		context.dbi = strus::createDatabase_leveldb( g_errorhnd );
-		if( context.dbi == NULL ) {
-			return NULL;
-		}
 		context_map[name] = context;
 	}
-	std::map<std::string, struct strusContext>::const_iterator it;
 	it = context_map.find( name );
 	if( it == context_map.end( ) ) {
 		return NULL;
+	}
+	if( (*it).second.dbi == NULL ) {
+		strus::DatabaseInterface *dbi = strus::createDatabase_leveldb( g_errorhnd );
+		if( dbi == NULL ) {
+			return NULL;
+		}
+		(*it).second.dbi = dbi;
 	}
 	return (*it).second.dbi;	
 }
@@ -69,13 +73,48 @@ strus::StorageInterface *strusWebService::getStorageInterface( const std::string
 	std::map<std::string, struct strusContext>::iterator it;
 	it = context_map.find( name );
 	if( it == context_map.end( ) ) {
+		struct strusContext context;
+		memset( &context, 0, sizeof( context ) );
+		context_map[name] = context;
+	}
+	it = context_map.find( name );
+	if( it == context_map.end( ) ) {
+		return NULL;
+	}
+	if( (*it).second.sti == NULL ) {
 		strus::StorageInterface *sti = strus::createStorage( g_errorhnd );
 		if( sti == NULL ) {
 			return NULL;
 		}
-		
+		(*it).second.sti = sti;
 	}
 	return (*it).second.sti;
+}
+
+void strusWebService::deleteDataBaseInterface( const std::string &name )
+{
+	std::map<std::string, struct strusContext>::iterator it;
+	it = context_map.find( name );
+	if( it == context_map.end( ) ) {
+		return;
+	}
+	if( (*it).second.dbi != NULL ) {
+		delete (*it).second.dbi;
+		(*it).second.dbi = NULL;
+	}
+}
+
+void strusWebService::deleteStorageInterface( const std::string &name )
+{
+	std::map<std::string, struct strusContext>::iterator it;
+	it = context_map.find( name );
+	if( it == context_map.end( ) ) {
+		return;
+	}
+	if( (*it).second.sti != NULL ) {
+		delete (*it).second.sti;
+		(*it).second.sti = NULL;
+	}
 }
 
 std::string strusWebService::getLastStrusError( )

@@ -24,7 +24,7 @@ void master::register_common_pages( )
 	service.dispatcher( ).assign( ".*", &master::not_found_404, this );
 }
 
-void master::prepare_strus_environment( const std::string &name )
+void master::get_strus_environment( const std::string &name )
 {
 	dbi = service.getDataBaseInterface( name );
 	if( dbi == NULL ) {
@@ -39,10 +39,12 @@ void master::prepare_strus_environment( const std::string &name )
 	}
 }
 
-void master::close_strus_environment( )
+void master::close_strus_environment( const std::string &name )
 {
-	//~ delete dbi;
-	//~ delete sti;
+	service.deleteDataBaseInterface( name );
+	service.deleteStorageInterface( name );
+	dbi = NULL;
+	sti = NULL;
 }
 
 void master::report_error( unsigned int code, const std::string &msg )

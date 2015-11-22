@@ -76,7 +76,7 @@ void index::create_cmd( const std::string name )
 		return;
 	}
 		
-	prepare_strus_environment( name );
+	get_strus_environment( name );
 
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
@@ -92,28 +92,23 @@ void index::create_cmd( const std::string name )
 	if( !boost::filesystem::create_directories(
 		service.getStorageDirectory( storage_base_directory, name ), err ) ) {
 		report_error( ERROR_INDEX_CREATE_CMD_MKDIR_STORAGE_DIR, err.message( ) );
-		close_strus_environment( );
 		return;
 	}
 		
 	if( !dbi->createDatabase( config ) ) {
 		report_error( ERROR_INDEX_CREATE_CMD_CREATE_DATABASE, service.getLastStrusError( ) );
-		close_strus_environment( );
 		return;
 	}
 	
 	strus::DatabaseClientInterface *database = dbi->createClient( config );
 	if( !database ) {
 		report_error( ERROR_INDEX_CREATE_CMD_CREATE_CLIENT, service.getLastStrusError( ) );
-		close_strus_environment( );
 		return;
 	}
 
 	sti->createStorage( config, database );
 	
 	delete database;
-
-	close_strus_environment( );
 			
 	report_ok( );
 }
@@ -122,7 +117,9 @@ void index::delete_cmd( const std::string name )
 {
 	if( !ensure_post( ) ) return;
 
-	prepare_strus_environment( name );
+	close_strus_environment( name );
+
+	get_strus_environment( name );
 
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
@@ -131,24 +128,20 @@ void index::delete_cmd( const std::string name )
 	
 	if( !dbi->exists( config ) ) {
 		report_error( ERROR_INDEX_DESTROY_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
-		close_strus_environment( );
 		return;
 	}
 	
 	if( !dbi->destroyDatabase( config ) ) {
 		report_error( ERROR_INDEX_DESTROY_CMD_DESTROY_DATABASE, service.getLastStrusError( ) );
-		close_strus_environment( );
 		return;
 	}
-	
-	close_strus_environment( );
-	
+			
 	report_ok( );
 }
 
 void index::config_cmd( const std::string name )
 {
-	prepare_strus_environment( name );
+	get_strus_environment( name );
 
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
@@ -157,7 +150,6 @@ void index::config_cmd( const std::string name )
 
 	if( !dbi->exists( configStr ) ) {
 		report_error( ERROR_INDEX_CONFIG_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
-		close_strus_environment( );
 		return;
 	}
 
@@ -170,7 +162,6 @@ void index::config_cmd( const std::string name )
 	strus::StorageClientInterface *storage = sti->createClient( configStr, database );
 	if( !storage ) {
 		delete database;
-		close_strus_environment( );
 		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
@@ -178,7 +169,6 @@ void index::config_cmd( const std::string name )
 	strus::MetaDataReaderInterface *metadata = storage->createMetaDataReader( );
 	if( !metadata ) {
 		delete database;
-		close_strus_environment( );
 		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_METADATA_READER, service.getLastStrusError( ) );
 		return;
 	}
@@ -196,8 +186,6 @@ void index::config_cmd( const std::string name )
 	delete storage;
 	//delete metadata;
 	
-	close_strus_environment( );
-
 	cppcms::json::value j;
 	j["config"] = config;
 	
@@ -206,7 +194,7 @@ void index::config_cmd( const std::string name )
 
 void index::stats_cmd( const std::string name )
 {
-	prepare_strus_environment( name );
+	get_strus_environment( name );
 
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
@@ -215,7 +203,6 @@ void index::stats_cmd( const std::string name )
 
 	if( !dbi->exists( config ) ) {
 		report_error( ERROR_INDEX_STATS_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
-		close_strus_environment( );
 		return;
 	}
 
@@ -228,7 +215,6 @@ void index::stats_cmd( const std::string name )
 	strus::StorageClientInterface *storage = sti->createClient( config, database );
 	if( !storage ) {
 		delete database;
-		close_strus_environment( );
 		report_error( ERROR_INDEX_STATS_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
@@ -239,8 +225,6 @@ void index::stats_cmd( const std::string name )
 	// database is deleted implicitely!
 	delete storage;
 	
-	close_strus_environment( );
-
 	cppcms::json::value j;
 	j["stats"] = stats;
 	
@@ -283,7 +267,7 @@ void index::list_cmd( )
 
 void index::exists_cmd( const std::string name )
 {
-	prepare_strus_environment( name );
+	get_strus_environment( name );
 
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
@@ -292,8 +276,6 @@ void index::exists_cmd( const std::string name )
 
 	cppcms::json::value j;
 	j["exists"] = dbi->exists( config );
-
-	close_strus_environment( );
 	
 	report_ok( j );
 }

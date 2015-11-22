@@ -16,10 +16,8 @@ void query::query_cmd( const std::string name )
 	if( !ensure_post( ) ) return;	
 	if( !ensure_json_request( ) ) return;
 
-	prepare_strus_environment( name );
+	get_strus_environment( name );
 
-	close_strus_environment( );
-			
 	report_ok( );
 }
 
