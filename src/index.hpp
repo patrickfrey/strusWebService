@@ -49,10 +49,7 @@ class index : public master {
 		void initialize_default_create_parameters( );
 		// TODO: or can we pass to get with a different initialzer
 		//~ struct StorageCreateParameters merge_create_parameters( const struct StorageCreateParameters &defaults, const struct StorageCreateParameters &params );
-		
-		std::string get_storage_directory( const std::string &base_storage_dir, const std::string &name );
-		std::string get_storage_config( const std::string &base_storage_dir, const struct StorageCreateParameters params, const std::string &name );
-				
+						
 	private:
 		void create_cmd( const std::string name );
 		void delete_cmd( const std::string name );

@@ -3,48 +3,50 @@
 
 #include <cppcms/url_dispatcher.h>  
 
+#include <storageTransactionInterface.hpp>
+
 namespace apps {
 
 document::document( strusWebService &service )
 	: master( service )
 {
-	service.dispatcher( ).assign( "/document/insert", &document::insert_without_id_cmd, this );
-	service.dispatcher( ).assign( "/document/insert/(\\w+)", &document::insert_cmd, this, 1  );
-	service.dispatcher( ).assign( "/document/update/(\\w+)", &document::update_cmd, this, 1 );
+	service.dispatcher( ).assign( "/document/insert/(\\w+)", &document::insert_without_id_cmd, this, 1 );
+	service.dispatcher( ).assign( "/document/insert/(\\w+)/(\\w+)", &document::insert_cmd, this, 1, 2  );
+	service.dispatcher( ).assign( "/document/update/(\\w+)/(\\w+)", &document::update_cmd, this, 1, 2 );
 	service.dispatcher( ).assign( "/document/delete/(\\w+)/(\\w+)", &document::delete_cmd, this, 1, 2 );
-	service.dispatcher( ).assign( "/document/get/(\\w+)", &document::get_cmd, this, 1 );
+	service.dispatcher( ).assign( "/document/get/(\\w+)/(\\w+)", &document::get_cmd, this, 1, 2 );
 }
 
-void document::insert_without_id_cmd( )
+void document::insert_without_id_cmd( const std::string name )
 {
 	if( !ensure_post( ) ) return;	
 	if( !ensure_json_request( ) ) return;
 
-	prepare_strus_environment( );
+	prepare_strus_environment( name );
 
 	close_strus_environment( );
 			
 	report_ok( );
 }
 
-void document::insert_cmd( const std::string id  )
+void document::insert_cmd( const std::string name, const std::string id  )
 {
 	if( !ensure_post( ) ) return;	
 	if( !ensure_json_request( ) ) return;
 
-	prepare_strus_environment( );
+	prepare_strus_environment( name );
 
 	close_strus_environment( );
 			
 	report_ok( );
 }
 
-void document::update_cmd( const std::string id )
+void document::update_cmd( const std::string name, const std::string id )
 {
 	if( !ensure_post( ) ) return;	
 	if( !ensure_json_request( ) ) return;
 
-	prepare_strus_environment( );
+	prepare_strus_environment( name );
 
 	close_strus_environment( );
 			
@@ -55,16 +57,16 @@ void document::delete_cmd( const std::string name, const std::string id )
 {
 	if( !ensure_post( ) ) return;	
 
-	prepare_strus_environment( );
+	prepare_strus_environment( name );
 	
 	close_strus_environment( );
 			
 	report_ok( );	
 }
 
-void document::get_cmd( const std::string id )
+void document::get_cmd( const std::string name, const std::string id )
 {
-	prepare_strus_environment( );
+	prepare_strus_environment( name );
 
 	close_strus_environment( );
 			

@@ -11,11 +11,11 @@ class document : public master {
 		document( strusWebService &service );
 		
 	private:
-		void insert_without_id_cmd( );
-		void insert_cmd( const std::string id  );
-		void update_cmd( const std::string id );
+		void insert_without_id_cmd( const std::string name );
+		void insert_cmd( const std::string name, const std::string id  );
+		void update_cmd( const std::string name, const std::string id );
 		void delete_cmd( const std::string name, const std::string id );
-		void get_cmd( const std::string id );
+		void get_cmd( const std::string name, const std::string id );
 };
 
 } // namespace apps

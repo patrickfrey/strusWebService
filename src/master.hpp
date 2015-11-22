@@ -4,11 +4,6 @@
 #include <cppcms/application.h>
 #include <cppcms/json.h>
 
-#include "strus/lib/error.hpp"
-#include "strus/databaseInterface.hpp"
-#include "strus/storageInterface.hpp"
-#include "strus/errorBufferInterface.hpp"
-
 #include "version.hpp"
 #include "error_codes.hpp"
 
@@ -17,26 +12,25 @@
 #include <cstdio>
 #include <map>
 
+#include "strus/databaseInterface.hpp"
+#include "strus/storageInterface.hpp"
+
 namespace apps {
 
 class strusWebService;
 
 class master : public cppcms::application {
-
-	private:
-		FILE *logfile;
 	
 	protected:
-		strus::ErrorBufferInterface *g_errorhnd;
 		strusWebService &service;
+		bool protocol_pretty_printing;
 		strus::DatabaseInterface *dbi;
 		strus::StorageInterface *sti;
-		bool protocol_pretty_printing;
 		
 	public:
 		master( strusWebService &service );
 		void register_common_pages( );
-		void prepare_strus_environment( );
+		void prepare_strus_environment( const std::string &name );
 		void close_strus_environment( );
 
 	protected:
@@ -44,7 +38,6 @@ class master : public cppcms::application {
 		void report_ok( cppcms::json::value &j );
 		void report_error( unsigned int code, const std::string &msg );
 		void not_found_404( );
-		std::vector<std::string> handle_strus_errors( );
 		bool ensure_post( );
 		bool ensure_json_request( );
 

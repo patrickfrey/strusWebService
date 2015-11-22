@@ -4,7 +4,6 @@
 #include <cppcms/url_dispatcher.h>  
 #include <cppcms/http_request.h>
 
-#include <booster/locale/format.h>
 #include <booster/log.h>
 #include <sstream>
 
@@ -50,48 +49,6 @@ void index::initialize_default_create_parameters( )
 	BOOSTER_DEBUG( PACKAGE ) << "Default storage configuration parameters:" << j;
 }
 
-std::string index::get_storage_directory( const std::string &base_storage_dir, const std::string &name )
-{
-	std::ostringstream ss;
-	
-	ss << booster::locale::format( "{1}/{2}" ) % base_storage_dir % name;
-	std::string directory = ss.str( );
-
-	return directory;	
-}
-
-std::string index::get_storage_config( const std::string &base_storage_dir, const struct StorageCreateParameters params, const std::string &name )
-{
-	std::ostringstream ss;
-	std::ostringstream ss2;
-	bool first = true;
-	std::vector<struct MetadataDefiniton>::const_iterator it;
-	
-	for( it = params.metadata.begin( ); it != params.metadata.end( ); it++ ) {
-		if( !first ) {
-			ss2 << ", ";		
-		} else {
-			first = false;
-		}
-		ss2 << it->name << " " << it->type;
-	}
-	
-	ss << booster::locale::format( "database={1}; path={2}; compression={3}; cache={4}; max_open_files={5}; write_buffer_size={6}; block_size={7}; metadata={8}" )
-		% params.database
-		% get_storage_directory( base_storage_dir, name )
-		% ( params.compression ? "yes" : "no" )
-		% params.cache_size
-		% params.max_open_files
-		% params.write_buffer_size
-		% params.block_size
-		% ss2.str( );
-	std::string config = ss.str( );
-
-	BOOSTER_DEBUG( PACKAGE ) << "Storage config string: " << config;
-	
-	return config;
-}
-
 void index::create_cmd( const std::string name )
 {
 	if( !ensure_post( ) ) return;	
@@ -119,12 +76,12 @@ void index::create_cmd( const std::string name )
 		return;
 	}
 		
-	prepare_strus_environment( );
+	prepare_strus_environment( name );
 
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
 
-	std::string config = get_storage_config( storage_base_directory, combined_params, name );
+	std::string config = service.getStorageConfig( storage_base_directory, combined_params, name );
 
 	if( dbi->exists( config ) ) {
 		report_error( ERROR_INDEX_CREATE_DATABASE_EXISTS, "An index with that name already exists" );
@@ -133,21 +90,21 @@ void index::create_cmd( const std::string name )
 	
 	boost::system::error_code err;
 	if( !boost::filesystem::create_directories(
-		get_storage_directory( storage_base_directory, name ), err ) ) {
+		service.getStorageDirectory( storage_base_directory, name ), err ) ) {
 		report_error( ERROR_INDEX_CREATE_CMD_MKDIR_STORAGE_DIR, err.message( ) );
 		close_strus_environment( );
 		return;
 	}
 		
 	if( !dbi->createDatabase( config ) ) {
-		report_error( ERROR_INDEX_CREATE_CMD_CREATE_DATABASE, g_errorhnd->fetchError( ) );
+		report_error( ERROR_INDEX_CREATE_CMD_CREATE_DATABASE, service.getLastStrusError( ) );
 		close_strus_environment( );
 		return;
 	}
 	
 	strus::DatabaseClientInterface *database = dbi->createClient( config );
 	if( !database ) {
-		report_error( ERROR_INDEX_CREATE_CMD_CREATE_CLIENT, g_errorhnd->fetchError( ) );
+		report_error( ERROR_INDEX_CREATE_CMD_CREATE_CLIENT, service.getLastStrusError( ) );
 		close_strus_environment( );
 		return;
 	}
@@ -165,12 +122,12 @@ void index::delete_cmd( const std::string name )
 {
 	if( !ensure_post( ) ) return;
 
-	prepare_strus_environment( );
+	prepare_strus_environment( name );
 
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
 
-	std::string config = get_storage_config( storage_base_directory, combined_params, name );
+	std::string config = service.getStorageConfig( storage_base_directory, combined_params, name );
 	
 	if( !dbi->exists( config ) ) {
 		report_error( ERROR_INDEX_DESTROY_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
@@ -179,7 +136,7 @@ void index::delete_cmd( const std::string name )
 	}
 	
 	if( !dbi->destroyDatabase( config ) ) {
-		report_error( ERROR_INDEX_DESTROY_CMD_DESTROY_DATABASE, g_errorhnd->fetchError( ) );
+		report_error( ERROR_INDEX_DESTROY_CMD_DESTROY_DATABASE, service.getLastStrusError( ) );
 		close_strus_environment( );
 		return;
 	}
@@ -191,12 +148,12 @@ void index::delete_cmd( const std::string name )
 
 void index::config_cmd( const std::string name )
 {
-	prepare_strus_environment( );
+	prepare_strus_environment( name );
 
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
 
-	std::string configStr = get_storage_config( storage_base_directory, combined_params, name );
+	std::string configStr = service.getStorageConfig( storage_base_directory, combined_params, name );
 
 	if( !dbi->exists( configStr ) ) {
 		report_error( ERROR_INDEX_CONFIG_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
@@ -206,7 +163,7 @@ void index::config_cmd( const std::string name )
 
 	strus::DatabaseClientInterface *database = dbi->createClient( configStr );
 	if( !database ) {
-		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_DATABASE_CLIENT, g_errorhnd->fetchError( ) );
+		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
 
@@ -214,7 +171,7 @@ void index::config_cmd( const std::string name )
 	if( !storage ) {
 		delete database;
 		close_strus_environment( );
-		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_STORAGE_CLIENT, g_errorhnd->fetchError( ) );
+		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
 
@@ -222,7 +179,7 @@ void index::config_cmd( const std::string name )
 	if( !metadata ) {
 		delete database;
 		close_strus_environment( );
-		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_METADATA_READER, g_errorhnd->fetchError( ) );
+		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_METADATA_READER, service.getLastStrusError( ) );
 		return;
 	}
 	
@@ -249,12 +206,12 @@ void index::config_cmd( const std::string name )
 
 void index::stats_cmd( const std::string name )
 {
-	prepare_strus_environment( );
+	prepare_strus_environment( name );
 
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
 
-	std::string config = get_storage_config( storage_base_directory, combined_params, name );
+	std::string config = service.getStorageConfig( storage_base_directory, combined_params, name );
 
 	if( !dbi->exists( config ) ) {
 		report_error( ERROR_INDEX_STATS_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
@@ -264,7 +221,7 @@ void index::stats_cmd( const std::string name )
 
 	strus::DatabaseClientInterface *database = dbi->createClient( config );
 	if( !database ) {
-		report_error( ERROR_INDEX_STATS_CMD_CREATE_DATABASE_CLIENT, g_errorhnd->fetchError( ) );
+		report_error( ERROR_INDEX_STATS_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
 
@@ -272,7 +229,7 @@ void index::stats_cmd( const std::string name )
 	if( !storage ) {
 		delete database;
 		close_strus_environment( );
-		report_error( ERROR_INDEX_STATS_CMD_CREATE_STORAGE_CLIENT, g_errorhnd->fetchError( ) );
+		report_error( ERROR_INDEX_STATS_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
 	
@@ -326,12 +283,12 @@ void index::list_cmd( )
 
 void index::exists_cmd( const std::string name )
 {
-	prepare_strus_environment( );
+	prepare_strus_environment( name );
 
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
 
-	std::string config = get_storage_config( storage_base_directory, combined_params, name );
+	std::string config = service.getStorageConfig( storage_base_directory, combined_params, name );
 
 	cppcms::json::value j;
 	j["exists"] = dbi->exists( config );
