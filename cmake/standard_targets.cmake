@@ -24,6 +24,7 @@ IF (UNIX)
    Makefile
    core core.*
    *~
+   tests/*.res
   )
   
   ADD_CUSTOM_COMMAND(

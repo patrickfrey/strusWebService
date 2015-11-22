@@ -117,6 +117,9 @@ void index::delete_cmd( const std::string name )
 {
 	if( !ensure_post( ) ) return;
 
+	// close all handles, we are going to delete the index now
+	// TODO: what if in parallel other clients access it? locking with timeout or
+	// error to this worker's client?
 	close_strus_environment( name );
 
 	get_strus_environment( name );
@@ -182,9 +185,8 @@ void index::config_cmd( const std::string name )
 		config.metadata.push_back( meta );
 	}
 
-	// database is deleted implicitely!
 	delete storage;
-	//delete metadata;
+	delete metadata;
 	
 	cppcms::json::value j;
 	j["config"] = config;
@@ -260,6 +262,7 @@ void index::list_cmd( )
 		}
 		v.push_back( last );
 	}
+	std::sort( v.begin( ), v.end( ) );
 	j["indexes"] = v;
 
 	report_ok( j );

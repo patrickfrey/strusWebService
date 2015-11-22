@@ -33,3 +33,6 @@ src/version.hpp
 strusWebService
 tests/curlJsonTester
 
+# results of the test program
+tests/*.res
+

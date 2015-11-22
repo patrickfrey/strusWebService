@@ -81,6 +81,15 @@ int main( int argc, char *argv[] )
 	must.assign( std::istreambuf_iterator<char>( mustfile ), std::istreambuf_iterator<char>( ) );            	
 	mustfile.close( );
 	
+	std::ostringstream ss3;
+	ss3 << testname << ".res";
+	std::ofstream resfile( ss3.str( ).c_str( ) );
+	if( !resfile.good( ) ) {
+		std::cerr << "ERROR: Result file '" << ss3.str( ) << "' not openable." << std::endl;
+		return 1;
+	}
+	resfile << res;
+	
 	std::cout << "MUST: " << must << std::endl;
 	std::cout << "RES : " << res << std::endl;
 	
