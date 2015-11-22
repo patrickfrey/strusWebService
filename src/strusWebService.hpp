@@ -12,14 +12,16 @@
 #include <map>
 
 #include "strus/lib/error.hpp"
+#include "strus/errorBufferInterface.hpp"
+
 #include "strus/databaseInterface.hpp"
 #include "strus/storageInterface.hpp"
-#include "strus/errorBufferInterface.hpp"
-#include "strus/storageObjectBuilderInterface.hpp"
+#include "strus/databaseClientInterface.hpp"
 
 struct strusContext {
 	strus::DatabaseInterface *dbi;
 	strus::StorageInterface *sti;
+	strus::DatabaseClientInterface *dbci;
 };
 
 namespace apps {
@@ -42,6 +44,7 @@ class strusWebService : public cppcms::application {
 		strusWebService( cppcms::service &srv );
 		strus::DatabaseInterface *getDataBaseInterface( const std::string &name );
 		strus::StorageInterface *getStorageInterface( const std::string &name );
+		strus::DatabaseClientInterface *getDatabaseClientInterface( const std::string &name, const std::string &config );
 		std::string getLastStrusError( );
 		std::vector<std::string> getStrusErrorDetails( );
 		std::string getStorageDirectory( const std::string &base_storage_dir, const std::string &name );

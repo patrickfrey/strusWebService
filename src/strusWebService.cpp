@@ -91,6 +91,30 @@ strus::StorageInterface *strusWebService::getStorageInterface( const std::string
 	return (*it).second.sti;
 }
 
+strus::DatabaseClientInterface *strusWebService::getDatabaseClientInterface( const std::string &name, const std::string &config )
+{
+	std::map<std::string, struct strusContext>::iterator it;
+	it = context_map.find( name );
+	if( it == context_map.end( ) ) {
+		struct strusContext context;
+		memset( &context, 0, sizeof( context ) );
+		context_map[name] = context;
+	}
+	it = context_map.find( name );
+	if( it == context_map.end( ) ) {
+		return NULL;
+	}
+	if( (*it).second.sti == NULL ) {
+		strus::DatabaseInterface *dbi = (*it).second.dbi;		
+		strus::DatabaseClientInterface *dbci = dbi->createClient( config );
+		if( dbci == NULL ) {
+			return NULL;
+		}
+		(*it).second.dbci = dbci;
+	}
+	return (*it).second.dbci;
+}
+
 void strusWebService::deleteDataBaseInterface( const std::string &name )
 {
 	std::map<std::string, struct strusContext>::iterator it;

@@ -15,7 +15,6 @@
 
 #include <boost/filesystem.hpp>
 
-#include "strus/databaseClientInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 
@@ -156,7 +155,7 @@ void index::config_cmd( const std::string name )
 		return;
 	}
 
-	strus::DatabaseClientInterface *database = dbi->createClient( configStr );
+	strus::DatabaseClientInterface *database = service.getDatabaseClientInterface( name, configStr );
 	if( !database ) {
 		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
 		return;

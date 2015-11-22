@@ -15,7 +15,6 @@ int main( int argc, char *argv[] )
 		return 1;
 	}
 	
-	// read URL to test
 	std::ostringstream ss;
 	std::string testname( argv[1] );
 	ss << testname << ".url";
@@ -53,15 +52,6 @@ int main( int argc, char *argv[] )
 		request.setOpt( new curlpp::options::ReadStream( &is ) );
 		request.setOpt( new curlpp::options::InfileSize( data.size( ) ) );
 		request.setOpt( new curlpp::options::HttpHeader( header ) ); 
-
-
-  //~ std::istringstream myStream(argv[2]);
-  //~ int size = myStream.str().size();
-
-      //~ request.setOpt(new ReadStream(&myStream));
-      //~ request.setOpt(new InfileSize(size));
-      //~ request.setOpt(new Upload(true));
-
 	}
     
 	request.perform( );

@@ -3,7 +3,8 @@
 
 #include <cppcms/url_dispatcher.h>  
 
-#include <storageTransactionInterface.hpp>
+#include "strus/storageTransactionInterface.hpp"
+#include "strus/storageClientInterface.hpp"
 
 namespace apps {
 
