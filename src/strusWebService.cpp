@@ -104,7 +104,7 @@ strus::DatabaseClientInterface *strusWebService::getDatabaseClientInterface( con
 	if( it == context_map.end( ) ) {
 		return NULL;
 	}
-	if( (*it).second.sti == NULL ) {
+	if( (*it).second.dbci == NULL ) {
 		strus::DatabaseInterface *dbi = (*it).second.dbi;		
 		strus::DatabaseClientInterface *dbci = dbi->createClient( config );
 		if( dbci == NULL ) {
