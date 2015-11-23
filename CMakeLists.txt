@@ -59,6 +59,9 @@ link_directories(
 add_executable(strusWebService ${SRC})
 target_link_libraries(strusWebService ${BOOSTER} ${CPPCMS} strus_storage strus_error strus_database_leveldb ${Boost_LIBRARIES})
 
+install( TARGETS strusWebService RUNTIME DESTINATION bin )
+install( FILES ${CMAKE_SOURCE_DIR}/config.js DESTINATION /etc/strusWebService RENAME strusWebService.conf )
+
 ADD_CUSTOM_TARGET(run @echo runs the web service)
 ADD_CUSTOM_COMMAND(
   COMMENT "run"
