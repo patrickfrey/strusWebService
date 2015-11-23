@@ -208,17 +208,17 @@ BuildRequires: boost-devel
 
 %if %{rhel} || %{centos} || %{scilin}
 BuildRequires: libcppcms-devel
-Requires: libcppcms-devel
+Requires: libcppcms
 %endif
 
 %if %{fedora}
 BuildRequires: libcppcms-devel
-Requires: libcppcms-devel
+Requires: libcppcms
 %endif
 
 %if %{suse} || %{sles}
 BuildRequires: libcppcms-devel
-Requires: libcppcms-devel
+Requires: libcppcms
 %endif
 
 BuildRequires: strus-devel >= 0.2.0
@@ -276,7 +276,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr( -, root, root )
 %{_bindir}/strusWebService
 %dir %attr(0755, root, root) %{_sysconfdir}/strusWebService
-%config(noreplace) %attr(0644, root, root) %{_sysconfdir}/strusWebService/config.js
+%config(noreplace) %attr(0644, root, root) %{_sysconfdir}/strusWebService/strusWebService.conf
 
 %changelog
 * Tue Nov 10 2015 Andreas Baumann <mail@andreasbaumann.cc> 0.0.1-0.1
