@@ -28,6 +28,10 @@ CPackSourceConfig.cmake.user
 CPackSourceConfig.cmake
 tests/cmake_install.cmake.user
 src/version.hpp
+dist/obs/deploy_to_obs.sh
+dist/archlinux/PKGBUILD
+dist/obs/strusanalyzer.dsc
+dist/redhat/strusanalyzer.spec
 
 # Compiled Programs
 strusWebService

@@ -1,0 +1,11 @@
+Format: 3.0 (quilt)
+Source: struswebservice
+Version: @STRUS_WEB_SERVICE_VERSION@
+Binary: strusanalyzer
+Maintainer: Andreas Baumann <mail@andreasbaumann.cc>
+Architecture: any
+Build-Depends: debhelper (>= 4.1.16), cmake,
+ libboost-dev, libboost-thread-dev, libboost-system-dev,
+ libboost-date-time-dev, strus-dev, libcppcms-dev,
+ libcurl4-openssl-dev
+Files:

@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 
+include_directories( "${PROJECT_SOURCE_DIR}/3rdParty/curlcpp/include" "${CURL_INCLUDE_DIRS}" )
+
 set( curlpp_source_files
 	src/curlpp/Easy.cpp
 	src/curlpp/Exception.cpp

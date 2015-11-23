@@ -1,0 +1,39 @@
+# Contributor: Andreas Baumann <mail@andreasbaumann.cc>
+# Maintainer: Andreas Baumann <mail@andreasbaumann.cc>
+
+pkgname=struswebservice
+_mainpkgver=@STRUS_WEB_SERVICE_VERSION@
+pkgver=${_mainpkgver}
+pkgrel=1
+pkgdesc='Library implementing the document and query analysis for a text search engine.'
+license=('GPL3')
+arch=('i686' 'x86_64')
+url="http://project-strus.net"
+depends=('boost>=1.53' 'boost-libs>=1.53' 'cppcms')
+makedepends=('cmake' 'curl')
+source=("${pkgname}-${_mainpkgver}.tar.gz")
+
+build() {
+  cd ${srcdir}/${pkgname}-${_mainpkgver}
+
+  msg "Building..."
+  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DLIB_INSTALL_DIR=lib .
+  make
+}
+
+package() {
+  cd ${srcdir}/${pkgname}-${_mainpkgver}
+
+  msg "Installing.."
+  make DESTDIR=${pkgdir} install
+}
+
+check() {
+  cd ${srcdir}/${pkgname}-${_mainpkgver}
+
+  msg "Testing..."
+#  make run
+#  make test
+#  pkill strusWebService
+}
+

@@ -12,11 +12,16 @@ set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" )
 include( cmake/standard_targets.cmake )
 include( cmake/find_strus_package.cmake )
 include( cmake/boost.cmake )
+include( cmake/dist.cmake )
 include( cmake/FindCURL.cmake )
 
 find_strus_package( core )
 
 configure_file( "${PROJECT_SOURCE_DIR}/src/version.hpp.in"  "${PROJECT_SOURCE_DIR}/src/version.hpp"  @ONLY )
+configure_file( "${PROJECT_SOURCE_DIR}/dist/obs/deploy_to_obs.sh.in"  "${PROJECT_SOURCE_DIR}/dist/obs/deploy_to_obs.sh"  @ONLY )
+configure_file( "${PROJECT_SOURCE_DIR}/dist/archlinux/PKGBUILD.in"  "${PROJECT_SOURCE_DIR}/dist/archlinux/PKGBUILD"  @ONLY )
+configure_file( "${PROJECT_SOURCE_DIR}/dist/obs/struswebservice.dsc.in"  "${PROJECT_SOURCE_DIR}/dist/obs/struswebservice.dsc"  @ONLY )
+configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/struswebservice.spec.in"  "${PROJECT_SOURCE_DIR}/dist/redhat/struswebservice.spec"  @ONLY )
 
 find_library(CPPCMS cppcms)
 find_library(BOOSTER booster)
