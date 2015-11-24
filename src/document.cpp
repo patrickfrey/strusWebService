@@ -4,6 +4,8 @@
 #include <cppcms/url_dispatcher.h>  
 #include <cppcms/http_request.h>
 
+#include <booster/log.h>
+
 #include "strus/storageTransactionInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/storageDocumentInterface.hpp"
@@ -60,7 +62,7 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 		report_error( ERROR_DOCUMENT_INSERT_ILLEGAL_JSON, "Expecting a JSON object as JSON document payload" );
 		return;
 	}
-		
+	
 	get_strus_environment( name );
 
 	if( !dbi->exists( service.getConfigString( name ) ) ) {
@@ -100,6 +102,20 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 	strus::StorageDocumentInterface *doc = transaction->createDocument( docid );
 
 	doc->setAttribute( strus::Constants::attribute_docid( ), docid );
+
+	for( std::vector<std::pair<std::string, std::string> >::const_iterator it = ins_doc.attributes.begin( );
+		it != ins_doc.attributes.end( ); it++ ) {
+		doc->setAttribute( it->first, it->second );
+	}
+/*
+ * 							// Define all attributes extracted from the document analysis:
+							std::vector<strus::analyzer::Attribute>::const_iterator
+								ai = doc.attributes().begin(), ae = doc.attributes().end();
+							for (; ai != ae; ++ai)
+							{
+								storagedoc->setAttribute( ai->name(), ai->value());
+							}
+*/
 
 	doc->done( );
 	

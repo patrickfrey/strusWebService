@@ -10,7 +10,7 @@
 
 struct DocumentInsertRequest {
 	std::string docid;
-	std::vector<std::pair<std::string, std::string> > attribute;
+	std::vector<std::pair<std::string, std::string> > attributes;
 };
 
 namespace apps {
@@ -46,12 +46,33 @@ struct traits<DocumentInsertRequest> {
 		}
 		// TODO: should we also accept int, float? how can we fall back?
 		d.docid = v.get<std::string>( "docid", "" );
+		d.attributes = v.get<std::vector<std::pair<std::string, std::string> > >( "attributes" );
 		return d;
 	}
 	
 	static void set( value &v, DocumentInsertRequest const &d )
 	{
 		v.set( "docid", d.docid );
+	}
+};
+
+template<>
+struct traits<std::pair<std::string, std::string> > {
+	
+	static std::pair<std::string, std::string> get( value const &v )
+	{
+		std::pair<std::string, std::string> p;
+		
+		p.first = v.get<std::string>( "key" );
+		p.second = v.get<std::string>( "value" );
+		
+		return p;
+	}
+	
+	static void set( value &v, std::pair<std::string, std::string> &p )
+	{
+		v.set( "key", p.first );
+		v.set( "value", p.second );
 	}
 };
 

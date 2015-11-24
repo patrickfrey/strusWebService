@@ -3,3 +3,5 @@
 - can't ommit the "params" member in JSON /index/create request
 - no loadable database implementation support
 - can't implement a /document/exists
+- attribute pairs are string/string for now, we also want other
+  value types like ints/doubles too
