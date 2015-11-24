@@ -16,15 +16,25 @@ namespace apps {
 document::document( strusWebService &service )
 	: master( service )
 {
-	service.dispatcher( ).assign( "/document/insert/(\\w+)/(\\w+)", &document::insert_at_cmd, this, 1, 2  );
-	service.dispatcher( ).assign( "/document/insert/(\\w+)", &document::insert_cmd, this, 1  );
+	service.dispatcher( ).assign( "/document/insert/(\\w+)/(\\w+)", &document::insert_url_cmd, this, 1, 2  );
+	service.dispatcher( ).assign( "/document/insert/(\\w+)", &document::insert_payload_cmd, this, 1  );
 	service.dispatcher( ).assign( "/document/update/(\\w+)/(\\w+)", &document::update_cmd, this, 1, 2 );
 	service.dispatcher( ).assign( "/document/delete/(\\w+)/(\\w+)", &document::delete_cmd, this, 1, 2 );
 	service.dispatcher( ).assign( "/document/get/(\\w+)/(\\w+)", &document::get_cmd, this, 1, 2 );
 	service.dispatcher( ).assign( "/document/exists/(\\w+)/(\\w+)", &document::exists_cmd, this, 1, 2 );	
 }
 
-void document::insert_at_cmd( const std::string name, const std::string id  )
+void document::insert_url_cmd( const std::string name, const std::string id )
+{
+	insert_cmd( name, id, true );
+}
+
+void document::insert_payload_cmd( const std::string name )
+{
+	insert_cmd( name, "", false );
+}
+
+void document::insert_cmd( const std::string name, const std::string id, bool docid_id_url )
 {
 	if( !ensure_post( ) ) return;	
 	if( !ensure_json_request( ) ) return;
@@ -75,10 +85,21 @@ void document::insert_at_cmd( const std::string name, const std::string id  )
 		report_error( ERROR_DOCUMENT_INSERT_CMD_CREATE_STORAGE_TRANSACTION, service.getLastStrusError( ) );
 		return;
 	}
+	
+	std::string docid;
+	if( docid_id_url ) {
+		docid = id;
+	} else {
+		if( ins_doc.docid.compare( "" ) == 0 ) {
+			report_error( ERROR_DOCUMENT_INSERT_CMD_DOCID_REQUIRED, "docid must be part of the JSON payload as field of 'doc'" );
+			return;
+		}
+		docid = ins_doc.docid;
+	}
 		
-	strus::StorageDocumentInterface *doc = transaction->createDocument( id );
+	strus::StorageDocumentInterface *doc = transaction->createDocument( docid );
 
-	doc->setAttribute( strus::Constants::attribute_docid( ), id );
+	doc->setAttribute( strus::Constants::attribute_docid( ), docid );
 
 	doc->done( );
 	
@@ -88,13 +109,6 @@ void document::insert_at_cmd( const std::string name, const std::string id  )
 	service.deleteStorageTransactionInterface( name );
 		
 	report_ok( );	
-}
-
-void document::insert_cmd( const std::string name )
-{
-	// TODO: insert command with docid as part of the payload (for instance
-	// if the URL is something which doesn't fit into the URL, this is in
-	// violation of rest though. And for the index name we are not that picky..
 }
 
 void document::update_cmd( const std::string name, const std::string id )
@@ -146,9 +160,7 @@ void document::exists_cmd( const std::string name , const std::string id )
 	
 	strus::Index docno = storage->documentNumber( id );
 	
-	cppcms::json::value j;
-	j["docno"] = docno;
-	report_ok( j );
+	report_ok( );
 }
 
 } // namespace apps

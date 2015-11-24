@@ -28,7 +28,15 @@ add_test( NAME index_stats_A COMMAND curlJsonTester index_stats_A )
 
 # document.cpp
 
+add_test( NAME document_url_docid_insert COMMAND curlJsonTester document_url_docid_insert )
+add_test( NAME document_payload_docid_insert COMMAND curlJsonTester document_payload_docid_insert )
 add_test( NAME document_insert COMMAND curlJsonTester document_insert )
+
+add_test( NAME document_exists_doc1 COMMAND curlJsonTester document_exists_doc1 )
+add_test( NAME document_exists_doc2 COMMAND curlJsonTester document_exists_doc2 )
+add_test( NAME document_exists_doc3 COMMAND curlJsonTester document_exists_doc3 )
+
+add_test( NAME index_stats_A_after_insert COMMAND curlJsonTester index_stats_A_after_insert )
 
 # index.cpp (cleaning up)
 
