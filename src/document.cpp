@@ -107,15 +107,6 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 		it != ins_doc.attributes.end( ); it++ ) {
 		doc->setAttribute( it->first, it->second );
 	}
-/*
- * 							// Define all attributes extracted from the document analysis:
-							std::vector<strus::analyzer::Attribute>::const_iterator
-								ai = doc.attributes().begin(), ae = doc.attributes().end();
-							for (; ai != ae; ++ai)
-							{
-								storagedoc->setAttribute( ai->name(), ai->value());
-							}
-*/
 
 	doc->done( );
 	
@@ -175,8 +166,12 @@ void document::exists_cmd( const std::string name , const std::string id )
 	}
 	
 	strus::Index docno = storage->documentNumber( id );
+	bool exists = ( docno > 0 );	
+		
+	cppcms::json::value j;
+	j["exists"] = exists;
 	
-	report_ok( );
+	report_ok( j );
 }
 
 } // namespace apps
