@@ -12,10 +12,13 @@
 
 #include <sstream>
 
+#include <unistd.h>
+
 namespace apps {
 
 strusWebService::strusWebService( cppcms::service &srv )
 	: cppcms::application( srv ),
+	storage_base_directory( settings( ).get<std::string>( "storage.basedir" ) ),
 	master( *this ),
 	other( *this ),
 	index( *this, settings( ).get<std::string>( "storage.basedir" ) ),
@@ -50,10 +53,20 @@ void strusWebService::getOrCreateStrusContext( const std::string &name )
 	std::map<std::string, struct strusContext>::iterator it;
 	it = context_map.find( name );
 	if( it == context_map.end( ) ) {
-		struct strusContext context;
-		memset( &context, 0, sizeof( context ) );
+		struct strusContext context( getStorageConfig( storage_base_directory, name ) );
 		context_map[name] = context;
 	}
+}
+
+void strusWebService::registerStorageConfig( const std::string &name, const std::string &config )
+{
+	// TODO: actually we should rather throw here
+	getOrCreateStrusContext( name );
+	std::map<std::string, struct strusContext>::iterator it = context_map.find( name );
+	if( it == context_map.end( ) ) {
+		return;
+	}
+	(*it).second.config = config;
 }
 
 strus::DatabaseInterface *strusWebService::getDataBaseInterface( const std::string &name )
@@ -90,7 +103,7 @@ strus::StorageInterface *strusWebService::getStorageInterface( const std::string
 	return (*it).second.sti;
 }
 
-strus::DatabaseClientInterface *strusWebService::getDatabaseClientInterface( const std::string &name, const std::string &config )
+strus::DatabaseClientInterface *strusWebService::getDatabaseClientInterface( const std::string &name )
 {
 	getOrCreateStrusContext( name );
 	std::map<std::string, struct strusContext>::iterator it = context_map.find( name );
@@ -99,6 +112,7 @@ strus::DatabaseClientInterface *strusWebService::getDatabaseClientInterface( con
 	}
 	if( (*it).second.dbci == NULL ) {
 		strus::DatabaseInterface *dbi = (*it).second.dbi;		
+		std::string config = (*it).second.config;
 		strus::DatabaseClientInterface *dbci = dbi->createClient( config );
 		if( dbci == NULL ) {
 			return NULL;
@@ -108,7 +122,7 @@ strus::DatabaseClientInterface *strusWebService::getDatabaseClientInterface( con
 	return (*it).second.dbci;
 }
 
-strus::StorageClientInterface *strusWebService::getStorageClientInterface( const std::string &name, const std::string &config )
+strus::StorageClientInterface *strusWebService::getStorageClientInterface( const std::string &name )
 {
 	getOrCreateStrusContext( name );
 	std::map<std::string, struct strusContext>::iterator it = context_map.find( name );
@@ -116,6 +130,7 @@ strus::StorageClientInterface *strusWebService::getStorageClientInterface( const
 		return NULL;
 	}
 	if( (*it).second.stci == NULL ) {
+		std::string config = (*it).second.config;
 		strus::StorageInterface *sti = (*it).second.sti;		
 		strus::DatabaseClientInterface *dbci = (*it).second.dbci;		
 		strus::StorageClientInterface *stci = sti->createClient( config, dbci );
@@ -143,6 +158,34 @@ strus::MetaDataReaderInterface *strusWebService::getMetaDataReaderInterface( con
 		(*it).second.mdri = mdri;
 	}
 	return (*it).second.mdri;
+}
+
+strus::StorageTransactionInterface *strusWebService::getStorageTransactionInterface( const std::string &name )
+{
+	getOrCreateStrusContext( name );
+	std::map<std::string, struct strusContext>::iterator it = context_map.find( name );
+	if( it == context_map.end( ) ) {
+		return NULL;
+	}
+	if( (*it).second.stti == NULL ) {
+		strus::StorageClientInterface *stci = (*it).second.stci;
+		strus::StorageTransactionInterface *stti = stci->createTransaction( );
+		if( stti == NULL ) {
+			return NULL;
+		}
+		(*it).second.stti = stti;
+	}
+	return (*it).second.stti;
+}
+
+std::string strusWebService::getConfigString( const std::string &name )
+{
+	getOrCreateStrusContext( name );
+	std::map<std::string, struct strusContext>::iterator it = context_map.find( name );
+	if( it == context_map.end( ) ) {
+		return NULL;
+	}
+	return (*it).second.config;
 }
 
 void strusWebService::deleteDataBaseInterface( const std::string &name )
@@ -214,6 +257,19 @@ void strusWebService::deleteMetaDataReaderInterface( const std::string &name )
 	}	
 }
 
+void strusWebService::deleteStorageTransactionInterface( const std::string &name )
+{
+	std::map<std::string, struct strusContext>::iterator it;
+	it = context_map.find( name );
+	if( it == context_map.end( ) ) {
+		return;
+	}
+	if( (*it).second.stti != NULL ) {
+		delete (*it).second.stti;
+		(*it).second.stti = NULL;
+	}	
+}
+
 std::string strusWebService::getLastStrusError( )
 {
 	return g_errorhnd->fetchError( );
@@ -233,6 +289,8 @@ std::vector<std::string> strusWebService::getStrusErrorDetails( )
 			BOOSTER_ERROR( PACKAGE_STRUS ) << s;
 			v.push_back( s );
 		}
+		(void)ftruncate( fileno( logfile ), 0 );
+		fseek( logfile, 0 , SEEK_SET );
 	}
 	
 	return v;
@@ -278,6 +336,19 @@ std::string strusWebService::getStorageConfig( const std::string &base_storage_d
 	BOOSTER_DEBUG( PACKAGE ) << "Storage config string: " << config;
 	
 	return config;
+}
+
+std::string strusWebService::getStorageConfig( const std::string &base_storage_dir, const std::string &name )
+{
+	std::ostringstream ss;
+	
+	ss << booster::locale::format( "path={1}" )
+		% getStorageDirectory( base_storage_dir, name );
+	std::string config = ss.str( );
+
+	BOOSTER_DEBUG( PACKAGE ) << "Simple storage config string: " << config;
+	
+	return config;	
 }
 
 } // namespace apps

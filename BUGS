@@ -1,0 +1,4 @@
+- create parameters in /index/create are ignored
+- parameters are not persistent between sessions
+- can't ommit the "params" member in JSON /index/create request
+- no loadable database implementation support

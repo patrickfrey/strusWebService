@@ -5,6 +5,7 @@
 
 #include "strus/storageTransactionInterface.hpp"
 #include "strus/storageClientInterface.hpp"
+#include "strus/storageDocumentInterface.hpp"
 
 namespace apps {
 
@@ -25,7 +26,33 @@ void document::insert_without_id_cmd( const std::string name )
 
 	get_strus_environment( name );
 
-	report_ok( );
+	if( !dbi->exists( service.getConfigString( name ) ) ) {
+		report_error( ERROR_DOCUMENT_INSERT_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
+		return;
+	}
+
+	strus::DatabaseClientInterface *database = service.getDatabaseClientInterface( name );
+	if( !database ) {
+		report_error( ERROR_DOCUMENT_INSERT_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
+		return;
+	}
+
+	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
+	if( !storage ) {
+		report_error( ERROR_DOCUMENT_INSERT_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
+		return;
+	}
+
+	strus::StorageTransactionInterface *transaction = service.getStorageTransactionInterface( name );
+	if( !transaction ) {
+		report_error( ERROR_DOCUMENT_INSERT_CMD_CREATE_STORAGE_TRANSACTION, service.getLastStrusError( ) );
+		return;
+	}
+	
+	cppcms::json::value j;
+	// TODO: report back generated internal id
+	
+	report_ok( j );	
 }
 
 void document::insert_cmd( const std::string name, const std::string id  )
