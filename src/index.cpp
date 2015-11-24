@@ -15,9 +15,6 @@
 
 #include <boost/filesystem.hpp>
 
-#include "strus/storageClientInterface.hpp"
-#include "strus/metaDataReaderInterface.hpp"
-
 namespace apps {
 
 index::index( strusWebService &service, std::string storage_base_directory )
@@ -161,16 +158,14 @@ void index::config_cmd( const std::string name )
 		return;
 	}
 
-	strus::StorageClientInterface *storage = sti->createClient( configStr, database );
+	strus::StorageClientInterface *storage = service.getStorageClientInterface( name, configStr );
 	if( !storage ) {
-		delete database;
 		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
 
-	strus::MetaDataReaderInterface *metadata = storage->createMetaDataReader( );
+	strus::MetaDataReaderInterface *metadata = service.getMetaDataReaderInterface( name );
 	if( !metadata ) {
-		delete database;
 		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_METADATA_READER, service.getLastStrusError( ) );
 		return;
 	}
@@ -184,9 +179,6 @@ void index::config_cmd( const std::string name )
 		config.metadata.push_back( meta );
 	}
 
-	delete storage;
-	delete metadata;
-	
 	cppcms::json::value j;
 	j["config"] = config;
 	
@@ -200,20 +192,20 @@ void index::stats_cmd( const std::string name )
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
 
-	std::string config = service.getStorageConfig( storage_base_directory, combined_params, name );
+	std::string configStr = service.getStorageConfig( storage_base_directory, combined_params, name );
 
-	if( !dbi->exists( config ) ) {
+	if( !dbi->exists( configStr ) ) {
 		report_error( ERROR_INDEX_STATS_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
 		return;
 	}
 
-	strus::DatabaseClientInterface *database = dbi->createClient( config );
+	strus::DatabaseClientInterface *database = service.getDatabaseClientInterface( name, configStr );
 	if( !database ) {
 		report_error( ERROR_INDEX_STATS_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
 
-	strus::StorageClientInterface *storage = sti->createClient( config, database );
+	strus::StorageClientInterface *storage = service.getStorageClientInterface( name, configStr );
 	if( !storage ) {
 		delete database;
 		report_error( ERROR_INDEX_STATS_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
@@ -222,10 +214,7 @@ void index::stats_cmd( const std::string name )
 	
 	struct StorageStatistics stats;
 	stats.nof_docs = storage->globalNofDocumentsInserted( );
-	
-	// database is deleted implicitely!
-	delete storage;
-	
+		
 	cppcms::json::value j;
 	j["stats"] = stats;
 	
