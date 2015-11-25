@@ -38,6 +38,10 @@ add_test( NAME document_exists_doc3 COMMAND curlJsonTester document_exists_doc3 
 
 add_test( NAME index_stats_A_after_insert COMMAND curlJsonTester index_stats_A_after_insert )
 
+add_test( NAME document_delete COMMAND curlJsonTester document_delete )
+
+add_test( NAME index_stats_A_after_delete COMMAND curlJsonTester index_stats_A_after_delete )
+
 # index.cpp (cleaning up)
 
 add_test( NAME delete_index_A COMMAND curlJsonTester delete_index_A )

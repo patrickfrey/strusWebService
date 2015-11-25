@@ -22,6 +22,10 @@ struct DocumentInsertRequest {
 	std::vector<boost::tuple<std::string, std::string, strus::Index> > search;
 };
 
+struct DocumentDeleteRequest {
+	std::string docid;
+};
+
 namespace apps {
 
 class document : public master {
@@ -32,13 +36,19 @@ class document : public master {
 	private:
 		void insert_url_cmd( const std::string name, const std::string id );
 		void insert_payload_cmd( const std::string name );
-		void insert_cmd( const std::string name, const std::string id, bool docid_id_url );
+		void insert_cmd( const std::string name, const std::string id, bool docid_in_url );
 		void update_url_cmd( const std::string name, const std::string id );
 		void update_payload_cmd( const std::string name );
-		void update_cmd( const std::string name, const std::string id, bool docid_id_url );
-		void delete_cmd( const std::string name, const std::string id );
-		void get_cmd( const std::string name, const std::string id );
-		void exists_cmd( const std::string name, const std::string id );
+		void update_cmd( const std::string name, const std::string id, bool docid_in_url );
+		void delete_url_cmd( const std::string name, const std::string id );
+		void delete_payload_cmd( const std::string name );
+		void delete_cmd( const std::string name, const std::string id, bool docid_in_url );
+		void get_url_cmd( const std::string name, const std::string id );
+		void get_payload_cmd( const std::string name );
+		void get_cmd( const std::string name, const std::string id, bool docid_in_url );
+		void exists_url_cmd( const std::string name, const std::string id );
+		void exists_payload_cmd( const std::string name );
+		void exists_cmd( const std::string name, const std::string id, bool docid_in_url );
 };
 
 } // namespace apps
@@ -48,7 +58,7 @@ namespace cppcms {
 
 template<>
 struct traits<DocumentInsertRequest> {
-	
+		
 	static DocumentInsertRequest get( value const &v )
 	{
 		DocumentInsertRequest d;
@@ -69,6 +79,25 @@ struct traits<DocumentInsertRequest> {
 		v.set( "docid", d.docid );
 		v.set( "attributes", d.attributes );
 		v.set( "metadata", d.metadata );
+	}
+};
+
+template<>
+struct traits<DocumentDeleteRequest> {
+
+	static DocumentDeleteRequest get( value const &v )
+	{
+		DocumentDeleteRequest d;
+		if( v.type( ) != is_object) {
+			throw bad_value_cast( );
+		}
+		// TODO: should we also accept int, float? how can we fall back?
+		d.docid = v.get<std::string>( "docid", "" );		
+	}
+	
+	static void get( value &v, DocumentDeleteRequest const &d )
+	{
+		v.set( "docid", d.docid );
 	}
 };
 

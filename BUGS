@@ -8,3 +8,13 @@
 - insert doc doesn't handle ACLs at the moment
 - typedefs in template function for serialization instead of
   std::pair and boost::tuple directly?
+- report "number of documents affected" like a database on
+  insert, update, delete?
+- quite some copy-paste-code around parsing JSON request,
+  must find an elegant solution, no answer structs exist, 
+  JSON is mapped directly
+  something with templates forming a protocol request and
+  answer mapping with parameters of some sort
+- insert, update, delete doesn't allow batches for now,
+  all happen with an auto-commit of 1
+

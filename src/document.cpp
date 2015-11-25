@@ -19,16 +19,16 @@ namespace apps {
 document::document( strusWebService &service )
 	: master( service )
 {
-	// TODO: have two variants, GET/POST and docid in URL as well
-	// as always POST with docid in JSON request
-	// so far done for 'insert'
 	service.dispatcher( ).assign( "/document/insert/(\\w+)/(\\w+)", &document::insert_url_cmd, this, 1, 2  );
 	service.dispatcher( ).assign( "/document/insert/(\\w+)", &document::insert_payload_cmd, this, 1  );
 	service.dispatcher( ).assign( "/document/update/(\\w+)/(\\w+)", &document::update_url_cmd, this, 1, 2 );
 	service.dispatcher( ).assign( "/document/update/(\\w+)", &document::update_payload_cmd, this, 1 );
-	service.dispatcher( ).assign( "/document/delete/(\\w+)/(\\w+)", &document::delete_cmd, this, 1, 2 );
-	service.dispatcher( ).assign( "/document/get/(\\w+)/(\\w+)", &document::get_cmd, this, 1, 2 );
-	service.dispatcher( ).assign( "/document/exists/(\\w+)/(\\w+)", &document::exists_cmd, this, 1, 2 );	
+	service.dispatcher( ).assign( "/document/delete/(\\w+)/(\\w+)", &document::delete_url_cmd, this, 1, 2 );
+	service.dispatcher( ).assign( "/document/delete/(\\w+)", &document::delete_payload_cmd, this, 1 );	
+	service.dispatcher( ).assign( "/document/get/(\\w+)/(\\w+)", &document::get_url_cmd, this, 1, 2 );
+	service.dispatcher( ).assign( "/document/get/(\\w+)", &document::get_payload_cmd, this, 1 );
+	service.dispatcher( ).assign( "/document/exists/(\\w+)/(\\w+)", &document::exists_url_cmd, this, 1, 2 );	
+	service.dispatcher( ).assign( "/document/exists/(\\w+)", &document::exists_payload_cmd, this, 1 );	
 }
 
 void document::insert_url_cmd( const std::string name, const std::string id )
@@ -41,7 +41,7 @@ void document::insert_payload_cmd( const std::string name )
 	insert_cmd( name, "", false );
 }
 
-void document::insert_cmd( const std::string name, const std::string id, bool docid_id_url )
+void document::insert_cmd( const std::string name, const std::string id, bool docid_in_url )
 {
 	if( !ensure_post( ) ) return;	
 	if( !ensure_json_request( ) ) return;
@@ -95,10 +95,11 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 	
 	// docid can come from the JSON payload or directly in the URL
 	std::string docid;
-	if( docid_id_url ) {
+	if( docid_in_url ) {
 		docid = id;
 	} else {
 		if( ins_doc.docid.compare( "" ) == 0 ) {
+			service.deleteStorageTransactionInterface( name );
 			report_error( ERROR_DOCUMENT_INSERT_CMD_DOCID_REQUIRED, "docid must be part of the JSON payload as field of 'doc'" );
 			return;
 		}
@@ -180,7 +181,7 @@ void document::update_payload_cmd( const std::string name )
 	update_cmd( name, "", false );
 }
 
-void document::update_cmd( const std::string name, const std::string id, bool docid_id_url )
+void document::update_cmd( const std::string name, const std::string id, bool docid_in_url )
 {
 	if( !ensure_post( ) ) return;	
 	if( !ensure_json_request( ) ) return;
@@ -190,24 +191,136 @@ void document::update_cmd( const std::string name, const std::string id, bool do
 	report_error( ERROR_NOT_IMPLEMENTED, "metadata, attribute, ACL updates are currently not implemented" );
 }
 
-void document::delete_cmd( const std::string name, const std::string id )
+void document::delete_url_cmd( const std::string name, const std::string id )
+{
+	delete_cmd( name, id, true );
+}
+
+void document::delete_payload_cmd( const std::string name )
+{
+	delete_cmd( name, "", false );
+}
+
+void document::delete_cmd( const std::string name, const std::string id, bool docid_in_url )
 {
 	if( !ensure_post( ) ) return;	
+	if( !docid_in_url ) {
+		if( !ensure_json_request( ) ) return;
+	}
 
-	get_strus_environment( name );
+	struct DocumentDeleteRequest del_doc;
 	
-	report_ok( );	
-}
+	if( !docid_in_url ) {
+		std::pair<void *, size_t> data = request( ).raw_post_data( );
+		std::istringstream is( std::string( reinterpret_cast<char const *>( data.first ), data.second ) );
+		cppcms::json::value p;
+		if( !p.load( is, true) ) {
+			report_error( ERROR_DOCUMENT_DELETE_ILLEGAL_JSON, "Illegal JSON received" );
+			return;
+		}
+		
+		if( p.type( "doc" ) == cppcms::json::is_object ) {
+			try {
+				del_doc = p.get<struct DocumentDeleteRequest>( "doc" );
+			} catch( cppcms::json::bad_value_cast &e ) {
+				report_error( ERROR_DOCUMENT_DELETE_ILLEGAL_JSON, "Illegal JSON document payload received" );
+				return;
+			}
+		} else {
+			report_error( ERROR_DOCUMENT_DELETE_ILLEGAL_JSON, "Expecting a JSON object as JSON document payload" );
+			return;
+		}
+	}
 
-void document::get_cmd( const std::string name, const std::string id )
-{
 	get_strus_environment( name );
 
-	report_ok( );
+	if( !dbi->exists( service.getConfigString( name ) ) ) {
+		report_error( ERROR_DOCUMENT_DELETE_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
+		return;
+	}
+
+	strus::DatabaseClientInterface *database = service.getDatabaseClientInterface( name );
+	if( !database ) {
+		report_error( ERROR_DOCUMENT_DELETE_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
+		return;
+	}
+
+	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
+	if( !storage ) {
+		report_error( ERROR_DOCUMENT_DELETE_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
+		return;
+	}
+
+	strus::Index docno = storage->documentNumber( id );
+	if( docno == 0 ) {
+		report_error( ERROR_DOCUMENT_DELETE_CMD_NO_SUCH_DOCUMENT, "Document to delete doesn't exist" );
+		return;
+	}
+
+	strus::StorageTransactionInterface *transaction = service.getStorageTransactionInterface( name );
+	if( !transaction ) {
+		report_error( ERROR_DOCUMENT_DELETE_CMD_CREATE_STORAGE_TRANSACTION, service.getLastStrusError( ) );
+		return;
+	}
+
+	// docid can come from the JSON payload or directly in the URL
+	std::string docid;
+	if( docid_in_url ) {
+		docid = id;
+	} else {
+		if( del_doc.docid.compare( "" ) == 0 ) {
+			service.deleteStorageTransactionInterface( name );
+			report_error( ERROR_DOCUMENT_DELETE_CMD_DOCID_REQUIRED, "docid must be part of the JSON payload as field of 'doc'" );
+			return;
+		}
+		docid = del_doc.docid;
+	}
+
+	// TODO: error handling, for now we catch at least the document doesn't exist
+	// case above..
+	transaction->deleteDocument( docid );
+
+	transaction->commit( );
+
+	service.deleteStorageTransactionInterface( name );
+	
+ 	report_ok( ); 	
 }
 
-void document::exists_cmd( const std::string name , const std::string id )
+void document::get_url_cmd( const std::string name, const std::string id )
 {
+	get_cmd( name, id, true );
+}
+
+void document::get_payload_cmd( const std::string name )
+{
+	get_cmd( name, "", false );
+}
+
+void document::get_cmd( const std::string name, const std::string id, bool docid_in_url )
+{
+	report_error( ERROR_NOT_IMPLEMENTED, "get document is currently not implemented" );
+}
+
+void document::exists_url_cmd( const std::string name, const std::string id )
+{
+	exists_cmd( name, id, true );
+}
+
+void document::exists_payload_cmd( const std::string name )
+{
+	exists_cmd( name, "", false );
+}
+
+void document::exists_cmd( const std::string name, const std::string id, bool docid_in_url )
+{
+	if( !docid_in_url ) {
+		//~ if( !ensure_post( ) ) return;	
+		//~ if( !ensure_json_request( ) ) return;
+		report_error( ERROR_NOT_IMPLEMENTED, "document exists with POST request is currently not implemented" );
+		return;
+	}
+	
 	get_strus_environment( name );
 
 	if( !dbi->exists( service.getConfigString( name ) ) ) {

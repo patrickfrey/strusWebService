@@ -13,12 +13,7 @@ query::query( strusWebService &service )
 
 void query::query_cmd( const std::string name )
 {
-	if( !ensure_post( ) ) return;	
-	if( !ensure_json_request( ) ) return;
-
-	get_strus_environment( name );
-
-	report_ok( );
+	report_error( ERROR_NOT_IMPLEMENTED, "query currently not implemented" );
 }
 
 } // namespace apps
