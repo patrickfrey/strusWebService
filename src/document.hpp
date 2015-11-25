@@ -14,18 +14,27 @@
 #include <utility>
 #include "boost/tuple/tuple.hpp"
 
-struct DocumentInsertRequest {
+struct DocumentRequestBase {
 	std::string docid;
+};
+
+struct DocumentInsertRequest : public DocumentRequestBase {
 	std::vector<std::pair<std::string, std::string> > attributes;
 	std::vector<std::pair<std::string, strus::ArithmeticVariant> > metadata;
 	std::vector<boost::tuple<std::string, std::string, strus::Index> > forward;
 	std::vector<boost::tuple<std::string, std::string, strus::Index> > search;
 };
 
-struct DocumentDeleteRequest {
-	std::string docid;
+struct DocumentDeleteRequest : public DocumentRequestBase {
 };
 
+struct DocumentGetRequest : public DocumentRequestBase {
+};
+
+struct DocumentGetAnswer {
+	strus::Index docno;
+};
+	
 namespace apps {
 
 class document : public master {
@@ -83,6 +92,27 @@ struct traits<DocumentInsertRequest> {
 };
 
 template<>
+struct traits<DocumentRequestBase> {
+
+	static DocumentRequestBase get( value const &v )
+	{
+		DocumentRequestBase d;
+		if( v.type( ) != is_object) {
+			throw bad_value_cast( );
+		}
+		// TODO: should we also accept int, float? how can we fall back?
+		d.docid = v.get<std::string>( "docid", "" );	
+		
+		return d;	
+	}
+
+	static void set( value &v, DocumentRequestBase const &d )
+	{
+		v.set( "docid", d.docid );
+	}
+};
+
+template<>
 struct traits<DocumentDeleteRequest> {
 
 	static DocumentDeleteRequest get( value const &v )
@@ -92,14 +122,57 @@ struct traits<DocumentDeleteRequest> {
 			throw bad_value_cast( );
 		}
 		// TODO: should we also accept int, float? how can we fall back?
-		d.docid = v.get<std::string>( "docid", "" );		
+		d.docid = v.get<std::string>( "docid", "" );	
+		
+		return d;	
 	}
 	
-	static void get( value &v, DocumentDeleteRequest const &d )
+	static void set( value &v, DocumentDeleteRequest const &d )
 	{
 		v.set( "docid", d.docid );
 	}
 };
+
+template<>
+struct traits<DocumentGetRequest> {
+
+	static DocumentGetRequest get( value const &v )
+	{
+		DocumentGetRequest d;
+		if( v.type( ) != is_object) {
+			throw bad_value_cast( );
+		}
+		// TODO: should we also accept int, float? how can we fall back?
+		d.docid = v.get<std::string>( "docid", "" );		
+		
+		return d;
+	}
+	
+	static void set( value &v, DocumentGetRequest const &d )
+	{
+		v.set( "docid", d.docid );
+	}
+};
+
+template<>
+struct traits<DocumentGetAnswer> {
+	
+	static DocumentGetAnswer get( value const &v )
+	{
+		DocumentGetAnswer a;
+		if( v.type( ) != is_object) {
+			throw bad_value_cast( );
+		}
+		a.docno = v.get<strus::Index>( "docno" );
+		
+		return a;
+	}
+	
+	static void set( value &v, DocumentGetAnswer const &a )
+	{
+		v.set( "docno", a.docno );
+	}
+};	
 
 template<>
 struct traits<std::pair<std::string, std::string> > {
