@@ -18,6 +18,9 @@ namespace apps {
 document::document( strusWebService &service )
 	: master( service )
 {
+	// TODO: have two variants, GET/POST and docid in URL as well
+	// as always POST with docid in JSON request
+	// so far done for 'insert'
 	service.dispatcher( ).assign( "/document/insert/(\\w+)/(\\w+)", &document::insert_url_cmd, this, 1, 2  );
 	service.dispatcher( ).assign( "/document/insert/(\\w+)", &document::insert_payload_cmd, this, 1  );
 	service.dispatcher( ).assign( "/document/update/(\\w+)/(\\w+)", &document::update_cmd, this, 1, 2 );
@@ -107,7 +110,39 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 		it != ins_doc.attributes.end( ); it++ ) {
 		doc->setAttribute( it->first, it->second );
 	}
+	
+	for( std::vector<std::pair<std::string, strus::ArithmeticVariant> >::const_iterator it = ins_doc.metadata.begin( );
+		it != ins_doc.metadata.end( ); it++ ) {
+		doc->setMetaData( (*it).first, (*it).second );
+	}
 
+
+/*
+ * 							std::vector<strus::analyzer::MetaData>::const_iterator
+								mi = doc.metadata().begin(), me = doc.metadata().end();
+							for (; mi != me; ++mi)
+							{
+								double val = mi->value();
+								if (val - std::floor( val) < std::numeric_limits<float>::epsilon())
+								{
+									if (val < 0.0)
+									{
+										strus::ArithmeticVariant av( (int)(std::floor( val) + std::numeric_limits<float>::epsilon()));
+										storagedoc->setMetaData( mi->name(), av);
+									}
+									else
+									{
+										strus::ArithmeticVariant av( (unsigned int)(std::floor( val) + std::numeric_limits<float>::epsilon()));
+										storagedoc->setMetaData( mi->name(), av);
+									}
+								}
+								else
+								{
+									storagedoc->setMetaData( mi->name(), (float) val);
+								}
+							}
+
+ */
 	doc->done( );
 	
 	transaction->commit( );

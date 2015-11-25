@@ -1,1 +1,1 @@
-{"config":{"metadata":[{"name":"doclen","type":"UInt16"},{"name":"doclen2","type":"UInt32"}]},"result":"ok"}
+{"config":{"metadata":[{"name":"doclen","type":"UInt16"},{"name":"docweight","type":"Float32"}]},"result":"ok"}
