@@ -5,3 +5,6 @@
 - can't implement a /document/exists
 - attribute pairs are string/string for now, we also want other
   value types like ints/doubles too
+- insert doc doesn't handle ACLs at the moment
+- typedefs in template function for serialization instead of
+  std::pair and boost::tuple directly?

@@ -5,6 +5,7 @@
 #include <cppcms/http_request.h>
 
 #include <booster/log.h>
+#include <booster/locale/format.h>
 
 #include "strus/storageTransactionInterface.hpp"
 #include "strus/storageClientInterface.hpp"
@@ -23,7 +24,8 @@ document::document( strusWebService &service )
 	// so far done for 'insert'
 	service.dispatcher( ).assign( "/document/insert/(\\w+)/(\\w+)", &document::insert_url_cmd, this, 1, 2  );
 	service.dispatcher( ).assign( "/document/insert/(\\w+)", &document::insert_payload_cmd, this, 1  );
-	service.dispatcher( ).assign( "/document/update/(\\w+)/(\\w+)", &document::update_cmd, this, 1, 2 );
+	service.dispatcher( ).assign( "/document/update/(\\w+)/(\\w+)", &document::update_url_cmd, this, 1, 2 );
+	service.dispatcher( ).assign( "/document/update/(\\w+)", &document::update_payload_cmd, this, 1 );
 	service.dispatcher( ).assign( "/document/delete/(\\w+)/(\\w+)", &document::delete_cmd, this, 1, 2 );
 	service.dispatcher( ).assign( "/document/get/(\\w+)/(\\w+)", &document::get_cmd, this, 1, 2 );
 	service.dispatcher( ).assign( "/document/exists/(\\w+)/(\\w+)", &document::exists_cmd, this, 1, 2 );	
@@ -91,6 +93,7 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 		return;
 	}
 	
+	// docid can come from the JSON payload or directly in the URL
 	std::string docid;
 	if( docid_id_url ) {
 		docid = id;
@@ -104,63 +107,87 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 		
 	strus::StorageDocumentInterface *doc = transaction->createDocument( docid );
 
+	// the one attribute with fixed name 'docid' must always exist
 	doc->setAttribute( strus::Constants::attribute_docid( ), docid );
 
+	// attributes
 	for( std::vector<std::pair<std::string, std::string> >::const_iterator it = ins_doc.attributes.begin( );
 		it != ins_doc.attributes.end( ); it++ ) {
 		doc->setAttribute( it->first, it->second );
 	}
 	
+	// metadata
 	for( std::vector<std::pair<std::string, strus::ArithmeticVariant> >::const_iterator it = ins_doc.metadata.begin( );
 		it != ins_doc.metadata.end( ); it++ ) {
 		doc->setMetaData( (*it).first, (*it).second );
 	}
+		
+	// forward index
+	strus::Index maxPos = 0;
+	for( std::vector<boost::tuple<std::string, std::string, strus::Index> >::const_iterator it = ins_doc.forward.begin( );
+		it != ins_doc.forward.end( ); it++ ) {
+		strus::Index pos = boost::get<2>( *it );
+		if( pos > strus::Constants::storage_max_position_info( ) ) {
+			if( pos > maxPos ) {
+				maxPos = pos;
+			}
+		} else {
+			doc->addForwardIndexTerm( boost::get<0>( *it ), boost::get<1>( *it ), pos );
+		}
+	}
+	
+	// search index
+	for( std::vector<boost::tuple<std::string, std::string, strus::Index> >::const_iterator it = ins_doc.search.begin( );
+		it != ins_doc.search.end( ); it++ ) {
+		strus::Index pos = boost::get<2>( *it );
+		if( pos > strus::Constants::storage_max_position_info( ) ) {
+			if( pos > maxPos ) {
+				maxPos = pos;
+			}
+		} else {
+			doc->addSearchIndexTerm( boost::get<0>( *it ), boost::get<1>( *it ), pos );
+		}
+	}
 
-
-/*
- * 							std::vector<strus::analyzer::MetaData>::const_iterator
-								mi = doc.metadata().begin(), me = doc.metadata().end();
-							for (; mi != me; ++mi)
-							{
-								double val = mi->value();
-								if (val - std::floor( val) < std::numeric_limits<float>::epsilon())
-								{
-									if (val < 0.0)
-									{
-										strus::ArithmeticVariant av( (int)(std::floor( val) + std::numeric_limits<float>::epsilon()));
-										storagedoc->setMetaData( mi->name(), av);
-									}
-									else
-									{
-										strus::ArithmeticVariant av( (unsigned int)(std::floor( val) + std::numeric_limits<float>::epsilon()));
-										storagedoc->setMetaData( mi->name(), av);
-									}
-								}
-								else
-								{
-									storagedoc->setMetaData( mi->name(), (float) val);
-								}
-							}
-
- */
+	if( maxPos > strus::Constants::storage_max_position_info( ) ) {
+		std::ostringstream ss;
+		ss << booster::locale::format( "Token positions of document {1} are out or range (document too big, only {2} token positions were assigned, maximum allowed position is %{3})" )
+			% docid % maxPos % strus::Constants::storage_max_position_info( );
+		delete doc;
+		service.deleteStorageTransactionInterface( name );
+		// TODO: warning or error?
+		report_error( ERROR_DOCUMENT_INSERT_TOO_BIG_POSITION, ss.str( ) );
+		return;
+	}
+	
 	doc->done( );
 	
 	transaction->commit( );
 	
 	delete doc;
 	service.deleteStorageTransactionInterface( name );
-		
+			
 	report_ok( );	
 }
 
-void document::update_cmd( const std::string name, const std::string id )
+void document::update_url_cmd( const std::string name, const std::string id )
+{
+	update_cmd( name, id, true );
+}
+
+void document::update_payload_cmd( const std::string name )
+{
+	update_cmd( name, "", false );
+}
+
+void document::update_cmd( const std::string name, const std::string id, bool docid_id_url )
 {
 	if( !ensure_post( ) ) return;	
 	if( !ensure_json_request( ) ) return;
-
-	get_strus_environment( name );
-
-	report_ok( );
+	
+	//TODO: update is metadata update, not document update!
+	// document update is done via insert
+	report_error( ERROR_NOT_IMPLEMENTED, "metadata, attribute, ACL updates are currently not implemented" );
 }
 
 void document::delete_cmd( const std::string name, const std::string id )

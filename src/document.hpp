@@ -4,6 +4,7 @@
 #include "master.hpp"
 
 #include "strus/arithmeticVariant.hpp"
+#include "strus/index.hpp"
 
 #include <boost/lexical_cast.hpp>
 
@@ -11,11 +12,14 @@
 
 #include <vector>
 #include <utility>
+#include "boost/tuple/tuple.hpp"
 
 struct DocumentInsertRequest {
 	std::string docid;
 	std::vector<std::pair<std::string, std::string> > attributes;
 	std::vector<std::pair<std::string, strus::ArithmeticVariant> > metadata;
+	std::vector<boost::tuple<std::string, std::string, strus::Index> > forward;
+	std::vector<boost::tuple<std::string, std::string, strus::Index> > search;
 };
 
 namespace apps {
@@ -29,7 +33,9 @@ class document : public master {
 		void insert_url_cmd( const std::string name, const std::string id );
 		void insert_payload_cmd( const std::string name );
 		void insert_cmd( const std::string name, const std::string id, bool docid_id_url );
-		void update_cmd( const std::string name, const std::string id );
+		void update_url_cmd( const std::string name, const std::string id );
+		void update_payload_cmd( const std::string name );
+		void update_cmd( const std::string name, const std::string id, bool docid_id_url );
 		void delete_cmd( const std::string name, const std::string id );
 		void get_cmd( const std::string name, const std::string id );
 		void exists_cmd( const std::string name, const std::string id );
@@ -53,6 +59,8 @@ struct traits<DocumentInsertRequest> {
 		d.docid = v.get<std::string>( "docid", "" );
 		d.attributes = v.get<std::vector<std::pair<std::string, std::string> > >( "attributes" );
 		d.metadata = v.get<std::vector<std::pair<std::string, strus::ArithmeticVariant> > >( "metadata" );
+		d.forward = v.get<std::vector<boost::tuple<std::string, std::string, strus::Index> > >( "forward" );
+		d.search = v.get<std::vector<boost::tuple<std::string, std::string, strus::Index> > >( "search" );
 		return d;
 	}
 	
@@ -155,6 +163,34 @@ struct traits<std::pair<std::string, strus::ArithmeticVariant> > {
 	{
 		// TODO: implement first, used for document/get introspection
 		throw bad_value_cast( );
+	}
+};
+
+template<>
+struct traits<boost::tuple<std::string, std::string, strus::Index> > {
+	
+	static boost::tuple<std::string, std::string, strus::Index> get( value const &v )
+	{
+		boost::tuple<std::string, std::string, strus::Index> t;
+
+		if( v.type( ) != is_object) {
+			throw bad_value_cast( );
+		}
+		
+		t = boost::make_tuple(
+			v.get<std::string>( "type" ),
+			v.get<std::string>( "value" ),
+			v.get<strus::Index>( "pos" )
+		);
+				
+		return t;
+	}
+	
+	static void set( value &v, boost::tuple<std::string, std::string, strus::Index> const &t )
+	{
+		v.set( "type", boost::get<0>( t ) );
+		v.set( "value", boost::get<1>( t ) );
+		v.set( "pos", boost::get<2>( t ) );
 	}
 };
 
