@@ -394,44 +394,6 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 		}
 	}
 
-/*
- * 	
-	strus::Index hnd = attreader->elementHandle( key[0]);
-
-	if (size == 1)
-	{
-		strus::Index maxDocno = storage.maxDocumentNumber();
-		strus::Index docno = 1;
-		for (; docno <= maxDocno; ++docno)
-		{
-			attreader->skipDoc( docno);
-			std::string value = attreader->getValue( hnd);
-			if (value.size())
-			{
-				std::cout << docno << ' ' << value << std::endl;
-			}
-		}
-	}
-	else
-	{
-		strus::Index docno = isIndex(key[1])
-				?stringToIndex( key[1])
-				:storage.documentNumber( key[1]);
-
-		if (docno)
-		{
-			attreader->skipDoc( docno);
-			std::string value = attreader->getValue( hnd);
-			std::cout << value << std::endl;
-		}
-		else
-		{
-			throw strus::runtime_error( _TXT("unknown document"));
-		}
-	}
-
- */	
-
 	// metadata
 	
 	strus::MetaDataReaderInterface *metadata = service.getMetaDataReaderInterface( name );
@@ -439,7 +401,17 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 		report_error( ERROR_DOCUMENT_GET_CMD_CREATE_METADATA_READER, service.getLastStrusError( ) );
 		return;
 	}
-		
+
+	metadata->skipDoc( answer.docno );
+	for( strus::Index idx = 0; idx != metadata->nofElements( ); idx++ ) {
+		std::string name( metadata->getName( idx ) );
+		// TODO: should we report the type too? We have it in index/config already
+		// std::string type( metadata->getType( idx ) );
+		strus::Index h = metadata->elementHandle( name );
+		strus::ArithmeticVariant value = metadata->getValue( h );
+		answer.metadata.push_back( std::make_pair( name, value ) );
+	}
+
 	cppcms::json::value j;
 	j["doc"] = answer;
 	

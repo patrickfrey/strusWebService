@@ -34,6 +34,7 @@ struct DocumentGetRequest : public DocumentRequestBase {
 struct DocumentGetAnswer {
 	strus::Index docno;
 	std::vector<std::pair<std::string, std::string> > attributes;
+	std::vector<std::pair<std::string, strus::ArithmeticVariant> > metadata;
 };
 	
 namespace apps {
@@ -166,7 +167,8 @@ struct traits<DocumentGetAnswer> {
 		}
 		a.docno = v.get<strus::Index>( "docno" );
 		a.attributes = v.get<std::vector<std::pair<std::string, std::string> > >( "attributes" );
-		
+		a.metadata = v.get<std::vector<std::pair<std::string, strus::ArithmeticVariant> > >( "metadata" );
+
 		return a;
 	}
 	
@@ -174,6 +176,7 @@ struct traits<DocumentGetAnswer> {
 	{
 		v.set( "docno", a.docno );
 		v.set( "attributes", a.attributes );
+		v.set( "metadata", a.metadata );
 	}
 };	
 
@@ -255,6 +258,7 @@ struct traits<std::pair<std::string, strus::ArithmeticVariant> > {
 				
 			case is_undefined:
 			case is_null:
+				// TODO: how do we map absence
 			case is_object:
 			case is_array:	
 			default:
@@ -266,8 +270,27 @@ struct traits<std::pair<std::string, strus::ArithmeticVariant> > {
 
 	static void set( value &v, std::pair<std::string, strus::ArithmeticVariant> const &p )
 	{
-		// TODO: implement first, used for document/get introspection
-		throw bad_value_cast( );
+		v.set( "key", p.first );
+		switch( p.second.type ) {
+			case strus::ArithmeticVariant::Null:
+				v.set( "value", cppcms::json::null( ) );
+				break;
+			
+			case strus::ArithmeticVariant::Int:
+				v.set( "value", p.second.toint( ) );
+				break;
+				
+			case strus::ArithmeticVariant::UInt:
+				v.set( "value", p.second.touint( ) );
+				break;
+				
+			case strus::ArithmeticVariant::Float:
+				v.set( "value", p.second.tofloat( ) );
+				break;
+			
+			default:
+				throw bad_value_cast( );
+		}
 	}
 };
 
