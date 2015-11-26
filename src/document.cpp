@@ -300,9 +300,8 @@ void document::get_payload_cmd( const std::string name )
 void document::get_cmd( const std::string name, const std::string id, bool docid_in_url )
 {
 	if( !docid_in_url ) {
-		//~ if( !ensure_post( ) ) return;	
-		//~ if( !ensure_json_request( ) ) return;
-		report_error( ERROR_NOT_IMPLEMENTED, "document exists with POST request is currently not implemented" );
+		if( !ensure_post( ) ) return;	
+		if( !ensure_json_request( ) ) return;
 		return;
 	}
 	
@@ -362,7 +361,6 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 		docid = get_doc.docid;
 	}
 
-
 	DocumentGetAnswer answer;
 	answer.docno = storage->documentNumber( docid );
 	
@@ -402,10 +400,33 @@ void document::exists_payload_cmd( const std::string name )
 void document::exists_cmd( const std::string name, const std::string id, bool docid_in_url )
 {
 	if( !docid_in_url ) {
-		//~ if( !ensure_post( ) ) return;	
-		//~ if( !ensure_json_request( ) ) return;
-		report_error( ERROR_NOT_IMPLEMENTED, "document exists with POST request is currently not implemented" );
+		if( !ensure_post( ) ) return;	
+		if( !ensure_json_request( ) ) return;
 		return;
+	}
+
+	struct DocumentGetRequest get_doc;
+
+	if( !docid_in_url ) {
+		std::pair<void *, size_t> data = request( ).raw_post_data( );
+		std::istringstream is( std::string( reinterpret_cast<char const *>( data.first ), data.second ) );
+		cppcms::json::value p;
+		if( !p.load( is, true) ) {
+			report_error( ERROR_DOCUMENT_GET_ILLEGAL_JSON, "Illegal JSON received" );
+			return;
+		}
+		
+		if( p.type( "doc" ) == cppcms::json::is_object ) {
+			try {
+				get_doc = p.get<struct DocumentGetRequest>( "doc" );
+			} catch( cppcms::json::bad_value_cast &e ) {
+				report_error( ERROR_DOCUMENT_GET_ILLEGAL_JSON, "Illegal JSON document payload received" );
+				return;
+			}
+		} else {
+			report_error( ERROR_DOCUMENT_GET_ILLEGAL_JSON, "Expecting a JSON object as JSON document payload" );
+			return;
+		}
 	}
 	
 	get_strus_environment( name );
@@ -425,6 +446,19 @@ void document::exists_cmd( const std::string name, const std::string id, bool do
 	if( !storage ) {
 		report_error( ERROR_DOCUMENT_EXISTS_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
+	}
+
+	// docid can come from the JSON payload or directly in the URL
+	std::string docid;
+	if( docid_in_url ) {
+		docid = id;
+	} else {
+		if( get_doc.docid.compare( "" ) == 0 ) {
+			service.deleteStorageTransactionInterface( name );
+			report_error( ERROR_DOCUMENT_DELETE_CMD_DOCID_REQUIRED, "docid must be part of the JSON payload as field of 'doc'" );
+			return;
+		}
+		docid = get_doc.docid;
 	}
 	
 	strus::Index docno = storage->documentNumber( id );

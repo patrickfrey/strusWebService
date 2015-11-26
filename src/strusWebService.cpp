@@ -160,6 +160,24 @@ strus::MetaDataReaderInterface *strusWebService::getMetaDataReaderInterface( con
 	return (*it).second.mdri;
 }
 
+strus::AttributeReaderInterface *strusWebService::getAttributeReaderInterface( const std::string &name )
+{
+	getOrCreateStrusContext( name );
+	std::map<std::string, struct strusContext>::iterator it = context_map.find( name );
+	if( it == context_map.end( ) ) {
+		return NULL;
+	}
+	if( (*it).second.atri == NULL ) {
+		strus::StorageClientInterface *stci = (*it).second.stci;
+		strus::AttributeReaderInterface *atri = stci->createAttributeReader( );
+		if( atri == NULL ) {
+			return NULL;
+		}
+		(*it).second.atri = atri;
+	}
+	return (*it).second.atri;
+}
+
 strus::StorageTransactionInterface *strusWebService::getStorageTransactionInterface( const std::string &name )
 {
 	getOrCreateStrusContext( name );
@@ -254,6 +272,19 @@ void strusWebService::deleteMetaDataReaderInterface( const std::string &name )
 	if( (*it).second.mdri != NULL ) {
 		delete (*it).second.mdri;
 		(*it).second.mdri = NULL;
+	}	
+}
+
+void strusWebService::deleteAttributeReaderInterface( const std::string &name )
+{
+	std::map<std::string, struct strusContext>::iterator it;
+	it = context_map.find( name );
+	if( it == context_map.end( ) ) {
+		return;
+	}
+	if( (*it).second.atri != NULL ) {
+		delete (*it).second.atri;
+		(*it).second.atri = NULL;
 	}	
 }
 
