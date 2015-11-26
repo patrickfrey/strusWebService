@@ -35,6 +35,8 @@ struct DocumentGetAnswer {
 	strus::Index docno;
 	std::vector<std::pair<std::string, std::string> > attributes;
 	std::vector<std::pair<std::string, strus::ArithmeticVariant> > metadata;
+	std::vector<boost::tuple<std::string, std::string, strus::Index> > forward;
+	std::vector<boost::tuple<std::string, std::string, strus::Index> > search;
 };
 	
 namespace apps {
@@ -90,6 +92,8 @@ struct traits<DocumentInsertRequest> {
 		v.set( "docid", d.docid );
 		v.set( "attributes", d.attributes );
 		v.set( "metadata", d.metadata );
+		v.set( "forward", d.forward );
+		v.set( "search", d.search );
 	}
 };
 
@@ -168,6 +172,8 @@ struct traits<DocumentGetAnswer> {
 		a.docno = v.get<strus::Index>( "docno" );
 		a.attributes = v.get<std::vector<std::pair<std::string, std::string> > >( "attributes" );
 		a.metadata = v.get<std::vector<std::pair<std::string, strus::ArithmeticVariant> > >( "metadata" );
+		a.forward = v.get<std::vector<boost::tuple<std::string, std::string, strus::Index> > >( "forward" );
+		a.search = v.get<std::vector<boost::tuple<std::string, std::string, strus::Index> > >( "search" );
 
 		return a;
 	}
@@ -177,6 +183,8 @@ struct traits<DocumentGetAnswer> {
 		v.set( "docno", a.docno );
 		v.set( "attributes", a.attributes );
 		v.set( "metadata", a.metadata );
+		v.set( "forward", a.forward );
+		v.set( "search", a.search );
 	}
 };	
 

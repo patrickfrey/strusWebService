@@ -10,6 +10,8 @@
 #include "strus/storageTransactionInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/storageDocumentInterface.hpp"
+#include "strus/postingIteratorInterface.hpp"
+#include "strus/forwardIteratorInterface.hpp"
 #include "strus/constants.hpp"
 
 #include <sstream>
@@ -411,6 +413,11 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 		strus::ArithmeticVariant value = metadata->getValue( h );
 		answer.metadata.push_back( std::make_pair( name, value ) );
 	}
+
+// TODO: where to know 'word', 'stem' etc. from!?
+//	strus::ForwardIteratorInterface *forward = storage->createForwardIterator( "" );
+	
+//	delete forward;
 
 	cppcms::json::value j;
 	j["doc"] = answer;
