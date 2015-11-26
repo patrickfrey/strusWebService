@@ -36,6 +36,8 @@ add_test( NAME document_exists_doc1 COMMAND curlJsonTester document_exists_doc1 
 add_test( NAME document_exists_doc2 COMMAND curlJsonTester document_exists_doc2 )
 add_test( NAME document_exists_doc3 COMMAND curlJsonTester document_exists_doc3 )
 
+add_test( NAME document_get COMMAND curlJsonTester document_get )
+
 add_test( NAME index_stats_A_after_insert COMMAND curlJsonTester index_stats_A_after_insert )
 
 add_test( NAME document_delete COMMAND curlJsonTester document_delete )

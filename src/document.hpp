@@ -33,6 +33,7 @@ struct DocumentGetRequest : public DocumentRequestBase {
 
 struct DocumentGetAnswer {
 	strus::Index docno;
+	std::vector<std::pair<std::string, std::string> > attributes;
 };
 	
 namespace apps {
@@ -164,6 +165,7 @@ struct traits<DocumentGetAnswer> {
 			throw bad_value_cast( );
 		}
 		a.docno = v.get<strus::Index>( "docno" );
+		a.attributes = v.get<std::vector<std::pair<std::string, std::string> > >( "attributes" );
 		
 		return a;
 	}
@@ -171,6 +173,7 @@ struct traits<DocumentGetAnswer> {
 	static void set( value &v, DocumentGetAnswer const &a )
 	{
 		v.set( "docno", a.docno );
+		v.set( "attributes", a.attributes );
 	}
 };	
 

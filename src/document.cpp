@@ -13,6 +13,7 @@
 #include "strus/constants.hpp"
 
 #include <sstream>
+#include <algorithm>
 
 namespace apps {
 
@@ -368,23 +369,81 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 		report_error( ERROR_DOCUMENT_GET_CMD_NO_SUCH_DOCUMENT, "Document doesn't exist" );
 		return;
 	}
+	
+	// attributes
+	
+	strus::AttributeReaderInterface *attributeReader = service.getAttributeReaderInterface( name );
+	if( !attributeReader ) {
+		report_error( ERROR_DOCUMENT_GET_CMD_CREATE_ATTRIBUTE_READER, service.getLastStrusError( ) );
+		return;
+	}
 
-		
-	cppcms::json::value j;
-	j["doc"] = answer;
-	
-	report_ok( j );
-	
+	// first fetch all possible attribute names which have been attached
+	// to all documents
+	std::vector<std::string> attrNames = attributeReader->getAttributeNames( );
+	std::sort( attrNames.begin( ), attrNames.end( ) );
+
+	// skip to document and iterate over all attribute names and add them if we find
+	// them attached to that document
+	attributeReader->skipDoc( answer.docno );
+	for( std::vector<std::string>::const_iterator it = attrNames.begin( ); it != attrNames.end( ); it++ ) {
+		strus::Index h = attributeReader->elementHandle( (*it).c_str( ) );
+		std::string value = attributeReader->getValue( h );
+		if( value.size( ) > 0 ) {
+			answer.attributes.push_back( std::make_pair( *it, value ) );
+		}
+	}
+
 /*
- * 
+ * 	
+	strus::Index hnd = attreader->elementHandle( key[0]);
+
+	if (size == 1)
+	{
+		strus::Index maxDocno = storage.maxDocumentNumber();
+		strus::Index docno = 1;
+		for (; docno <= maxDocno; ++docno)
+		{
+			attreader->skipDoc( docno);
+			std::string value = attreader->getValue( hnd);
+			if (value.size())
+			{
+				std::cout << docno << ' ' << value << std::endl;
+			}
+		}
+	}
+	else
+	{
+		strus::Index docno = isIndex(key[1])
+				?stringToIndex( key[1])
+				:storage.documentNumber( key[1]);
+
+		if (docno)
+		{
+			attreader->skipDoc( docno);
+			std::string value = attreader->getValue( hnd);
+			std::cout << value << std::endl;
+		}
+		else
+		{
+			throw strus::runtime_error( _TXT("unknown document"));
+		}
+	}
+
+ */	
+
+	// metadata
+	
 	strus::MetaDataReaderInterface *metadata = service.getMetaDataReaderInterface( name );
 	if( !metadata ) {
 		report_error( ERROR_DOCUMENT_GET_CMD_CREATE_METADATA_READER, service.getLastStrusError( ) );
 		return;
 	}
-
- * 
- */
+		
+	cppcms::json::value j;
+	j["doc"] = answer;
+	
+	report_ok( j );	
 }
 
 void document::exists_url_cmd( const std::string name, const std::string id )
@@ -461,9 +520,10 @@ void document::exists_cmd( const std::string name, const std::string id, bool do
 		docid = get_doc.docid;
 	}
 	
+	// translate docid to internal docno
 	strus::Index docno = storage->documentNumber( id );
-	bool exists = ( docno > 0 );	
-		
+	bool exists = ( docno > 0 );
+			
 	cppcms::json::value j;
 	j["exists"] = exists;
 	
