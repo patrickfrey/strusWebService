@@ -67,6 +67,8 @@ void index::create_cmd( const std::string name )
 			report_error( ERROR_INDEX_ILLEGAL_JSON, "Illegal storage creation parameter received" );
 			return;
 		}
+	} else if( p.type( "params" ) == cppcms::json::is_null ) {
+		params = default_create_parameters;
 	} else {
 		report_error( ERROR_INDEX_ILLEGAL_JSON, "Expecting a JSON object as storage creation parameter" );
 		return;
@@ -74,6 +76,7 @@ void index::create_cmd( const std::string name )
 		
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
+	// TODO: merge configurations
 
 	std::string config = service.getStorageConfig( storage_base_directory, combined_params, name );
 
