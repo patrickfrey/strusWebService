@@ -7,6 +7,8 @@
 #include <booster/log.h>
 #include <booster/locale/format.h>
 
+#include <booster/log.h>
+
 #include "strus/storageTransactionInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/storageDocumentInterface.hpp"
@@ -66,6 +68,8 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 			report_error( ERROR_DOCUMENT_INSERT_ILLEGAL_JSON, "Illegal JSON document payload received" );
 			return;
 		}
+	} else if( p.type( "doc" ) == cppcms::json::is_null ) {
+		BOOSTER_WARNING( PACKAGE ) << "Inserting an empty document, hope this is ok";
 	} else {
 		report_error( ERROR_DOCUMENT_INSERT_ILLEGAL_JSON, "Expecting a JSON object as JSON document payload" );
 		return;
