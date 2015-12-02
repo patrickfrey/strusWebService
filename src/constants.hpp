@@ -29,6 +29,6 @@ const int DEFAULT_PROTOCOL_PRETTY_PRINT					= false;
 
 // TODO: this should be exported IMHO
 //#include "strus/versionStorage.hpp"
-#define STRUS_VERSION_STRING "0.2.1"
+#define STRUS_VERSION_STRING "0.2.4"
 
 #endif
