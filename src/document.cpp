@@ -258,18 +258,6 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 		return;
 	}
 
-	strus::Index docno = storage->documentNumber( id );
-	if( docno == 0 ) {
-		report_error( ERROR_DOCUMENT_DELETE_CMD_NO_SUCH_DOCUMENT, "Document to delete doesn't exist" );
-		return;
-	}
-
-	strus::StorageTransactionInterface *transaction = service.getStorageTransactionInterface( name );
-	if( !transaction ) {
-		report_error( ERROR_DOCUMENT_DELETE_CMD_CREATE_STORAGE_TRANSACTION, service.getLastStrusError( ) );
-		return;
-	}
-
 	// docid can come from the JSON payload or directly in the URL
 	std::string docid;
 	if( docid_in_url ) {
@@ -281,6 +269,18 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 			return;
 		}
 		docid = del_doc.docid;
+	}
+
+	strus::Index docno = storage->documentNumber( docid );
+	if( docno == 0 ) {
+		report_error( ERROR_DOCUMENT_DELETE_CMD_NO_SUCH_DOCUMENT, "Document to delete doesn't exist" );
+		return;
+	}
+
+	strus::StorageTransactionInterface *transaction = service.getStorageTransactionInterface( name );
+	if( !transaction ) {
+		report_error( ERROR_DOCUMENT_DELETE_CMD_CREATE_STORAGE_TRANSACTION, service.getLastStrusError( ) );
+		return;
 	}
 
 	// TODO: error handling, for now we catch at least the document doesn't exist
