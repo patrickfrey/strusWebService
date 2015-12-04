@@ -21,6 +21,8 @@
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/attributeReaderInterface.hpp"
 #include "strus/storageTransactionInterface.hpp"
+#include "strus/queryEvalInterface.hpp"
+//~ #include "strus/queryeval.hpp"
 
 struct strusContext {
 	std::string config;
@@ -31,6 +33,7 @@ struct strusContext {
 	strus::MetaDataReaderInterface *mdri;
 	strus::AttributeReaderInterface *atri;
 	strus::StorageTransactionInterface *stti;
+	strus::QueryEvalInterface *qei;
 	
 	public:
 		strusContext( ) : config( "" ),
@@ -44,7 +47,7 @@ struct strusContext {
 			dbi( 0 ), sti( 0 ),
 			dbci( 0 ), stci( 0 ),
 			mdri( 0 ), stti( 0 ),
-			atri( 0 ) { }			
+			atri( 0 ), qei( 0 ) { }			
 };
 
 namespace apps {
@@ -84,6 +87,7 @@ class strusWebService : public cppcms::application {
 		strus::MetaDataReaderInterface *getMetaDataReaderInterface( const std::string &name );
 		strus::AttributeReaderInterface *getAttributeReaderInterface( const std::string &name );
 		strus::StorageTransactionInterface *getStorageTransactionInterface( const std::string &name );
+		strus::QueryEvalInterface *getQueryEvalInterface( const std::string &name );
 		std::string getConfigString( const std::string &name );
 		void deleteDataBaseInterface( const std::string &name );
 		void deleteStorageInterface( const std::string &name );
@@ -92,6 +96,7 @@ class strusWebService : public cppcms::application {
 		void deleteMetaDataReaderInterface( const std::string &name );
 		void deleteAttributeReaderInterface( const std::string &name );
 		void deleteStorageTransactionInterface( const std::string &name );
+		void deleteQueryEvalInterface( const std::string &name );
 };
 
 } // namespace apps

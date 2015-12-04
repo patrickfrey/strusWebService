@@ -196,6 +196,27 @@ strus::StorageTransactionInterface *strusWebService::getStorageTransactionInterf
 	return (*it).second.stti;
 }
 
+strus::QueryEvalInterface *strusWebService::getQueryEvalInterface( const std::string &name )
+{
+	getOrCreateStrusContext( name );
+	std::map<std::string, struct strusContext>::iterator it = context_map.find( name );
+	if( it == context_map.end( ) ) {
+		return NULL;
+	}
+	if( (*it).second.stti == NULL ) {
+		// TODO:  no queryeval.h, how to create a QueryEvalInterface if not over
+		// the object builder (but the should I rewrite everything to use
+		// object builder?) Why should in this case there be two interfaces?
+		//~ strus::QueryEvalInterface *qei = strus::createQueryEval( g_errorhnd );
+		strus::QueryEvalInterface *qei = NULL;
+		if( qei == NULL ) {
+			return NULL;
+		}
+		(*it).second.qei = qei;
+	}
+	return (*it).second.qei;
+}
+
 std::string strusWebService::getConfigString( const std::string &name )
 {
 	getOrCreateStrusContext( name );
@@ -298,6 +319,19 @@ void strusWebService::deleteStorageTransactionInterface( const std::string &name
 	if( (*it).second.stti != NULL ) {
 		delete (*it).second.stti;
 		(*it).second.stti = NULL;
+	}	
+}
+
+void strusWebService::deleteQueryEvalInterface( const std::string &name )
+{
+	std::map<std::string, struct strusContext>::iterator it;
+	it = context_map.find( name );
+	if( it == context_map.end( ) ) {
+		return;
+	}
+	if( (*it).second.qei != NULL ) {
+		delete (*it).second.qei;
+		(*it).second.qei = NULL;
 	}	
 }
 
