@@ -161,8 +161,9 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 			response.ranks.push_back( rank );
 						
 			// TODO: generic mapping of all other attributes and summarization results			
-			//~ std::vector<strus::ResultDocument::Attribute>::const_iterator ai = wi->attributes().begin(), ae = wi->attributes().end();
-			//~ ai->name(), ai->value()
+			for( std::vector<strus::ResultDocument::Attribute>::const_iterator ait = (*it).attributes( ).begin( ); ait != (*it).attributes( ).end( ); ait++ ) {
+				std::cout << ait->name( ) << ":" << ait->value( ) << std::endl;
+			}
 	}
 	
 	delete query;

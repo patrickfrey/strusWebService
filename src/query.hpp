@@ -27,6 +27,7 @@ struct QueryResponseBase{
 struct Rank {
 	strus::Index docno;
 	float weight;
+	std::vector<std::pair<std::string, std::string> > attributes;
 };
 
 struct QueryResponse : public QueryResponseBase {
