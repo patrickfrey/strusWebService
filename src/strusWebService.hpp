@@ -22,7 +22,6 @@
 #include "strus/attributeReaderInterface.hpp"
 #include "strus/storageTransactionInterface.hpp"
 #include "strus/queryEvalInterface.hpp"
-//~ #include "strus/queryeval.hpp"
 
 struct strusContext {
 	std::string config;

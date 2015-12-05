@@ -57,7 +57,7 @@ link_directories(
 )
 
 add_executable(strusWebService ${SRC})
-target_link_libraries(strusWebService ${BOOSTER} ${CPPCMS} strus_storage strus_error strus_database_leveldb ${Boost_LIBRARIES})
+target_link_libraries(strusWebService ${BOOSTER} ${CPPCMS} strus_storage strus_error strus_database_leveldb strus_queryeval strus_queryproc ${Boost_LIBRARIES})
 
 install( TARGETS strusWebService RUNTIME DESTINATION bin )
 install( FILES ${CMAKE_SOURCE_DIR}/config.js DESTINATION /etc/strusWebService RENAME strusWebService.conf )

@@ -14,6 +14,8 @@
 
 #include <unistd.h>
 
+#include "strus/lib/queryeval.hpp"
+
 namespace apps {
 
 strusWebService::strusWebService( cppcms::service &srv )
@@ -133,7 +135,7 @@ strus::StorageClientInterface *strusWebService::getStorageClientInterface( const
 		std::string config = (*it).second.config;
 		strus::StorageInterface *sti = (*it).second.sti;		
 		strus::DatabaseClientInterface *dbci = (*it).second.dbci;		
-		strus::StorageClientInterface *stci = sti->createClient( config, dbci );
+		strus::StorageClientInterface *stci = sti->createClient( config, dbci, 0 );
 		if( stci == NULL ) {
 			return NULL;
 		}
@@ -204,11 +206,7 @@ strus::QueryEvalInterface *strusWebService::getQueryEvalInterface( const std::st
 		return NULL;
 	}
 	if( (*it).second.stti == NULL ) {
-		// TODO:  no queryeval.h, how to create a QueryEvalInterface if not over
-		// the object builder (but the should I rewrite everything to use
-		// object builder?) Why should in this case there be two interfaces?
-		//~ strus::QueryEvalInterface *qei = strus::createQueryEval( g_errorhnd );
-		strus::QueryEvalInterface *qei = NULL;
+		strus::QueryEvalInterface *qei = strus::createQueryEval( g_errorhnd );
 		if( qei == NULL ) {
 			return NULL;
 		}
