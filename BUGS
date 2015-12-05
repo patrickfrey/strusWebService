@@ -17,4 +17,5 @@
   answer mapping with parameters of some sort
 - insert, update, delete doesn't allow batches for now,
   all happen with an auto-commit of 1
-
+- once the error is consumed and printed, we get result:ok.
+  Also seen error happending later..

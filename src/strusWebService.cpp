@@ -15,6 +15,7 @@
 #include <unistd.h>
 
 #include "strus/lib/queryeval.hpp"
+#include "strus/lib/queryproc.hpp"
 
 namespace apps {
 
@@ -215,6 +216,23 @@ strus::QueryEvalInterface *strusWebService::getQueryEvalInterface( const std::st
 	return (*it).second.qei;
 }
 
+strus::QueryProcessorInterface *strusWebService::getQueryProcessorInterface( const std::string &name )
+{
+	getOrCreateStrusContext( name );
+	std::map<std::string, struct strusContext>::iterator it = context_map.find( name );
+	if( it == context_map.end( ) ) {
+		return NULL;
+	}
+	if( (*it).second.stti == NULL ) {
+		strus::QueryProcessorInterface *qpi = strus::createQueryProcessor( g_errorhnd );
+		if( qpi == NULL ) {
+			return NULL;
+		}
+		(*it).second.qpi = qpi;
+	}
+	return (*it).second.qpi;	
+}
+
 std::string strusWebService::getConfigString( const std::string &name )
 {
 	getOrCreateStrusContext( name );
@@ -333,12 +351,30 @@ void strusWebService::deleteQueryEvalInterface( const std::string &name )
 	}	
 }
 
-std::string strusWebService::getLastStrusError( )
+void strusWebService::deleteQueryProcessorInterface( const std::string &name )
+{
+	std::map<std::string, struct strusContext>::iterator it;
+	it = context_map.find( name );
+	if( it == context_map.end( ) ) {
+		return;
+	}
+	if( (*it).second.qpi != NULL ) {
+		delete (*it).second.qpi;
+		(*it).second.qpi = NULL;
+	}	
+}
+
+bool strusWebService::hasError( ) const
+{
+	return g_errorhnd->hasError( );
+}
+
+std::string strusWebService::getLastStrusError( ) const
 {
 	return g_errorhnd->fetchError( );
 }
 
-std::vector<std::string> strusWebService::getStrusErrorDetails( )
+std::vector<std::string> strusWebService::getStrusErrorDetails( ) const
 {
 	char buf[512];
 	std::vector<std::string> v;

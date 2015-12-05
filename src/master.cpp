@@ -41,6 +41,8 @@ void master::get_strus_environment( const std::string &name )
 
 void master::close_strus_environment( const std::string &name )
 {
+	service.deleteQueryEvalInterface( name );
+	service.deleteQueryProcessorInterface( name );
 	service.deleteStorageTransactionInterface( name );
 	service.deleteAttributeReaderInterface( name );
 	service.deleteMetaDataReaderInterface( name );
@@ -48,6 +50,7 @@ void master::close_strus_environment( const std::string &name )
 	service.deleteDatabaseClientInterface( name );	
 	service.deleteStorageInterface( name );
 	service.deleteDataBaseInterface( name );
+
 	dbi = NULL;
 	sti = NULL;
 }

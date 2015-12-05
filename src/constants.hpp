@@ -31,4 +31,8 @@ const int DEFAULT_PROTOCOL_PRETTY_PRINT					= false;
 //#include "strus/versionStorage.hpp"
 #define STRUS_VERSION_STRING "0.2.4"
 
+const int DEFAULT_QUERY_FIRST_RANK						= 0;
+
+const int DEFAULT_QUERY_NOF_RANKS						= 10;
+
 #endif

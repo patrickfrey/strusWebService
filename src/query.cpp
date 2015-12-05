@@ -5,6 +5,8 @@
 #include <cppcms/http_request.h>
 
 #include "strus/queryInterface.hpp"
+#include "strus/weightingFunctionInterface.hpp"
+#include "strus/weightingFunctionInstanceInterface.hpp"
 
 namespace apps {
 
@@ -55,6 +57,8 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 			report_error( ERROR_QUERY_CMD_GET_ILLEGAL_JSON, "Expecting a JSON object as JSON document payload" );
 			return;
 		}
+	} else {
+		qry_req.text = qry;
 	}
 	
 	get_strus_environment( name );
@@ -77,10 +81,96 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	}
 
 	strus::QueryEvalInterface *query_eval = service.getQueryEvalInterface( name );
+	if( !query_eval ) {
+		report_error( ERROR_QUERY_CMD_CREATE_QUERY_EVAL_INTERFACE, service.getLastStrusError( ) );
+		return;
+	}
+
+	strus::QueryProcessorInterface *query_processor = service.getQueryProcessorInterface( name );
+	if( !query_processor ) {
+		report_error( ERROR_QUERY_CMD_CREATE_QUERY_PROCESSOR, service.getLastStrusError( ) );
+		return;
+	}
+	
+	// TODO: list of possible functions again in an introspection function, use
+	// getFunctionList (FunctionType for this.
+	
+	// TODO: get from query request
+	std::string scheme = "BM25";
+	//~ WeightingConfig weightingConfig;
+	//~ weightingConfig.defineParameter( "k1", 0.75);
+	//~ weightingConfig.defineParameter( "b", 2.1);
+	//~ weightingConfig.defineParameter( "avgdoclen", 8);
+	
+	const strus::WeightingFunctionInterface *wfi = query_processor->getWeightingFunction( scheme );
+	if( !wfi ) {
+		report_error( ERROR_QUERY_CMD_GET_WEIGHTING_FUNCTION, service.getLastStrusError( ) );
+		return;
+	}
+	
+	strus::WeightingFunctionInstanceInterface *function = wfi->createInstance( );
+
+	// TODO: every weighting scheme must be introspectable and the JSON deserializer
+	// must be tolerant to those parameters (do it as for the metadata)
+	std::vector<strus::QueryEvalInterface::FeatureParameter> feature_parameters;
+	//~ feature_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "feat" ) );
+	//~ ArithmeticVariant parameterValue = parseNumericValue( src);
+	//~ function->addNumericParameter( parameterName, parameterValue);
+	//~ function->addStringParameter( parameterName, parameterValue);
+	float weight = 1.0;
+	
+	query_eval->addWeightingFunction( scheme, function, feature_parameters, weight );
+	
+	query_eval->addSelectionFeature( "sel" );
 	
 	strus::QueryInterface *query = query_eval->createQuery( storage );
+	if( !query ) {
+		report_error( ERROR_QUERY_CMD_CREATE_QUERY, service.getLastStrusError( ) );
+		return;
+	}
+
+	// TODO: add summarizers
+	
+	query->setMinRank( qry_req.first_rank );
+	query->setMaxNofRanks( qry_req.nof_ranks );
+		
+	// TODO: again introspect and make the json tree parser tolerant to expression nodes
+	const strus::PostingJoinOperatorInterface *op = query_processor->getPostingJoinOperator( "contains" );	
+
+	// number of terms, range of operator, cardinality = minimal matching subelements in expr-tree
+	query->pushTerm( "word", qry_req.text );
+	query->defineFeature( "feat", 1.0 );
+	query->pushTerm( "word", qry_req.text );
+	query->pushExpression( op, 1, 0, 0 );
+	query->defineFeature( "sel", 1.0 );
+
+	std::vector<strus::ResultDocument> ranklist = query->evaluate( );
+	if( service.hasError( ) ) {
+		report_error( ERROR_QUERY_CMD_QUERY_EVALUATE, service.getLastStrusError( ) );
+		delete query;
+		return;
+	}
+
+	QueryResponse response;
+	
+	for( std::vector<strus::ResultDocument>::const_iterator it = ranklist.begin( ); it != ranklist.end( ); it++ ) {
+			Rank rank;
+			
+			rank.docno = (*it).docno( );
+			rank.weight = (*it).weight( );
+			response.ranks.push_back( rank );
+						
+			// TODO: generic mapping of all other attributes and summarization results			
+			//~ std::vector<strus::ResultDocument::Attribute>::const_iterator ai = wi->attributes().begin(), ae = wi->attributes().end();
+			//~ ai->name(), ai->value()
+	}
 	
 	delete query;
+
+	cppcms::json::value j;
+	j["ranklist"] = response;
+	
+	report_ok( j );
 }
 
 } // namespace apps

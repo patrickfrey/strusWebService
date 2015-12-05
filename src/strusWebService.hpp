@@ -22,6 +22,7 @@
 #include "strus/attributeReaderInterface.hpp"
 #include "strus/storageTransactionInterface.hpp"
 #include "strus/queryEvalInterface.hpp"
+#include "strus/queryProcessorInterface.hpp"
 
 struct strusContext {
 	std::string config;
@@ -33,20 +34,23 @@ struct strusContext {
 	strus::AttributeReaderInterface *atri;
 	strus::StorageTransactionInterface *stti;
 	strus::QueryEvalInterface *qei;
+	strus::QueryProcessorInterface *qpi;
 	
 	public:
 		strusContext( ) : config( "" ),
 			dbi( 0 ), sti( 0 ),
 			dbci( 0 ), stci( 0 ),
 			mdri( 0 ), stti( 0 ),
-			atri( 0 ) { }
+			atri( 0 ), qei( 0 ),
+			qpi( 0 ) { }
 
 		strusContext( const std::string &_config )
 			: config( _config ),
 			dbi( 0 ), sti( 0 ),
 			dbci( 0 ), stci( 0 ),
 			mdri( 0 ), stti( 0 ),
-			atri( 0 ), qei( 0 ) { }			
+			atri( 0 ), qei( 0 ),
+			qpi( 0 ) { }			
 };
 
 namespace apps {
@@ -72,8 +76,9 @@ class strusWebService : public cppcms::application {
 
 	public:
 		strusWebService( cppcms::service &srv );
-		std::string getLastStrusError( );
-		std::vector<std::string> getStrusErrorDetails( );
+		bool hasError( ) const;
+		std::string getLastStrusError( ) const;
+		std::vector<std::string> getStrusErrorDetails( ) const;
 		std::string getStorageDirectory( const std::string &base_storage_dir, const std::string &name );
 		std::string getStorageConfig( const std::string &base_storage_dir, const struct StorageCreateParameters params, const std::string &name );
 		std::string getStorageConfig( const std::string &base_storage_dir, const std::string &name );
@@ -87,6 +92,7 @@ class strusWebService : public cppcms::application {
 		strus::AttributeReaderInterface *getAttributeReaderInterface( const std::string &name );
 		strus::StorageTransactionInterface *getStorageTransactionInterface( const std::string &name );
 		strus::QueryEvalInterface *getQueryEvalInterface( const std::string &name );
+		strus::QueryProcessorInterface* getQueryProcessorInterface( const std::string &name );
 		std::string getConfigString( const std::string &name );
 		void deleteDataBaseInterface( const std::string &name );
 		void deleteStorageInterface( const std::string &name );
@@ -96,6 +102,7 @@ class strusWebService : public cppcms::application {
 		void deleteAttributeReaderInterface( const std::string &name );
 		void deleteStorageTransactionInterface( const std::string &name );
 		void deleteQueryEvalInterface( const std::string &name );
+		void deleteQueryProcessorInterface( const std::string &name );
 };
 
 } // namespace apps
