@@ -7,6 +7,8 @@
 #include "strus/queryInterface.hpp"
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
+#include "strus/summarizerFunctionInterface.hpp"
+#include "strus/summarizerFunctionInstanceInterface.hpp"
 
 namespace apps {
 
@@ -112,14 +114,36 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 
 	// TODO: every weighting scheme must be introspectable and the JSON deserializer
 	// must be tolerant to those parameters (do it as for the metadata)
-	std::vector<strus::QueryEvalInterface::FeatureParameter> feature_parameters;
-	//~ feature_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "feat" ) );
+	std::vector<strus::QueryEvalInterface::FeatureParameter> weighting_parameters;
+	//~ weighting_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "feat" ) );
 	//~ ArithmeticVariant parameterValue = parseNumericValue( src);
 	//~ function->addNumericParameter( parameterName, parameterValue);
 	//~ function->addStringParameter( parameterName, parameterValue);
 	float weight = 1.0;
 	
-	query_eval->addWeightingFunction( scheme, function, feature_parameters, weight );
+	query_eval->addWeightingFunction( scheme, function, weighting_parameters, weight );
+
+	// TODO: add summarizers
+	const strus::SummarizerFunctionInterface *sum = query_processor->getSummarizerFunction( "attribute" );
+	if( !sum ) {
+		report_error( ERROR_QUERY_CMD_GET_SUMMARIZER_FUNCTION_INSTANCE, service.getLastStrusError( ) );
+		return;
+	}
+	strus::SummarizerFunctionInstanceInterface *summarizer = sum->createInstance( query_processor );
+	if( !summarizer ) {
+		report_error( ERROR_QUERY_CMD_GET_SUMMARIZER_FUNCTION_INSTANCE, service.getLastStrusError( ) );
+		return;
+	}
+	
+	std::vector<strus::QueryEvalInterface::FeatureParameter> summarizer_parameters;
+	summarizer->addStringParameter( "name", "docid" );
+	
+	//~ weighting_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "feat" ) );
+	//~ ArithmeticVariant parameterValue = parseNumericValue( src);
+	//~ function->addNumericParameter( parameterName, parameterValue);
+	//~ function->addStringParameter( parameterName, parameterValue);
+
+	query_eval->addSummarizerFunction( "docid", summarizer, summarizer_parameters, "docid" );
 	
 	query_eval->addSelectionFeature( "sel" );
 	
@@ -128,9 +152,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		report_error( ERROR_QUERY_CMD_CREATE_QUERY, service.getLastStrusError( ) );
 		return;
 	}
-
-	// TODO: add summarizers
-	
+		
 	query->setMinRank( qry_req.first_rank );
 	query->setMaxNofRanks( qry_req.nof_ranks );
 		
@@ -158,12 +180,12 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 			
 			rank.docno = (*it).docno( );
 			rank.weight = (*it).weight( );
-			response.ranks.push_back( rank );
 						
-			// TODO: generic mapping of all other attributes and summarization results			
 			for( std::vector<strus::ResultDocument::Attribute>::const_iterator ait = (*it).attributes( ).begin( ); ait != (*it).attributes( ).end( ); ait++ ) {
-				std::cout << ait->name( ) << ":" << ait->value( ) << std::endl;
+				rank.attributes.push_back( std::make_pair( ait->name( ), ait->value( ) ) );
 			}
+
+			response.ranks.push_back( rank );
 	}
 	
 	delete query;

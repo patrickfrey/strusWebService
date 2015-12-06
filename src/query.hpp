@@ -105,6 +105,7 @@ struct traits<Rank> {
 		}
 		r.docno = v.get<strus::Index>( "docno" );
 		r.weight = v.get<float>( "weight" );
+		r.attributes = v.get<std::vector<std::pair<std::string, std::string> > >( "attributes" );
 		
 	}		
 	
@@ -112,6 +113,7 @@ struct traits<Rank> {
 	{
 		v.set( "docno", r.docno );
 		v.set( "weight", r.weight );
+		v.set( "attributes", r.attributes );
 	}
 };
 
