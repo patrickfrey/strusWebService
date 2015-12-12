@@ -31,6 +31,10 @@
 		//"worker_threads" : 3
 	},
 	
+	"security" : {
+		"content_length_limit": 16384000
+	},
+	
 	"logging" : {
 		"level" : "debug",
 		//~ "file" : {
