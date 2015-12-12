@@ -313,7 +313,6 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 	if( !docid_in_url ) {
 		if( !ensure_post( ) ) return;	
 		if( !ensure_json_request( ) ) return;
-		return;
 	}
 	
 	struct DocumentGetRequest get_doc;
@@ -450,7 +449,6 @@ void document::exists_cmd( const std::string name, const std::string id, bool do
 	if( !docid_in_url ) {
 		if( !ensure_post( ) ) return;	
 		if( !ensure_json_request( ) ) return;
-		return;
 	}
 
 	struct DocumentGetRequest get_doc;
@@ -512,7 +510,7 @@ void document::exists_cmd( const std::string name, const std::string id, bool do
 	}
 	
 	// translate docid to internal docno
-	strus::Index docno = storage->documentNumber( id );
+	strus::Index docno = storage->documentNumber( docid );
 	bool exists = ( docno > 0 );
 			
 	cppcms::json::value j;
