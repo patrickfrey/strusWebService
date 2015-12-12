@@ -10,12 +10,15 @@
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerFunctionInstanceInterface.hpp"
 
+#include <vector>
+#include <string>
+
 namespace apps {
 
 query::query( strusWebService &service )
 	: master( service )
 {
-	service.dispatcher( ).assign( "/query/(\\w++)/(\\w+)", &query::query_url_cmd, this, 1, 2 );
+	service.dispatcher( ).assign( "/query/(\\w++)/(.+)", &query::query_url_cmd, this, 1, 2 );
 	service.dispatcher( ).assign( "/query/(\\w++)", &query::query_payload_cmd, this, 1 );
 }
 
@@ -34,7 +37,6 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	if( !query_in_url ) {
 		if( !ensure_post( ) ) return;	
 		if( !ensure_json_request( ) ) return;
-		return;
 	}
 	
 	struct QueryRequest qry_req; 
@@ -121,31 +123,33 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	//~ ArithmeticVariant parameterValue = parseNumericValue( src);
 	//~ function->addNumericParameter( parameterName, parameterValue);
 	//~ function->addStringParameter( parameterName, parameterValue);
+		//~ weighting_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "feat" ) );
+		//~ ArithmeticVariant parameterValue = parseNumericValue( src);
+		//~ function->addNumericParameter( parameterName, parameterValue);
+		//~ function->addStringParameter( parameterName, parameterValue);
 	float weight = 1.0;
 	
 	query_eval->addWeightingFunction( scheme, function, weighting_parameters, weight );
-
+	
 	// TODO: add summarizers
 	const strus::SummarizerFunctionInterface *sum = query_processor->getSummarizerFunction( "attribute" );
 	if( !sum ) {
 		report_error( ERROR_QUERY_CMD_GET_SUMMARIZER_FUNCTION_INSTANCE, service.getLastStrusError( ) );
 		return;
 	}
-	strus::SummarizerFunctionInstanceInterface *summarizer = sum->createInstance( query_processor );
-	if( !summarizer ) {
-		report_error( ERROR_QUERY_CMD_GET_SUMMARIZER_FUNCTION_INSTANCE, service.getLastStrusError( ) );
-		return;
+	std::vector<std::string> attribute_summarizers = qry_req.attributes;
+	for( std::vector<std::string>::const_iterator it = attribute_summarizers.begin( ); it != attribute_summarizers.end( ); it++ ) {
+		strus::SummarizerFunctionInstanceInterface *summarizer = sum->createInstance( query_processor );
+		if( !summarizer ) {
+			report_error( ERROR_QUERY_CMD_GET_SUMMARIZER_FUNCTION_INSTANCE, service.getLastStrusError( ) );
+			return;
+		}
+		
+		std::vector<strus::QueryEvalInterface::FeatureParameter> summarizer_parameters;
+		summarizer->addStringParameter( "name", *it );
+		
+		query_eval->addSummarizerFunction( *it, summarizer, summarizer_parameters, *it );
 	}
-	
-	std::vector<strus::QueryEvalInterface::FeatureParameter> summarizer_parameters;
-	summarizer->addStringParameter( "name", "docid" );
-	
-	//~ weighting_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "feat" ) );
-	//~ ArithmeticVariant parameterValue = parseNumericValue( src);
-	//~ function->addNumericParameter( parameterName, parameterValue);
-	//~ function->addStringParameter( parameterName, parameterValue);
-
-	query_eval->addSummarizerFunction( "docid", summarizer, summarizer_parameters, "docid" );
 	
 	query_eval->addSelectionFeature( "sel" );
 	

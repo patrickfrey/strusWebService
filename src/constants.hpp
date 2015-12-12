@@ -35,4 +35,6 @@ const int DEFAULT_QUERY_FIRST_RANK						= 0;
 
 const int DEFAULT_QUERY_NOF_RANKS						= 10;
 
+const std::string DEFAULT_ATTRIBUTE_DOCID				= "docid";
+
 #endif

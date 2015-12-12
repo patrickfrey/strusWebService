@@ -16,6 +16,7 @@ struct QueryRequest : public QueryRequestBase {
 	std::string text;
 	size_t first_rank;
 	size_t nof_ranks;
+	std::vector<std::string> attributes;
 	
 	QueryRequest( ) : first_rank( DEFAULT_QUERY_FIRST_RANK ),
 		nof_ranks( DEFAULT_QUERY_NOF_RANKS ) { }
@@ -64,6 +65,9 @@ struct traits<QueryRequest> {
 		q.text = v.get<std::string>( "text", "" );		
 		q.first_rank = v.get<size_t>( "first_rank", DEFAULT_QUERY_FIRST_RANK );
 		q.nof_ranks = v.get<size_t>( "nof_ranks", DEFAULT_QUERY_NOF_RANKS );
+		std::vector<std::string> standard_attributes;
+		standard_attributes.push_back( DEFAULT_ATTRIBUTE_DOCID );
+		q.attributes = v.get<std::vector<std::string> >( "attributes", standard_attributes );
 		
 		return q;
 	}
@@ -73,6 +77,7 @@ struct traits<QueryRequest> {
 		v.set( "text", q.text );
 		v.set( "first_rank", q.first_rank );
 		v.set( "nof_ranks", q.nof_ranks );
+		v.set( "attributes", q.attributes );
 	}
 };
 
