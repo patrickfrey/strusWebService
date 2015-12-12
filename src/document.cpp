@@ -75,7 +75,9 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 		return;
 	}
 	
-	get_strus_environment( name );
+	if( !get_strus_environment( name ) ) {
+		return;
+	}
 
 	if( !dbi->exists( service.getConfigString( name ) ) ) {
 		report_error( ERROR_DOCUMENT_INSERT_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
@@ -239,7 +241,9 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 		}
 	}
 
-	get_strus_environment( name );
+	if( !get_strus_environment( name ) ) {
+		return;
+	}
 
 	if( !dbi->exists( service.getConfigString( name ) ) ) {
 		report_error( ERROR_DOCUMENT_DELETE_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
@@ -336,7 +340,9 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 		}
 	}
 
-	get_strus_environment( name );
+	if( !get_strus_environment( name ) ) {
+		return;
+	}
 
 	if( !dbi->exists( service.getConfigString( name ) ) ) {
 		report_error( ERROR_DOCUMENT_GET_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
@@ -471,7 +477,9 @@ void document::exists_cmd( const std::string name, const std::string id, bool do
 		}
 	}
 	
-	get_strus_environment( name );
+	if( !get_strus_environment( name ) ) {
+		return;
+	}
 
 	if( !dbi->exists( service.getConfigString( name ) ) ) {
 		report_error( ERROR_DOCUMENT_EXISTS_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );

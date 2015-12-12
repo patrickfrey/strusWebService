@@ -80,7 +80,9 @@ void index::create_cmd( const std::string name )
 
 	std::string config = service.getStorageConfig( storage_base_directory, combined_params, name );
 
-	get_strus_environment( name );
+	if( !get_strus_environment( name ) ) {
+		return;
+	}
 
 	if( dbi->exists( config ) ) {
 		report_error( ERROR_INDEX_CREATE_DATABASE_EXISTS, "An index with that name already exists" );
@@ -128,7 +130,9 @@ void index::delete_cmd( const std::string name )
 
 	std::string config = service.getStorageConfig( storage_base_directory, combined_params, name );
 
-	get_strus_environment( name );
+	if( !get_strus_environment( name ) ) {
+		return;
+	}
 	
 	if( !dbi->exists( config ) ) {
 		report_error( ERROR_INDEX_DESTROY_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
@@ -150,7 +154,9 @@ void index::config_cmd( const std::string name )
 
 	std::string configStr = service.getStorageConfig( storage_base_directory, combined_params, name );
 
-	get_strus_environment( name );
+	if( !get_strus_environment( name ) ) {
+		return;
+	}
 
 	if( !dbi->exists( configStr ) ) {
 		report_error( ERROR_INDEX_CONFIG_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
@@ -197,7 +203,9 @@ void index::stats_cmd( const std::string name )
 
 	std::string configStr = service.getStorageConfig( storage_base_directory, combined_params, name );
 
-	get_strus_environment( name );
+	if( !get_strus_environment( name ) ) {
+		return;
+	}
 
 	if( !dbi->exists( configStr ) ) {
 		report_error( ERROR_INDEX_STATS_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
@@ -218,7 +226,7 @@ void index::stats_cmd( const std::string name )
 	}
 	
 	struct StorageStatistics stats;
-	stats.nof_docs = storage->globalNofDocumentsInserted( );
+	stats.nof_docs = storage->nofDocumentsInserted( );
 		
 	cppcms::json::value j;
 	j["stats"] = stats;
@@ -268,7 +276,9 @@ void index::exists_cmd( const std::string name )
 
 	std::string config = service.getStorageConfig( storage_base_directory, combined_params, name );
 
-	get_strus_environment( name );
+	if( !get_strus_environment( name ) ) {
+		return;
+	}
 
 	cppcms::json::value j;
 	j["exists"] = dbi->exists( config );

@@ -24,19 +24,21 @@ void master::register_common_pages( )
 	service.dispatcher( ).assign( ".*", &master::not_found_404, this );
 }
 
-void master::get_strus_environment( const std::string &name )
+bool master::get_strus_environment( const std::string &name )
 {
 	dbi = service.getDataBaseInterface( name );
 	if( dbi == NULL ) {
 		report_error( ERROR_INDEX_CREATE_DATABASE_INTERFACE, service.getLastStrusError( ) );
-		return;
+		return false;
 	}
 
 	sti = service.getStorageInterface( name );
 	if( sti == NULL ) {
 		report_error( ERROR_INDEX_CREATE_STORAGE_INTERFACE, service.getLastStrusError( ) );
-		return;
+		return false;
 	}
+	
+	return true;
 }
 
 void master::close_strus_environment( const std::string &name )

@@ -63,7 +63,9 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		qry_req.text = qry;
 	}
 	
-	get_strus_environment( name );
+	if( !get_strus_environment( name ) ) {
+		return;
+	}
 
 	if( !dbi->exists( service.getConfigString( name ) ) ) {
 		report_error( ERROR_QUERY_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
