@@ -49,7 +49,7 @@
 								}
 							}		
 						},
-						attributes: [ "docid", "title", "dossier" ]
+						attributes: $( "#attribute" ).val( ) || []
 					}
 				};
 				
@@ -79,18 +79,37 @@
 					$( '#result' ).html( html );
 				} );
 			};
+
+			function attributes( ) {
+				// get list of attributes of the current search index for presentation
+				// in the attribute summarizer
+				$.ajax( {
+					type : 'GET',
+					url : '/strus/index/config/' + $( '#index' ).val( ),
+					contentType : 'application/json'
+				} ).done( function( data ) {
+					html = '<select multiple id="attribute" class="attribute" name="attribute" size="3">';
+					$.each( data.config.attributes, function( key, value ) {
+						html += "<option value='" + value + "'>" + value + "</option>"
+					} );
+					html += '</select>';
+					$( '#attributes' ).html( html );
+
+					// make sure the 'docid' attribute is always select by default
+					$('#attribute option[value="docid"]').attr( "selected", "selected" ).change( );
+				} );
+			};
 			
 			// TODO: output format picker
 			var rawJson = true;
 			
 			$( window ).load( function( ) {
-				// introspect the configuration of the index and the storage
+				// introspect the configuration for weighting functions
 				$.ajax( {
 					type : 'GET',
 					url : '/strus/config',
 					contentType : 'application/json'
 				} ).done( function( data ) {
-					var json = JSON.stringify( data, null, "    " );
 					html = '<select id="scheme" class="scheme" name="scheme" size="1">';
 					$.each( data.config.weighting_funtions, function( key, value ) {
 						html += "<option>" + value + "</option>"
@@ -104,48 +123,63 @@
 					query( );
 				} );
 
-				// redo the query when changing the index
+				// introspect service for list of all search indexes
 				$.ajax( {
 					type : 'GET',
 					url : '/strus/index/list',
 					contentType : 'application/json'
 				} ).done( function( data ) {
-					var json = JSON.stringify( data, null, "    " );
 					html = '<select id="index" class="index" name="index" size="1">';
 					$.each( data.indexes, function( key, value ) {
 						html += "<option>" + value + "</option>"
 					} );
 					html += '</select>';
 					$( '#indexes' ).html( html );
+					// select first index (so that attributes get filled in)
+					attributes( );
 				} );
 
+				// redo the query when changing the index
 				$( 'body' ).on( 'change', 'select.index', function( ) {
 					query( );
+					attributes( );
 				} );
-				
+
+				// redo the query when changing the index
+				$( 'body' ).on( 'change', 'select.attribute', function( ) {
+					query( );					
+				} );
+								
 				// execute query on new characters
 				$( '#search' ).keyup( function( ) {
 					query( );
-				} );					
+				} );	
+				
 			} );
 		</script>      
 	</head>
 
 	<body>		
+		<section>
+			<div id="form">
 		<form role="form">			
 			<fieldset>
 				<div class="labels">
 				  <label for="indexes">Search index:</label><br>
 				  <label for="schemes">Weighting schema:</label><br>
+				  <label for="attributes">Attributes for ranklist:</label><br>
 				  <label for="search">Search terms:</label><br>
 				</div>
 				<div class="inputs">
 					<div id="indexes"></div>
 					<div id="schemes"></div>
+					<div id="attributes"></div>
   				    <input required autocomplete='off' class="form-control input-lg" id="search" placeholder="Enter query terms ....">
 				</div>
 			</fieldset>
 		</form>
+			</div>
+		</section
 		<p>Request:
 			<div id="request">...</div>
 		</p>

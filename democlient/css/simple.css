@@ -17,3 +17,8 @@ FIELDSET {
 .inputs {
     float: left;
 }
+
+label,select {
+	display: inline-block;
+	vertical-align: middle;
+}
