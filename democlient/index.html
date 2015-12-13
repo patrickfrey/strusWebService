@@ -55,12 +55,12 @@
 				
 				var html;
 				var json = JSON.stringify( request, null, "    " );
-				if( rawJson ) {
+				if( $( "#layout option:selected" ).val( ) == "json" ) {
 					html = "<pre>" + json + "</pre>";
 				} else {
 					html = json2html( request );
 				}
-				$( '#request' ).html( html );
+				$( '#request_data' ).html( html );
 				
 				$.ajax( {
 					type : 'POST',
@@ -70,13 +70,13 @@
 					contentType : 'application/json'
 				} ).done( function( data ) {
 					var html;
-					if( rawJson ) {
+					if( $( "#layout option:selected" ).val( ) == "json" ) {
 						var json = JSON.stringify( data, null, "    " );
 						html = "<pre>" + json + "</pre>";
 					} else {
 						html = json2html( data );
 					}
-					$( '#result' ).html( html );
+					$( '#response_data' ).html( html );
 				} );
 			};
 
@@ -99,11 +99,8 @@
 					$('#attribute option[value="docid"]').attr( "selected", "selected" ).change( );
 				} );
 			};
-			
-			// TODO: output format picker
-			var rawJson = true;
-			
-			$( window ).load( function( ) {
+						
+			$( window ).load( function( ) {				
 				// introspect the configuration for weighting functions
 				$.ajax( {
 					type : 'GET',
@@ -155,6 +152,10 @@
 					query( );
 				} );	
 				
+				// change layout (rexecute query)
+				$( 'body' ).on( 'change', 'select.layout', function( ) {
+					query( );
+				} );
 			} );
 		</script>      
 	</head>
@@ -168,23 +169,33 @@
 				  <label for="indexes">Search index:</label><br>
 				  <label for="schemes">Weighting schema:</label><br>
 				  <label for="attributes">Attributes for ranklist:</label><br>
+				  <label for="layout">layout of ranklist:</label><br>
 				  <label for="search">Search terms:</label><br>
 				</div>
 				<div class="inputs">
 					<div id="indexes"></div>
 					<div id="schemes"></div>
 					<div id="attributes"></div>
+					<div id="layouts">
+						<select id="layout" name="layout" class="layout" size="1">
+							<option value="json">raw JSON</option>
+							<option value="list">list</option>
+						</select>
+					</div>
   				    <input required autocomplete='off' class="form-control input-lg" id="search" placeholder="Enter query terms ....">
 				</div>
 			</fieldset>
 		</form>
 			</div>
-		</section
-		<p>Request:
-			<div id="request">...</div>
-		</p>
-		<p>Response:
-		<div id="result">...</div>
-		</p>
+
+		<div id="request">
+		Request:
+			<div id="request_data">...</div>
+		</div>
+		<div id="response">
+		Response:
+		<div id="response_data">...</div>
+		</div>
+		</section>
 	</body>
 </html>
