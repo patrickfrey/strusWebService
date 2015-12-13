@@ -3,3 +3,17 @@
 .key { font-weight: bold; }
 
 .value { color: blue; }
+
+FIELDSET {
+    display: inline-block;
+    line-height: 200%;
+}
+
+.labels {
+    text-align: right;
+    float: left;
+    margin-right: 5px;
+}
+.inputs {
+    float: left;
+}
