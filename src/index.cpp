@@ -180,6 +180,12 @@ void index::config_cmd( const std::string name )
 		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_METADATA_READER, service.getLastStrusError( ) );
 		return;
 	}
+
+	strus::AttributeReaderInterface *attributeReader = service.getAttributeReaderInterface( name );
+	if( !attributeReader ) {
+		report_error( ERROR_DOCUMENT_GET_CMD_CREATE_ATTRIBUTE_READER, service.getLastStrusError( ) );
+		return;
+	}	
 	
 	struct StorageConfiguration config;
 	
@@ -189,6 +195,10 @@ void index::config_cmd( const std::string name )
 		meta.type = metadata->getType( it );		
 		config.metadata.push_back( meta );
 	}
+
+	std::vector<std::string> attrNames = attributeReader->getAttributeNames( );
+	std::sort( attrNames.begin( ), attrNames.end( ) );
+	config.attributes = attrNames;
 
 	cppcms::json::value j;
 	j["config"] = config;

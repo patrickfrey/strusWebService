@@ -7,6 +7,7 @@
 #include <cppcms/json.h>
 
 #include <vector>
+#include <string>
 
 struct MetadataDefiniton {
 	std::string name;
@@ -27,6 +28,7 @@ struct StorageCreateParameters {
 
 struct StorageConfiguration {
 	std::vector<struct MetadataDefiniton> metadata;
+	std::vector<std::string> attributes;
 	// TODO: more, most likely subset of 'StorageCreateParameters'
 };
 
@@ -128,12 +130,14 @@ struct traits<StorageConfiguration> {
 			throw bad_value_cast( );
 		}		
 		c.metadata = v.get<std::vector<struct MetadataDefiniton> >( "metadata", std::vector<struct MetadataDefiniton>( ) );
+		c.attributes = v.get<std::vector<std::string> >( "attributes", std::vector<std::string>( ) );
 		return c;
 	}
 	
 	static void set( value &v, StorageConfiguration const &c )
 	{
 		v.set( "metadata", c.metadata );
+		v.set( "attributes", c.attributes );
 	}
 };
 

@@ -382,7 +382,6 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 	}
 	
 	// attributes
-	
 	strus::AttributeReaderInterface *attributeReader = service.getAttributeReaderInterface( name );
 	if( !attributeReader ) {
 		report_error( ERROR_DOCUMENT_GET_CMD_CREATE_ATTRIBUTE_READER, service.getLastStrusError( ) );
