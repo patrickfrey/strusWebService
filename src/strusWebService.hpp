@@ -63,6 +63,8 @@ class strusWebService : public cppcms::application {
 		std::map<std::string, struct strusContext> context_map;
 		std::string storage_base_directory;
 
+		strus::QueryProcessorInterface *qpi;
+
 	public:
 		apps::master master;
 		apps::other other;
@@ -93,6 +95,7 @@ class strusWebService : public cppcms::application {
 		strus::StorageTransactionInterface *getStorageTransactionInterface( const std::string &name );
 		strus::QueryEvalInterface *getQueryEvalInterface( const std::string &name );
 		strus::QueryProcessorInterface* getQueryProcessorInterface( const std::string &name );
+		strus::QueryProcessorInterface* getQueryProcessorInterface( );		
 		std::string getConfigString( const std::string &name );
 		void deleteDataBaseInterface( const std::string &name );
 		void deleteStorageInterface( const std::string &name );
@@ -103,6 +106,7 @@ class strusWebService : public cppcms::application {
 		void deleteStorageTransactionInterface( const std::string &name );
 		void deleteQueryEvalInterface( const std::string &name );
 		void deleteQueryProcessorInterface( const std::string &name );
+		void deleteQueryProcessorInterface( );
 };
 
 } // namespace apps
