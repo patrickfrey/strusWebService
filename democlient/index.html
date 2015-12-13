@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en"> 
+	<head>
+		<meta charset="utf-8"/>
+		<title>AZA test</title>
+
+		<link rel="stylesheet" href="css/jquery-ui.css"/>
+		<link rel="stylesheet" href="css/simple.css"/>
+		<script src="js/jquery.js"></script>
+		<script src="js/jquery-ui.js"></script>
+		<script src="js/jquery.ui.waitbutton.js"></script>
+
+		<script>
+			function json2html( json ) {
+				var i, ret = "";
+				ret += "<ul>";
+				for( i in json) {
+					ret += "<li>" + i + ": <span class='" + i +"'>";
+					if( typeof json[i] === "object") {
+						ret += json2html( json[i] );
+					} else {
+						ret += json[i];
+					}
+					ret += "</span></li>";
+				}
+				ret += "</ul>";
+				return ret;
+			}
+			
+			// TODO: output format picker
+			var rawJson = true;
+			
+			$( window ).load( function( ) {
+				// introspect the configuration of the index and the storage
+				//~ $.ajax( {
+						//~ type : 'POST',
+						//~ url : '/strus/query/aza',
+						//~ data : json,
+						//~ contentType : 'application/json'
+					//~ } ).done( function( data ) {
+						//~ var html;
+						//~ if( rawJson ) {
+							//~ var json = JSON.stringify( data, null, "    " );
+							//~ html = "<pre>" + json + "</pre>";
+						//~ } else {
+							//~ html = json2html( data );
+						//~ }
+						//~ $( '#result' ).html( html );
+					//~ } );
+
+				
+				// execute query on new characters
+				$( '#search' ).keyup( function( ) {
+					var request = {
+						query: {
+							text: $( '#search' ).val( ),
+							first_rank: 0,
+							nof_ranks: 20,
+							weighting: {
+								// schemes
+								// meta: name
+								// BM25: b and k1, avgdoclen
+								// weight: match
+								// frequency: match
+								// constant: match
+								// formula: match and formula, parameters of formula
+								scheme: {
+									name: "BM5",
+									params: {
+										b: 0.75,
+										k1: 1
+									}
+								}		
+							},
+							attributes: [ "docid", "title", "dossier" ]
+						}
+					};
+					
+					var html;
+					var json = JSON.stringify( request, null, "    " );
+					if( rawJson ) {
+						html = "<pre>" + json + "</pre>";
+					} else {
+						html = json2html( request );
+					}
+					$( '#request' ).html( html );
+					
+					$.ajax( {
+						type : 'POST',
+						// TODO: indexname, dynamic dropdown list
+						url : '/strus/query/aza',
+						data : json,
+						contentType : 'application/json'
+					} ).done( function( data ) {
+						var html;
+						if( rawJson ) {
+							var json = JSON.stringify( data, null, "    " );
+							html = "<pre>" + json + "</pre>";
+						} else {
+							html = json2html( data );
+						}
+						$( '#result' ).html( html );
+					} );
+				} );
+			} );
+		</script>      
+	</head>
+
+	<body>		
+		<form role="form">
+        <div class="form-group">
+          <input required class="form-control input-lg" id="search" placeholder="Enter query terms ....">
+        </div>
+		</form>
+		<p>Request:
+			<div id="request">...</div>
+		</p>
+		<p>Response:
+		<div id="result">...</div>
+		</p>
+	</body>
+</html>
