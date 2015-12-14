@@ -97,17 +97,8 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		report_error( ERROR_QUERY_CMD_CREATE_QUERY_PROCESSOR, service.getLastStrusError( ) );
 		return;
 	}
-	
-	// TODO: list of possible functions again in an introspection function, use
-	// getFunctionList (FunctionType for this.
-	
-	// TODO: get from query request
+		
 	std::string scheme = qry_req.weighting.scheme.name;
-	//~ WeightingConfig weightingConfig;
-	//~ weightingConfig.defineParameter( "k1", 0.75);
-	//~ weightingConfig.defineParameter( "b", 2.1);
-	//~ weightingConfig.defineParameter( "avgdoclen", 8);
-	
 	const strus::WeightingFunctionInterface *wfi = query_processor->getWeightingFunction( scheme );
 	if( !wfi ) {
 		report_error( ERROR_QUERY_CMD_GET_WEIGHTING_FUNCTION, service.getLastStrusError( ) );
@@ -115,10 +106,24 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	}
 	
 	strus::WeightingFunctionInstanceInterface *function = wfi->createInstance( );
+	for( std::vector<std::pair<std::string, struct ParameterValue> >::const_iterator it = qry_req.weighting.scheme.params.begin( ); it != qry_req.weighting.scheme.params.end( ); it++ ) {
+		switch( it->second.type ) {
+			case PARAMETER_TYPE_STRING:
+				function->addStringParameter( it->first, it->second.s );
+				break;
+			case PARAMETER_TYPE_NUMERIC:
+				function->addNumericParameter( it->first, it->second.n );
+				break;
+			case PARAMETER_TYPE_UNKNOWN:
+			default:
+				report_error( ERROR_QUERY_CMD_GET_WEIGHTING_FUNCTION_PARAMETER, "Unknown type of weighting function parameter, internal error, check query object parsing!" );
+				return;
+		}
+	}
 
-	// TODO: every weighting scheme must be introspectable and the JSON deserializer
-	// must be tolerant to those parameters (do it as for the metadata)
+	// TODO: map parameters which are specific per query, i.e. the name of the feature set
 	std::vector<strus::QueryEvalInterface::FeatureParameter> weighting_parameters;
+
 	//~ weighting_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "feat" ) );
 	//~ ArithmeticVariant parameterValue = parseNumericValue( src);
 	//~ function->addNumericParameter( parameterName, parameterValue);
