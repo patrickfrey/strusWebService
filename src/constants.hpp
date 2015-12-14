@@ -37,4 +37,9 @@ const int DEFAULT_QUERY_NOF_RANKS						= 10;
 
 const std::string DEFAULT_ATTRIBUTE_DOCID				= "docid";
 
+const std::string DEFAULT_WEIGHTING_SCHEME				= "BM25";
+const int DEFAULT_BM25_K1								= 1;
+const float DEFAULT_BM25_B								= 0.75;
+const int DEFAULT_BM25_AVGDOCLEN						= 1000;
+
 #endif

@@ -102,7 +102,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	// getFunctionList (FunctionType for this.
 	
 	// TODO: get from query request
-	std::string scheme = "BM25";
+	std::string scheme = qry_req.weighting.scheme.name;
 	//~ WeightingConfig weightingConfig;
 	//~ weightingConfig.defineParameter( "k1", 0.75);
 	//~ weightingConfig.defineParameter( "b", 2.1);
@@ -137,7 +137,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		report_error( ERROR_QUERY_CMD_GET_SUMMARIZER_FUNCTION_INSTANCE, service.getLastStrusError( ) );
 		return;
 	}
-	std::vector<std::string> attribute_summarizers = qry_req.attributes;
+	std::vector<std::string> attribute_summarizers = qry_req.summarizer.attributes;
 	for( std::vector<std::string>::const_iterator it = attribute_summarizers.begin( ); it != attribute_summarizers.end( ); it++ ) {
 		strus::SummarizerFunctionInstanceInterface *summarizer = sum->createInstance( query_processor );
 		if( !summarizer ) {

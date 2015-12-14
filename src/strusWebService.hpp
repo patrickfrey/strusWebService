@@ -40,16 +40,16 @@ struct strusContext {
 		strusContext( ) : config( "" ),
 			dbi( 0 ), sti( 0 ),
 			dbci( 0 ), stci( 0 ),
-			mdri( 0 ), stti( 0 ),
-			atri( 0 ), qei( 0 ),
+			mdri( 0 ), atri( 0 ),
+			stti( 0 ), qei( 0 ),
 			qpi( 0 ) { }
 
 		strusContext( const std::string &_config )
 			: config( _config ),
 			dbi( 0 ), sti( 0 ),
 			dbci( 0 ), stci( 0 ),
-			mdri( 0 ), stti( 0 ),
-			atri( 0 ), qei( 0 ),
+			mdri( 0 ), atri( 0 ),
+			stti( 0 ), qei( 0 ),
 			qpi( 0 ) { }			
 };
 

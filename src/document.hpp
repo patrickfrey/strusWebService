@@ -3,16 +3,18 @@
 
 #include "master.hpp"
 
+#include "utils.hpp"
+
 #include "strus/arithmeticVariant.hpp"
 #include "strus/index.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <boost/typeof/typeof.hpp>
 
 #include <cppcms/json.h>
 
 #include <vector>
 #include <utility>
-#include "boost/tuple/tuple.hpp"
+#include <boost/tuple/tuple.hpp>
 
 struct DocumentRequestBase {
 	std::string docid;
@@ -214,25 +216,6 @@ struct traits<std::pair<std::string, std::string> > {
 
 template<>
 struct traits<std::pair<std::string, strus::ArithmeticVariant> > {
-
-	template<typename T> static bool is_of_type( value const &v, T )
-	{
-		try {
-			if( v.type( ) == is_number ) {
-				T t = boost::lexical_cast<T>( v.number( ) );
-				(void)t;
-				return true;
-			} else if( v.type( ) == is_string ) {
-				T t = boost::lexical_cast<T>( v.str( ) );
-				(void)t;
-				return true;
-			} else {
-				return false;
-			}
-		} catch( boost::bad_lexical_cast e ) {
-			return false;
-		}		
-	}
 	
 	static std::pair<std::string, strus::ArithmeticVariant> get( value const &v )
 	{
@@ -254,11 +237,11 @@ struct traits<std::pair<std::string, strus::ArithmeticVariant> > {
 				// TODO: really? Do we allow this?
 			case is_number:
 				if( is_of_type( val, p.second.variant.Int ) ) {
-					p.second = v.get<typeof( p.second.variant.Int )>( "value" );
+					p.second = v.get<BOOST_TYPEOF( p.second.variant.Int )>( "value" );
 				} else if( is_of_type( val, p.second.variant.UInt ) ) {
-					p.second = v.get<typeof( p.second.variant.UInt )>( "value" );
+					p.second = v.get<BOOST_TYPEOF( p.second.variant.UInt )>( "value" );
 				} else if( is_of_type( val, p.second.variant.Float ) ) {
-					p.second = v.get<typeof( p.second.variant.Float )>( "value" );
+					p.second = v.get<BOOST_TYPEOF( p.second.variant.Float )>( "value" );
 				} else {
 					throw bad_value_cast( );
 				}

@@ -42,14 +42,17 @@
 							// constant: match
 							// formula: match and formula, parameters of formula
 							scheme: {
-								name: "BM5",
-								params: {
-									b: 0.75,
-									k1: 1
-								}
+								name: $( '#scheme' ).val( ),
+								params: [
+									{ key: "b", value: 0.75 },
+									{ key: "k1", value: 1.0001 },
+									{ key: "avgdoclen", value: 11943 }
+								]
 							}		
 						},
-						attributes: $( "#attribute" ).val( ) || []
+						summarizer: {
+							attributes: $( "#attribute" ).val( ) || []
+						}
 					}
 				};
 				
