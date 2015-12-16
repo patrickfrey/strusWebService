@@ -7,6 +7,8 @@
 #include <cppcms/http_response.h>
 #include <cppcms/json.h>
 
+#include "strus/summarizerFunctionInterface.hpp"
+
 namespace apps {
 
 other::other( strusWebService &service )
@@ -47,8 +49,20 @@ void other::config_cmd( )
 	ServiceConfiguration config;
 	
 	config.weighting_functions = query_processor->getFunctionList( strus::QueryProcessorInterface::WeightingFunction );
-	config.summarizer_functions = query_processor->getFunctionList( strus::QueryProcessorInterface::SummarizerFunction );
 	config.posting_join_operators = query_processor->getFunctionList( strus::QueryProcessorInterface::PostingJoinOperator );
+
+	std::vector<std::string> summarizers = query_processor->getFunctionList( strus::QueryProcessorInterface::SummarizerFunction );
+	for( std::vector<std::string>::const_iterator it = summarizers.begin( ); it != summarizers.end( ); it++ ) {
+		const strus::SummarizerFunctionInterface *sum = query_processor->getSummarizerFunction( *it );
+		SummarizerFunctionConfiguration sum_config;
+		sum_config.name = *it;
+		sum_config.description = sum->getDescription( );
+		std::vector<std::string> p = sum->getParameterNames( );
+		for( std::vector<std::string>::const_iterator pit = p.begin( ); pit != p.end( ); pit++ ) {
+			sum_config.parameter.push_back( *pit );
+		}
+		config.summarizer_functions.push_back( sum_config );
+	}
 	
 	service.deleteQueryProcessorInterface( );
 

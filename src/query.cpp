@@ -123,20 +123,12 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 
 	// TODO: map parameters which are specific per query, i.e. the name of the feature set
 	std::vector<strus::QueryEvalInterface::FeatureParameter> weighting_parameters;
-
-	//~ weighting_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "feat" ) );
-	//~ ArithmeticVariant parameterValue = parseNumericValue( src);
-	//~ function->addNumericParameter( parameterName, parameterValue);
-	//~ function->addStringParameter( parameterName, parameterValue);
-		//~ weighting_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "feat" ) );
-		//~ ArithmeticVariant parameterValue = parseNumericValue( src);
-		//~ function->addNumericParameter( parameterName, parameterValue);
-		//~ function->addStringParameter( parameterName, parameterValue);
+	weighting_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "feat" ) );
 	float weight = 1.0;
-	
+		
 	query_eval->addWeightingFunction( scheme, function, weighting_parameters, weight );
 	
-	// TODO: add summarizers
+	// TODO: add all other summarizers
 	const strus::SummarizerFunctionInterface *sum = query_processor->getSummarizerFunction( "attribute" );
 	if( !sum ) {
 		report_error( ERROR_QUERY_CMD_GET_SUMMARIZER_FUNCTION_INSTANCE, service.getLastStrusError( ) );
