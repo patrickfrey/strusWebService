@@ -7,6 +7,7 @@
 #include <cppcms/http_response.h>
 #include <cppcms/json.h>
 
+#include "strus/weightingFunctionInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
 
 namespace apps {
@@ -47,10 +48,20 @@ void other::config_cmd( )
 	}
 	
 	ServiceConfiguration config;
-	
-	config.weighting_functions = query_processor->getFunctionList( strus::QueryProcessorInterface::WeightingFunction );
-	config.posting_join_operators = query_processor->getFunctionList( strus::QueryProcessorInterface::PostingJoinOperator );
 
+	std::vector<std::string> weighting_functions = query_processor->getFunctionList( strus::QueryProcessorInterface::WeightingFunction );
+	for( std::vector<std::string>::const_iterator it = weighting_functions.begin( ); it != weighting_functions.end( ); it++ ) {
+		const strus::WeightingFunctionInterface *func = query_processor->getWeightingFunction( *it );
+		WeightingFunctionConfiguration weighting_config;
+		weighting_config.name = *it;
+		weighting_config.description = func->getDescription( );
+		std::vector<std::string> p = func->getParameterNames( );
+		for( std::vector<std::string>::const_iterator pit = p.begin( ); pit != p.end( ); pit++ ) {
+			weighting_config.parameter.push_back( *pit );
+		}
+		config.weighting_functions.push_back( weighting_config );
+	}
+		
 	std::vector<std::string> summarizers = query_processor->getFunctionList( strus::QueryProcessorInterface::SummarizerFunction );
 	for( std::vector<std::string>::const_iterator it = summarizers.begin( ); it != summarizers.end( ); it++ ) {
 		const strus::SummarizerFunctionInterface *sum = query_processor->getSummarizerFunction( *it );
@@ -63,6 +74,8 @@ void other::config_cmd( )
 		}
 		config.summarizer_functions.push_back( sum_config );
 	}
+
+	config.posting_join_operators = query_processor->getFunctionList( strus::QueryProcessorInterface::PostingJoinOperator );
 	
 	service.deleteQueryProcessorInterface( );
 
