@@ -1,4 +1,4 @@
-.ranklist { background: lightgrey; }
+.ranklist { background-color: lightgrey; }
 
 .key { font-weight: bold; }
 
@@ -21,4 +21,10 @@ FIELDSET {
 label,select {
 	display: inline-block;
 	vertical-align: middle;
+}
+
+#info {	
+	float: right;
+	width: 30%;
+    line-height: 100%;
 }

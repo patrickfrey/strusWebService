@@ -83,7 +83,7 @@
 				} );
 			};
 
-			function attributes( ) {
+			function reload_attributes( ) {
 				// get list of attributes of the current search index for presentation
 				// in the attribute summarizer
 				$.ajax( {
@@ -102,7 +102,37 @@
 					$('#attribute option[value="docid"]').attr( "selected", "selected" ).change( );
 				} );
 			};
-						
+					
+			function show_weighting_info( )	{				
+				$.ajax( {
+					type : 'GET',
+					url : '/strus/config',
+					contentType : 'application/json'
+				} ).done( function( data ) {
+					
+					var scheme = $( '#scheme' ).val( );
+					var html = "";
+					
+					$.each( data.config.weighting_funtions, function( key, value ) {
+						if( value.name == scheme ) {
+							html = "<p>" + value.description + "</p>";
+						}	
+					} );
+
+					html += "<p>Parameters:</p><p><ul>"; 
+					$.each( data.config.weighting_funtions, function( key, value ) {
+						if( value.name == scheme ) {
+							$.each( value.parameter, function( key2, value2 ) {
+								html += "<li>" + value2 + "</p>";
+							} );
+						}	
+					} );
+					html += "</ul></p>";
+
+					$( '#info' ).html( html );					
+				} );
+			}
+			
 			$( window ).load( function( ) {				
 				// introspect the configuration for weighting functions
 				$.ajax( {
@@ -112,15 +142,17 @@
 				} ).done( function( data ) {
 					html = '<select id="scheme" class="scheme" name="scheme" size="1">';
 					$.each( data.config.weighting_funtions, function( key, value ) {
-						html += "<option>" + value + "</option>"
+						html += "<option>" + value.name + "</option>"
 					} );
 					html += '</select>';
 					$( '#schemes' ).html( html );
+					show_weighting_info( );					
 				} );
 
 				// redo the query when changing the schema
 				$( 'body' ).on( 'change', 'select.scheme', function( ) {
 					query( );
+					show_weighting_info( );
 				} );
 
 				// introspect service for list of all search indexes
@@ -136,13 +168,13 @@
 					html += '</select>';
 					$( '#indexes' ).html( html );
 					// select first index (so that attributes get filled in)
-					attributes( );
+					reload_attributes( );
 				} );
 
 				// redo the query when changing the index
 				$( 'body' ).on( 'change', 'select.index', function( ) {
 					query( );
-					attributes( );
+					reload_attributes( );
 				} );
 
 				// redo the query when changing the index
@@ -187,17 +219,20 @@
 					</div>
   				    <input required autocomplete='off' class="form-control input-lg" id="search" placeholder="Enter query terms ....">
 				</div>
+				<div id="info">
+					loading..
+				</div>
+			</div>
 			</fieldset>
 		</form>
-			</div>
 
 		<div id="request">
 		Request:
-			<div id="request_data">...</div>
+			<div id="request_data">loading...</div>
 		</div>
 		<div id="response">
 		Response:
-		<div id="response_data">...</div>
+		<div id="response_data">loading...</div>
 		</div>
 		</section>
 	</body>
