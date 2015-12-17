@@ -43,10 +43,11 @@
 							// formula: match and formula, parameters of formula
 							scheme: {
 								name: $( '#scheme' ).val( ),
+								// TODO: make this depend on the current scheme
 								params: [
-									{ key: "b", value: 0.75 },
-									{ key: "k1", value: 1.0001 },
-									{ key: "avgdoclen", value: 11943 }
+									//~ { key: "b", value: 0.75 },
+									//~ { key: "k1", value: 1.0001 },
+									//~ { key: "avgdoclen", value: 11943 }
 								]
 							}		
 						},
@@ -102,7 +103,35 @@
 					$('#attribute option[value="docid"]').attr( "selected", "selected" ).change( );
 				} );
 			};
+
+			function reload_weighting_parameters( ) {
+				$.ajax( {
+					type : 'GET',
+					url : '/strus/config',
+					contentType : 'application/json'
+				} ).done( function( data ) {
 					
+					var scheme = $( '#scheme' ).val( );
+					var html_inputs = "";
+					var html_labels = "";
+					$.each( data.config.weighting_funtions, function( key, value ) {
+						if( value.name == scheme ) {
+							$.each( value.parameter, function( key2, value2 ) {
+								// TODO: get default of parameter here
+								// TODO: depending on the type of the parameter provide
+								// a text/numeric box, add validators or put a picker
+								// combobox for names of feature sets
+								html_inputs += '<input size="10" id="weighting_param_' + value2 + '" value=""/><br/>';
+								html_labels += '<label for="weighting_param_' + value2 + '">' + value2 + ':</label><br/>';
+							} );
+						}	
+					} );
+
+					$( '#weighting_parameters' ).html( html_inputs );
+					$( '#weighting_parameters_labels' ).html( html_labels );
+				} );
+			}
+			
 			function show_weighting_info( )	{				
 				$.ajax( {
 					type : 'GET',
@@ -141,18 +170,37 @@
 					contentType : 'application/json'
 				} ).done( function( data ) {
 					html = '<select id="scheme" class="scheme" name="scheme" size="1">';
+					// TODO: fix name in service!
 					$.each( data.config.weighting_funtions, function( key, value ) {
-						html += "<option>" + value.name + "</option>"
+						html += "<option>" + value.name + "</option>";
 					} );
 					html += '</select>';
 					$( '#schemes' ).html( html );
-					show_weighting_info( );					
+					show_weighting_info( );	
+					reload_weighting_parameters( );				
+				} );
+
+				// introspect the configuration for summarizer functions
+				$.ajax( {
+					type : 'GET',
+					url : '/strus/config',
+					contentType : 'application/json'
+				} ).done( function( data ) {
+					html = '<select id="summarizer" class="summarizer" name="summarizer" size="1">';
+					$.each( data.config.summarizer_functions, function( key, value ) {
+						html += "<option>" + value.name + "</option>";
+					} );
+					html += '</select>';
+					$( '#summarizer' ).html( html );
+					//~ show_summarizer_info( );	
+					//~ reload_weighting_parameters( );				
 				} );
 
 				// redo the query when changing the schema
 				$( 'body' ).on( 'change', 'select.scheme', function( ) {
 					query( );
 					show_weighting_info( );
+					reload_weighting_parameters( );
 				} );
 
 				// introspect service for list of all search indexes
@@ -203,6 +251,8 @@
 				<div class="labels">
 				  <label for="indexes">Search index:</label><br>
 				  <label for="schemes">Weighting schema:</label><br>
+				  <div id="weighting_parameters_labels"></div>
+				  <label for="summarizer">Summarizer function:</label><br>
 				  <label for="attributes">Attributes for ranklist:</label><br>
 				  <label for="layout">layout of ranklist:</label><br>
 				  <label for="search">Search terms:</label><br>
@@ -210,6 +260,8 @@
 				<div class="inputs">
 					<div id="indexes"></div>
 					<div id="schemes"></div>
+					<div id="weighting_parameters"></div>
+					<div id="summarizer"></div>
 					<div id="attributes"></div>
 					<div id="layouts">
 						<select id="layout" name="layout" class="layout" size="1">
