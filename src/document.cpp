@@ -133,10 +133,10 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 	}
 		
 	// forward index
-	strus::Index maxPos = 0;
+	unsigned int maxPos = 0;
 	for( std::vector<boost::tuple<std::string, std::string, strus::Index> >::const_iterator it = ins_doc.forward.begin( );
 		it != ins_doc.forward.end( ); it++ ) {
-		strus::Index pos = boost::get<2>( *it );
+		unsigned int pos = boost::get<2>( *it );
 		if( pos > strus::Constants::storage_max_position_info( ) ) {
 			if( pos > maxPos ) {
 				maxPos = pos;
@@ -149,7 +149,7 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 	// search index
 	for( std::vector<boost::tuple<std::string, std::string, strus::Index> >::const_iterator it = ins_doc.search.begin( );
 		it != ins_doc.search.end( ); it++ ) {
-		strus::Index pos = boost::get<2>( *it );
+		unsigned int pos = boost::get<2>( *it );
 		if( pos > strus::Constants::storage_max_position_info( ) ) {
 			if( pos > maxPos ) {
 				maxPos = pos;

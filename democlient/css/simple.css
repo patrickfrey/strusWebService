@@ -23,8 +23,14 @@ label,select {
 	vertical-align: middle;
 }
 
-#info {	
+#weighting_info {	
 	float: right;
-	width: 30%;
+	width: 50%;
+    line-height: 100%;
+}
+
+#summarizer_info {	
+	float: right;
+	width: 50%;
     line-height: 100%;
 }

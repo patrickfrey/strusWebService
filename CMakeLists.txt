@@ -9,6 +9,7 @@ set( STRUS_WEB_SERVICE_PATCH_VERSION 1 )
 set( STRUS_WEB_SERVICE_VERSION ${STRUS_WEB_SERVICE_MAJOR_VERSION}.${STRUS_WEB_SERVICE_MINOR_VERSION}.${STRUS_WEB_SERVICE_PATCH_VERSION} )
 
 set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" )
+include( cmake/build_rules.cmake )
 include( cmake/standard_targets.cmake )
 include( cmake/find_strus_package.cmake )
 include( cmake/boost.cmake )

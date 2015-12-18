@@ -58,7 +58,7 @@ struct traits<ServiceConfiguration> {
 	
 	static void set( value &v, ServiceConfiguration const &c )
 	{
-		v.set( "weighting_funtions", c.weighting_functions );
+		v.set( "weighting_functions", c.weighting_functions );
 		v.set( "summarizer_functions", c.summarizer_functions );
 		v.set( "posting_join_operators", c.posting_join_operators );
 	}
