@@ -5,16 +5,67 @@
 
 #include <cppcms/json.h>
 
+#include "strus/weightingFunctionInterface.hpp"
+#include "strus/summarizerFunctionInterface.hpp"
+
+enum FunctionType {
+	FUNCTION_TYPE_FEATURE,
+	FUNCTION_TYPE_NUMERIC,
+	FUNCTION_TYPE_STRING
+};
+
+struct FunctionParameter {
+	enum FunctionType type;
+	std::string name;
+	std::string description;
+	
+	FunctionParameter( ) { }
+	
+	FunctionParameter( strus::WeightingFunctionInterface::Description::Param p )
+	{
+		name = p.name( );
+		description = p.text( );
+		switch( p.type( ) ) {
+			case strus::WeightingFunctionInterface::Description::Param::Feature:
+				type = FUNCTION_TYPE_FEATURE;
+				break;
+			case strus::WeightingFunctionInterface::Description::Param::Numeric:
+				type = FUNCTION_TYPE_NUMERIC;
+				break;
+			case strus::WeightingFunctionInterface::Description::Param::String:
+				type = FUNCTION_TYPE_STRING;
+				break;
+			}
+	}
+
+	FunctionParameter( strus::SummarizerFunctionInterface::Description::Param p )
+	{
+		name = p.name( );
+		description = p.text( );
+		switch( p.type( ) ) {
+			case strus::SummarizerFunctionInterface::Description::Param::Feature:
+				type = FUNCTION_TYPE_FEATURE;
+				break;
+			case strus::SummarizerFunctionInterface::Description::Param::Numeric:
+				type = FUNCTION_TYPE_NUMERIC;
+				break;
+			case strus::SummarizerFunctionInterface::Description::Param::String:
+				type = FUNCTION_TYPE_STRING;
+				break;
+			}
+	}
+};
+
 struct WeightingFunctionConfiguration {
 	std::string name;
 	std::string description;
-	std::vector<std::string> parameter;
+	std::vector<FunctionParameter> parameter;
 };
 
 struct SummarizerFunctionConfiguration {
 	std::string name;
 	std::string description;
-	std::vector<std::string> parameter;
+	std::vector<FunctionParameter> parameter;
 };
 
 struct ServiceConfiguration {
@@ -47,7 +98,7 @@ struct traits<ServiceConfiguration> {
 	static ServiceConfiguration get( value const &v )
 	{
 		ServiceConfiguration c;
-		if( v.type( ) != is_object) {
+		if( v.type( ) != is_object ) {
 			throw bad_value_cast( );
 		}		
 		c.weighting_functions = v.get<std::vector<WeightingFunctionConfiguration> >( "weighting_functions", std::vector<WeightingFunctionConfiguration>( ) );
@@ -71,12 +122,12 @@ struct traits<WeightingFunctionConfiguration> {
 	static WeightingFunctionConfiguration get( value const &v )
 	{
 		WeightingFunctionConfiguration c;
-		if( v.type( ) != is_object) {
+		if( v.type( ) != is_object ) {
 			throw bad_value_cast( );
 		}		
 		c.name = v.get<std::string>( "name" );
 		c.description = v.get<std::string>( "description" );
-		c.parameter = v.get<std::vector<std::string> >( "parameter" );
+		c.parameter = v.get<std::vector<FunctionParameter> >( "parameter" );
 	}
 	
 	static void set( value &v, WeightingFunctionConfiguration const &c )
@@ -94,12 +145,12 @@ struct traits<SummarizerFunctionConfiguration> {
 	static SummarizerFunctionConfiguration get( value const &v )
 	{
 		SummarizerFunctionConfiguration c;
-		if( v.type( ) != is_object) {
+		if( v.type( ) != is_object ) {
 			throw bad_value_cast( );
 		}		
 		c.name = v.get<std::string>( "name" );
 		c.description = v.get<std::string>( "description" );
-		c.parameter = v.get<std::vector<std::string> >( "parameter" );
+		c.parameter = v.get<std::vector<FunctionParameter> >( "parameter" );
 	}
 	
 	static void set( value &v, SummarizerFunctionConfiguration const &c )
@@ -109,6 +160,49 @@ struct traits<SummarizerFunctionConfiguration> {
 		v.set( "parameter", c.parameter );
 	}
 	
+};
+
+template<>
+struct traits<FunctionParameter> {
+	
+	static FunctionParameter get( value const &v )
+	{
+		FunctionParameter p;
+		if( v.type( ) != is_object ) {
+			throw bad_value_cast( );
+		}
+		std::string s = v.get<std::string>( "type" );
+		if( s.compare( "feature" ) == 0 ) {
+			p.type = FUNCTION_TYPE_FEATURE;
+		} else if( s.compare( "numeric" ) == 0 ) {
+			p.type = FUNCTION_TYPE_NUMERIC;
+		} else if( s.compare( "string" ) == 0 ) {
+			p.type = FUNCTION_TYPE_STRING;
+		} else {
+			throw bad_value_cast( );
+		}
+		p.name = v.get<std::string>( "name" );
+		p.description = v.get<std::string>( "description" );
+	}
+	
+	static void set( value &v, FunctionParameter const &p )
+	{
+		switch( p.type ) {
+			case FUNCTION_TYPE_FEATURE:
+				v.set( "type", "feature" );
+				break;
+			case FUNCTION_TYPE_NUMERIC:
+				v.set( "type", "numeric" );
+				break;
+			case FUNCTION_TYPE_STRING:
+				v.set( "type", "string" );
+				break;
+			default:
+				throw bad_value_cast( );
+		}				
+		v.set( "name", p.name );
+		v.set( "description", p.description );
+	}
 };
 
 } } // namespace cppcms::json

@@ -7,9 +7,6 @@
 #include <cppcms/http_response.h>
 #include <cppcms/json.h>
 
-#include "strus/weightingFunctionInterface.hpp"
-#include "strus/summarizerFunctionInterface.hpp"
-
 namespace apps {
 
 other::other( strusWebService &service )
@@ -58,7 +55,8 @@ void other::config_cmd( )
 		weighting_config.description = description.text( );
 		std::vector<strus::WeightingFunctionInterface::Description::Param> p = description.param( );
 		for( std::vector<strus::WeightingFunctionInterface::Description::Param>::const_iterator pit = p.begin( ); pit != p.end( ); pit++ ) {
-			weighting_config.parameter.push_back( pit->name( ) );
+			FunctionParameter param( *pit );
+			weighting_config.parameter.push_back( param );
 		}
 		config.weighting_functions.push_back( weighting_config );
 	}
@@ -72,7 +70,8 @@ void other::config_cmd( )
 		sum_config.description = description.text( );
 		std::vector<strus::SummarizerFunctionInterface::Description::Param> p = description.param( );
 		for( std::vector<strus::SummarizerFunctionInterface::Description::Param>::const_iterator pit = p.begin( ); pit != p.end( ); pit++ ) {
-			sum_config.parameter.push_back( pit->name( ) );
+			FunctionParameter param( *pit );
+			sum_config.parameter.push_back( param );
 		}
 		config.summarizer_functions.push_back( sum_config );
 	}
