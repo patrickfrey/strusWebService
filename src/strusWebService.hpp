@@ -9,61 +9,22 @@
 
 #include <cppcms/application.h>  
 
-#include <map>
-
 #include "strus/lib/error.hpp"
 #include "strus/errorBufferInterface.hpp"
 
-#include "strus/databaseInterface.hpp"
-#include "strus/storageInterface.hpp"
-#include "strus/databaseClientInterface.hpp"
-#include "strus/storageClientInterface.hpp"
-#include "strus/metaDataReaderInterface.hpp"
-#include "strus/attributeReaderInterface.hpp"
-#include "strus/storageTransactionInterface.hpp"
-#include "strus/queryEvalInterface.hpp"
-#include "strus/queryProcessorInterface.hpp"
-
-struct strusContext {
-	std::string config;
-	strus::DatabaseInterface *dbi;
-	strus::StorageInterface *sti;
-	strus::DatabaseClientInterface *dbci;
-	strus::StorageClientInterface *stci;
-	strus::MetaDataReaderInterface *mdri;
-	strus::AttributeReaderInterface *atri;
-	strus::StorageTransactionInterface *stti;
-	strus::QueryEvalInterface *qei;
-	strus::QueryProcessorInterface *qpi;
-	
-	public:
-		strusContext( ) : config( "" ),
-			dbi( 0 ), sti( 0 ),
-			dbci( 0 ), stci( 0 ),
-			mdri( 0 ), atri( 0 ),
-			stti( 0 ), qei( 0 ),
-			qpi( 0 ) { }
-
-		strusContext( const std::string &_config )
-			: config( _config ),
-			dbi( 0 ), sti( 0 ),
-			dbci( 0 ), stci( 0 ),
-			mdri( 0 ), atri( 0 ),
-			stti( 0 ), qei( 0 ),
-			qpi( 0 ) { }			
-};
+#include "strusContext.hpp"
 
 namespace apps {
 
 class strusWebService : public cppcms::application {
 
 	private:
+		StrusContext *context;
 		FILE *logfile;
 		strus::ErrorBufferInterface *g_errorhnd;
-		std::map<std::string, struct strusContext> context_map;
 		std::string storage_base_directory;
-
 		strus::QueryProcessorInterface *qpi;
+		strus::QueryEvalInterface *qei;
 
 	public:
 		apps::master master;
@@ -72,19 +33,15 @@ class strusWebService : public cppcms::application {
 		apps::document document;
 		apps::query query;
 		
-	private:
-		void persistStorageConfigurations( );
-		void restoreStorageConfigurations( );
-
 	public:
-		strusWebService( cppcms::service &srv );
+		strusWebService( cppcms::service &srv, StrusContext *context );
 		bool hasError( ) const;
 		std::string getLastStrusError( ) const;
 		std::vector<std::string> getStrusErrorDetails( ) const;
 		std::string getStorageDirectory( const std::string &base_storage_dir, const std::string &name );
 		std::string getStorageConfig( const std::string &base_storage_dir, const struct StorageCreateParameters params, const std::string &name );
 		std::string getStorageConfig( const std::string &base_storage_dir, const std::string &name );
-		void getOrCreateStrusContext( const std::string &name );
+		StrusConnectionContext *getOrCreateStrusContext( const std::string &name );
 		void registerStorageConfig( const std::string &name, const std::string &config );
 		strus::DatabaseInterface *getDataBaseInterface( const std::string &name );
 		strus::StorageInterface *getStorageInterface( const std::string &name );
@@ -93,8 +50,7 @@ class strusWebService : public cppcms::application {
 		strus::MetaDataReaderInterface *getMetaDataReaderInterface( const std::string &name );
 		strus::AttributeReaderInterface *getAttributeReaderInterface( const std::string &name );
 		strus::StorageTransactionInterface *getStorageTransactionInterface( const std::string &name );
-		strus::QueryEvalInterface *getQueryEvalInterface( const std::string &name );
-		strus::QueryProcessorInterface* getQueryProcessorInterface( const std::string &name );
+		strus::QueryEvalInterface *getQueryEvalInterface( );
 		strus::QueryProcessorInterface* getQueryProcessorInterface( );		
 		std::string getConfigString( const std::string &name );
 		void deleteDataBaseInterface( const std::string &name );
@@ -104,8 +60,7 @@ class strusWebService : public cppcms::application {
 		void deleteMetaDataReaderInterface( const std::string &name );
 		void deleteAttributeReaderInterface( const std::string &name );
 		void deleteStorageTransactionInterface( const std::string &name );
-		void deleteQueryEvalInterface( const std::string &name );
-		void deleteQueryProcessorInterface( const std::string &name );
+		void deleteQueryEvalInterface( );
 		void deleteQueryProcessorInterface( );
 };
 

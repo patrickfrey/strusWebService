@@ -86,13 +86,13 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		return;
 	}
 
-	strus::QueryEvalInterface *query_eval = service.getQueryEvalInterface( name );
+	strus::QueryEvalInterface *query_eval = service.getQueryEvalInterface( );
 	if( !query_eval ) {
 		report_error( ERROR_QUERY_CMD_CREATE_QUERY_EVAL_INTERFACE, service.getLastStrusError( ) );
 		return;
 	}
 
-	strus::QueryProcessorInterface *query_processor = service.getQueryProcessorInterface( name );
+	strus::QueryProcessorInterface *query_processor = service.getQueryProcessorInterface( );
 	if( !query_processor ) {
 		report_error( ERROR_QUERY_CMD_CREATE_QUERY_PROCESSOR, service.getLastStrusError( ) );
 		return;

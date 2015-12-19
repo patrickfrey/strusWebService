@@ -43,8 +43,8 @@ bool master::get_strus_environment( const std::string &name )
 
 void master::close_strus_environment( const std::string &name )
 {
-	service.deleteQueryEvalInterface( name );
-	service.deleteQueryProcessorInterface( name );
+	service.deleteQueryEvalInterface( );
+	service.deleteQueryProcessorInterface( );
 	service.deleteStorageTransactionInterface( name );
 	service.deleteAttributeReaderInterface( name );
 	service.deleteMetaDataReaderInterface( name );

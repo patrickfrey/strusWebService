@@ -34,7 +34,8 @@ int main( int argc, char *argv[] )
 		try {
 			BOOSTER_INFO( "strusCms" ) << "Restarting strus web service..";
 			
-			srv.applications_pool( ).mount( cppcms::applications_factory<apps::strusWebService>( ) );
+			StrusContext *strusContext = new StrusContext( );
+			srv.applications_pool( ).mount( cppcms::applications_factory<apps::strusWebService, StrusContext *>( strusContext ) );
 	
 			srv.run( );
 
