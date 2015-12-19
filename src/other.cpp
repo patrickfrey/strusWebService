@@ -53,11 +53,12 @@ void other::config_cmd( )
 	for( std::vector<std::string>::const_iterator it = weighting_functions.begin( ); it != weighting_functions.end( ); it++ ) {
 		const strus::WeightingFunctionInterface *func = query_processor->getWeightingFunction( *it );
 		WeightingFunctionConfiguration weighting_config;
+		strus::WeightingFunctionInterface::Description description= func->getDescription( );
 		weighting_config.name = *it;
-		weighting_config.description = func->getDescription( );
-		std::vector<std::string> p = func->getParameterNames( );
-		for( std::vector<std::string>::const_iterator pit = p.begin( ); pit != p.end( ); pit++ ) {
-			weighting_config.parameter.push_back( *pit );
+		weighting_config.description = description.text( );
+		std::vector<strus::WeightingFunctionInterface::Description::Param> p = description.param( );
+		for( std::vector<strus::WeightingFunctionInterface::Description::Param>::const_iterator pit = p.begin( ); pit != p.end( ); pit++ ) {
+			weighting_config.parameter.push_back( pit->name( ) );
 		}
 		config.weighting_functions.push_back( weighting_config );
 	}
@@ -66,11 +67,12 @@ void other::config_cmd( )
 	for( std::vector<std::string>::const_iterator it = summarizers.begin( ); it != summarizers.end( ); it++ ) {
 		const strus::SummarizerFunctionInterface *sum = query_processor->getSummarizerFunction( *it );
 		SummarizerFunctionConfiguration sum_config;
+		strus::SummarizerFunctionInterface::Description description = sum->getDescription( );
 		sum_config.name = *it;
-		sum_config.description = sum->getDescription( );
-		std::vector<std::string> p = sum->getParameterNames( );
-		for( std::vector<std::string>::const_iterator pit = p.begin( ); pit != p.end( ); pit++ ) {
-			sum_config.parameter.push_back( *pit );
+		sum_config.description = description.text( );
+		std::vector<strus::SummarizerFunctionInterface::Description::Param> p = description.param( );
+		for( std::vector<strus::SummarizerFunctionInterface::Description::Param>::const_iterator pit = p.begin( ); pit != p.end( ); pit++ ) {
+			sum_config.parameter.push_back( pit->name( ) );
 		}
 		config.summarizer_functions.push_back( sum_config );
 	}
