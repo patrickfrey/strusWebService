@@ -118,11 +118,29 @@
 						if( value.name == scheme ) {
 							$.each( value.parameter, function( key2, value2 ) {
 								// TODO: get default of parameter here
-								// TODO: depending on the type of the parameter provide
-								// a text/numeric box, add validators or put a picker
-								// combobox for names of feature sets
-								html_inputs += '<input size="10" id="weighting_param_' + value2 + '" value=""/><br/>';
-								html_labels += '<label for="weighting_param_' + value2 + '">' + value2 + ':</label><br/>';
+								// TODO: ranges of parameters here
+								// TODO: feature sets and metadata features and
+								//       attributes should be three type, otherwise
+								//       we cannot prepare the proper values for the
+								//       the select box below
+								switch( value2.type ) {
+									case 'string':
+										html_inputs += '<input size="10" id="weighting_param_' + value2.name + '" value=""/><br/>';
+										break;
+									// TODO: cannot distinguish between float and integer values here
+									case 'numeric':
+										html_inputs += '<input type="number" step="any" size="10" id="weighting_param_' + value2.name + '" value=""/><br/>';
+										break;
+									case 'feature':
+										html_inputs += '<select id=weighting_param_' + value2.name + '" size="1">';
+										// TODO: fill in the possible values from 'metadata', 'attributes' or 'features'
+										//~ $.each( data.config.attributes, function( key, value ) {
+											//~ html += "<option value='" + value + "'>" + value + "</option>"
+										//~ } );
+										html_inputs += '</select><br/>';
+										break;
+								}
+								html_labels += '<label for="weighting_param_' + value2.name + '">' + value2.name + ':</label><br/>';
 							} );
 						}	
 					} );
@@ -152,13 +170,59 @@
 					$.each( data.config.weighting_functions, function( key, value ) {
 						if( value.name == scheme ) {
 							$.each( value.parameter, function( key2, value2 ) {
-								html += "<li>" + value2 + "</p>";
+								html += "<li>" + value2.name + ": " + value2.description + "</p>";
 							} );
 						}	
 					} );
 					html += "</ul></p>";
 
 					$( '#weighting_info' ).html( html );					
+				} );
+			}
+
+			function reload_summarizer_parameters( ) {
+				$.ajax( {
+					type : 'GET',
+					url : '/strus/config',
+					contentType : 'application/json'
+				} ).done( function( data ) {
+					
+					var scheme = $( '#summarizer' ).val( );
+					var html_inputs = "";
+					var html_labels = "";
+					$.each( data.config.summarizer_functions, function( key, value ) {
+						if( value.name == scheme ) {
+							$.each( value.parameter, function( key2, value2 ) {
+								// TODO: get default of parameter here
+								// TODO: ranges of parameters here
+								// TODO: feature sets and metadata features and
+								//       attributes should be three type, otherwise
+								//       we cannot prepare the proper values for the
+								//       the select box below
+								switch( value2.type ) {
+									case 'string':
+										html_inputs += '<input size="10" id="summarizer_param_' + value2.name + '" value=""/><br/>';
+										break;
+									// TODO: cannot distinguish between float and integer values here
+									case 'numeric':
+										html_inputs += '<input type="number" step="any" size="10" id="summarizer_param_' + value2.name + '" value=""/><br/>';
+										break;
+									case 'feature':
+										html_inputs += '<select id=summarizer_param_' + value2.name + '" size="1">';
+										// TODO: fill in the possible values from 'metadata', 'attributes' or 'features'
+										//~ $.each( data.config.attributes, function( key, value ) {
+											//~ html += "<option value='" + value + "'>" + value + "</option>"
+										//~ } );
+										html_inputs += '</select><br/>';
+										break;
+								}
+								html_labels += '<label for="summarizer_param_' + value2.name + '">' + value2.name + ':</label><br/>';
+							} );
+						}	
+					} );
+
+					$( '#summarizer_parameters' ).html( html_inputs );
+					$( '#summarizer_parameters_labels' ).html( html_labels );
 				} );
 			}
 
@@ -182,7 +246,7 @@
 					$.each( data.config.summarizer_functions, function( key, value ) {
 						if( value.name == summarizer ) {
 							$.each( value.parameter, function( key2, value2 ) {
-								html += "<li>" + value2 + "</p>";
+								html += "<li>" + value2.name + ": " + value2.description + "</p>";
 							} );
 						}	
 					} );
@@ -222,8 +286,8 @@
 					} );
 					html += '</select>';
 					$( '#summarizers' ).html( html );
-					show_summarizer_info( );	
-					//~ reload_weighting_parameters( );				
+					show_summarizer_info( );
+					reload_summarizer_parameters( );
 				} );
 
 				// redo the query when changing the schema
@@ -237,6 +301,7 @@
 				$( 'body' ).on( 'change', 'select.summarizer', function( ) {
 					query( );
 					show_summarizer_info( );
+					reload_summarizer_parameters( );
 				} );
 
 				// introspect service for list of all search indexes
@@ -289,7 +354,7 @@
 				  <label for="schemes">Weighting schema:</label><br>
 				  <div id="weighting_parameters_labels"></div>
 				  <label for="summarizers">Summarizer function:</label><br>
-				  <label for="attributes">Attributes for ranklist:</label><br>
+				  <div id="summarizer_parameters_labels"></div>
 				  <label for="layout">layout of ranklist:</label><br>
 				  <label for="search">Search terms:</label><br>
 				</div>
@@ -298,7 +363,7 @@
 					<div id="schemes"></div>
 					<div id="weighting_parameters"></div>
 					<div id="summarizers"></div>
-					<div id="attributes"></div>
+					<div id="summarizer_parameters"></div>
 					<div id="layouts">
 						<select id="layout" name="layout" class="layout" size="1">
 							<option value="json">raw JSON</option>
