@@ -123,6 +123,7 @@
 								//       attributes should be three type, otherwise
 								//       we cannot prepare the proper values for the
 								//       the select box below
+								console.log( value2 );
 								switch( value2.type ) {
 									case 'string':
 										html_inputs += '<input size="10" id="weighting_param_' + value2.name + '" value=""/><br/>';
@@ -132,6 +133,8 @@
 										html_inputs += '<input type="number" step="any" size="10" id="weighting_param_' + value2.name + '" value=""/><br/>';
 										break;
 									case 'feature':
+									case 'attribute':
+									case 'metadata':
 										html_inputs += '<select id=weighting_param_' + value2.name + '" size="1">';
 										// TODO: fill in the possible values from 'metadata', 'attributes' or 'features'
 										//~ $.each( data.config.attributes, function( key, value ) {
@@ -208,6 +211,8 @@
 										html_inputs += '<input type="number" step="any" size="10" id="summarizer_param_' + value2.name + '" value=""/><br/>';
 										break;
 									case 'feature':
+									case 'attribute':
+									case 'metadata':
 										html_inputs += '<select id=summarizer_param_' + value2.name + '" size="1">';
 										// TODO: fill in the possible values from 'metadata', 'attributes' or 'features'
 										//~ $.each( data.config.attributes, function( key, value ) {

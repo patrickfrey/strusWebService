@@ -10,6 +10,8 @@
 
 enum FunctionType {
 	FUNCTION_TYPE_FEATURE,
+	FUNCTION_TYPE_ATTRIBUTE,
+	FUNCTION_TYPE_METADATA,
 	FUNCTION_TYPE_NUMERIC,
 	FUNCTION_TYPE_STRING
 };
@@ -29,6 +31,12 @@ struct FunctionParameter {
 			case strus::WeightingFunctionInterface::Description::Param::Feature:
 				type = FUNCTION_TYPE_FEATURE;
 				break;
+			case strus::WeightingFunctionInterface::Description::Param::Attribute:
+				type = FUNCTION_TYPE_ATTRIBUTE;
+				break;
+			case strus::WeightingFunctionInterface::Description::Param::Metadata:
+				type = FUNCTION_TYPE_METADATA;
+				break;
 			case strus::WeightingFunctionInterface::Description::Param::Numeric:
 				type = FUNCTION_TYPE_NUMERIC;
 				break;
@@ -45,6 +53,12 @@ struct FunctionParameter {
 		switch( p.type( ) ) {
 			case strus::SummarizerFunctionInterface::Description::Param::Feature:
 				type = FUNCTION_TYPE_FEATURE;
+				break;
+			case strus::SummarizerFunctionInterface::Description::Param::Attribute:
+				type = FUNCTION_TYPE_ATTRIBUTE;
+				break;
+			case strus::SummarizerFunctionInterface::Description::Param::Metadata:
+				type = FUNCTION_TYPE_METADATA;
 				break;
 			case strus::SummarizerFunctionInterface::Description::Param::Numeric:
 				type = FUNCTION_TYPE_NUMERIC;
@@ -174,6 +188,10 @@ struct traits<FunctionParameter> {
 		std::string s = v.get<std::string>( "type" );
 		if( s.compare( "feature" ) == 0 ) {
 			p.type = FUNCTION_TYPE_FEATURE;
+		} else if( s.compare( "attribute" ) == 0 ) {
+			p.type = FUNCTION_TYPE_ATTRIBUTE;
+		} else if( s.compare( "metadata" ) == 0 ) {
+			p.type = FUNCTION_TYPE_METADATA;
 		} else if( s.compare( "numeric" ) == 0 ) {
 			p.type = FUNCTION_TYPE_NUMERIC;
 		} else if( s.compare( "string" ) == 0 ) {
@@ -190,6 +208,12 @@ struct traits<FunctionParameter> {
 		switch( p.type ) {
 			case FUNCTION_TYPE_FEATURE:
 				v.set( "type", "feature" );
+				break;
+			case FUNCTION_TYPE_ATTRIBUTE:
+				v.set( "type", "attribute" );
+				break;
+			case FUNCTION_TYPE_METADATA:
+				v.set( "type", "metadata" );
 				break;
 			case FUNCTION_TYPE_NUMERIC:
 				v.set( "type", "numeric" );
