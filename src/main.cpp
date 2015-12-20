@@ -38,6 +38,8 @@ int main( int argc, char *argv[] )
 			srv.applications_pool( ).mount( cppcms::applications_factory<apps::strusWebService, StrusContext *>( strusContext ) );
 	
 			srv.run( );
+			
+			delete strusContext;
 
 			if( got_sighup ) {
 				BOOSTER_INFO( "strusWebService" ) << "Reloading configuration on SIGHUP..";

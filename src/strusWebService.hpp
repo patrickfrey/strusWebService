@@ -49,7 +49,7 @@ class strusWebService : public cppcms::application {
 		strus::StorageClientInterface *getStorageClientInterface( const std::string &name );
 		strus::MetaDataReaderInterface *getMetaDataReaderInterface( const std::string &name );
 		strus::AttributeReaderInterface *getAttributeReaderInterface( const std::string &name );
-		strus::StorageTransactionInterface *getStorageTransactionInterface( const std::string &name );
+		strus::StorageTransactionInterface *createStorageTransactionInterface( const std::string &name );
 		strus::QueryEvalInterface *getQueryEvalInterface( );
 		strus::QueryProcessorInterface* getQueryProcessorInterface( );		
 		std::string getConfigString( const std::string &name );
@@ -59,7 +59,6 @@ class strusWebService : public cppcms::application {
 		void deleteStorageClientInterface( const std::string &name );
 		void deleteMetaDataReaderInterface( const std::string &name );
 		void deleteAttributeReaderInterface( const std::string &name );
-		void deleteStorageTransactionInterface( const std::string &name );
 		void deleteQueryEvalInterface( );
 		void deleteQueryProcessorInterface( );
 };

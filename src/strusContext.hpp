@@ -10,9 +10,10 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/attributeReaderInterface.hpp"
-#include "strus/storageTransactionInterface.hpp"
 #include "strus/queryEvalInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
+
+#include <booster/thread.h>
 
 struct StrusConnectionContext {
 	std::string config;
@@ -22,26 +23,24 @@ struct StrusConnectionContext {
 	strus::StorageClientInterface *stci;
 	strus::MetaDataReaderInterface *mdri;
 	strus::AttributeReaderInterface *atri;
-	strus::StorageTransactionInterface *stti;
 	
 	public:
 		StrusConnectionContext( ) : config( "" ),
 			dbi( 0 ), sti( 0 ),
 			dbci( 0 ), stci( 0 ),
-			mdri( 0 ), atri( 0 ),
-			stti( 0 ) { }
+			mdri( 0 ), atri( 0 ) { }
 
 		StrusConnectionContext( const std::string &_config )
 			: config( _config ),
 			dbi( 0 ), sti( 0 ),
 			dbci( 0 ), stci( 0 ),
-			mdri( 0 ), atri( 0 ),
-			stti( 0 ) { }			
+			mdri( 0 ), atri( 0 ) { }			
 };
 
 class StrusContext {
 	private:
 		std::map<std::string, StrusConnectionContext *> context_map;	
+		booster::mutex mutex;
 
 	public:
 		StrusContext( );

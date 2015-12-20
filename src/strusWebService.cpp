@@ -16,6 +16,7 @@
 
 #include "strus/lib/queryeval.hpp"
 #include "strus/lib/queryproc.hpp"
+#include "strus/storageTransactionInterface.hpp"
 
 namespace apps {
 
@@ -160,19 +161,12 @@ strus::AttributeReaderInterface *strusWebService::getAttributeReaderInterface( c
 	return ctx->atri;
 }
 
-strus::StorageTransactionInterface *strusWebService::getStorageTransactionInterface( const std::string &name )
+strus::StorageTransactionInterface *strusWebService::createStorageTransactionInterface( const std::string &name )
 {
 	StrusConnectionContext *ctx = context->acquire( name );
-	if( ctx->stti == 0 ) {
-		strus::StorageTransactionInterface *stti = ctx->stci->createTransaction( );
-		if( stti == 0 ) {
-			context->release( name, ctx );
-			return 0;
-		}
-		ctx->stti = stti;
-	}
+	strus::StorageTransactionInterface *stti = ctx->stci->createTransaction( );
 	context->release( name, ctx );
-	return ctx->stti;
+	return stti;
 }
 
 strus::QueryEvalInterface *strusWebService::getQueryEvalInterface( )
@@ -257,16 +251,6 @@ void strusWebService::deleteAttributeReaderInterface( const std::string &name )
 	if( ctx->atri != 0 ) {
 		delete ctx->atri;
 		ctx->atri = 0;
-	}
-	context->release( name, ctx );
-}
-
-void strusWebService::deleteStorageTransactionInterface( const std::string &name )
-{
-	StrusConnectionContext *ctx = context->acquire( name );
-	if( ctx->stti != 0 ) {
-		delete ctx->stti;
-		ctx->stti = 0;
 	}
 	context->release( name, ctx );
 }

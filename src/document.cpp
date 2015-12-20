@@ -96,7 +96,7 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 		return;
 	}
 
-	strus::StorageTransactionInterface *transaction = service.getStorageTransactionInterface( name );
+	strus::StorageTransactionInterface *transaction = service.createStorageTransactionInterface( name );
 	if( !transaction ) {
 		report_error( ERROR_DOCUMENT_INSERT_CMD_CREATE_STORAGE_TRANSACTION, service.getLastStrusError( ) );
 		return;
@@ -108,7 +108,7 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 		docid = id;
 	} else {
 		if( ins_doc.docid.compare( "" ) == 0 ) {
-			service.deleteStorageTransactionInterface( name );
+			delete transaction;
 			report_error( ERROR_DOCUMENT_INSERT_CMD_DOCID_REQUIRED, "docid must be part of the JSON payload as field of 'doc'" );
 			return;
 		}
@@ -164,7 +164,7 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 		ss << booster::locale::format( "Token positions of document {1} are out or range (document too big, only {2} token positions were assigned, maximum allowed position is %{3})" )
 			% docid % maxPos % strus::Constants::storage_max_position_info( );
 		delete doc;
-		service.deleteStorageTransactionInterface( name );
+		delete transaction;
 		// TODO: warning or error?
 		report_error( ERROR_DOCUMENT_INSERT_TOO_BIG_POSITION, ss.str( ) );
 		return;
@@ -174,8 +174,8 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 	
 	transaction->commit( );
 	
+	delete transaction;
 	delete doc;
-	service.deleteStorageTransactionInterface( name );
 			
 	report_ok( );	
 }
@@ -268,7 +268,6 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 		docid = id;
 	} else {
 		if( del_doc.docid.compare( "" ) == 0 ) {
-			service.deleteStorageTransactionInterface( name );
 			report_error( ERROR_DOCUMENT_DELETE_CMD_DOCID_REQUIRED, "docid must be part of the JSON payload as field of 'doc'" );
 			return;
 		}
@@ -281,7 +280,7 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 		return;
 	}
 
-	strus::StorageTransactionInterface *transaction = service.getStorageTransactionInterface( name );
+	strus::StorageTransactionInterface *transaction = service.createStorageTransactionInterface( name );
 	if( !transaction ) {
 		report_error( ERROR_DOCUMENT_DELETE_CMD_CREATE_STORAGE_TRANSACTION, service.getLastStrusError( ) );
 		return;
@@ -292,8 +291,8 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 	transaction->deleteDocument( docid );
 
 	transaction->commit( );
-
-	service.deleteStorageTransactionInterface( name );
+	
+	delete transaction;
 	
  	report_ok( ); 	
 }
@@ -366,7 +365,6 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 		docid = id;
 	} else {
 		if( get_doc.docid.compare( "" ) == 0 ) {
-			service.deleteStorageTransactionInterface( name );
 			report_error( ERROR_DOCUMENT_DELETE_CMD_DOCID_REQUIRED, "docid must be part of the JSON payload as field of 'doc'" );
 			return;
 		}
@@ -501,7 +499,6 @@ void document::exists_cmd( const std::string name, const std::string id, bool do
 		docid = id;
 	} else {
 		if( get_doc.docid.compare( "" ) == 0 ) {
-			service.deleteStorageTransactionInterface( name );
 			report_error( ERROR_DOCUMENT_DELETE_CMD_DOCID_REQUIRED, "docid must be part of the JSON payload as field of 'doc'" );
 			return;
 		}

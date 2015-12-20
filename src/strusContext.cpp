@@ -14,6 +14,7 @@ StrusConnectionContext *StrusContext::acquire( const std::string &name )
 	} else {
 		return it->second;
 	}
+	mutex.lock( );
 }
 
 void StrusContext::release( const std::string &name, StrusConnectionContext *ctx )
@@ -25,4 +26,5 @@ void StrusContext::release( const std::string &name, StrusConnectionContext *ctx
 	} else {
 		it->second = ctx;
 	}
+	mutex.unlock( );
 }

@@ -45,7 +45,6 @@ void master::close_strus_environment( const std::string &name )
 {
 	service.deleteQueryEvalInterface( );
 	service.deleteQueryProcessorInterface( );
-	service.deleteStorageTransactionInterface( name );
 	service.deleteAttributeReaderInterface( name );
 	service.deleteMetaDataReaderInterface( name );
 	service.deleteStorageClientInterface( name );

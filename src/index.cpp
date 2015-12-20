@@ -284,11 +284,11 @@ void index::exists_cmd( const std::string name )
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
 
-	std::string config = service.getStorageConfig( storage_base_directory, combined_params, name );
-
 	if( !get_strus_environment( name ) ) {
 		return;
 	}
+
+	std::string config = service.getStorageConfig( storage_base_directory, combined_params, name );
 
 	cppcms::json::value j;
 	j["exists"] = dbi->exists( config );
