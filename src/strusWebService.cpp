@@ -27,7 +27,8 @@ strusWebService::strusWebService( cppcms::service &srv, StrusContext *_context )
 	other( *this ),
 	index( *this, settings( ).get<std::string>( "storage.basedir" ) ),
 	document( *this ),
-	query( *this )
+	query( *this ),
+	qei( 0 ), qpi( 0 )
 {
 	add( master );
 	add( other );
@@ -194,6 +195,9 @@ std::string strusWebService::getConfigString( const std::string &name )
 void strusWebService::deleteDataBaseInterface( const std::string &name )
 {
 	StrusConnectionContext *ctx = context->acquire( name );
+	if( ctx == 0 ) {
+		return;
+	}
 	if( ctx->dbi != 0 ) {
 		delete ctx->dbi;
 		ctx->dbi = 0;
@@ -204,6 +208,9 @@ void strusWebService::deleteDataBaseInterface( const std::string &name )
 void strusWebService::deleteStorageInterface( const std::string &name )
 {
 	StrusConnectionContext *ctx = context->acquire( name );
+	if( ctx == 0 ) {
+		return;
+	}
 	if( ctx->sti != 0 ) {
 		delete ctx->sti;
 		ctx->sti = 0;
@@ -214,6 +221,9 @@ void strusWebService::deleteStorageInterface( const std::string &name )
 void strusWebService::deleteDatabaseClientInterface( const std::string &name )
 {
 	StrusConnectionContext *ctx = context->acquire( name );
+	if( ctx == 0 ) {
+		return;
+	}
 	if( ctx->dbci != 0 ) {
 		delete ctx->dbci;
 		ctx->dbci = 0;
@@ -224,6 +234,9 @@ void strusWebService::deleteDatabaseClientInterface( const std::string &name )
 void strusWebService::deleteStorageClientInterface( const std::string &name )
 {
 	StrusConnectionContext *ctx = context->acquire( name );
+	if( ctx == 0 ) {
+		return;
+	}
 	if( ctx->stci != 0 ) {
 		delete ctx->stci;
 		ctx->stci = 0;
@@ -238,6 +251,9 @@ void strusWebService::deleteStorageClientInterface( const std::string &name )
 void strusWebService::deleteMetaDataReaderInterface( const std::string &name )
 {
 	StrusConnectionContext *ctx = context->acquire( name );
+	if( ctx == 0 ) {
+		return;
+	}
 	if( ctx->mdri != 0 ) {
 		delete ctx->mdri;
 		ctx->mdri = 0;
@@ -248,6 +264,9 @@ void strusWebService::deleteMetaDataReaderInterface( const std::string &name )
 void strusWebService::deleteAttributeReaderInterface( const std::string &name )
 {
 	StrusConnectionContext *ctx = context->acquire( name );
+	if( ctx == 0 ) {
+		return;
+	}
 	if( ctx->atri != 0 ) {
 		delete ctx->atri;
 		ctx->atri = 0;
