@@ -19,3 +19,5 @@
   all happen with an auto-commit of 1
 - once the error is consumed and printed, we get result:ok.
   Also seen error happending later..
+- JSON exception throw instead of clear indication of error
+  location in the tree. This is a cppcms thing I'm afraid.
