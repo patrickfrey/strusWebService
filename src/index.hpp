@@ -12,9 +12,8 @@
 struct MetadataDefiniton {
 	std::string name;
 	std::string type;
-
-	bool operator <( MetadataDefiniton &m )
-	{
+	
+	bool operator < ( const MetadataDefiniton &m ) const {
 		return name.compare( m.name );
 	}
 };
