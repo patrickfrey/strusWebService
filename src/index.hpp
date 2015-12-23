@@ -12,6 +12,11 @@
 struct MetadataDefiniton {
 	std::string name;
 	std::string type;
+
+	bool operator <( MetadataDefiniton &m )
+	{
+		return name.compare( m.name );
+	}
 };
 
 struct StorageCreateParameters {

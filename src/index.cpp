@@ -195,6 +195,7 @@ void index::config_cmd( const std::string name )
 		meta.type = metadata->getType( it );		
 		config.metadata.push_back( meta );
 	}
+	std::sort( config.metadata.begin( ), config.metadata.end( ) );
 
 	std::vector<std::string> attrNames = attributeReader->getAttributeNames( );
 	std::sort( attrNames.begin( ), attrNames.end( ) );
