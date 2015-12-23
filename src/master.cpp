@@ -7,6 +7,8 @@
 #include <cppcms/http_request.h>
 #include <cppcms/http_content_type.h>
 
+#include <booster/log.h>
+
 #include "strus/errorBufferInterface.hpp"
 
 namespace apps {
@@ -59,6 +61,10 @@ void master::close_strus_environment( const std::string &name )
 void master::report_error( unsigned int code, const std::string &msg )
 {
 	std::vector<std::string> errors = service.getStrusErrorDetails( );
+	
+	for( std::vector<std::string>::const_iterator it = errors.begin( ); it != errors.end( ); it++ ) {
+		BOOSTER_ERROR( PACKAGE ) << *it;
+	}
 	
 	response( ).content_type( "application/json" );
 	cppcms::json::value j;  
