@@ -9,10 +9,10 @@
 
 #include <cppcms/application.h>  
 
-#include "strus/lib/error.hpp"
-#include "strus/errorBufferInterface.hpp"
-
 #include "strusContext.hpp"
+
+#include "strus/queryEvalInterface.hpp"
+#include "strus/queryProcessorInterface.hpp"
 
 namespace apps {
 
@@ -20,8 +20,6 @@ class strusWebService : public cppcms::application {
 
 	private:
 		StrusContext *context;
-		FILE *logfile;
-		strus::ErrorBufferInterface *g_errorhnd;
 		std::string storage_base_directory;
 		strus::QueryProcessorInterface *qpi;
 		strus::QueryEvalInterface *qei;

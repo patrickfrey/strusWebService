@@ -95,6 +95,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	strus::QueryProcessorInterface *query_processor = service.getQueryProcessorInterface( );
 	if( !query_processor ) {
 		report_error( ERROR_QUERY_CMD_CREATE_QUERY_PROCESSOR, service.getLastStrusError( ) );
+		service.deleteQueryEvalInterface( );
 		return;
 	}
 		
@@ -102,6 +103,8 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	const strus::WeightingFunctionInterface *wfi = query_processor->getWeightingFunction( scheme );
 	if( !wfi ) {
 		report_error( ERROR_QUERY_CMD_GET_WEIGHTING_FUNCTION, service.getLastStrusError( ) );
+		service.deleteQueryEvalInterface( );
+		service.deleteQueryProcessorInterface( );
 		return;
 	}
 	
@@ -117,6 +120,8 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 			case PARAMETER_TYPE_UNKNOWN:
 			default:
 				report_error( ERROR_QUERY_CMD_GET_WEIGHTING_FUNCTION_PARAMETER, "Unknown type of weighting function parameter, internal error, check query object parsing!" );
+				service.deleteQueryEvalInterface( );
+				service.deleteQueryProcessorInterface( );
 				return;
 		}
 	}
@@ -132,6 +137,8 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	const strus::SummarizerFunctionInterface *sum = query_processor->getSummarizerFunction( "attribute" );
 	if( !sum ) {
 		report_error( ERROR_QUERY_CMD_GET_SUMMARIZER_FUNCTION_INSTANCE, service.getLastStrusError( ) );
+		service.deleteQueryEvalInterface( );
+		service.deleteQueryProcessorInterface( );
 		return;
 	}
 	std::vector<std::string> attribute_summarizers = qry_req.summarizer.attributes;
@@ -139,6 +146,8 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		strus::SummarizerFunctionInstanceInterface *summarizer = sum->createInstance( query_processor );
 		if( !summarizer ) {
 			report_error( ERROR_QUERY_CMD_GET_SUMMARIZER_FUNCTION_INSTANCE, service.getLastStrusError( ) );
+			service.deleteQueryEvalInterface( );
+			service.deleteQueryProcessorInterface( );
 			return;
 		}
 		
@@ -153,6 +162,8 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	strus::QueryInterface *query = query_eval->createQuery( storage );
 	if( !query ) {
 		report_error( ERROR_QUERY_CMD_CREATE_QUERY, service.getLastStrusError( ) );
+		service.deleteQueryEvalInterface( );
+		service.deleteQueryProcessorInterface( );
 		return;
 	}
 		
@@ -173,6 +184,8 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	if( service.hasError( ) ) {
 		report_error( ERROR_QUERY_CMD_QUERY_EVALUATE, service.getLastStrusError( ) );
 		delete query;
+		service.deleteQueryEvalInterface( );
+		service.deleteQueryProcessorInterface( );
 		return;
 	}
 
@@ -192,6 +205,8 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	}
 	
 	delete query;
+	service.deleteQueryEvalInterface( );
+	service.deleteQueryProcessorInterface( );
 
 	cppcms::json::value j;
 	j["ranklist"] = response;

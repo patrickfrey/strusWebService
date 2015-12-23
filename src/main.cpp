@@ -33,8 +33,16 @@ int main( int argc, char *argv[] )
 		
 		try {
 			BOOSTER_INFO( "strusCms" ) << "Restarting strus web service..";
+
+			unsigned int nof_threads;
+			if( srv.procs_no( ) == 0 ) {
+				nof_threads = srv.threads_no( );
+			} else {
+				nof_threads = srv.procs_no( ) * srv.threads_no( );
+			}
+			BOOSTER_DEBUG( PACKAGE ) << "Using '" << nof_threads << "' threads for strus logging buffers";
 			
-			StrusContext *strusContext = new StrusContext( );
+			StrusContext *strusContext = new StrusContext( nof_threads );
 			srv.applications_pool( ).mount( cppcms::applications_factory<apps::strusWebService, StrusContext *>( strusContext ) );
 	
 			srv.run( );

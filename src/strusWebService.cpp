@@ -7,12 +7,9 @@
 #include "strus/lib/database_leveldb.hpp"
 #include "strus/lib/storage.hpp"
 
-#include <boost/algorithm/string.hpp>
 #include <booster/locale/format.h>
 
 #include <sstream>
-
-#include <unistd.h>
 
 #include "strus/lib/queryeval.hpp"
 #include "strus/lib/queryproc.hpp"
@@ -37,20 +34,6 @@ strusWebService::strusWebService( cppcms::service &srv, StrusContext *_context )
 	add( query );
 			
 	master.register_common_pages( );
-
-	// implementing a ErrorBufferInterface is not really possible!
-	// redirecting the output to a tmpfile and reading and rewinding that
-	// one periodically seems to be the only hacky option right now
-	logfile = std::tmpfile( );
-	
-	unsigned int nof_threads;
-	if( service( ).procs_no( ) == 0 ) {
-		nof_threads = service( ).threads_no( );
-	} else {
-		nof_threads = service( ).procs_no( ) * service( ).threads_no( );
-	}
-	BOOSTER_DEBUG( PACKAGE ) << "Using '" << nof_threads << "' threads for strus logging buffers";
-	g_errorhnd = strus::createErrorBuffer_standard( logfile, nof_threads );
 }
 
 StrusConnectionContext *strusWebService::getOrCreateStrusContext( const std::string &name )
@@ -75,7 +58,7 @@ strus::DatabaseInterface *strusWebService::getDataBaseInterface( const std::stri
 {
 	StrusConnectionContext *ctx = getOrCreateStrusContext( name );
 	if( ctx->dbi == 0 ) {
-		strus::DatabaseInterface *dbi = strus::createDatabase_leveldb( g_errorhnd );
+		strus::DatabaseInterface *dbi = strus::createDatabase_leveldb( context->g_errorhnd );
 		if( dbi == 0 ) {
 			context->release( name, ctx );
 			return 0;
@@ -90,7 +73,7 @@ strus::StorageInterface *strusWebService::getStorageInterface( const std::string
 {
 	StrusConnectionContext *ctx = getOrCreateStrusContext( name );
 	if( ctx->sti == 0 ) {
-		strus::StorageInterface *sti = strus::createStorage( g_errorhnd );
+		strus::StorageInterface *sti = strus::createStorage( context->g_errorhnd );
 		if( sti == 0 ) {
 			context->release( name, ctx );
 			return 0;
@@ -173,7 +156,7 @@ strus::StorageTransactionInterface *strusWebService::createStorageTransactionInt
 strus::QueryEvalInterface *strusWebService::getQueryEvalInterface( )
 {
 	if( qei == 0 ) {
-		qei = strus::createQueryEval( g_errorhnd );
+		qei = strus::createQueryEval( context->g_errorhnd );
 	}
 	return qei;
 }
@@ -181,7 +164,7 @@ strus::QueryEvalInterface *strusWebService::getQueryEvalInterface( )
 strus::QueryProcessorInterface *strusWebService::getQueryProcessorInterface( )
 {
 	if( qpi == 0 ) {
-		qpi = strus::createQueryProcessor( g_errorhnd );
+		qpi = strus::createQueryProcessor( context->g_errorhnd );
 	}
 	return qpi;
 }
@@ -292,33 +275,17 @@ void strusWebService::deleteQueryProcessorInterface( )
 
 bool strusWebService::hasError( ) const
 {
-	return g_errorhnd->hasError( );
+	return context->g_errorhnd->hasError( );
 }
 
 std::string strusWebService::getLastStrusError( ) const
 {
-	return g_errorhnd->fetchError( );
+	return context->g_errorhnd->fetchError( );
 }
 
 std::vector<std::string> strusWebService::getStrusErrorDetails( ) const
 {
-	char buf[512];
-	std::vector<std::string> v;
-	
-	long pos = ftell( logfile );
-	if( pos > 0 ) {
-		fseek( logfile, 0 , SEEK_SET );
-		while( fgets( buf, sizeof( buf ), logfile ) != 0 ) {
-			std::string s( buf );
-			boost::trim_right_if( s, boost::is_any_of( "\r\n" ) );
-			BOOSTER_ERROR( PACKAGE_STRUS ) << s;
-			v.push_back( s );
-		}
-		(void)ftruncate( fileno( logfile ), 0 );
-		fseek( logfile, 0 , SEEK_SET );
-	}
-	
-	return v;
+	return context->getStrusErrorDetails( );
 }
 
 std::string strusWebService::getStorageDirectory( const std::string &base_storage_dir, const std::string &name )

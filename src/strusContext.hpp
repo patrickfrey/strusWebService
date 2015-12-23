@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 #include "strus/databaseInterface.hpp"
 #include "strus/storageInterface.hpp"
@@ -10,10 +11,11 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/attributeReaderInterface.hpp"
-#include "strus/queryEvalInterface.hpp"
-#include "strus/queryProcessorInterface.hpp"
 
 #include <booster/thread.h>
+
+#include "strus/lib/error.hpp"
+#include "strus/errorBufferInterface.hpp"
 
 struct StrusConnectionContext {
 	std::string config;
@@ -41,12 +43,19 @@ class StrusContext {
 	private:
 		std::map<std::string, StrusConnectionContext *> context_map;	
 		booster::mutex mutex;
+		FILE *logfile;
 
 	public:
-		StrusContext( );
+		strus::ErrorBufferInterface *g_errorhnd;
+
+	public:
+		StrusContext( unsigned int nof_threads );
 		
 		StrusConnectionContext *acquire( const std::string &name );
 		void release( const std::string &name, StrusConnectionContext *ctx );
+
+		std::vector<std::string> getStrusErrorDetails( ) const;
+
 };
 
 #endif
