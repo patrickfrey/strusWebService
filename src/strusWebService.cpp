@@ -23,12 +23,12 @@ namespace apps {
 strusWebService::strusWebService( cppcms::service &srv, StrusContext *_context )
 	: cppcms::application( srv ), context( _context ),
 	storage_base_directory( settings( ).get<std::string>( "storage.basedir" ) ),
+	qpi( 0 ), qei( 0 ),
 	master( *this ),
 	other( *this ),
 	index( *this, settings( ).get<std::string>( "storage.basedir" ) ),
 	document( *this ),
-	query( *this ),
-	qei( 0 ), qpi( 0 )
+	query( *this )
 {
 	add( master );
 	add( other );
