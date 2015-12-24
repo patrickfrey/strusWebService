@@ -15,9 +15,9 @@ StrusContext::StrusContext( unsigned int nof_threads )
 	g_errorhnd = strus::createErrorBuffer_standard( logfile, nof_threads );
 }
 
-StrusConnectionContext *StrusContext::acquire( const std::string &name )
+StrusIndexContext *StrusContext::acquire( const std::string &name )
 {
-	std::map<std::string, StrusConnectionContext *>::iterator it;
+	std::map<std::string, StrusIndexContext *>::iterator it;
 	it = context_map.find( name );
 	if( it == context_map.end( ) ) {
 		return 0;
@@ -27,9 +27,9 @@ StrusConnectionContext *StrusContext::acquire( const std::string &name )
 	mutex.lock( );
 }
 
-void StrusContext::release( const std::string &name, StrusConnectionContext *ctx )
+void StrusContext::release( const std::string &name, StrusIndexContext *ctx )
 {
-	std::map<std::string, StrusConnectionContext *>::iterator it;
+	std::map<std::string, StrusIndexContext *>::iterator it;
 	it = context_map.find( name );
 	if( it == context_map.end( ) ) {
 		context_map[name] = ctx;

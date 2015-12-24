@@ -36,11 +36,11 @@ strusWebService::strusWebService( cppcms::service &srv, StrusContext *_context )
 	master.register_common_pages( );
 }
 
-StrusConnectionContext *strusWebService::getOrCreateStrusContext( const std::string &name )
+StrusIndexContext *strusWebService::getOrCreateStrusContext( const std::string &name )
 {
-	StrusConnectionContext *ctx = context->acquire( name );
+	StrusIndexContext *ctx = context->acquire( name );
 	if( ctx == 0 ) {
-		ctx = new StrusConnectionContext( getStorageConfig( storage_base_directory, name ) );
+		ctx = new StrusIndexContext( getStorageConfig( storage_base_directory, name ) );
 	}
 	context->release( name, ctx );
 	return ctx;
@@ -49,14 +49,14 @@ StrusConnectionContext *strusWebService::getOrCreateStrusContext( const std::str
 void strusWebService::registerStorageConfig( const std::string &name, const std::string &config )
 {
 	// TODO: actually we should rather throw here (why?)
-	StrusConnectionContext *ctx = getOrCreateStrusContext( name );
+	StrusIndexContext *ctx = getOrCreateStrusContext( name );
 	ctx->config = config;
 	context->release( name, ctx );
 }
 
 strus::DatabaseInterface *strusWebService::getDataBaseInterface( const std::string &name )
 {
-	StrusConnectionContext *ctx = getOrCreateStrusContext( name );
+	StrusIndexContext *ctx = getOrCreateStrusContext( name );
 	if( ctx->dbi == 0 ) {
 		strus::DatabaseInterface *dbi = strus::createDatabase_leveldb( context->g_errorhnd );
 		if( dbi == 0 ) {
@@ -71,7 +71,7 @@ strus::DatabaseInterface *strusWebService::getDataBaseInterface( const std::stri
 
 strus::StorageInterface *strusWebService::getStorageInterface( const std::string &name )
 {
-	StrusConnectionContext *ctx = getOrCreateStrusContext( name );
+	StrusIndexContext *ctx = getOrCreateStrusContext( name );
 	if( ctx->sti == 0 ) {
 		strus::StorageInterface *sti = strus::createStorage( context->g_errorhnd );
 		if( sti == 0 ) {
@@ -86,7 +86,7 @@ strus::StorageInterface *strusWebService::getStorageInterface( const std::string
 
 strus::DatabaseClientInterface *strusWebService::getDatabaseClientInterface( const std::string &name )
 {
-	StrusConnectionContext *ctx = context->acquire( name );
+	StrusIndexContext *ctx = context->acquire( name );
 	if( ctx->dbci == 0 ) {
 		strus::DatabaseInterface *dbi = ctx->dbi;		
 		strus::DatabaseClientInterface *dbci = dbi->createClient( ctx->config );
@@ -102,7 +102,7 @@ strus::DatabaseClientInterface *strusWebService::getDatabaseClientInterface( con
 
 strus::StorageClientInterface *strusWebService::getStorageClientInterface( const std::string &name )
 {
-	StrusConnectionContext *ctx = context->acquire( name );
+	StrusIndexContext *ctx = context->acquire( name );
 	if( ctx->stci == 0 ) {
 		strus::StorageClientInterface *stci = ctx->sti->createClient( ctx->config, ctx->dbci, 0 );
 		if( stci == 0 ) {
@@ -117,7 +117,7 @@ strus::StorageClientInterface *strusWebService::getStorageClientInterface( const
 
 strus::MetaDataReaderInterface *strusWebService::getMetaDataReaderInterface( const std::string &name )
 {
-	StrusConnectionContext *ctx = context->acquire( name );
+	StrusIndexContext *ctx = context->acquire( name );
 	if( ctx->mdri == 0 ) {
 		strus::MetaDataReaderInterface *mdri = ctx->stci->createMetaDataReader( );
 		if( mdri == 0 ) {
@@ -132,7 +132,7 @@ strus::MetaDataReaderInterface *strusWebService::getMetaDataReaderInterface( con
 
 strus::AttributeReaderInterface *strusWebService::getAttributeReaderInterface( const std::string &name )
 {
-	StrusConnectionContext *ctx = context->acquire( name );
+	StrusIndexContext *ctx = context->acquire( name );
 	if( ctx->atri == 0 ) {
 		strus::AttributeReaderInterface *atri = ctx->stci->createAttributeReader( );
 		if( atri == 0 ) {
@@ -147,7 +147,7 @@ strus::AttributeReaderInterface *strusWebService::getAttributeReaderInterface( c
 
 strus::StorageTransactionInterface *strusWebService::createStorageTransactionInterface( const std::string &name )
 {
-	StrusConnectionContext *ctx = context->acquire( name );
+	StrusIndexContext *ctx = context->acquire( name );
 	strus::StorageTransactionInterface *stti = ctx->stci->createTransaction( );
 	context->release( name, ctx );
 	return stti;
@@ -171,13 +171,13 @@ strus::QueryProcessorInterface *strusWebService::getQueryProcessorInterface( )
 
 std::string strusWebService::getConfigString( const std::string &name )
 {
-	StrusConnectionContext *ctx = context->acquire( name );
+	StrusIndexContext *ctx = context->acquire( name );
 	return ctx->config;
 }
 
 void strusWebService::deleteDataBaseInterface( const std::string &name )
 {
-	StrusConnectionContext *ctx = context->acquire( name );
+	StrusIndexContext *ctx = context->acquire( name );
 	if( ctx == 0 ) {
 		return;
 	}
@@ -190,7 +190,7 @@ void strusWebService::deleteDataBaseInterface( const std::string &name )
 
 void strusWebService::deleteStorageInterface( const std::string &name )
 {
-	StrusConnectionContext *ctx = context->acquire( name );
+	StrusIndexContext *ctx = context->acquire( name );
 	if( ctx == 0 ) {
 		return;
 	}
@@ -203,7 +203,7 @@ void strusWebService::deleteStorageInterface( const std::string &name )
 
 void strusWebService::deleteDatabaseClientInterface( const std::string &name )
 {
-	StrusConnectionContext *ctx = context->acquire( name );
+	StrusIndexContext *ctx = context->acquire( name );
 	if( ctx == 0 ) {
 		return;
 	}
@@ -216,7 +216,7 @@ void strusWebService::deleteDatabaseClientInterface( const std::string &name )
 
 void strusWebService::deleteStorageClientInterface( const std::string &name )
 {
-	StrusConnectionContext *ctx = context->acquire( name );
+	StrusIndexContext *ctx = context->acquire( name );
 	if( ctx == 0 ) {
 		return;
 	}
@@ -233,7 +233,7 @@ void strusWebService::deleteStorageClientInterface( const std::string &name )
 
 void strusWebService::deleteMetaDataReaderInterface( const std::string &name )
 {
-	StrusConnectionContext *ctx = context->acquire( name );
+	StrusIndexContext *ctx = context->acquire( name );
 	if( ctx == 0 ) {
 		return;
 	}
@@ -246,7 +246,7 @@ void strusWebService::deleteMetaDataReaderInterface( const std::string &name )
 
 void strusWebService::deleteAttributeReaderInterface( const std::string &name )
 {
-	StrusConnectionContext *ctx = context->acquire( name );
+	StrusIndexContext *ctx = context->acquire( name );
 	if( ctx == 0 ) {
 		return;
 	}

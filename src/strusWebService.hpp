@@ -39,7 +39,7 @@ class strusWebService : public cppcms::application {
 		std::string getStorageDirectory( const std::string &base_storage_dir, const std::string &name );
 		std::string getStorageConfig( const std::string &base_storage_dir, const struct StorageCreateParameters params, const std::string &name );
 		std::string getStorageConfig( const std::string &base_storage_dir, const std::string &name );
-		StrusConnectionContext *getOrCreateStrusContext( const std::string &name );
+		StrusIndexContext *getOrCreateStrusContext( const std::string &name );
 		void registerStorageConfig( const std::string &name, const std::string &config );
 		strus::DatabaseInterface *getDataBaseInterface( const std::string &name );
 		strus::StorageInterface *getStorageInterface( const std::string &name );
