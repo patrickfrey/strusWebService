@@ -300,7 +300,7 @@ void strusWebService::deleteStorageTransactionInterface( const std::string &name
 	it = ctx->trans_map.find( id );
 	if( it != ctx->trans_map.end( ) ) {
 		delete it->second;
-		ctx->trans_map[id] = 0;
+		ctx->trans_map.erase( it );
 	}
 }
 
