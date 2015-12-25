@@ -25,13 +25,15 @@ strusWebService::strusWebService( cppcms::service &srv, StrusContext *_context )
 	other( *this ),
 	index( *this, settings( ).get<std::string>( "storage.basedir" ) ),
 	document( *this ),
-	query( *this )
+	query( *this ),
+	transaction( *this )
 {
 	add( master );
 	add( other );
 	add( index );
 	add( document );
 	add( query );
+	add( transaction );
 			
 	master.register_common_pages( );
 }
@@ -153,6 +155,40 @@ strus::StorageTransactionInterface *strusWebService::createStorageTransactionInt
 	return stti;
 }
 
+strus::StorageTransactionInterface *strusWebService::createStorageTransactionInterface( const std::string &name, const std::string &id )
+{
+	StrusIndexContext *ctx = context->acquire( name );
+	std::map<std::string, strus::StorageTransactionInterface *>::iterator it;
+	it = ctx->trans_map.find( id );
+	strus::StorageTransactionInterface *stti;
+	if( it == ctx->trans_map.end( ) ) {
+		stti = ctx->stci->createTransaction( );
+		if( stti == 0 ) {
+			return 0;
+		}
+		ctx->trans_map[id] = stti;
+	} else {
+		stti = ctx->trans_map[id];
+	}
+	context->release( name, ctx );
+	return stti;
+}
+
+strus::StorageTransactionInterface *strusWebService::getStorageTransactionInterface( const std::string &name, const std::string &id )
+{
+	StrusIndexContext *ctx = context->acquire( name );
+	std::map<std::string, strus::StorageTransactionInterface *>::iterator it;
+	it = ctx->trans_map.find( id );
+	strus::StorageTransactionInterface *stti;
+	if( it == ctx->trans_map.end( ) ) {
+		return 0;
+	} else {
+		stti = ctx->trans_map[id];
+	}
+	context->release( name, ctx );
+	return stti;
+}
+
 strus::QueryEvalInterface *strusWebService::getQueryEvalInterface( )
 {
 	if( qei == 0 ) {
@@ -255,6 +291,17 @@ void strusWebService::deleteAttributeReaderInterface( const std::string &name )
 		ctx->atri = 0;
 	}
 	context->release( name, ctx );
+}
+
+void strusWebService::deleteStorageTransactionInterface( const std::string &name, const std::string &id )
+{
+	StrusIndexContext *ctx = context->acquire( name );
+	std::map<std::string, strus::StorageTransactionInterface *>::iterator it;
+	it = ctx->trans_map.find( id );
+	if( it != ctx->trans_map.end( ) ) {
+		delete it->second;
+		ctx->trans_map[id] = 0;
+	}
 }
 
 void strusWebService::deleteQueryEvalInterface(  )

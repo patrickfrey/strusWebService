@@ -21,3 +21,5 @@
   Also seen error happending later..
 - JSON exception throw instead of clear indication of error
   location in the tree. This is a cppcms thing I'm afraid.
+- transactions work only per index, but in theory there is
+  no problem to implement them to span indexes

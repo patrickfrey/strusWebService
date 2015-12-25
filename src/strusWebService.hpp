@@ -6,6 +6,7 @@
 #include "index.hpp"
 #include "document.hpp"
 #include "query.hpp"
+#include "transaction.hpp"
 
 #include <cppcms/application.h>  
 
@@ -30,6 +31,7 @@ class strusWebService : public cppcms::application {
 		apps::index index;
 		apps::document document;
 		apps::query query;
+		apps::transaction transaction;
 		
 	public:
 		strusWebService( cppcms::service &srv, StrusContext *context );
@@ -48,9 +50,12 @@ class strusWebService : public cppcms::application {
 		strus::MetaDataReaderInterface *getMetaDataReaderInterface( const std::string &name );
 		strus::AttributeReaderInterface *getAttributeReaderInterface( const std::string &name );
 		strus::StorageTransactionInterface *createStorageTransactionInterface( const std::string &name );
+		strus::StorageTransactionInterface *createStorageTransactionInterface( const std::string &name, const std::string &id );
+		strus::StorageTransactionInterface *getStorageTransactionInterface( const std::string &name, const std::string &id );
 		strus::QueryEvalInterface *getQueryEvalInterface( );
 		strus::QueryProcessorInterface* getQueryProcessorInterface( );		
 		std::string getConfigString( const std::string &name );
+		void deleteStorageTransactionInterface( const std::string &name, const std::string &id );
 		void deleteDataBaseInterface( const std::string &name );
 		void deleteStorageInterface( const std::string &name );
 		void deleteDatabaseClientInterface( const std::string &name );

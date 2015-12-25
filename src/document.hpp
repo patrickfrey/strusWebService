@@ -110,7 +110,7 @@ struct traits<DocumentRequestBase> {
 		}
 		// TODO: should we also accept int, float? how can we fall back?
 		d.docid = v.get<std::string>( "docid", "" );	
-		
+
 		return d;	
 	}
 
@@ -131,7 +131,7 @@ struct traits<DocumentDeleteRequest> {
 		}
 		// TODO: should we also accept int, float? how can we fall back?
 		d.docid = v.get<std::string>( "docid", "" );	
-		
+
 		return d;	
 	}
 	

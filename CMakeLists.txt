@@ -48,6 +48,7 @@ set(SRC
 	src/index.cpp
 	src/document.cpp
 	src/query.cpp
+	src/transaction.cpp
 )
 
 include_directories(

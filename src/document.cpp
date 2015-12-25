@@ -74,7 +74,7 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 		report_error( ERROR_DOCUMENT_INSERT_ILLEGAL_JSON, "Expecting a JSON object as JSON document payload" );
 		return;
 	}
-	
+
 	if( !get_strus_environment( name ) ) {
 		return;
 	}
@@ -96,23 +96,39 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 		return;
 	}
 
-	strus::StorageTransactionInterface *transaction = service.createStorageTransactionInterface( name );
-	if( !transaction ) {
-		report_error( ERROR_DOCUMENT_INSERT_CMD_CREATE_STORAGE_TRANSACTION, service.getLastStrusError( ) );
-		return;
-	}
-	
 	// docid can come from the JSON payload or directly in the URL
 	std::string docid;
 	if( docid_in_url ) {
 		docid = id;
 	} else {
 		if( ins_doc.docid.compare( "" ) == 0 ) {
-			delete transaction;
 			report_error( ERROR_DOCUMENT_INSERT_CMD_DOCID_REQUIRED, "docid must be part of the JSON payload as field of 'doc'" );
 			return;
 		}
 		docid = ins_doc.docid;
+	}
+
+	// transaction id is optional and additional payload along to 'doc'
+	std::string trans_id = "";
+	try {
+		trans_id = p.get<std::string>( "transaction.id", "" );
+	} catch( cppcms::json::bad_value_cast &e ) {
+		// be tolerant, transactions are optional
+	}
+
+	strus::StorageTransactionInterface *transaction;
+	if( trans_id == "" ) {
+		transaction = service.createStorageTransactionInterface( name );
+		if( !transaction ) {
+			report_error( ERROR_DOCUMENT_INSERT_CMD_CREATE_STORAGE_TRANSACTION, service.getLastStrusError( ) );
+			return;
+		}
+	} else {
+		transaction = service.getStorageTransactionInterface( name, trans_id );
+		if( !transaction ) {
+			report_error( ERROR_DOCUMENT_INSERT_CMD_GET_STORAGE_TRANSACTION, "Referencing illegal transaction, no begin transaction seen before" );
+			return;
+		}
 	}
 		
 	strus::StorageDocumentInterface *doc = transaction->createDocument( docid );
@@ -171,10 +187,13 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 	}
 	
 	doc->done( );
-	
-	transaction->commit( );
-	
-	delete transaction;
+
+	// autocommit if not part of a transaction
+	if( trans_id == "" ) {
+		transaction->commit( );
+		delete transaction;
+	}
+
 	delete doc;
 			
 	report_ok( );	

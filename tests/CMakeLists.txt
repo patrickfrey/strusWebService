@@ -48,6 +48,18 @@ add_test( NAME document_nonexist_delete COMMAND curlJsonTester document_nonexist
 
 add_test( NAME index_stats_A_after_nonexist_delete COMMAND curlJsonTester index_stats_A_after_nonexist_delete )
 
+# transaction.cpp
+
+add_test( NAME transaction_begin COMMAND curlJsonTester transaction_begin )
+
+add_test( NAME transaction_insert_doc1 COMMAND curlJsonTester transaction_insert_doc1 )
+
+add_test( NAME transaction_insert_doc2 COMMAND curlJsonTester transaction_insert_doc2 )
+
+add_test( NAME transaction_insert_doc3 COMMAND curlJsonTester transaction_insert_doc3 )
+
+add_test( NAME transaction_commit COMMAND curlJsonTester transaction_commit )
+
 # index.cpp (cleaning up)
 
 add_test( NAME delete_index_A COMMAND curlJsonTester delete_index_A )

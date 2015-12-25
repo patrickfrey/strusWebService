@@ -11,6 +11,7 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/attributeReaderInterface.hpp"
+#include "strus/storageTransactionInterface.hpp"
 
 #include <booster/thread.h>
 
@@ -25,6 +26,7 @@ struct StrusIndexContext {
 	strus::StorageClientInterface *stci;
 	strus::MetaDataReaderInterface *mdri;
 	strus::AttributeReaderInterface *atri;
+	std::map<std::string, strus::StorageTransactionInterface *> trans_map;
 	
 	public:
 		StrusIndexContext( ) : config( "" ),
