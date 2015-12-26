@@ -100,7 +100,7 @@ void master::report_ok( cppcms::json::value &j )
 	if( !errors.empty( ) ) {
 		unsigned int pos = 0;
 		for( std::vector<std::string>::const_iterator it = errors.begin( ); it != errors.end( ); it++, pos++ ) {
-			j["details"][pos] = *it;
+			j["err"]["details"][pos] = *it;
 		}
 	}
 	if( protocol_pretty_printing ) {
