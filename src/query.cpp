@@ -62,7 +62,8 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 			return;
 		}
 	} else {
-		qry_req.text = qry;
+		QueryRequest default_qry_req( qry );
+		qry_req = default_qry_req;
 	}
 	
 	if( !get_strus_environment( name ) ) {
@@ -98,51 +99,53 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		service.deleteQueryEvalInterface( );
 		return;
 	}
-		
-	std::string scheme = qry_req.weighting.scheme.name;
-	const strus::WeightingFunctionInterface *wfi = query_processor->getWeightingFunction( scheme );
-	if( !wfi ) {
-		report_error( ERROR_QUERY_CMD_GET_WEIGHTING_FUNCTION, service.getLastStrusError( ) );
-		service.deleteQueryEvalInterface( );
-		service.deleteQueryProcessorInterface( );
-		return;
-	}
-	
-	strus::WeightingFunctionInstanceInterface *function = wfi->createInstance( );
-	for( std::vector<std::pair<std::string, struct ParameterValue> >::const_iterator it = qry_req.weighting.scheme.params.begin( ); it != qry_req.weighting.scheme.params.end( ); it++ ) {
-		switch( it->second.type ) {
-			case PARAMETER_TYPE_STRING:
-				function->addStringParameter( it->first, it->second.s );
-				break;
-			case PARAMETER_TYPE_NUMERIC:
-				function->addNumericParameter( it->first, it->second.n );
-				break;
-			case PARAMETER_TYPE_UNKNOWN:
-			default:
-				report_error( ERROR_QUERY_CMD_GET_WEIGHTING_FUNCTION_PARAMETER, "Unknown type of weighting function parameter, internal error, check query object parsing!" );
-				service.deleteQueryEvalInterface( );
-				service.deleteQueryProcessorInterface( );
-				return;
+
+	for( std::vector<struct WeightingConfiguration>::const_iterator it = qry_req.weighting.begin( ); it != qry_req.weighting.end( ); it++ ) {
+		std::string scheme = it->name;
+		const strus::WeightingFunctionInterface *wfi = query_processor->getWeightingFunction( scheme );
+		if( !wfi ) {
+			report_error( ERROR_QUERY_CMD_GET_WEIGHTING_FUNCTION, service.getLastStrusError( ) );
+			service.deleteQueryEvalInterface( );
+			service.deleteQueryProcessorInterface( );
+			return;
 		}
+	
+		strus::WeightingFunctionInstanceInterface *function = wfi->createInstance( );
+		for( std::vector<std::pair<std::string, struct ParameterValue> >::const_iterator pit = it->params.begin( ); pit != it->params.end( ); pit++ ) {
+			switch( pit->second.type ) {
+				case PARAMETER_TYPE_STRING:
+					function->addStringParameter( pit->first, pit->second.s );
+					break;
+				case PARAMETER_TYPE_NUMERIC:
+					function->addNumericParameter( pit->first, pit->second.n );
+					break;
+				case PARAMETER_TYPE_UNKNOWN:
+				default:
+					report_error( ERROR_QUERY_CMD_GET_WEIGHTING_FUNCTION_PARAMETER, "Unknown type of weighting function parameter, internal error, check query object parsing!" );
+					service.deleteQueryEvalInterface( );
+					service.deleteQueryProcessorInterface( );
+					return;
+			}
+		}
+
+		// TODO: add feature and other weighting parameters which are not mere
+		// constants
+		// TODO: map parameters which are specific per query, i.e. the name of the feature set
+		std::vector<strus::QueryEvalInterface::FeatureParameter> weighting_parameters;
+		weighting_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "feat" ) );
+		query_eval->addWeightingFunction( scheme, function, weighting_parameters, it->weight );
 	}
 
-	// TODO: map parameters which are specific per query, i.e. the name of the feature set
-	std::vector<strus::QueryEvalInterface::FeatureParameter> weighting_parameters;
-	weighting_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "feat" ) );
-	float weight = 1.0;
-		
-	query_eval->addWeightingFunction( scheme, function, weighting_parameters, weight );
-	
-	// TODO: add all other summarizers
-	const strus::SummarizerFunctionInterface *sum = query_processor->getSummarizerFunction( "attribute" );
-	if( !sum ) {
-		report_error( ERROR_QUERY_CMD_GET_SUMMARIZER_FUNCTION_INSTANCE, service.getLastStrusError( ) );
-		service.deleteQueryEvalInterface( );
-		service.deleteQueryProcessorInterface( );
-		return;
-	}
-	std::vector<std::string> attribute_summarizers = qry_req.summarizer.attributes;
-	for( std::vector<std::string>::const_iterator it = attribute_summarizers.begin( ); it != attribute_summarizers.end( ); it++ ) {
+	for( std::vector<struct SummarizerConfiguration>::const_iterator it = qry_req.summarizer.begin( ); it != qry_req.summarizer.end( ); it++ ) {
+		std::string name = it->name;
+		const strus::SummarizerFunctionInterface *sum = query_processor->getSummarizerFunction( name );
+		if( !sum ) {
+			report_error( ERROR_QUERY_CMD_GET_SUMMARIZER_FUNCTION_INSTANCE, service.getLastStrusError( ) );
+			service.deleteQueryEvalInterface( );
+			service.deleteQueryProcessorInterface( );
+			return;
+		}
+
 		strus::SummarizerFunctionInstanceInterface *summarizer = sum->createInstance( query_processor );
 		if( !summarizer ) {
 			report_error( ERROR_QUERY_CMD_GET_SUMMARIZER_FUNCTION_INSTANCE, service.getLastStrusError( ) );
@@ -150,11 +153,28 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 			service.deleteQueryProcessorInterface( );
 			return;
 		}
-		
+
+		for( std::vector<std::pair<std::string, struct ParameterValue> >::const_iterator pit = it->params.begin( ); pit != it->params.end( ); pit++ ) {
+			switch( pit->second.type ) {
+				case PARAMETER_TYPE_STRING:
+					summarizer->addStringParameter( pit->first, pit->second.s );
+					break;
+				case PARAMETER_TYPE_NUMERIC:
+					summarizer->addNumericParameter( pit->first, pit->second.n );
+					break;
+				case PARAMETER_TYPE_UNKNOWN:
+				default:
+					report_error( ERROR_QUERY_CMD_GET_WEIGHTING_FUNCTION_PARAMETER, "Unknown type of weighting function parameter, internal error, check query object parsing!" );
+					service.deleteQueryEvalInterface( );
+					service.deleteQueryProcessorInterface( );
+					return;
+			}
+		}
+
+		// TODO: add feature and other weighting parameters which are not mere
+		// constants
 		std::vector<strus::QueryEvalInterface::FeatureParameter> summarizer_parameters;
-		summarizer->addStringParameter( "name", *it );
-		
-		query_eval->addSummarizerFunction( *it, summarizer, summarizer_parameters, *it );
+		query_eval->addSummarizerFunction( name, summarizer, summarizer_parameters, name );
 	}
 	
 	query_eval->addSelectionFeature( "sel" );

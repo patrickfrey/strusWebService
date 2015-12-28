@@ -39,34 +39,55 @@ struct ParameterValue {
 	ParameterValue( const float &f )
 		: type( PARAMETER_TYPE_NUMERIC ),
 		n( f ) { }
-		
+
+	ParameterValue( const std::string &_s )
+		: type( PARAMETER_TYPE_STRING ),
+		s( _s ) { }
 };
 
-struct WeightingScheme {
+struct WeightingConfiguration {
 	std::string name;
-	std::vector<std::pair<std::string, struct ParameterValue> > params;	
+	std::vector<std::pair<std::string, struct ParameterValue> > params;
+	float weight;
 };
 
-struct WeightingParameters {
-	struct WeightingScheme scheme;
-};
-
-struct SummarizerParameters {
-	std::vector<std::string> attributes;
+struct SummarizerConfiguration {
+	std::string name;
+	std::vector<std::pair<std::string, struct ParameterValue> > params;
 };
 
 struct QueryRequest : public QueryRequestBase {
 	std::string text;
 	size_t first_rank;
 	size_t nof_ranks;
-	struct SummarizerParameters summarizer;
-	struct WeightingParameters weighting;
+	std::vector<struct WeightingConfiguration> weighting;
+	std::vector<struct SummarizerConfiguration> summarizer;
 	
 	QueryRequest( ) : 
 		text( "" ),
 		first_rank( DEFAULT_QUERY_FIRST_RANK ),
 		nof_ranks( DEFAULT_QUERY_NOF_RANKS ),
-		summarizer( ), weighting( ) { }
+		weighting( ), summarizer( ) { }
+
+	QueryRequest( const std::string &_text, size_t _first_rank = DEFAULT_QUERY_FIRST_RANK, size_t _nof_ranks = DEFAULT_QUERY_NOF_RANKS ) :
+		text( _text  ),
+		first_rank( _first_rank ),
+		nof_ranks( _nof_ranks ),
+		weighting( ), summarizer( )
+	{
+		struct WeightingConfiguration standard_scheme;
+		standard_scheme.name = DEFAULT_WEIGHTING_SCHEME;
+		standard_scheme.params.push_back( std::make_pair( "k1", ParameterValue( DEFAULT_BM25_K1 ) ) );
+		standard_scheme.params.push_back( std::make_pair( "b", ParameterValue( DEFAULT_BM25_B ) ) );
+		standard_scheme.params.push_back( std::make_pair( "avgdoclen", ParameterValue( DEFAULT_BM25_AVGDOCLEN ) ) );
+		standard_scheme.params.push_back( std::make_pair( "doclen", ParameterValue( DEFAULT_BM25_METADATA_DOCLEN ) ) );
+		weighting.push_back( standard_scheme );
+
+		struct SummarizerConfiguration standard_summarizer;
+		standard_summarizer.name = DEFAULT_SUMMARIZER;
+		standard_summarizer.params.push_back( std::make_pair( "name", ParameterValue( DEFAULT_ATTRIBUTE_DOCID ) ) );
+		summarizer.push_back( standard_summarizer );
+	}
 };
 
 struct QueryResponseBase{
@@ -112,16 +133,21 @@ struct traits<QueryRequest> {
 		q.text = v.get<std::string>( "text", "" );		
 		q.first_rank = v.get<size_t>( "first_rank", DEFAULT_QUERY_FIRST_RANK );
 		q.nof_ranks = v.get<size_t>( "nof_ranks", DEFAULT_QUERY_NOF_RANKS );
-		//~ struct SummarizerParameters standard_summarizer;
-		//~ standard_summarizer.attributes.push_back( DEFAULT_ATTRIBUTE_DOCID );
-		//~ q.summarizer = v.get<struct SummarizerParameters>( "summarizer", standard_summarizer );
-		q.summarizer = v.get<struct SummarizerParameters>( "summarizer" );
-		struct WeightingParameters standard_weighting;
-		standard_weighting.scheme.name = DEFAULT_WEIGHTING_SCHEME;
-		standard_weighting.scheme.params.push_back( std::make_pair( "k1", ParameterValue( DEFAULT_BM25_K1 ) ) );
-		standard_weighting.scheme.params.push_back( std::make_pair( "b", ParameterValue( DEFAULT_BM25_B ) ) );
-		standard_weighting.scheme.params.push_back( std::make_pair( "avgdoclen", ParameterValue( DEFAULT_BM25_AVGDOCLEN ) ) );
-		q.weighting = v.get<struct WeightingParameters>( "weighting", standard_weighting );
+		std::vector<struct WeightingConfiguration> standard_weightings;
+		struct WeightingConfiguration standard_scheme;
+		standard_scheme.name = DEFAULT_WEIGHTING_SCHEME;
+		standard_scheme.params.push_back( std::make_pair( "k1", ParameterValue( DEFAULT_BM25_K1 ) ) );
+		standard_scheme.params.push_back( std::make_pair( "b", ParameterValue( DEFAULT_BM25_B ) ) );
+		standard_scheme.params.push_back( std::make_pair( "avgdoclen", ParameterValue( DEFAULT_BM25_AVGDOCLEN ) ) );
+		standard_scheme.params.push_back( std::make_pair( "doclen", ParameterValue( DEFAULT_BM25_METADATA_DOCLEN ) ) );
+		standard_weightings.push_back( standard_scheme );
+		q.weighting = v.get<std::vector<struct WeightingConfiguration> >( "weighting", standard_weightings );
+		std::vector<struct SummarizerConfiguration> standard_summarizers;
+		struct SummarizerConfiguration standard_summarizer;
+		standard_summarizer.name = DEFAULT_SUMMARIZER;
+		standard_summarizer.params.push_back( std::make_pair( "name", ParameterValue( DEFAULT_ATTRIBUTE_DOCID ) ) );
+		standard_summarizers.push_back( standard_summarizer );
+		q.summarizer = v.get<std::vector<struct SummarizerConfiguration> >( "summarizer", standard_summarizers );
 		return q;
 	}
 	
@@ -130,55 +156,17 @@ struct traits<QueryRequest> {
 		v.set( "text", q.text );
 		v.set( "first_rank", q.first_rank );
 		v.set( "nof_ranks", q.nof_ranks );
-		v.set( "summarizer", q.summarizer );
 		v.set( "weighting", q.weighting );
+		v.set( "summarizer", q.summarizer );
 	}
 };
 
 template<>
-struct traits<struct SummarizerParameters> {
-	
-	static struct SummarizerParameters get( value const &v )
-	{
-		struct SummarizerParameters p;
-		if( v.type( ) != is_object ) {
-			throw bad_value_cast( );
-		}
-		p.attributes = v.get<std::vector<std::string> >( "attributes" );
-		return p;
-	}
-	
-	static void set( value &v, struct SummarizerParameters const &p )
-	{
-		v.set( "attributes", p.attributes );
-	}
-};
+struct traits<struct SummarizerConfiguration> {
 
-template<>
-struct traits<struct WeightingParameters> {
-	
-	static struct WeightingParameters get( value const &v )
+	static struct SummarizerConfiguration get( value const &v )
 	{
-		struct WeightingParameters p;
-		if( v.type( ) != is_object ) {
-			throw bad_value_cast( );
-		}
-		p.scheme = v.get<struct WeightingScheme>( "scheme" );
-		return p;
-	}
-	
-	static void set( value &v, struct WeightingParameters const &p )
-	{
-		v.set( "scheme", p.scheme );
-	}
-};
-
-template<>
-struct traits<struct WeightingScheme> {
-	
-	static struct WeightingScheme get( value const &v )
-	{
-		struct WeightingScheme s;
+		struct SummarizerConfiguration s;
 		if( v.type( ) != is_object ) {
 			throw bad_value_cast( );
 		}
@@ -187,10 +175,33 @@ struct traits<struct WeightingScheme> {
 		return s;
 	}
 	
-	static void set( value &v, struct WeightingScheme const &s )
+	static void set( value &v, struct SummarizerConfiguration const &s )
 	{
 		v.set( "name", s.name );
 		v.set( "params", s.params );
+	}
+};
+
+template<>
+struct traits<struct WeightingConfiguration> {
+	
+	static struct WeightingConfiguration get( value const &v )
+	{
+		struct WeightingConfiguration s;
+		if( v.type( ) != is_object ) {
+			throw bad_value_cast( );
+		}
+		s.name = v.get<std::string>( "name" );
+		s.params = v.get<std::vector<std::pair<std::string, struct ParameterValue> > >( "params" );
+		s.weight = v.get<float>( "weight" );
+		return s;
+	}
+	
+	static void set( value &v, struct WeightingConfiguration const &s )
+	{
+		v.set( "name", s.name );
+		v.set( "params", s.params );
+		v.set( "weight", s.weight );
 	}
 };
 

@@ -33,7 +33,7 @@
 						text: $( '#search' ).val( ),
 						first_rank: 0,
 						nof_ranks: 20,
-						weighting: {
+						weighting: [
 							// schemes
 							// meta: name
 							// BM25: b and k1, avgdoclen
@@ -41,19 +41,50 @@
 							// frequency: match
 							// constant: match
 							// formula: match and formula, parameters of formula
-							scheme: {
+							{
 								name: $( '#scheme' ).val( ),
 								// TODO: make this depend on the current scheme
 								params: [
 									//~ { key: "b", value: 0.75 },
 									//~ { key: "k1", value: 1.0001 },
 									//~ { key: "avgdoclen", value: 11943 }
+								],
+								weight: 0.8
+							},
+							{
+								name: "td",
+								params: [
+								],
+								weight: 0.2
+							}
+						],
+						summarizer: [
+							{
+								name: "attribute",
+								params: [
+									{ "name" : "docid" }
 								]
-							}		
-						},
-						summarizer: {
-							attributes: $( "#attribute" ).val( ) || []
-						}
+							},
+							{
+								name: "attribute",
+								params: [
+									{ "name" : "title" }
+								]
+							},
+							{
+								name: "attribute",
+								params: [
+									{ "name" : "dossier" }
+								]
+							},
+							{
+								name: "metadata",
+								params: [
+									{ "name" : "doclen" }
+								]
+							}
+//							attributes: $( "#attribute" ).val( ) || []
+						]
 					}
 				};
 				

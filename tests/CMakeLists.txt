@@ -60,6 +60,10 @@ add_test( NAME transaction_insert_doc3 COMMAND curlJsonTester transaction_insert
 
 add_test( NAME transaction_commit COMMAND curlJsonTester transaction_commit )
 
+# query.cpp
+
+add_test( NAME query_in_url COMMAND curlJsonTester query_in_url )
+
 # index.cpp (cleaning up)
 
 add_test( NAME delete_index_A COMMAND curlJsonTester delete_index_A )
