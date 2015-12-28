@@ -52,6 +52,7 @@ struct WeightingConfiguration {
 };
 
 struct SummarizerConfiguration {
+	std::string attribute;
 	std::string name;
 	std::vector<std::pair<std::string, struct ParameterValue> > params;
 };
@@ -84,6 +85,7 @@ struct QueryRequest : public QueryRequestBase {
 		weighting.push_back( standard_scheme );
 
 		struct SummarizerConfiguration standard_summarizer;
+		standard_summarizer.attribute = DEFAULT_ATTRIBUTE_DOCID;
 		standard_summarizer.name = DEFAULT_SUMMARIZER;
 		standard_summarizer.params.push_back( std::make_pair( "name", ParameterValue( DEFAULT_ATTRIBUTE_DOCID ) ) );
 		summarizer.push_back( standard_summarizer );
@@ -144,6 +146,7 @@ struct traits<QueryRequest> {
 		q.weighting = v.get<std::vector<struct WeightingConfiguration> >( "weighting", standard_weightings );
 		std::vector<struct SummarizerConfiguration> standard_summarizers;
 		struct SummarizerConfiguration standard_summarizer;
+		standard_summarizer.attribute = DEFAULT_ATTRIBUTE_DOCID;
 		standard_summarizer.name = DEFAULT_SUMMARIZER;
 		standard_summarizer.params.push_back( std::make_pair( "name", ParameterValue( DEFAULT_ATTRIBUTE_DOCID ) ) );
 		standard_summarizers.push_back( standard_summarizer );
@@ -170,6 +173,7 @@ struct traits<struct SummarizerConfiguration> {
 		if( v.type( ) != is_object ) {
 			throw bad_value_cast( );
 		}
+		s.attribute = v.get<std::string>( "attribute" );
 		s.name = v.get<std::string>( "name" );
 		s.params = v.get<std::vector<std::pair<std::string, struct ParameterValue> > >( "params" );
 		return s;
@@ -177,6 +181,7 @@ struct traits<struct SummarizerConfiguration> {
 	
 	static void set( value &v, struct SummarizerConfiguration const &s )
 	{
+		v.set( "attribute", s.attribute );
 		v.set( "name", s.name );
 		v.set( "params", s.params );
 	}

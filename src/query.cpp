@@ -132,7 +132,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		// constants
 		// TODO: map parameters which are specific per query, i.e. the name of the feature set
 		std::vector<strus::QueryEvalInterface::FeatureParameter> weighting_parameters;
-		weighting_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "feat" ) );
+		//~ weighting_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "feat" ) );
 		query_eval->addWeightingFunction( scheme, function, weighting_parameters, it->weight );
 	}
 
@@ -174,7 +174,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		// TODO: add feature and other weighting parameters which are not mere
 		// constants
 		std::vector<strus::QueryEvalInterface::FeatureParameter> summarizer_parameters;
-		query_eval->addSummarizerFunction( name, summarizer, summarizer_parameters, name );
+		query_eval->addSummarizerFunction( name, summarizer, summarizer_parameters, it->attribute );
 	}
 	
 	query_eval->addSelectionFeature( "sel" );

@@ -45,9 +45,10 @@
 								name: $( '#scheme' ).val( ),
 								// TODO: make this depend on the current scheme
 								params: [
-									//~ { key: "b", value: 0.75 },
-									//~ { key: "k1", value: 1.0001 },
-									//~ { key: "avgdoclen", value: 11943 }
+									{ key: "b", value: 0.751 },
+									{ key: "k1", value: 1.0001 },
+									{ key: "avgdoclen", value: 11943 },
+									{ key: "doclen", value: "doclen" }
 								],
 								weight: 0.8
 							},
@@ -60,27 +61,43 @@
 						],
 						summarizer: [
 							{
+								attribute: "docid",
 								name: "attribute",
 								params: [
-									{ "name" : "docid" }
+									{ "key" : "name",
+									  "value" : "docid" }
 								]
 							},
 							{
+								attribute: "title",
 								name: "attribute",
 								params: [
-									{ "name" : "title" }
+									{ "key": "name",
+									  "value" : "title" }
 								]
 							},
 							{
+								attribute: "dossier",
 								name: "attribute",
 								params: [
-									{ "name" : "dossier" }
+									{ "key" : "name", 
+									  "value" : "dossier" }
 								]
 							},
 							{
+								attribute: "doclen",
 								name: "metadata",
 								params: [
-									{ "name" : "doclen" }
+									{ "key" : "name",
+									  "value" : "doclen" }
+								]
+							},
+							{
+								attribute: "docweight",
+								name: "metadata",
+								params: [
+									{ "key" : "name",
+									  "value" : "docweight" }
 								]
 							}
 //							attributes: $( "#attribute" ).val( ) || []

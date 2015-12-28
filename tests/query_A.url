@@ -1,0 +1,3 @@
+POST
+http://localhost:8080/strus/query/A
+{ "query" : { "text" : "hello", "first_rank" : 0, "nof_ranks" : 10, "weighting" : [ { "name": "metadata", "params": [ { "key": "name", "value": "docweight" } ], "weight": 0.0 }, { "name": "tf", "params": [ { "key": "match", "value": "x" } ], "weight": 1.0 } ], "summarizer": [ { "attribute" : "docid", "name" : "attribute", "params" : [ { "key": "name", "value" : "docid" } ] }, { "attribute" : "title", "name" : "attribute", "params" : [ { "key": "name", "value" : "title" } ] } ] } }
