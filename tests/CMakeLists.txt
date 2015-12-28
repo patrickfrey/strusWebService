@@ -17,7 +17,7 @@ add_test( NAME invalid_json COMMAND curlJsonTester invalid_json )
 
 # index.cpp
 
-add_test( NAME create_index_A_params_missing COMMAND curlJsonTester create_index_A_params_missing )
+add_test( NAME create_index_params_missing COMMAND curlJsonTester create_index_params_missing )
 add_test( NAME create_index_A COMMAND curlJsonTester create_index_A )
 add_test( NAME create_index_B COMMAND curlJsonTester create_index_B )
 
