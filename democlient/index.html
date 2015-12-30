@@ -132,26 +132,6 @@
 				} );
 			};
 
-			function reload_attributes( ) {
-				// get list of attributes of the current search index for presentation
-				// in the attribute summarizer
-				$.ajax( {
-					type : 'GET',
-					url : '/strus/index/config/' + $( '#index' ).val( ),
-					contentType : 'application/json'
-				} ).done( function( data ) {
-					html = '<select multiple id="attribute" class="attribute" name="attribute" size="3">';
-					$.each( data.config.attributes, function( key, value ) {
-						html += "<option value='" + value + "'>" + value + "</option>"
-					} );
-					html += '</select>';
-					$( '#attributes' ).html( html );
-
-					// make sure the 'docid' attribute is always select by default
-					$('#attribute option[value="docid"]').attr( "selected", "selected" ).change( );
-				} );
-			};
-
 			function reload_weighting_parameters( ) {
 				$.ajax( {
 					type : 'GET',
@@ -171,7 +151,6 @@
 								//       attributes should be three type, otherwise
 								//       we cannot prepare the proper values for the
 								//       the select box below
-								console.log( value2 );
 								switch( value2.type ) {
 									case 'string':
 										html_inputs += '<input size="10" id="weighting_param_' + value2.name + '" value=""/><br/>';
@@ -181,14 +160,36 @@
 										html_inputs += '<input type="number" step="any" size="10" id="weighting_param_' + value2.name + '" value=""/><br/>';
 										break;
 									case 'feature':
-									case 'attribute':
-									case 'metadata':
 										html_inputs += '<select id=weighting_param_' + value2.name + '" size="1">';
 										// TODO: fill in the possible values from 'metadata', 'attributes' or 'features'
 										//~ $.each( data.config.attributes, function( key, value ) {
 											//~ html += "<option value='" + value + "'>" + value + "</option>"
 										//~ } );
 										html_inputs += '</select><br/>';
+										break;
+									case 'attribute':
+										html_inputs += '<select id="weighting_param_' + value2.name + '" ' +
+											'name=weighting_param_' + value2.name + '"' +
+											' size="1">';
+										html_inputs += '</select><br/>';
+										$( "#weighting_param_" + value2.name ).ready( function( ) {
+											reload_attributes( "weighting_param_" + value2.name );
+										} );
+										$( 'body' ).on( 'change', 'select.index', function( ) {
+											reload_attributes( "weighting_param_" + value2.name );
+										} );
+										break;
+									case 'metadata':
+										html_inputs += '<select id="weighting_param_' + value2.name + '" ' +
+											'name=weighting_param_' + value2.name + '"' +
+											' size="1">';
+										html_inputs += '</select><br/>';
+										$( "#weighting_param_" + value2.name ).ready( function( ) {
+											reload_metadata( "weighting_param_" + value2.name );
+										} );
+										$( 'body' ).on( 'change', 'select.index', function( ) {
+											reload_metadata( "weighting_param_" + value2.name );
+										} );
 										break;
 								}
 								html_labels += '<label for="weighting_param_' + value2.name + '">' + value2.name + ':</label><br/>';
@@ -231,6 +232,59 @@
 				} );
 			}
 
+			(function($, window) {
+				$.fn.replaceOptions = function(options) {
+					var self, $option;
+
+					this.empty();
+					self = this;
+
+					$.each(options, function(index, option) {
+						$option = $("<option></option>")
+							.attr("value", option.value)
+							.text(option.text);
+						self.append($option);
+					});
+				};
+			})(jQuery, window);
+
+			function reload_attributes( name ) {
+				// get list of attributes of the current search index for presentation
+				// in all dropboxes needed an attribute as parameter
+				$.ajax( {
+					type : 'GET',
+					url : '/strus/index/config/' + $( '#index' ).val( ),
+					contentType : 'application/json'
+				} ).done( function( data ) {
+					var options = [];
+					var list = document.getElementById(name);
+					$.each( data.config.attributes, function( key, v ) {
+						options.push( { text: v, value: v } );
+					} );
+					$( "#" + name ).replaceOptions( options );
+
+					// make sure the 'docid' attribute is always select by default
+					$('#' + name + ' option[value="docid"]').attr( "selected", "selected" ).change( );
+				} );
+			}
+
+			function reload_metadata( name ) {
+				// get list of metadata of the current search index for presentation
+				// in all dropboxes needed a metadata name as parameter
+				$.ajax( {
+					type : 'GET',
+					url : '/strus/index/config/' + $( '#index' ).val( ),
+					contentType : 'application/json'
+				} ).done( function( data ) {
+					var options = [];
+					var list = document.getElementById(name);
+					$.each( data.config.metadata, function( key, v ) {
+						options.push( { text: v.name, value: v.name } );
+					} );
+					$( "#" + name ).replaceOptions( options );
+				} );
+			}
+			
 			function reload_summarizer_parameters( ) {
 				$.ajax( {
 					type : 'GET',
@@ -259,14 +313,36 @@
 										html_inputs += '<input type="number" step="any" size="10" id="summarizer_param_' + value2.name + '" value=""/><br/>';
 										break;
 									case 'feature':
-									case 'attribute':
-									case 'metadata':
-										html_inputs += '<select id=summarizer_param_' + value2.name + '" size="1">';
+										html_inputs += '<select id="summarizer_param_' + value2.name + '" size="1">';
 										// TODO: fill in the possible values from 'metadata', 'attributes' or 'features'
 										//~ $.each( data.config.attributes, function( key, value ) {
 											//~ html += "<option value='" + value + "'>" + value + "</option>"
 										//~ } );
 										html_inputs += '</select><br/>';
+										break;
+									case 'attribute':
+										html_inputs += '<select id="summarizer_param_' + value2.name + '" ' +
+											'name=summarizer_param_' + value2.name + '"' +
+											' size="1">';
+										html_inputs += '</select><br/>';
+										$( "#summarizer_param_" + value2.name ).ready( function( ) {
+											reload_attributes( "summarizer_param_" + value2.name );
+										} );
+										$( 'body' ).on( 'change', 'select.index', function( ) {
+											reload_attributes( "summarizer_param_" + value2.name );
+										} );
+										break;
+									case 'metadata':
+										html_inputs += '<select id="summarizer_param_' + value2.name + '" ' +
+											'name=summarizer_param_' + value2.name + '"' +
+											' size="1">';
+										html_inputs += '</select><br/>';
+										$( "#summarizer_param_" + value2.name ).ready( function( ) {
+											reload_metadata( "summarizer_param_" + value2.name );
+										} );
+										$( 'body' ).on( 'change', 'select.index', function( ) {
+											reload_metadata( "summarizer_param_" + value2.name );
+										} );
 										break;
 								}
 								html_labels += '<label for="summarizer_param_' + value2.name + '">' + value2.name + ':</label><br/>';
@@ -276,6 +352,7 @@
 
 					$( '#summarizer_parameters' ).html( html_inputs );
 					$( '#summarizer_parameters_labels' ).html( html_labels );
+
 				} );
 			}
 
@@ -369,14 +446,11 @@
 					} );
 					html += '</select>';
 					$( '#indexes' ).html( html );
-					// select first index (so that attributes get filled in)
-					reload_attributes( );
 				} );
 
 				// redo the query when changing the index
 				$( 'body' ).on( 'change', 'select.index', function( ) {
 					query( );
-					reload_attributes( );
 				} );
 
 				// redo the query when changing the index
