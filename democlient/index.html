@@ -27,6 +27,42 @@
 				return ret;
 			}
 
+			function get_weighting_parameters( ) {
+				var params = [];
+				$( '*[id^="weighting_param_"]' ).each( function( ) {
+					var key = $(this).attr( 'id' ).split( '_' )[2];
+					var value;
+					if( $(this).is( 'select' ) ) {
+						value = $(this).find( ":selected" ).text( );
+					} else {
+						value = $(this).val( );
+					}
+					params.push( {
+						key : key,
+						value: value
+					} );
+				} );
+				return params;
+			}
+
+			function get_summarizer_parameter( ) {
+				var params = [];
+				$( '*[id^="summarizer_param_"]' ).each( function( ) {
+					var key = $(this).attr( 'id' ).split( '_' )[2];
+					var value;
+					if( $(this).is( 'select' ) ) {
+						value = $(this).find( ":selected" ).text( );
+					} else {
+						value = $(this).val( );
+					}
+					params.push( {
+						key : key,
+						value: value
+					} );
+				} );
+				return params;
+			}
+
 			function query( ) {
 				var request = {
 					query: {
@@ -34,73 +70,22 @@
 						first_rank: 0,
 						nof_ranks: 20,
 						weighting: [
-							// schemes
-							// meta: name
-							// BM25: b and k1, avgdoclen
-							// weight: match
-							// frequency: match
-							// constant: match
-							// formula: match and formula, parameters of formula
+							// TODO: have multiple weighting schemes
 							{
 								name: $( '#scheme' ).val( ),
-								// TODO: make this depend on the current scheme
-								params: [
-									{ key: "b", value: 0.751 },
-									{ key: "k1", value: 1.0001 },
-									{ key: "avgdoclen", value: 11943 },
-									{ key: "doclen", value: "doclen" }
-								],
+								params: get_weighting_parameters( ),
+								// TODO: add box for this
 								weight: 0.8
-							},
-							{
-								name: "td",
-								params: [
-								],
-								weight: 0.2
 							}
 						],
 						summarizer: [
 							{
-								attribute: "docid",
-								name: "attribute",
-								params: [
-									{ "key" : "name",
-									  "value" : "docid" }
-								]
-							},
-							{
-								attribute: "title",
-								name: "attribute",
-								params: [
-									{ "key": "name",
-									  "value" : "title" }
-								]
-							},
-							{
-								attribute: "dossier",
-								name: "attribute",
-								params: [
-									{ "key" : "name", 
-									  "value" : "dossier" }
-								]
-							},
-							{
-								attribute: "doclen",
-								name: "metadata",
-								params: [
-									{ "key" : "name",
-									  "value" : "doclen" }
-								]
-							},
-							{
-								attribute: "docweight",
-								name: "metadata",
-								params: [
-									{ "key" : "name",
-									  "value" : "docweight" }
-								]
+								// TODO: think about naming the attribute,
+								// for now name it exacly as the method
+								attribute: $( '#summarizer' ).val( ),
+								name: $( '#summarizer' ).val( ),
+								params: get_summarizer_parameter( )
 							}
-//							attributes: $( "#attribute" ).val( ) || []
 						]
 					}
 				};
@@ -160,7 +145,7 @@
 										html_inputs += '<input type="number" step="any" size="10" id="weighting_param_' + value2.name + '" value=""/><br/>';
 										break;
 									case 'feature':
-										html_inputs += '<select id=weighting_param_' + value2.name + '" size="1">';
+										html_inputs += '<select id="xweighting_param_' + value2.name + '" size="1">';
 										// TODO: fill in the possible values from 'metadata', 'attributes' or 'features'
 										//~ $.each( data.config.attributes, function( key, value ) {
 											//~ html += "<option value='" + value + "'>" + value + "</option>"
@@ -169,7 +154,7 @@
 										break;
 									case 'attribute':
 										html_inputs += '<select id="weighting_param_' + value2.name + '" ' +
-											'name=weighting_param_' + value2.name + '"' +
+											'name="weighting_param_' + value2.name + '"' +
 											' size="1">';
 										html_inputs += '</select><br/>';
 										$( "#weighting_param_" + value2.name ).ready( function( ) {
@@ -181,7 +166,7 @@
 										break;
 									case 'metadata':
 										html_inputs += '<select id="weighting_param_' + value2.name + '" ' +
-											'name=weighting_param_' + value2.name + '"' +
+											'name="weighting_param_' + value2.name + '"' +
 											' size="1">';
 										html_inputs += '</select><br/>';
 										$( "#weighting_param_" + value2.name ).ready( function( ) {
@@ -192,6 +177,10 @@
 										} );
 										break;
 								}
+								// redo the query when changing a parameter
+								$( 'body' ).on( 'change', "#weighting_param_" + value2.name, function( ) {
+									query( );
+								} );								
 								html_labels += '<label for="weighting_param_' + value2.name + '">' + value2.name + ':</label><br/>';
 							} );
 						}	
@@ -262,9 +251,6 @@
 						options.push( { text: v, value: v } );
 					} );
 					$( "#" + name ).replaceOptions( options );
-
-					// make sure the 'docid' attribute is always select by default
-					$('#' + name + ' option[value="docid"]').attr( "selected", "selected" ).change( );
 				} );
 			}
 
@@ -322,7 +308,7 @@
 										break;
 									case 'attribute':
 										html_inputs += '<select id="summarizer_param_' + value2.name + '" ' +
-											'name=summarizer_param_' + value2.name + '"' +
+											'name="summarizer_param_' + value2.name + '"' +
 											' size="1">';
 										html_inputs += '</select><br/>';
 										$( "#summarizer_param_" + value2.name ).ready( function( ) {
@@ -334,7 +320,7 @@
 										break;
 									case 'metadata':
 										html_inputs += '<select id="summarizer_param_' + value2.name + '" ' +
-											'name=summarizer_param_' + value2.name + '"' +
+											'name="summarizer_param_' + value2.name + '"' +
 											' size="1">';
 										html_inputs += '</select><br/>';
 										$( "#summarizer_param_" + value2.name ).ready( function( ) {
@@ -345,6 +331,10 @@
 										} );
 										break;
 								}
+								// redo the query when changing a parameter
+								$( 'body' ).on( 'change', "#summarizer_param_" + value2.name, function( ) {
+									query( );
+								} );								
 								html_labels += '<label for="summarizer_param_' + value2.name + '">' + value2.name + ':</label><br/>';
 							} );
 						}	
@@ -386,6 +376,26 @@
 				} );
 			}
 			
+			function show_operator_info( ) {
+				$.ajax( {
+					type : 'GET',
+					url : '/strus/config',
+					contentType : 'application/json'
+				} ).done( function( data ) {
+					
+					var operator = $( '#operator' ).val( );
+					
+					var html = "<h3>Posting join operator '" + operator + "'</h3>";
+					$.each( data.config.posting_join_operators, function( key, value ) {
+						if( value.name == operator ) {
+							html += "<p>" + value.description + "</p>";
+						}	
+					} );
+
+					$( '#operator_info' ).html( html );					
+				} );
+			}				
+			
 			$( window ).load( function( ) {				
 				// introspect the configuration for weighting functions
 				$.ajax( {
@@ -418,6 +428,32 @@
 					$( '#summarizers' ).html( html );
 					show_summarizer_info( );
 					reload_summarizer_parameters( );
+
+					$( 'body' ).on( 'load', 'select.summarizer', function( ) {
+						alert( 'ready' );
+							//~ reload_metadata( "summarizer_param_" + value2.name );
+					} );
+
+					// make sure the attribute summarizer and the docid attribute is always select by default
+					$( '#summarizer option[value="attribute"]' ).attr( "selected", "selected" ).change( );
+					$( '#summarizer_param_name option[value="docid"]').attr( "selected", "selected" ).change( );
+
+				} );
+
+				// introspect the configuration for query operators
+				$.ajax( {
+					type : 'GET',
+					url : '/strus/config',
+					contentType : 'application/json'
+				} ).done( function( data ) {
+					html = '<select id="operator" class="operator" name="operator" size="1">';
+					$.each( data.config.posting_join_operators, function( key, value ) {
+						html += "<option>" + value.name + "</option>";
+					} );
+					html += '</select>';
+					$( '#operators' ).html( html );
+					show_operator_info( );
+					//~ reload_summarizer_parameters( );
 				} );
 
 				// redo the query when changing the schema
@@ -432,6 +468,12 @@
 					query( );
 					show_summarizer_info( );
 					reload_summarizer_parameters( );
+				} );
+
+				// redo the query when changing the join operator
+				$( 'body' ).on( 'change', 'select.operator', function( ) {
+					query( );
+					show_operator_info( );
 				} );
 
 				// introspect service for list of all search indexes
@@ -453,16 +495,11 @@
 					query( );
 				} );
 
-				// redo the query when changing the index
-				$( 'body' ).on( 'change', 'select.attribute', function( ) {
-					query( );					
-				} );
-								
 				// execute query on new characters
 				$( '#search' ).keyup( function( ) {
 					query( );
 				} );	
-				
+
 				// change layout (rexecute query)
 				$( 'body' ).on( 'change', 'select.layout', function( ) {
 					query( );
@@ -473,50 +510,61 @@
 
 	<body>		
 		<section>
-			<div id="form">
-		<form role="form">			
-			<fieldset>
-				<div class="labels">
-				  <label for="indexes">Search index:</label><br>
-				  <label for="schemes">Weighting schema:</label><br>
-				  <div id="weighting_parameters_labels"></div>
-				  <label for="summarizers">Summarizer function:</label><br>
-				  <div id="summarizer_parameters_labels"></div>
-				  <label for="layout">layout of ranklist:</label><br>
-				  <label for="search">Search terms:</label><br>
-				</div>
-				<div class="inputs">
-					<div id="indexes"></div>
-					<div id="schemes"></div>
-					<div id="weighting_parameters"></div>
-					<div id="summarizers"></div>
-					<div id="summarizer_parameters"></div>
-					<div id="layouts">
-						<select id="layout" name="layout" class="layout" size="1">
-							<option value="json">raw JSON</option>
-							<option value="list">list</option>
-						</select>
-					</div>
-  				    <input required autocomplete='off' class="form-control input-lg" id="search" placeholder="Enter query terms ....">
-				</div>
+			<div id="left">
+				<form role="form">			
+					<fieldset>
+						<div class="labels">
+							<label for="indexes">Search index:</label><br>
+							<label for="schemes">Weighting schema:</label><br>
+							<div id="weighting_parameters_labels"></div>
+							<label for="summarizers">Summarizer function:</label><br>
+							<div id="summarizer_parameters_labels"></div>
+							<label for="layout">layout of ranklist:</label><br>
+							<label for="operators">Search term operator:</label><br>
+							<label for="search">Search terms:</label><br>
+						</div>
+						<div class="inputs">
+							<div id="indexes"></div>
+							<div id="schemes"></div>
+							<div id="weighting_parameters"></div>
+							<div id="summarizers"></div>
+							<div id="summarizer_parameters"></div>
+							<div>
+							<select id="layout" name="layout" class="layout" size="1">
+								<option value="json">raw JSON</option>
+								<option value="list">list</option>
+							</select>
+							</div>
+							<div id="operators"></div>
+							<div>
+								<input required autocomplete='off' class="form-control input-lg" id="search" placeholder="Enter query terms ....">
+							</div>
+						</div>
+					</fieldset>
+				</form>
+			</div>
+
+			<div id="right">
 				<div id="weighting_info">
 					loading..
 				</div>
 				<div id="summarizer_info">
 					loading..
 				</div>
+				<div id="operator_info">
+					loading..
+				</div>
 			</div>
-			</fieldset>
-		</form>
 
-		<div id="request">
-		Request:
-			<div id="request_data">loading...</div>
-		</div>
-		<div id="response">
-		Response:
-		<div id="response_data">loading...</div>
-		</div>
+			<div id="middle">
+				<div id="request">
+				Request:
+					<div id="request_data">loading...</div>
+				</div>
+				<div id="response">
+				Response:
+				<div id="response_data">loading...</div>
+			</div>
 		</section>
 	</body>
 </html>
