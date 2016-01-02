@@ -76,7 +76,15 @@ void other::config_cmd( )
 		config.summarizer_functions.push_back( sum_config );
 	}
 
-	config.posting_join_operators = query_processor->getFunctionList( strus::QueryProcessorInterface::PostingJoinOperator );
+	std::vector<std::string> operators = query_processor->getFunctionList( strus::QueryProcessorInterface::PostingJoinOperator );
+	for( std::vector<std::string>::const_iterator it = operators.begin( ); it != operators.end( ); it++ ) {
+		const strus::PostingJoinOperatorInterface *join_operator = query_processor->getPostingJoinOperator( *it );
+		PostingJoinOperatorConfiguration op_config;
+		strus::PostingJoinOperatorInterface::Description description = join_operator->getDescription( );
+		op_config.name = *it;
+		op_config.description = description.text( );
+		config.posting_join_operators.push_back( op_config );
+	}
 	
 	service.deleteQueryProcessorInterface( );
 

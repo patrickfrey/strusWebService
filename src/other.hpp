@@ -82,10 +82,15 @@ struct SummarizerFunctionConfiguration {
 	std::vector<FunctionParameter> parameter;
 };
 
+struct PostingJoinOperatorConfiguration {
+	std::string name;
+	std::string description;
+};
+
 struct ServiceConfiguration {
 	std::vector<WeightingFunctionConfiguration> weighting_functions;
 	std::vector<SummarizerFunctionConfiguration> summarizer_functions;
-	std::vector<std::string> posting_join_operators;
+	std::vector<PostingJoinOperatorConfiguration> posting_join_operators;
 };
 
 namespace apps {
@@ -117,7 +122,7 @@ struct traits<ServiceConfiguration> {
 		}		
 		c.weighting_functions = v.get<std::vector<WeightingFunctionConfiguration> >( "weighting_functions", std::vector<WeightingFunctionConfiguration>( ) );
 		c.summarizer_functions = v.get<std::vector<SummarizerFunctionConfiguration> >( "summarizer_functions", std::vector<SummarizerFunctionConfiguration>( ) );
-		c.posting_join_operators = v.get<std::vector<std::string> >( "posting_join_operators", std::vector<std::string>( ) );
+		c.posting_join_operators = v.get<std::vector<PostingJoinOperatorConfiguration> >( "posting_join_operators", std::vector<PostingJoinOperatorConfiguration>( ) );
 		return c;
 	}
 	
@@ -172,6 +177,27 @@ struct traits<SummarizerFunctionConfiguration> {
 		v.set( "name", c.name );
 		v.set( "description", c.description );
 		v.set( "parameter", c.parameter );
+	}
+	
+};
+
+template<>
+struct traits<PostingJoinOperatorConfiguration> {
+	
+	static PostingJoinOperatorConfiguration get( value const &v )
+	{
+		PostingJoinOperatorConfiguration c;
+		if( v.type( ) != is_object ) {
+			throw bad_value_cast( );
+		}		
+		c.name = v.get<std::string>( "name" );
+		c.description = v.get<std::string>( "description" );
+	}
+	
+	static void set( value &v, PostingJoinOperatorConfiguration const &c )
+	{
+		v.set( "name", c.name );
+		v.set( "description", c.description );
 	}
 	
 };
