@@ -63,25 +63,65 @@
 				return params;
 			}
 
+	//~ query->pushTerm( "word", qry_req.text );
+	//~ query->defineFeature( "feat", 1.0 );
+	//~ query->pushTerm( "word", qry_req.text );
+	// number of terms, range of operator, cardinality = minimal matching subelements in expr-tree
+	//~ query->pushExpression( op, 1, 0, 0 );
+	//~ query->defineFeature( "sel", 1.0 );
+	//~ defineMetaDataRestriction
+
 			function query( ) {
 				var request = {
 					query: {
 						text: $( '#search' ).val( ),
-						first_rank: 0,
-						nof_ranks: 20,
+						first_rank: parseInt( $( '#first_rank' ).val( ) ),
+						nof_ranks: parseInt( $( '#nof_ranks' ).val( ) ),
+						feature: {
+							name: "sel",
+							expression : {
+								op: "contains",
+								range: 0,
+								cardinality: 0,
+								args: [
+									{
+										feature: {
+											name: "feat",
+											terms: [
+												// TODO: split text input field into separate features like
+												// var key = $(this).attr( 'id' ).split( '_' )[2];
+												// TODO: word is a feature type which must be introspectable
+												{ type: "word", value: $( '#search' ).val( ) },
+											],
+											weight: 1.0
+										}
+									}
+								]
+							}
+						},
+						select: [
+							"sel"
+						],
+						restrict: [
+						],
+						exclude: [
+						],
+						// TODO: have multiple weighting schemes
 						weighting: [
-							// TODO: have multiple weighting schemes
 							{
 								name: $( '#scheme' ).val( ),
 								params: get_weighting_parameters( ),
-								// TODO: add box for this
-								weight: 0.8
+								weight: $( '#weight' ).val( )
 							}
 						],
+						// TODO: have multiple summarizers
 						summarizer: [
 							{
 								// TODO: think about naming the attribute,
 								// for now name it exacly as the method
+								// maybe better is the name per pair
+								// (method,param), for instance:
+								// (metadata,name), (attribute,name)
 								attribute: $( '#summarizer' ).val( ),
 								name: $( '#summarizer' ).val( ),
 								params: get_summarizer_parameter( )
@@ -101,7 +141,6 @@
 				
 				$.ajax( {
 					type : 'POST',
-					// TODO: indexname, dynamic dropdown list
 					url : '/strus/query/' + $( '#index' ).val( ),
 					data : json,
 					contentType : 'application/json'
@@ -278,11 +317,11 @@
 					contentType : 'application/json'
 				} ).done( function( data ) {
 					
-					var scheme = $( '#summarizer' ).val( );
+					var summarizer = $( '#summarizer' ).val( );
 					var html_inputs = "";
 					var html_labels = "";
 					$.each( data.config.summarizer_functions, function( key, value ) {
-						if( value.name == scheme ) {
+						if( value.name == summarizer ) {
 							$.each( value.parameter, function( key2, value2 ) {
 								// TODO: get default of parameter here
 								// TODO: ranges of parameters here
@@ -422,7 +461,11 @@
 				} ).done( function( data ) {
 					html = '<select id="summarizer" class="summarizer" name="summarizer" size="1">';
 					$.each( data.config.summarizer_functions, function( key, value ) {
-						html += "<option>" + value.name + "</option>";
+						if( value.name == 'attribute' ) {
+							html += '<option selected="selected">' + value.name + "</option>";
+						} else {
+							html += "<option>" + value.name + "</option>";
+						}
 					} );
 					html += '</select>';
 					$( '#summarizers' ).html( html );
@@ -435,7 +478,6 @@
 					} );
 
 					// make sure the attribute summarizer and the docid attribute is always select by default
-					$( '#summarizer option[value="attribute"]' ).attr( "selected", "selected" ).change( );
 					$( '#summarizer_param_name option[value="docid"]').attr( "selected", "selected" ).change( );
 
 				} );
@@ -463,6 +505,18 @@
 					reload_weighting_parameters( );
 				} );
 
+				// redo the query when we change the weight or the
+				// number of ranks or the first rank
+				$( 'body' ).on( 'change', '#weight', function( ) {
+					query( );
+				} );
+				$( 'body' ).on( 'change', '#first_rank', function( ) {
+					query( );
+				} );
+				$( 'body' ).on( 'change', '#nof_ranks', function( ) {
+					query( );
+				} );
+
 				// redo the query when changing the schema
 				$( 'body' ).on( 'change', 'select.summarizer', function( ) {
 					query( );
@@ -488,6 +542,9 @@
 					} );
 					html += '</select>';
 					$( '#indexes' ).html( html );
+
+					// initial query
+					query( );
 				} );
 
 				// redo the query when changing the index
@@ -503,7 +560,7 @@
 				// change layout (rexecute query)
 				$( 'body' ).on( 'change', 'select.layout', function( ) {
 					query( );
-				} );
+				} );				
 			} );
 		</script>      
 	</head>
@@ -514,8 +571,11 @@
 				<form role="form">			
 					<fieldset>
 						<div class="labels">
+							<label for="first_rank">First rank:</label><br>
+							<label for="nof_ranks">Number of ranks:</label><br>
 							<label for="indexes">Search index:</label><br>
 							<label for="schemes">Weighting schema:</label><br>
+							<label for="weight">Weight:</label><br>
 							<div id="weighting_parameters_labels"></div>
 							<label for="summarizers">Summarizer function:</label><br>
 							<div id="summarizer_parameters_labels"></div>
@@ -524,8 +584,11 @@
 							<label for="search">Search terms:</label><br>
 						</div>
 						<div class="inputs">
+							<input type="number" step="1" min="0" max="1000" size="10" id="first_rank" name="first_rank" value="0"/><br>
+							<input type="number" step="1" min="0" max="1000" size="10" id="nof_ranks" name="nof_ranks" value="10"/><br>
 							<div id="indexes"></div>
 							<div id="schemes"></div>
+							<input type="number" step="any" size="10" id="weight" name="weight" value="1.0"/><br>
 							<div id="weighting_parameters"></div>
 							<div id="summarizers"></div>
 							<div id="summarizer_parameters"></div>
@@ -537,7 +600,7 @@
 							</div>
 							<div id="operators"></div>
 							<div>
-								<input required autocomplete='off' class="form-control input-lg" id="search" placeholder="Enter query terms ....">
+								<input required autocomplete='off' class="form-control input-lg" id="search" placeholder="Enter query terms ...." value="die">
 							</div>
 						</div>
 					</fieldset>

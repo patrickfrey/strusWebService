@@ -114,6 +114,8 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		for( std::vector<std::pair<std::string, struct ParameterValue> >::const_iterator pit = it->params.begin( ); pit != it->params.end( ); pit++ ) {
 			switch( pit->second.type ) {
 				case PARAMETER_TYPE_STRING:
+					// TODO: if the name matches a known feature set, do not add it
+					// as string parameter, but as feature parameter
 					function->addStringParameter( pit->first, pit->second.s );
 					break;
 				case PARAMETER_TYPE_NUMERIC:
@@ -132,7 +134,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		// constants
 		// TODO: map parameters which are specific per query, i.e. the name of the feature set
 		std::vector<strus::QueryEvalInterface::FeatureParameter> weighting_parameters;
-		//~ weighting_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "feat" ) );
+		weighting_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "feat" ) );
 		query_eval->addWeightingFunction( scheme, function, weighting_parameters, it->weight );
 	}
 
@@ -157,6 +159,8 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		for( std::vector<std::pair<std::string, struct ParameterValue> >::const_iterator pit = it->params.begin( ); pit != it->params.end( ); pit++ ) {
 			switch( pit->second.type ) {
 				case PARAMETER_TYPE_STRING:
+					// TODO: if the name matches a known feature set, do not add it
+					// as string parameter, but as feature parameter
 					summarizer->addStringParameter( pit->first, pit->second.s );
 					break;
 				case PARAMETER_TYPE_NUMERIC:
@@ -176,9 +180,16 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		std::vector<strus::QueryEvalInterface::FeatureParameter> summarizer_parameters;
 		query_eval->addSummarizerFunction( name, summarizer, summarizer_parameters, it->attribute );
 	}
-	
+
 	query_eval->addSelectionFeature( "sel" );
 	
+	// fix term for all queries, we might not use it.
+	// addTerm (const std::string &set_, const std::string &type_, const std::string &value_)=0
+	// addSelectionFeature: super-set of what get's weighted
+	// from that set what remains in there can be restricted with
+	// addRestrictionFeature: keep documents which CONTAIN the feature
+	// addExclusionFeature: keep docuemnts which DON'T CONTAIN the feature
+		
 	strus::QueryInterface *query = query_eval->createQuery( storage );
 	if( !query ) {
 		report_error( ERROR_QUERY_CMD_CREATE_QUERY, service.getLastStrusError( ) );
@@ -193,13 +204,15 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	// TODO: again introspect and make the json tree parser tolerant to expression nodes
 	const strus::PostingJoinOperatorInterface *op = query_processor->getPostingJoinOperator( "contains" );	
 
-	// number of terms, range of operator, cardinality = minimal matching subelements in expr-tree
 	query->pushTerm( "word", qry_req.text );
 	query->defineFeature( "feat", 1.0 );
 	query->pushTerm( "word", qry_req.text );
 	query->pushExpression( op, 1, 0, 0 );
 	query->defineFeature( "sel", 1.0 );
 
+	// TODOS
+	//~ defineMetaDataRestriction
+	
 	std::vector<strus::ResultDocument> ranklist = query->evaluate( );
 	if( service.hasError( ) ) {
 		report_error( ERROR_QUERY_CMD_QUERY_EVALUATE, service.getLastStrusError( ) );
