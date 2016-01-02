@@ -9,6 +9,7 @@
 		<script src="js/jquery.js"></script>
 		<script src="js/jquery-ui.js"></script>
 		<script src="js/jquery.ui.waitbutton.js"></script>
+		<script src="js/insQ.min.js"></script>
 
 		<script>
 			function json2html( json ) {
@@ -62,14 +63,6 @@
 				} );
 				return params;
 			}
-
-	//~ query->pushTerm( "word", qry_req.text );
-	//~ query->defineFeature( "feat", 1.0 );
-	//~ query->pushTerm( "word", qry_req.text );
-	// number of terms, range of operator, cardinality = minimal matching subelements in expr-tree
-	//~ query->pushExpression( op, 1, 0, 0 );
-	//~ query->defineFeature( "sel", 1.0 );
-	//~ defineMetaDataRestriction
 
 			function query( ) {
 				var request = {
@@ -309,7 +302,7 @@
 					$( "#" + name ).replaceOptions( options );
 				} );
 			}
-			
+						
 			function reload_summarizer_parameters( ) {
 				$.ajax( {
 					type : 'GET',
@@ -435,7 +428,14 @@
 				} );
 			}				
 			
-			$( window ).load( function( ) {				
+			$( window ).load( function( ) {			
+					
+				// nifty trick to execute initial query when the summarizer parameters
+				// have actually been dynamically generated
+				insertionQ(	'*[id^="summarizer_param_"]' ).every( function( element ) {
+					query( );
+				});
+			
 				// introspect the configuration for weighting functions
 				$.ajax( {
 					type : 'GET',
@@ -519,7 +519,6 @@
 
 				// redo the query when changing the schema
 				$( 'body' ).on( 'change', 'select.summarizer', function( ) {
-					query( );
 					show_summarizer_info( );
 					reload_summarizer_parameters( );
 				} );
@@ -542,9 +541,7 @@
 					} );
 					html += '</select>';
 					$( '#indexes' ).html( html );
-
-					// initial query
-					query( );
+										
 				} );
 
 				// redo the query when changing the index
@@ -560,7 +557,8 @@
 				// change layout (rexecute query)
 				$( 'body' ).on( 'change', 'select.layout', function( ) {
 					query( );
-				} );				
+				} );
+																
 			} );
 		</script>      
 	</head>
