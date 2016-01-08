@@ -4,8 +4,8 @@
 #include "master.hpp"
 
 #include "strus/arithmeticVariant.hpp"
-
-#include <boost/typeof/typeof.hpp>
+#include "strus/queryInterface.hpp"
+#include "strus/queryProcessorInterface.hpp"
 
 #include "constants.hpp"
 #include "utils.hpp"
@@ -15,9 +15,121 @@
 #include <vector>
 #include <string>
 
-struct QueryRequestBase {
+#include <boost/typeof/typeof.hpp>
+
+struct Node {
+	virtual void produceQuery( strus::QueryProcessorInterface *query_processor, strus::QueryInterface *query ) const = 0;
+	virtual Node *clone( ) const = 0;
 };
 
+struct Term : public Node {
+	std::string type;
+	std::string value;
+	
+	Term( ) : type( "" ), value( "" ) { }
+	
+	Term( const std::string &_type, const std::string &_value )
+		: type( _type ), value( _value ) { }
+	
+	virtual void produceQuery( strus::QueryProcessorInterface *query_processor, strus::QueryInterface *query ) const
+	{
+		query->pushTerm( type, value );
+	}
+	
+	virtual Node *clone( ) const
+	{
+		return new Term( *this );
+	}		
+};
+
+struct Expression : public Node {
+	std::string operator_;
+	int range;
+	int cardinality;
+	std::vector<Term> terms;	
+	
+	Expression( ) : operator_( "" ), range( 0 ), cardinality( 0 ), terms( ) { }
+	
+	Expression( const std::string &_operator, int _range, int _cardinality, const std::vector<Term> &_terms )
+		: operator_( _operator ), range( _range ), cardinality( _cardinality ),
+		terms( _terms ) { }
+
+	virtual void produceQuery( strus::QueryProcessorInterface *query_processor, strus::QueryInterface *query ) const
+	{
+		for( std::vector<Term>::const_iterator it = terms.begin( ); it != terms.end( ); it++ ) {
+			it->produceQuery( query_processor, query );
+		}
+			
+		const strus::PostingJoinOperatorInterface *op = query_processor->getPostingJoinOperator( operator_ );
+
+		query->pushExpression( op, terms.size( ), range, cardinality );
+	}
+
+	virtual Node *clone( ) const
+	{
+		return new Expression( *this );
+	}		
+};
+
+struct Feature : public Node {
+	std::string name;
+	float weight;
+
+	Feature( ) : name( "" ), weight( 0.0 ) { }
+	
+	Feature( const std::string &_name, float _weight )
+		: name( _name ), weight( _weight ) { }	
+
+	virtual void produceQuery( strus::QueryProcessorInterface *query_processor, strus::QueryInterface *query ) const
+	{
+	}
+	
+	virtual Node *clone( ) const
+	{
+		return new Feature( *this );
+	}		
+};
+
+struct TermFeature : public Feature {
+	Term term;
+
+	TermFeature( ) : term( ) { }
+	
+	TermFeature( const std::string &_name, const Term &_term, float _weight )
+		: Feature( _name, _weight ), term( _term ) { }
+
+	virtual void produceQuery( strus::QueryProcessorInterface *query_processor, strus::QueryInterface *query ) const
+	{
+		term.produceQuery( query_processor, query );
+		query->defineFeature( name, weight );
+	}
+
+	virtual Node *clone( ) const
+	{
+		return new TermFeature( *this );
+	}		
+};
+
+struct ExpressionFeature : public Feature {
+	Expression expression;
+	
+	ExpressionFeature( ) : expression( ) { }
+	
+	ExpressionFeature( const std::string &_name, const Expression &_expression, float _weight )
+		: Feature( _name, _weight ), expression( _expression ) { }
+
+	virtual void produceQuery( strus::QueryProcessorInterface *query_processor, strus::QueryInterface *query ) const
+	{
+		expression.produceQuery( query_processor, query );
+		query->defineFeature( name, weight );
+	}
+
+	virtual Node *clone( ) const
+	{
+		return new ExpressionFeature( *this );
+	}		
+};
+                            
 enum ParameterType {
 	PARAMETER_TYPE_UNKNOWN,
 	PARAMETER_TYPE_STRING,
@@ -57,31 +169,57 @@ struct SummarizerConfiguration {
 	std::vector<std::pair<std::string, struct ParameterValue> > params;
 };
 
+struct QueryRequestBase {
+};
+
 struct QueryRequest : public QueryRequestBase {
-	std::string text;
 	size_t first_rank;
 	size_t nof_ranks;
+	std::vector<struct Feature *> features;
+	std::vector<std::string> select;
+	std::vector<std::string> restrict;
+	std::vector<std::string> exclude;
 	std::vector<struct WeightingConfiguration> weighting;
 	std::vector<struct SummarizerConfiguration> summarizer;
 	
 	QueryRequest( ) : 
-		text( "" ),
 		first_rank( DEFAULT_QUERY_FIRST_RANK ),
 		nof_ranks( DEFAULT_QUERY_NOF_RANKS ),
+		features( ), select( ), restrict( ), exclude( ),
 		weighting( ), summarizer( ) { }
 
 	QueryRequest( const std::string &_text, size_t _first_rank = DEFAULT_QUERY_FIRST_RANK, size_t _nof_ranks = DEFAULT_QUERY_NOF_RANKS ) :
-		text( _text  ),
 		first_rank( _first_rank ),
 		nof_ranks( _nof_ranks ),
+		features( ), select( ), restrict( ), exclude( ),
 		weighting( ), summarizer( )
 	{
+		// TODO: standard query assumes a default type, must be in configuration
+		// of the service with a compiled in default being 'word'.
+		// assuming a standard normalization for text here. 'feat' and 'sel'
+		// can be constants in the code. Maybe the default operator 'contains'
+		// should also go to the configuration
+		// the weighting scheme and the parameters for the default query should
+		// also be configurable
+
+		TermFeature *feature = new TermFeature( "feat", Term( "word", _text ), 1.0 );
+		features.push_back( feature );
+
+		std::vector<Term> terms;
+		terms.push_back( Term( "word", _text ) );
+		ExpressionFeature *expr = new ExpressionFeature( "sel", Expression( "contains", 0, 0, terms ), 1.0 );
+		features.push_back( expr );
+		
+		select.push_back( "sel" );
+		
 		struct WeightingConfiguration standard_scheme;
 		standard_scheme.name = DEFAULT_WEIGHTING_SCHEME;
 		standard_scheme.params.push_back( std::make_pair( "k1", ParameterValue( DEFAULT_BM25_K1 ) ) );
 		standard_scheme.params.push_back( std::make_pair( "b", ParameterValue( DEFAULT_BM25_B ) ) );
 		standard_scheme.params.push_back( std::make_pair( "avgdoclen", ParameterValue( DEFAULT_BM25_AVGDOCLEN ) ) );
 		standard_scheme.params.push_back( std::make_pair( "doclen", ParameterValue( DEFAULT_BM25_METADATA_DOCLEN ) ) );
+		standard_scheme.params.push_back( std::make_pair( "match", ParameterValue( "feat" ) ) );
+		standard_scheme.weight = 1.0;
 		weighting.push_back( standard_scheme );
 
 		struct SummarizerConfiguration standard_summarizer;
@@ -89,6 +227,51 @@ struct QueryRequest : public QueryRequestBase {
 		standard_summarizer.name = DEFAULT_SUMMARIZER;
 		standard_summarizer.params.push_back( std::make_pair( "name", ParameterValue( DEFAULT_ATTRIBUTE_DOCID ) ) );
 		summarizer.push_back( standard_summarizer );
+	}
+	
+	QueryRequest( const QueryRequest &q )
+		: first_rank( q.first_rank ),
+		nof_ranks( q.nof_ranks ),
+		features( q.features ), select( q.select ), restrict( q.restrict ), exclude( q.exclude ),
+		weighting( q.weighting ), summarizer( q.summarizer )
+	{
+		for( std::size_t i = 0; i < q.features.size( ); i++ ) {
+			features[i] = dynamic_cast<Feature *>( q.features[i]->clone( ) );
+		}
+	}
+	
+	QueryRequest &operator=( const QueryRequest &q )
+	{
+		first_rank = q.first_rank;
+		nof_ranks = q.nof_ranks;
+		features = q.features;
+		select = q.select;
+		restrict = q.restrict;
+		exclude = q.exclude;
+		weighting = q.weighting;
+		summarizer = q.summarizer;
+		
+		for( std::size_t i = 0; i < q.features.size( ); i++ ){
+			features[i] = dynamic_cast<Feature *>( q.features[i]->clone( ) );
+		}
+		
+		return *this;
+	}
+		
+	virtual ~QueryRequest( ) {
+		for( std::vector<Feature *>::const_iterator it = features.begin( ); it != features.end( ); it++ ) {
+			free( *it );
+		}
+	}
+	
+	bool isFeature( const std::string &feat ) 
+	{
+		for( std::vector<Feature *>::const_iterator it = features.begin( ); it != features.end( ); it++ ) {
+			if( (*it)->name.compare( feat ) == 0 ) {
+				return true;
+			}			
+		}
+		return false;
 	}
 };
 
@@ -132,9 +315,14 @@ struct traits<QueryRequest> {
 		if( v.type( ) != is_object ) {
 			throw bad_value_cast( );
 		}
-		q.text = v.get<std::string>( "text", "" );		
 		q.first_rank = v.get<size_t>( "first_rank", DEFAULT_QUERY_FIRST_RANK );
 		q.nof_ranks = v.get<size_t>( "nof_ranks", DEFAULT_QUERY_NOF_RANKS );
+		
+		q.features = v.get<std::vector<struct Feature *> >( "features", std::vector<struct Feature *>( ) );
+		q.select = v.get<std::vector<std::string> >( "select", std::vector<std::string>( ) );
+		q.restrict = v.get<std::vector<std::string> >( "restrict", std::vector<std::string>( ) );
+		q.exclude = v.get<std::vector<std::string> >( "exclude", std::vector<std::string>( ) );
+		
 		std::vector<struct WeightingConfiguration> standard_weightings;
 		struct WeightingConfiguration standard_scheme;
 		standard_scheme.name = DEFAULT_WEIGHTING_SCHEME;
@@ -156,11 +344,112 @@ struct traits<QueryRequest> {
 	
 	static void set( value &v, QueryRequest const &q )
 	{
-		v.set( "text", q.text );
 		v.set( "first_rank", q.first_rank );
 		v.set( "nof_ranks", q.nof_ranks );
+		v.set( "features", q.features );
+		v.set( "select", q.select );
+		v.set( "restrict", q.restrict );
+		v.set( "exclude", q.exclude );
 		v.set( "weighting", q.weighting );
 		v.set( "summarizer", q.summarizer );
+	}
+};
+
+template<>
+struct traits<struct Feature *> {
+	
+	static struct Feature *get( value const &v )
+	{
+		if( v.type( ) != is_object ) {
+			throw bad_value_cast( );
+		}
+
+		Expression expr = v.get<Expression>( "expression", Expression( ) );
+		Term term = v.get<Term>( "term", Term( ) );
+
+		Feature *f = 0;
+		
+		if( expr.operator_.compare( "" ) == 0 && term.type.compare( "" ) != 0 ) {
+			f = new TermFeature( );
+			dynamic_cast<TermFeature *>( f )->term = term;
+		}
+		if( expr.operator_.compare( "" ) != 0 && term.type.compare( "" ) == 0 ) {
+			f = new ExpressionFeature( );
+			dynamic_cast<ExpressionFeature *>( f )->expression = expr;
+		}
+		
+		if( f == 0 ) {
+			throw bad_value_cast( );
+		}
+		
+		f->name = v.get<std::string>( "name" );
+		f->weight = v.get<float>( "weight" );
+		
+		return f;
+	}
+	
+	static void set( value &v, struct Feature const *f )
+	{
+		v.set( "name", f->name );
+		v.set( "weight", f->weight );		
+
+		const TermFeature *termFeat = dynamic_cast<const TermFeature *>( f );
+		if( termFeat != 0 ) {
+			v.set( "term", termFeat->term );
+		}
+		
+		const ExpressionFeature *exprFeat = dynamic_cast<const ExpressionFeature *>( f );
+		if( exprFeat != 0 ) {
+			v.set( "expression", exprFeat->expression );
+		}			
+	}
+};
+
+template<>
+struct traits<struct Expression> {
+	
+	static struct Expression get( value const &v )
+	{
+		Expression e;
+		if( v.type( ) != is_object ) {
+			throw bad_value_cast( );
+		}
+		e.operator_ = v.get<std::string>( "operator" );
+		e.range = v.get<int>( "range" );
+		e.cardinality = v.get<int>( "cardinality" );
+		e.terms = v.get<std::vector<Term> >( "terms" );
+		
+		return e;
+	}
+	
+	static void set( value &v, struct Expression const e )
+	{
+		v.set( "operator", e.operator_ );
+		v.set( "range", e.range );
+		v.set( "cardinality", e.cardinality );
+		v.set( "terms", e.terms );
+	}
+};			
+
+template<>
+struct traits<struct Term> {
+	
+	static struct Term get( value const &v )
+	{
+		Term t;
+		if( v.type( ) != is_object ) {
+			throw bad_value_cast( );
+		}		
+		t.type = v.get<std::string>( "type" );
+		t.value = v.get<std::string>( "value" );
+		
+		return t;
+	}
+	
+	static void set( value &v, struct Term const t )
+	{
+		v.set( "type", t.type );
+		v.set( "value", t.value );
 	}
 };
 

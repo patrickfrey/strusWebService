@@ -64,34 +64,59 @@
 				return params;
 			}
 
+			function get_features( s ) {
+				var features = [];
+				var words = s.split( ' ' );
+				for( var i in words ) {
+					features.push( 
+						{
+							name: "feat",
+							term: {
+								// TODO: dropdown for picking types, types must come from the server
+								type: "word",
+								value: words[i]
+							},
+							weight: 1.0
+						}
+					);
+				}
+				features.push(
+					{
+						name: "sel",
+						expression : {
+							operator: $( '#operator' ).val( ),
+							range: parseInt( $( '#range' ).val( ) ),
+							cardinality: parseInt( $( '#cardinality' ).val( ) ),
+							terms: get_terms( $( '#search' ).val( ) )
+						},
+						weight: 1.0								
+					}				
+				)
+				return features;
+			}
+
+			function get_terms( s ) {
+				var terms = [];
+				var words = s.split( ' ' );
+				for( var i in words ) {
+					terms.push( 
+						{
+							// TODO: dropdown for picking types, types must come from the server
+							type: "word",
+							value: words[i]
+						}
+					);
+				}
+				return terms;
+			}
+
 			function query( ) {
 				var request = {
 					query: {
 						text: $( '#search' ).val( ),
 						first_rank: parseInt( $( '#first_rank' ).val( ) ),
 						nof_ranks: parseInt( $( '#nof_ranks' ).val( ) ),
-						feature: {
-							name: "sel",
-							expression : {
-								op: "contains",
-								range: 0,
-								cardinality: 0,
-								args: [
-									{
-										feature: {
-											name: "feat",
-											terms: [
-												// TODO: split text input field into separate features like
-												// var key = $(this).attr( 'id' ).split( '_' )[2];
-												// TODO: word is a feature type which must be introspectable
-												{ type: "word", value: $( '#search' ).val( ) },
-											],
-											weight: 1.0
-										}
-									}
-								]
-							}
-						},
+						features: get_features( $( '#search' ).val( ) ),
 						select: [
 							"sel"
 						],
@@ -177,12 +202,11 @@
 										html_inputs += '<input type="number" step="any" size="10" id="weighting_param_' + value2.name + '" value=""/><br/>';
 										break;
 									case 'feature':
-										html_inputs += '<select id="xweighting_param_' + value2.name + '" size="1">';
-										// TODO: fill in the possible values from 'metadata', 'attributes' or 'features'
-										//~ $.each( data.config.attributes, function( key, value ) {
-											//~ html += "<option value='" + value + "'>" + value + "</option>"
-										//~ } );
+										html_inputs += '<select id="weighting_param_' + value2.name + '" size="1">';
 										html_inputs += '</select><br/>';
+										insertionQ(	"#weighting_param_" + value2.name ).every( function( ) {
+											reload_features( "weighting_param_" + value2.name );
+										});
 										break;
 									case 'attribute':
 										html_inputs += '<select id="weighting_param_' + value2.name + '" ' +
@@ -302,6 +326,19 @@
 					$( "#" + name ).replaceOptions( options );
 				} );
 			}
+
+			function reload_features( name ) {
+				// the list of features is known only to the client as
+				// we define them in the query (at the moment fix, later dynamically)
+				// TODO: make boxes to define features
+				var features = [];
+				features.push( "feat", "sel" );
+				var options = [];
+				$.each( features, function( k, v ) {
+					options.push( { text: v, value: v } );
+				} );
+				$( "#" + name ).replaceOptions( options );
+			}
 						
 			function reload_summarizer_parameters( ) {
 				$.ajax( {
@@ -332,11 +369,10 @@
 										break;
 									case 'feature':
 										html_inputs += '<select id="summarizer_param_' + value2.name + '" size="1">';
-										// TODO: fill in the possible values from 'metadata', 'attributes' or 'features'
-										//~ $.each( data.config.attributes, function( key, value ) {
-											//~ html += "<option value='" + value + "'>" + value + "</option>"
-										//~ } );
 										html_inputs += '</select><br/>';
+										insertionQ( "#summarizer_param_" + value2.name ).every( function( elem ) {
+											reload_features( "summarizer_param_" + value2.name );
+										} );
 										break;
 									case 'attribute':
 										html_inputs += '<select id="summarizer_param_' + value2.name + '" ' +
@@ -429,13 +465,13 @@
 			}				
 			
 			$( window ).load( function( ) {			
-					
+
 				// nifty trick to execute initial query when the summarizer parameters
 				// have actually been dynamically generated
 				insertionQ(	'*[id^="summarizer_param_"]' ).every( function( element ) {
 					query( );
 				});
-			
+								
 				// introspect the configuration for weighting functions
 				$.ajax( {
 					type : 'GET',
@@ -523,10 +559,17 @@
 					reload_summarizer_parameters( );
 				} );
 
-				// redo the query when changing the join operator
+				// redo the query when changing the join operator or one
+				// of it's parameters
 				$( 'body' ).on( 'change', 'select.operator', function( ) {
 					query( );
 					show_operator_info( );
+				} );
+				$( 'body' ).on( 'change', '#range', function( ) {
+					query( );
+				} );
+				$( 'body' ).on( 'change', '#cardinality', function( ) {
+					query( );
 				} );
 
 				// introspect service for list of all search indexes
@@ -579,6 +622,8 @@
 							<div id="summarizer_parameters_labels"></div>
 							<label for="layout">layout of ranklist:</label><br>
 							<label for="operators">Search term operator:</label><br>
+							<label for="range">Range:</label><br>
+							<label for="cardinality">Cardinality:</label><br>
 							<label for="search">Search terms:</label><br>
 						</div>
 						<div class="inputs">
@@ -597,8 +642,10 @@
 							</select>
 							</div>
 							<div id="operators"></div>
+							<input type="number" step="1" min="0" max="1000" size="10" id="range" name="range" value="1"/><br>
+							<input type="number" step="1" min="0" max="1000" size="10" id="cardinality" name="cardinality" value="1"/><br>
 							<div>
-								<input required autocomplete='off' class="form-control input-lg" id="search" placeholder="Enter query terms ...." value="die">
+								<input required autocomplete='off' class="form-control input-lg" id="search" placeholder="Enter query terms ...." value="das bundesgericht">
 							</div>
 						</div>
 					</fieldset>

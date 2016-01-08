@@ -4,7 +4,8 @@
 #include <cppcms/url_dispatcher.h>  
 #include <cppcms/http_request.h>
 
-#include "strus/queryInterface.hpp"
+#include <booster/log.h>
+
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
@@ -65,6 +66,15 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		QueryRequest default_qry_req( qry );
 		qry_req = default_qry_req;
 	}
+
+	{
+		cppcms::json::value j;
+		j["query"] = qry_req;
+		BOOSTER_DEBUG( PACKAGE ) << "Query: " << j;
+	}
+	
+	//~ my_object.save(std::cout,cppcms::json::readable);  
+	
 	
 	if( !get_strus_environment( name ) ) {
 		return;
@@ -100,6 +110,12 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		return;
 	}
 
+	// 1) define query evaluation scheme, we are RESTful, so we do not store
+	//    query evaluation schemes anywhere, we do all in one step!
+	
+	// 1.1) define weighting scheme
+	
+	std::vector<strus::QueryEvalInterface::FeatureParameter> weighting_parameters;
 	for( std::vector<struct WeightingConfiguration>::const_iterator it = qry_req.weighting.begin( ); it != qry_req.weighting.end( ); it++ ) {
 		std::string scheme = it->name;
 		const strus::WeightingFunctionInterface *wfi = query_processor->getWeightingFunction( scheme );
@@ -114,9 +130,11 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		for( std::vector<std::pair<std::string, struct ParameterValue> >::const_iterator pit = it->params.begin( ); pit != it->params.end( ); pit++ ) {
 			switch( pit->second.type ) {
 				case PARAMETER_TYPE_STRING:
-					// TODO: if the name matches a known feature set, do not add it
-					// as string parameter, but as feature parameter
-					function->addStringParameter( pit->first, pit->second.s );
+					if( qry_req.isFeature( pit->second.s ) ) {
+						weighting_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( pit->first, pit->second.s ) );
+					} else {
+						function->addStringParameter( pit->first, pit->second.s );
+					}
 					break;
 				case PARAMETER_TYPE_NUMERIC:
 					function->addNumericParameter( pit->first, pit->second.n );
@@ -129,15 +147,11 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 					return;
 			}
 		}
-
-		// TODO: add feature and other weighting parameters which are not mere
-		// constants
-		// TODO: map parameters which are specific per query, i.e. the name of the feature set
-		std::vector<strus::QueryEvalInterface::FeatureParameter> weighting_parameters;
-		weighting_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( "match", "feat" ) );
 		query_eval->addWeightingFunction( scheme, function, weighting_parameters, it->weight );
 	}
 
+	// 1.2) define summarizer configuration
+	
 	for( std::vector<struct SummarizerConfiguration>::const_iterator it = qry_req.summarizer.begin( ); it != qry_req.summarizer.end( ); it++ ) {
 		std::string name = it->name;
 		const strus::SummarizerFunctionInterface *sum = query_processor->getSummarizerFunction( name );
@@ -156,12 +170,15 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 			return;
 		}
 
+		std::vector<strus::QueryEvalInterface::FeatureParameter> summarizer_parameters;
 		for( std::vector<std::pair<std::string, struct ParameterValue> >::const_iterator pit = it->params.begin( ); pit != it->params.end( ); pit++ ) {
 			switch( pit->second.type ) {
 				case PARAMETER_TYPE_STRING:
-					// TODO: if the name matches a known feature set, do not add it
-					// as string parameter, but as feature parameter
-					summarizer->addStringParameter( pit->first, pit->second.s );
+					if( qry_req.isFeature( pit->second.s ) ) {
+						summarizer_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( pit->first, pit->second.s ) );
+					} else {
+						summarizer->addStringParameter( pit->first, pit->second.s );
+					}
 					break;
 				case PARAMETER_TYPE_NUMERIC:
 					summarizer->addNumericParameter( pit->first, pit->second.n );
@@ -174,15 +191,17 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 					return;
 			}
 		}
-
-		// TODO: add feature and other weighting parameters which are not mere
-		// constants
-		std::vector<strus::QueryEvalInterface::FeatureParameter> summarizer_parameters;
 		query_eval->addSummarizerFunction( name, summarizer, summarizer_parameters, it->attribute );
 	}
 
-	query_eval->addSelectionFeature( "sel" );
+	// 1.3) construct the various feature sets
 	
+	for( std::vector<std::string>::const_iterator it = qry_req.select.begin( ); it != qry_req.select.end( ); it++ ) {
+		query_eval->addSelectionFeature( *it );
+	}
+	
+	// 2) specific query
+		
 	// fix term for all queries, we might not use it.
 	// addTerm (const std::string &set_, const std::string &type_, const std::string &value_)=0
 	// addSelectionFeature: super-set of what get's weighted
@@ -197,21 +216,21 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		service.deleteQueryProcessorInterface( );
 		return;
 	}
-		
+	
+	// 2.1) query arguments
+	
 	query->setMinRank( qry_req.first_rank );
 	query->setMaxNofRanks( qry_req.nof_ranks );
-		
-	// TODO: again introspect and make the json tree parser tolerant to expression nodes
-	const strus::PostingJoinOperatorInterface *op = query_processor->getPostingJoinOperator( "contains" );	
 
-	query->pushTerm( "word", qry_req.text );
-	query->defineFeature( "feat", 1.0 );
-	query->pushTerm( "word", qry_req.text );
-	query->pushExpression( op, 1, 0, 0 );
-	query->defineFeature( "sel", 1.0 );
-
+	// 2.2) produce forest of feature trees
+	for( std::vector<Feature *>::const_iterator it = qry_req.features.begin( ); it != qry_req.features.end( ); it++ ) {
+		(*it)->produceQuery( query_processor, query );
+	}
+	
 	// TODOS
 	//~ defineMetaDataRestriction
+
+	// 3.1) execute query
 	
 	std::vector<strus::ResultDocument> ranklist = query->evaluate( );
 	if( service.hasError( ) ) {
@@ -222,6 +241,9 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		return;
 	}
 
+	// 3.2) get result and fill attributes per rank
+	// TODO: fill in also per ranklist data (currently we have none)
+	
 	QueryResponse response;
 	
 	for( std::vector<strus::ResultDocument>::const_iterator it = ranklist.begin( ); it != ranklist.end( ); it++ ) {
