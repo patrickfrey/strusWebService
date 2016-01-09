@@ -199,15 +199,12 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	for( std::vector<std::string>::const_iterator it = qry_req.select.begin( ); it != qry_req.select.end( ); it++ ) {
 		query_eval->addSelectionFeature( *it );
 	}
-	
-	// 2) specific query
-		
-	// fix term for all queries, we might not use it.
-	// addTerm (const std::string &set_, const std::string &type_, const std::string &value_)=0
-	// addSelectionFeature: super-set of what get's weighted
-	// from that set what remains in there can be restricted with
+
+	// TODO:
 	// addRestrictionFeature: keep documents which CONTAIN the feature
 	// addExclusionFeature: keep docuemnts which DON'T CONTAIN the feature
+	
+	// 2) specific query
 		
 	strus::QueryInterface *query = query_eval->createQuery( storage );
 	if( !query ) {
@@ -227,8 +224,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		(*it)->produceQuery( query_processor, query );
 	}
 	
-	// TODOS
-	//~ defineMetaDataRestriction
+	// TODO: defineMetaDataRestriction
 
 	// 3.1) execute query
 	

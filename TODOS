@@ -1,0 +1,3 @@
+- test multi-level expressions in query, currently implemented but untested
+- add restriction and exclusion feature sets, currently we have only selection feature sets
+- add metadata restrictions
