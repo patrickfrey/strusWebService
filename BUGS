@@ -15,11 +15,7 @@
   JSON is mapped directly
   something with templates forming a protocol request and
   answer mapping with parameters of some sort
-- insert, update, delete doesn't allow batches for now,
-  all happen with an auto-commit of 1
-- once the error is consumed and printed, we get result:ok.
-  Also seen error happending later..
 - JSON exception throw instead of clear indication of error
   location in the tree. This is a cppcms thing I'm afraid.
 - transactions work only per index, but in theory there is
-  no problem to implement them to span indexes
+  no problem to implement them to span more than one index
