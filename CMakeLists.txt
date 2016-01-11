@@ -17,6 +17,7 @@ include( cmake/dist.cmake )
 include( cmake/FindCURL.cmake )
 
 find_strus_package( core )
+find_strus_package( module )
 
 configure_file( "${PROJECT_SOURCE_DIR}/src/version.hpp.in"  "${PROJECT_SOURCE_DIR}/src/version.hpp"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/dist/obs/deploy_to_obs.sh.in"  "${PROJECT_SOURCE_DIR}/dist/obs/deploy_to_obs.sh"  @ONLY )
@@ -60,7 +61,7 @@ link_directories(
 )
 
 add_executable(strusWebService ${SRC})
-target_link_libraries(strusWebService ${BOOSTER} ${CPPCMS} strus_storage strus_error strus_database_leveldb strus_queryeval strus_queryproc ${Boost_LIBRARIES})
+target_link_libraries(strusWebService ${BOOSTER} ${CPPCMS} strus_storage strus_error strus_database_leveldb strus_queryeval strus_queryproc strus_module strus_error ${Boost_LIBRARIES})
 
 install( TARGETS strusWebService RUNTIME DESTINATION bin )
 install( FILES ${CMAKE_SOURCE_DIR}/config.js DESTINATION /etc/strusWebService RENAME strusWebService.conf )

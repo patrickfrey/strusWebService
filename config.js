@@ -19,6 +19,13 @@
 		}
 	},
 	
+	"extensions" : {
+		"directory" : "/usr/lib/strus/modules",
+		"modules" : [
+			"modtest.so"
+		]
+	},
+	
 	"http" : {
 		"script" : "/strus"
 	},

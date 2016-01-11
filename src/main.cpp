@@ -1,5 +1,6 @@
 #include <cppcms/service.h>
 #include <cppcms/applications_pool.h>
+
 #include <booster/log.h>
 
 #include <signal.h>
@@ -42,7 +43,10 @@ int main( int argc, char *argv[] )
 			}
 			BOOSTER_DEBUG( PACKAGE ) << "Using '" << nof_threads << "' threads for strus logging buffers";
 			
-			StrusContext *strusContext = new StrusContext( nof_threads );
+			StrusContext *strusContext = new StrusContext( nof_threads,
+				srv.settings( ).get<std::string>( "extensions.directory" ), 
+				srv.settings( ).get<std::vector<std::string> >( "extensions.modules" ) );
+				
 			srv.applications_pool( ).mount( cppcms::applications_factory<apps::strusWebService, StrusContext *>( strusContext ) );
 	
 			srv.run( );

@@ -12,11 +12,17 @@
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/attributeReaderInterface.hpp"
 #include "strus/storageTransactionInterface.hpp"
+#include "strus/postingJoinOperatorInterface.hpp"
+#include "strus/weightingFunctionInterface.hpp"
+#include "strus/summarizerFunctionInterface.hpp"
+#include "strus/queryProcessorInterface.hpp"
 
 #include <booster/thread.h>
 
 #include "strus/lib/error.hpp"
 #include "strus/errorBufferInterface.hpp"
+
+#include "strus/moduleEntryPoint.hpp"
 
 struct StrusIndexContext {
 	std::string config;
@@ -46,18 +52,19 @@ class StrusContext {
 		std::map<std::string, StrusIndexContext *> context_map;	
 		booster::mutex mutex;
 		FILE *logfile;
+		std::map<std::string, strus::WeightingFunctionInterface *> weighting_func_map;
 
 	public:
 		strus::ErrorBufferInterface *g_errorhnd;
 
 	public:
-		StrusContext( unsigned int nof_threads );
+		StrusContext( unsigned int nof_threads, const std::string moduleDir, const std::vector<std::string> modules );
 		
 		StrusIndexContext *acquire( const std::string &name );
 		void release( const std::string &name, StrusIndexContext *ctx );
 
 		std::vector<std::string> getStrusErrorDetails( ) const;
-
+		void registerModules( strus::QueryProcessorInterface *qpi ) const;
 };
 
 #endif

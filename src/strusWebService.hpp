@@ -13,7 +13,6 @@
 #include "strusContext.hpp"
 
 #include "strus/queryEvalInterface.hpp"
-#include "strus/queryProcessorInterface.hpp"
 
 namespace apps {
 

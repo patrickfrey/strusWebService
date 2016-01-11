@@ -201,6 +201,7 @@ strus::QueryProcessorInterface *strusWebService::getQueryProcessorInterface( )
 {
 	if( qpi == 0 ) {
 		qpi = strus::createQueryProcessor( context->g_errorhnd );
+		context->registerModules( qpi );
 	}
 	return qpi;
 }
