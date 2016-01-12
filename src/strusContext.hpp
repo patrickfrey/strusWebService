@@ -52,7 +52,7 @@ class StrusContext {
 		std::map<std::string, StrusIndexContext *> context_map;	
 		booster::mutex mutex;
 		FILE *logfile;
-		std::map<std::string, strus::WeightingFunctionInterface *> weighting_func_map;
+		std::vector<const strus::ModuleEntryPoint *> modules;
 
 	public:
 		strus::ErrorBufferInterface *g_errorhnd;

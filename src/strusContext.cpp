@@ -8,11 +8,11 @@
 #include <booster/log.h>
 
 #include <boost/filesystem.hpp>
-#include "strus/moduleEntryPoint.hpp"
+
 #include "strus/storageModule.hpp"
 
-StrusContext::StrusContext( unsigned int nof_threads, const std::string moduleDir, const std::vector<std::string> modules )
-	: context_map( ), weighting_func_map( )
+StrusContext::StrusContext( unsigned int nof_threads, const std::string moduleDir, const std::vector<std::string> modules_ )
+	: context_map( ), modules( )
 {
 	// implementing a ErrorBufferInterface is not really possible!
 	// redirecting the output to a tmpfile and reading and rewinding that
@@ -23,7 +23,7 @@ StrusContext::StrusContext( unsigned int nof_threads, const std::string moduleDi
 	
 	BOOSTER_DEBUG( PACKAGE ) << "Search directory for modules implementing extensions is '" << moduleDir << "'";	
 	
-	for( std::vector<std::string>::const_iterator it = modules.begin( ); it != modules.end( ); it++ ) {
+	for( std::vector<std::string>::const_iterator it = modules_.begin( ); it != modules_.end( ); it++ ) {
 		boost::filesystem::path path( moduleDir );
 		boost::filesystem::path fullPath = boost::filesystem::absolute( path ) /= *it;
 		BOOSTER_DEBUG( PACKAGE ) << "Loading module '" << fullPath.string( ) << "'";
@@ -39,30 +39,29 @@ StrusContext::StrusContext( unsigned int nof_threads, const std::string moduleDi
 			BOOSTER_WARNING( PACKAGE ) << "module '" << fullPath.string( ) << "' is not a storage module and is not loaded into the server";
 			continue;
 		}
-		
-		const strus::StorageModule *module = reinterpret_cast<const strus::StorageModule *>( entrypoint );
-		
-		if( module->weightingFunctionConstructor ) {
-			strus::WeightingFunctionConstructor const *constructor = module->weightingFunctionConstructor;
-			for( ; constructor->create != 0; constructor++ ) {
-				strus::WeightingFunctionInterface *func = constructor->create( g_errorhnd );
-				if( !func ) {
-					BOOSTER_WARNING( PACKAGE ) << "weighting function cannot be constructed";
-					continue;
-				}
-				weighting_func_map[constructor->name] = func;
-			}
-		}
+
+		modules.push_back( entrypoint );
 	}
 }
 
 void StrusContext::registerModules( strus::QueryProcessorInterface *qpi ) const
 {
-	for( std::map<std::string, strus::WeightingFunctionInterface *>::const_iterator it = weighting_func_map.begin( ); it != weighting_func_map.end( ); it++ ) {
-		qpi->defineWeightingFunction( it->first, it->second );
-		if( g_errorhnd->hasError( ) ) {
-			BOOSTER_WARNING( PACKAGE ) << "registering weighting function '" <<
-				it->first << "' resulted in an error: " << it->second;
+	for( std::vector<const strus::ModuleEntryPoint *>::const_iterator it = modules.begin( ); it != modules.end( ); it++ ) {
+		const strus::StorageModule *module = reinterpret_cast<const strus::StorageModule *>( *it );
+		if( module->weightingFunctionConstructor ) {
+			strus::WeightingFunctionConstructor const *constructor = module->weightingFunctionConstructor;
+			for( ; constructor->create != 0; constructor++ ) {
+				strus::WeightingFunctionInterface *func = constructor->create( g_errorhnd );
+				if( !func ) {
+					BOOSTER_WARNING( PACKAGE ) << "weighting function '" << constructor->name << "' cannot be constructed";
+					continue;
+				}
+				qpi->defineWeightingFunction( constructor->name, func );
+				if( g_errorhnd->hasError( ) ) {
+					BOOSTER_WARNING( PACKAGE ) << "registering weighting function '" <<
+						constructor->name << "' resulted in an error: " << g_errorhnd->fetchError( );
+				}
+			}
 		}
 	} 
 }
