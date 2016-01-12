@@ -55,7 +55,7 @@ class StrusContext {
 		std::vector<const strus::ModuleEntryPoint *> modules;
 
 	public:
-		strus::ErrorBufferInterface *g_errorhnd;
+		strus::ErrorBufferInterface *errorhnd;
 
 	public:
 		StrusContext( unsigned int nof_threads, const std::string moduleDir, const std::vector<std::string> modules );

@@ -60,7 +60,7 @@ strus::DatabaseInterface *strusWebService::getDataBaseInterface( const std::stri
 {
 	StrusIndexContext *ctx = getOrCreateStrusContext( name );
 	if( ctx->dbi == 0 ) {
-		strus::DatabaseInterface *dbi = strus::createDatabase_leveldb( context->g_errorhnd );
+		strus::DatabaseInterface *dbi = strus::createDatabase_leveldb( context->errorhnd );
 		if( dbi == 0 ) {
 			context->release( name, ctx );
 			return 0;
@@ -75,7 +75,7 @@ strus::StorageInterface *strusWebService::getStorageInterface( const std::string
 {
 	StrusIndexContext *ctx = getOrCreateStrusContext( name );
 	if( ctx->sti == 0 ) {
-		strus::StorageInterface *sti = strus::createStorage( context->g_errorhnd );
+		strus::StorageInterface *sti = strus::createStorage( context->errorhnd );
 		if( sti == 0 ) {
 			context->release( name, ctx );
 			return 0;
@@ -192,7 +192,7 @@ strus::StorageTransactionInterface *strusWebService::getStorageTransactionInterf
 strus::QueryEvalInterface *strusWebService::getQueryEvalInterface( )
 {
 	if( qei == 0 ) {
-		qei = strus::createQueryEval( context->g_errorhnd );
+		qei = strus::createQueryEval( context->errorhnd );
 	}
 	return qei;
 }
@@ -200,7 +200,7 @@ strus::QueryEvalInterface *strusWebService::getQueryEvalInterface( )
 strus::QueryProcessorInterface *strusWebService::getQueryProcessorInterface( )
 {
 	if( qpi == 0 ) {
-		qpi = strus::createQueryProcessor( context->g_errorhnd );
+		qpi = strus::createQueryProcessor( context->errorhnd );
 		context->registerModules( qpi );
 	}
 	return qpi;
@@ -323,12 +323,12 @@ void strusWebService::deleteQueryProcessorInterface( )
 
 bool strusWebService::hasError( ) const
 {
-	return context->g_errorhnd->hasError( );
+	return context->errorhnd->hasError( );
 }
 
 std::string strusWebService::getLastStrusError( ) const
 {
-	return context->g_errorhnd->fetchError( );
+	return context->errorhnd->fetchError( );
 }
 
 std::vector<std::string> strusWebService::getStrusErrorDetails( ) const

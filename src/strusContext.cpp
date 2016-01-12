@@ -19,7 +19,7 @@ StrusContext::StrusContext( unsigned int nof_threads, const std::string moduleDi
 	// one periodically seems to be the only hacky option right now
 	logfile = std::tmpfile( );
 	
-	g_errorhnd = strus::createErrorBuffer_standard( logfile, nof_threads );
+	errorhnd = strus::createErrorBuffer_standard( logfile, nof_threads );
 	
 	BOOSTER_DEBUG( PACKAGE ) << "Search directory for modules implementing extensions is '" << moduleDir << "'";	
 	
@@ -51,15 +51,15 @@ void StrusContext::registerModules( strus::QueryProcessorInterface *qpi ) const
 		if( module->weightingFunctionConstructor ) {
 			strus::WeightingFunctionConstructor const *constructor = module->weightingFunctionConstructor;
 			for( ; constructor->create != 0; constructor++ ) {
-				strus::WeightingFunctionInterface *func = constructor->create( g_errorhnd );
+				strus::WeightingFunctionInterface *func = constructor->create( errorhnd );
 				if( !func ) {
 					BOOSTER_WARNING( PACKAGE ) << "weighting function '" << constructor->name << "' cannot be constructed";
 					continue;
 				}
 				qpi->defineWeightingFunction( constructor->name, func );
-				if( g_errorhnd->hasError( ) ) {
+				if( errorhnd->hasError( ) ) {
 					BOOSTER_WARNING( PACKAGE ) << "registering weighting function '" <<
-						constructor->name << "' resulted in an error: " << g_errorhnd->fetchError( );
+						constructor->name << "' resulted in an error: " << errorhnd->fetchError( );
 				}
 			}
 		}
