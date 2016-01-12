@@ -129,7 +129,7 @@
 							{
 								name: $( '#scheme' ).val( ),
 								params: get_weighting_parameters( ),
-								weight: $( '#weight' ).val( )
+								weight: parseFloat( $( '#weight' ).val( ) )
 							}
 						],
 						// TODO: have multiple summarizers
@@ -292,7 +292,7 @@
 					});
 				};
 			})(jQuery, window);
-
+			
 			function reload_attributes( name ) {
 				// get list of attributes of the current search index for presentation
 				// in all dropboxes needed an attribute as parameter

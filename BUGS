@@ -22,4 +22,3 @@
 - can we pass 0 to createErrorBuffer_standard and still get
   all errors? do we get rid of the funny behaviour of reappearing
   error messages this way?
-- g_* to non-global naming
