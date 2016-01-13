@@ -36,7 +36,12 @@
 					if( $(this).is( 'select' ) ) {
 						value = $(this).find( ":selected" ).text( );
 					} else {
-						value = $(this).val( );
+						var type = $(this).attr( 'type' );
+						if( type == 'number' ) {
+							value = parseFloat( $(this).val( ) );
+						} else {
+							value = $(this).val( );
+						}
 					}
 					params.push( {
 						key : key,
@@ -54,7 +59,12 @@
 					if( $(this).is( 'select' ) ) {
 						value = $(this).find( ":selected" ).text( );
 					} else {
-						value = $(this).val( );
+						var type = $(this).attr( 'type' );
+						if( type == 'number' ) {
+							value = parseFloat( $(this).val( ) );
+						} else {
+							value = $(this).val( );
+						}
 					}
 					params.push( {
 						key : key,
@@ -468,7 +478,7 @@
 
 				// nifty trick to execute initial query when the summarizer parameters
 				// have actually been dynamically generated
-				insertionQ(	'*[id^="summarizer_param_"]' ).every( function( element ) {
+				insertionQ(	'*[id^="weighting_param_"]' ).every( function( element ) {
 					query( );
 				});
 								
