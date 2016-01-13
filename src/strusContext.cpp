@@ -63,6 +63,21 @@ void StrusContext::registerModules( strus::QueryProcessorInterface *qpi ) const
 				}
 			}
 		}
+		if( module->summarizerFunctionConstructor ) {
+			strus::SummarizerFunctionConstructor const *constructor = module->summarizerFunctionConstructor;
+			for( ; constructor->create != 0; constructor++ ) {
+				strus::SummarizerFunctionInterface *func = constructor->create( errorhnd );
+				if( !func ) {
+					BOOSTER_WARNING( PACKAGE ) << "summarizer function '" << constructor->name << "' cannot be constructed";
+					continue;
+				}
+				qpi->defineSummarizerFunction( constructor->name, func );
+				if( errorhnd->hasError( ) ) {
+					BOOSTER_WARNING( PACKAGE ) << "registering summarizer function '" <<
+						constructor->name << "' resulted in an error: " << errorhnd->fetchError( );
+				}
+			}
+		}
 	} 
 }
 
