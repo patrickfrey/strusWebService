@@ -22,3 +22,15 @@
 - can we pass 0 to createErrorBuffer_standard and still get
   all errors? do we get rid of the funny behaviour of reappearing
   error messages this way?
+- transfering big payloads (e.g. abstracts in ranklist) leads
+  to 100 CPU usage and a blocked server
+  (gdb) bt
+  #0  0x00007f1452f64733 in epoll_wait () from /usr/lib/libc.so.6
+  #1  0x00007f1455698bc0 in booster::aio::epoll_reactor::poll(booster::aio::reactor::event*, int, int, int&) () from /usr/lib/libbooster.so.0
+  #2  0x00007f14556982be in booster::aio::reactor::poll(booster::aio::reactor::event*, int, int, booster::system::error_code&) () from /usr/lib/libbooster.so.0
+  #3  0x00007f14556953e1 in booster::aio::event_loop_impl::run_one(booster::aio::reactor::event*, unsigned long) () from /usr/lib/libbooster.so.0
+  #4  0x00007f1455692888 in booster::aio::io_service::run() () from /usr/lib/libbooster.so.0
+  #5  0x00007f14552e6f00 in cppcms::service::run() () from /usr/lib/libcppcms.so.1
+  #6  0x0000000000417ada in main (argc=3, argv=0x7ffc8e206d28)
+    at /home/abaumann/strusWebService/src/main.cpp:52
+
