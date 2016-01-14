@@ -64,6 +64,7 @@ add_test( NAME transaction_commit COMMAND curlJsonTester transaction_commit )
 
 add_test( NAME query_in_url COMMAND curlJsonTester query_in_url )
 add_test( NAME query_A COMMAND curlJsonTester query_A )
+add_test( NAME query_hanging_cppcms COMMAND curlJsonTester query_hanging_cppcms )
 
 # index.cpp (cleaning up)
 
