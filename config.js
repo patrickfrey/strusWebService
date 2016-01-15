@@ -20,7 +20,7 @@
 	},
 	
 	"extensions" : {
-		"directory" : "/usr/lib/strus/modules",
+		"directory" : "/usr/lib64/strus/modules",
 		"modules" : [
 			"modtest.so"
 		]
