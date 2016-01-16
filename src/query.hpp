@@ -264,7 +264,7 @@ struct QueryRequest : public QueryRequestBase {
 		}
 	}
 	
-	bool isFeature( const std::string &feat ) 
+	bool isFeatureInQuery( const std::string &feat ) 
 	{
 		for( std::vector<Feature *>::const_iterator it = features.begin( ); it != features.end( ); it++ ) {
 			if( (*it)->name.compare( feat ) == 0 ) {

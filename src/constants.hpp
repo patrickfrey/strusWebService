@@ -44,4 +44,6 @@ const float DEFAULT_BM25_B								= 0.75;
 const int DEFAULT_BM25_AVGDOCLEN						= 1000;
 const std::string DEFAULT_BM25_METADATA_DOCLEN				= "doclen";
 
+const int MAX_NOF_FEATURES								= 100;
+
 #endif

@@ -10,9 +10,11 @@
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerFunctionInstanceInterface.hpp"
+#include "strus/valueIteratorInterface.hpp"
 
 #include <vector>
 #include <string>
+#include <set>
 
 namespace apps {
 
@@ -125,12 +127,22 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 			service.deleteQueryProcessorInterface( );
 			return;
 		}
-	
+		
+		strus::WeightingFunctionInterface::Description description= wfi->getDescription( );
+		std::vector<strus::WeightingFunctionInterface::Description::Param> p = description.param( );
+		std::set<std::string> knownFeatureParams;
+		for( std::vector<strus::WeightingFunctionInterface::Description::Param>::const_iterator pit = p.begin( ); pit != p.end( ); pit++ ) {
+			if( pit->type( ) == strus::WeightingFunctionInterface::Description::Param::Feature ) {
+				knownFeatureParams.insert( pit->name( ) );
+			}	
+		}
+		
 		strus::WeightingFunctionInstanceInterface *function = wfi->createInstance( );
 		for( std::vector<std::pair<std::string, struct ParameterValue> >::const_iterator pit = it->params.begin( ); pit != it->params.end( ); pit++ ) {
 			switch( pit->second.type ) {
 				case PARAMETER_TYPE_STRING:
-					if( qry_req.isFeature( pit->second.s ) ) {
+					if( knownFeatureParams.find( pit->first ) != knownFeatureParams.end( ) ||
+						qry_req.isFeatureInQuery( pit->second.s ) ) {
 						weighting_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( pit->first, pit->second.s ) );
 					} else {
 						function->addStringParameter( pit->first, pit->second.s );
@@ -162,6 +174,15 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 			return;
 		}
 
+		strus::SummarizerFunctionInterface::Description description= sum->getDescription( );
+		std::vector<strus::SummarizerFunctionInterface::Description::Param> p = description.param( );
+		std::set<std::string> knownFeatureParams;
+		for( std::vector<strus::SummarizerFunctionInterface::Description::Param>::const_iterator pit = p.begin( ); pit != p.end( ); pit++ ) {
+			if( pit->type( ) == strus::SummarizerFunctionInterface::Description::Param::Feature ) {
+				knownFeatureParams.insert( pit->name( ) );
+			}	
+		}
+
 		strus::SummarizerFunctionInstanceInterface *summarizer = sum->createInstance( query_processor );
 		if( !summarizer ) {
 			report_error( ERROR_QUERY_CMD_GET_SUMMARIZER_FUNCTION_INSTANCE, service.getLastStrusError( ) );
@@ -174,7 +195,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		for( std::vector<std::pair<std::string, struct ParameterValue> >::const_iterator pit = it->params.begin( ); pit != it->params.end( ); pit++ ) {
 			switch( pit->second.type ) {
 				case PARAMETER_TYPE_STRING:
-					if( qry_req.isFeature( pit->second.s ) ) {
+					if( knownFeatureParams.find( pit->first ) != knownFeatureParams.end( ) || qry_req.isFeatureInQuery( pit->second.s ) ) {
 						summarizer_parameters.push_back( strus::QueryEvalInterface::FeatureParameter( pit->first, pit->second.s ) );
 					} else {
 						summarizer->addStringParameter( pit->first, pit->second.s );

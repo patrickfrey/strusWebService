@@ -22,4 +22,11 @@
 - can we pass 0 to createErrorBuffer_standard and still get
   all errors? do we get rid of the funny behaviour of reappearing
   error messages this way?
+- guessing what is a feature type is brickolage currently:
+  - exists in query
+  - exists in storage as term type
+  - whatever the description of the w/s function tells us.
+- same applies for parameters expecting a term type
+  - exists in storage as term type
+
 

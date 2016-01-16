@@ -1,1 +1,1 @@
-{"config":{"attributes":[],"metadata":[{"name":"doclen","type":"UInt16"},{"name":"docweight","type":"Float32"}]},"result":"ok"}
+{"config":{"attributes":["attr1","attr2","docid","title"],"metadata":[{"name":"doclen","type":"UInt16"},{"name":"docweight","type":"Float32"}],"types":["word"]},"result":"ok"}

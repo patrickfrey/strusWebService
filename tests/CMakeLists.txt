@@ -23,7 +23,6 @@ add_test( NAME create_index_B COMMAND curlJsonTester create_index_B )
 
 add_test( NAME index_list COMMAND curlJsonTester index_list )
 
-add_test( NAME index_config_A COMMAND curlJsonTester index_config_A )
 add_test( NAME index_stats_A COMMAND curlJsonTester index_stats_A )
 
 # document.cpp
@@ -48,6 +47,8 @@ add_test( NAME document_nonexist_delete COMMAND curlJsonTester document_nonexist
 
 add_test( NAME index_stats_A_after_nonexist_delete COMMAND curlJsonTester index_stats_A_after_nonexist_delete )
 
+add_test( NAME index_config_A COMMAND curlJsonTester index_config_A )
+
 # transaction.cpp
 
 add_test( NAME transaction_begin COMMAND curlJsonTester transaction_begin )
@@ -64,7 +65,7 @@ add_test( NAME transaction_commit COMMAND curlJsonTester transaction_commit )
 
 add_test( NAME query_in_url COMMAND curlJsonTester query_in_url )
 add_test( NAME query_A COMMAND curlJsonTester query_A )
-add_test( NAME query_hanging_cppcms COMMAND curlJsonTester query_hanging_cppcms )
+#add_test( NAME query_hanging_cppcms COMMAND curlJsonTester query_hanging_cppcms )
 
 # index.cpp (cleaning up)
 

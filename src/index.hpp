@@ -33,6 +33,7 @@ struct StorageCreateParameters {
 struct StorageConfiguration {
 	std::vector<struct MetadataDefiniton> metadata;
 	std::vector<std::string> attributes;
+	std::vector<std::string> types;
 	// TODO: more, most likely subset of 'StorageCreateParameters'
 };
 
@@ -135,6 +136,7 @@ struct traits<StorageConfiguration> {
 		}		
 		c.metadata = v.get<std::vector<struct MetadataDefiniton> >( "metadata", std::vector<struct MetadataDefiniton>( ) );
 		c.attributes = v.get<std::vector<std::string> >( "attributes", std::vector<std::string>( ) );
+		c.types = v.get<std::vector<std::string> >( "types", std::vector<std::string>( ) );
 		return c;
 	}
 	
@@ -142,6 +144,7 @@ struct traits<StorageConfiguration> {
 	{
 		v.set( "metadata", c.metadata );
 		v.set( "attributes", c.attributes );
+		v.set( "types", c.types );
 	}
 };
 

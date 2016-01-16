@@ -1,6 +1,8 @@
 #include "index.hpp"
 #include "strusWebService.hpp"
 
+#include "strus/valueIteratorInterface.hpp"
+
 #include <cppcms/url_dispatcher.h>  
 #include <cppcms/http_request.h>
 
@@ -186,8 +188,14 @@ void index::config_cmd( const std::string name )
 		report_error( ERROR_DOCUMENT_GET_CMD_CREATE_ATTRIBUTE_READER, service.getLastStrusError( ) );
 		return;
 	}	
-	
+
 	struct StorageConfiguration config;
+	
+	strus::ValueIteratorInterface *valItr = storage->createTermTypeIterator( );
+	std::vector<std::string> termTypes = valItr->fetchValues( MAX_NOF_FEATURES );
+	for( std::vector<std::string>::const_iterator it = termTypes.begin( ); it != termTypes.end( ); it++ ) {
+		config.types.push_back( *it );
+	}
 	
 	for( strus::Index it = 0; it < metadata->nofElements( ); it++ ) {
 		struct MetadataDefiniton meta;
