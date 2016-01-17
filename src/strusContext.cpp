@@ -95,6 +95,7 @@ void StrusContext::registerModules( strus::QueryProcessorInterface *qpi ) const
 				}
 			}
 		}
+		
 		if( module->summarizerFunctionConstructor ) {
 			strus::SummarizerFunctionConstructor const *constructor = module->summarizerFunctionConstructor;
 			for( ; constructor->create != 0; constructor++ ) {
@@ -110,6 +111,22 @@ void StrusContext::registerModules( strus::QueryProcessorInterface *qpi ) const
 				}
 			}
 		}
+		
+		if( module->postingIteratorJoinConstructor ) {
+			strus::PostingIteratorJoinConstructor const *constructor = module->postingIteratorJoinConstructor;
+			for( ; constructor->create != 0; constructor++ ) {
+				strus::PostingJoinOperatorInterface *op = constructor->create( errorhnd );
+				if( !op ) {
+					BOOSTER_WARNING( PACKAGE ) << "posting join operator '" << constructor->name << "' cannot be constructed";
+					continue;
+				}
+				qpi->definePostingJoinOperator( constructor->name, op );
+				if( errorhnd->hasError( ) ) {
+					BOOSTER_WARNING( PACKAGE ) << "registering posting join operator '" <<
+						constructor->name << "' resulted in an error: " << errorhnd->fetchError( );
+				}
+			}
+		}					
 	} 
 }
 

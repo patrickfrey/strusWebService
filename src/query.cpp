@@ -42,7 +42,6 @@
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerFunctionInstanceInterface.hpp"
-#include "strus/valueIteratorInterface.hpp"
 
 #include <vector>
 #include <string>

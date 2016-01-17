@@ -44,10 +44,11 @@
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/attributeReaderInterface.hpp"
 #include "strus/storageTransactionInterface.hpp"
-#include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
+#include "strus/postingJoinOperatorInterface.hpp"
+#include "strus/postingIteratorInterface.hpp"
 
 #include <booster/thread.h>
 
