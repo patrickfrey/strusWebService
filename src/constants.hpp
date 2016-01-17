@@ -61,7 +61,7 @@ const int DEFAULT_PROTOCOL_PRETTY_PRINT					= false;
 
 // TODO: this should be exported IMHO
 //#include "strus/versionStorage.hpp"
-#define STRUS_VERSION_STRING "0.4.0"
+#define STRUS_VERSION_STRING "0.4.2"
 
 const int DEFAULT_QUERY_FIRST_RANK						= 0;
 
