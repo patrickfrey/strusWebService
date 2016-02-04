@@ -165,13 +165,15 @@ struct ExpressionFeature : public Feature {
 enum ParameterType {
 	PARAMETER_TYPE_UNKNOWN,
 	PARAMETER_TYPE_STRING,
-	PARAMETER_TYPE_NUMERIC
+	PARAMETER_TYPE_NUMERIC,
+	PARAMETER_TYPE_BOOLEAN
 };
 	
 struct ParameterValue {
 	enum ParameterType type;
 	std::string s;
 	strus::ArithmeticVariant n;
+	bool b;
 	
 	ParameterValue( )
 		: type( PARAMETER_TYPE_UNKNOWN ) { }
@@ -187,6 +189,10 @@ struct ParameterValue {
 	ParameterValue( const std::string &_s )
 		: type( PARAMETER_TYPE_STRING ),
 		s( _s ) { }
+	
+	ParameterValue( const bool &_b )
+		: type( PARAMETER_TYPE_BOOLEAN ),
+		b( _b ) { }
 };
 
 struct WeightingConfiguration {
@@ -546,9 +552,8 @@ struct traits<std::pair< std::string, struct ParameterValue> > {
 		value val = v["value"];
 		switch( val.type( ) ) {
 			case is_boolean:
-				// TODO: really? Do we allow this?
-				p.second.type = PARAMETER_TYPE_NUMERIC;
-				p.second.n = strus::ArithmeticVariant( ( v.get<bool>( "value" ) ) ? 1 : 0 );
+				p.second.type = PARAMETER_TYPE_BOOLEAN;
+				p.second.b = v.get<bool>( "value" );
 				break;
 				
 			case is_string:
@@ -610,6 +615,10 @@ struct traits<std::pair< std::string, struct ParameterValue> > {
 					default:
 						throw bad_value_cast( );
 				}
+				break;
+			
+			case PARAMETER_TYPE_BOOLEAN:
+				v.set( "value", p.second.b ? "true" : "false" );
 				break;
 			
 			case PARAMETER_TYPE_UNKNOWN:

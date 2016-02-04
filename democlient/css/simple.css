@@ -26,19 +26,19 @@ label,select {
 #middle {
 	display: left;
 	overflow: scroll;
-	width: 60%;
+	width: 50%;
 	height: 400px;
 }
 
 #left {
 	float: right;
 	overflow: visible;
-	width: 40%;
+	width: 50%;
 }
 
 #right {
 	float: right;
 	overflow: scroll;
-	width: 60%;
+	width: 50%;
 	height: 200px;
 }

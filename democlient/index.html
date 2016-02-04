@@ -36,6 +36,12 @@
 						var type = $(this).attr( 'type' );
 						if( type == 'number' ) {
 							value = parseFloat( $(this).val( ) );
+						} else if( type == 'checkbox' ) {
+							if( $(this).is( ':checked' ) ) {
+								value = 'true';
+							} else {
+								value = 'false';
+							}
 						} else {
 							value = $(this).val( );
 						}
@@ -59,6 +65,12 @@
 						var type = $(this).attr( 'type' );
 						if( type == 'number' ) {
 							value = parseFloat( $(this).val( ) );
+						} else if( type == 'checkbox' ) {
+							if( $(this).is( ':checked' ) ) {
+								value = 'true';
+							} else {
+								value = 'false';
+							}
 						} else {
 							value = $(this).val( );
 						}
@@ -207,6 +219,9 @@
 									// TODO: cannot distinguish between float and integer values here
 									case 'numeric':
 										html_inputs += '<input type="number" step="any" size="10" id="weighting_param_' + value2.name + '" value=""/><br/>';
+										break;
+									case 'boolean':
+										html_inputs += '<input type="checkbox" id="weighting_param_' + value2.name + '" value=""/><br/>';
 										break;
 									case 'feature':
 										html_inputs += '<select id="weighting_param_' + value2.name + '" size="1">';
@@ -373,6 +388,9 @@
 									// TODO: cannot distinguish between float and integer values here
 									case 'numeric':
 										html_inputs += '<input type="number" step="any" size="10" id="summarizer_param_' + value2.name + '" value=""/><br/>';
+										break;
+									case 'boolean':
+										html_inputs += '<input type="checkbox" id="weighting_param_' + value2.name + '" value=""/><br/>';
 										break;
 									case 'feature':
 										html_inputs += '<select id="summarizer_param_' + value2.name + '" size="1">';
