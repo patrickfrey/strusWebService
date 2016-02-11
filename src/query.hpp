@@ -165,8 +165,7 @@ struct ExpressionFeature : public Feature {
 enum ParameterType {
 	PARAMETER_TYPE_UNKNOWN,
 	PARAMETER_TYPE_STRING,
-	PARAMETER_TYPE_NUMERIC,
-	PARAMETER_TYPE_BOOLEAN
+	PARAMETER_TYPE_NUMERIC
 };
 	
 struct ParameterValue {
@@ -189,10 +188,6 @@ struct ParameterValue {
 	ParameterValue( const std::string &_s )
 		: type( PARAMETER_TYPE_STRING ),
 		s( _s ) { }
-	
-	ParameterValue( const bool &_b )
-		: type( PARAMETER_TYPE_BOOLEAN ),
-		b( _b ) { }
 };
 
 struct WeightingConfiguration {
@@ -551,11 +546,6 @@ struct traits<std::pair< std::string, struct ParameterValue> > {
 		p.first = v.get<std::string>( "key" );
 		value val = v["value"];
 		switch( val.type( ) ) {
-			case is_boolean:
-				p.second.type = PARAMETER_TYPE_BOOLEAN;
-				p.second.b = v.get<bool>( "value" );
-				break;
-				
 			case is_string:
 				p.second.type = PARAMETER_TYPE_STRING;
 				p.second.s = v.get<std::string>( "value" );
@@ -579,6 +569,7 @@ struct traits<std::pair< std::string, struct ParameterValue> > {
 				// TODO: how do we map absence
 			case is_object:
 			case is_array:	
+			case is_boolean:
 			default:
 				throw bad_value_cast( );
 		}
@@ -615,10 +606,6 @@ struct traits<std::pair< std::string, struct ParameterValue> > {
 					default:
 						throw bad_value_cast( );
 				}
-				break;
-			
-			case PARAMETER_TYPE_BOOLEAN:
-				v.set( "value", p.second.b ? "true" : "false" );
 				break;
 			
 			case PARAMETER_TYPE_UNKNOWN:
