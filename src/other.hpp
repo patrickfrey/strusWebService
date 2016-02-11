@@ -45,8 +45,7 @@ enum FunctionType {
 	FUNCTION_TYPE_ATTRIBUTE,
 	FUNCTION_TYPE_METADATA,
 	FUNCTION_TYPE_NUMERIC,
-	FUNCTION_TYPE_STRING,
-	FUNCTION_TYPE_BOOLEAN
+	FUNCTION_TYPE_STRING
 };
 
 struct FunctionParameter {
@@ -76,9 +75,6 @@ struct FunctionParameter {
 			case strus::WeightingFunctionInterface::Description::Param::String:
 				type = FUNCTION_TYPE_STRING;
 				break;
-			case strus::WeightingFunctionInterface::Description::Param::Boolean:
-				type = FUNCTION_TYPE_BOOLEAN;
-				break;
 			}
 	}
 
@@ -101,9 +97,6 @@ struct FunctionParameter {
 				break;
 			case strus::SummarizerFunctionInterface::Description::Param::String:
 				type = FUNCTION_TYPE_STRING;
-				break;
-			case strus::SummarizerFunctionInterface::Description::Param::Boolean:
-				type = FUNCTION_TYPE_BOOLEAN;
 				break;
 			}
 	}
@@ -261,8 +254,6 @@ struct traits<FunctionParameter> {
 			p.type = FUNCTION_TYPE_NUMERIC;
 		} else if( s.compare( "string" ) == 0 ) {
 			p.type = FUNCTION_TYPE_STRING;
-		} else if( s.compare( "boolean" ) == 0 ) {
-			p.type = FUNCTION_TYPE_BOOLEAN;
 		} else {
 			throw bad_value_cast( );
 		}
@@ -287,9 +278,6 @@ struct traits<FunctionParameter> {
 				break;
 			case FUNCTION_TYPE_STRING:
 				v.set( "type", "string" );
-				break;
-			case FUNCTION_TYPE_BOOLEAN:
-				v.set( "type", "boolean" );
 				break;
 			default:
 				throw bad_value_cast( );

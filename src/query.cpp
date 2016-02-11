@@ -182,9 +182,6 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 				case PARAMETER_TYPE_NUMERIC:
 					function->addNumericParameter( pit->first, pit->second.n );
 					break;
-				case PARAMETER_TYPE_BOOLEAN:
-					function->addBooleanParameter( pit->first, pit->second.b );
-					break;
 				case PARAMETER_TYPE_UNKNOWN:
 				default:
 					report_error( ERROR_QUERY_CMD_GET_WEIGHTING_FUNCTION_PARAMETER, "Unknown type of weighting function parameter, internal error, check query object parsing!" );
@@ -237,9 +234,6 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 					break;
 				case PARAMETER_TYPE_NUMERIC:
 					summarizer->addNumericParameter( pit->first, pit->second.n );
-					break;
-				case PARAMETER_TYPE_BOOLEAN:
-					summarizer->addBooleanParameter( pit->first, pit->second.b );
 					break;
 				case PARAMETER_TYPE_UNKNOWN:
 				default:
