@@ -279,5 +279,8 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %attr(0644, root, root) %{_sysconfdir}/strusWebService/strusWebService.conf
 
 %changelog
+* Thu Feb 25 2016 Andreas Baumann <mail@andreasbaumann.cc> 0.0.2-0.1
+- stable release with basic functionality finished
+
 * Tue Nov 10 2015 Andreas Baumann <mail@andreasbaumann.cc> 0.0.1-0.1
 - initial release

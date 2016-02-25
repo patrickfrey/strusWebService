@@ -1,5 +1,7 @@
+struswebservice (0.0.2-1) unstable; urgency=low
+  * small update of documentation
+ -- Andreas Baumann <mail@andreasbaumann.cc>  Thu, 25 Feb 2016 29:00:00 +0100
+
 struswebservice (0.0.1-1) unstable; urgency=low
-
   * Initial Release.
-
  -- Andreas Baumann <mail@andreasbaumann.cc>  Tue, 10 Nov 2015 20:23:28 +0100
