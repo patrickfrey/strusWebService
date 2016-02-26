@@ -42,6 +42,7 @@
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerFunctionInstanceInterface.hpp"
+#include "strus/queryResult.hpp"
 
 #include <vector>
 #include <string>
@@ -130,6 +131,12 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		return;
 	}
 
+	strus::MetaDataReaderInterface *metadata = service.getMetaDataReaderInterface( name );
+	if( !metadata ) {
+		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_METADATA_READER, service.getLastStrusError( ) );
+		return;
+	}
+
 	strus::QueryEvalInterface *query_eval = service.getQueryEvalInterface( );
 	if( !query_eval ) {
 		report_error( ERROR_QUERY_CMD_CREATE_QUERY_EVAL_INTERFACE, service.getLastStrusError( ) );
@@ -213,7 +220,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 				knownFeatureParams.insert( pit->name( ) );
 			}	
 		}
-
+		
 		strus::SummarizerFunctionInstanceInterface *summarizer = sum->createInstance( query_processor );
 		if( !summarizer ) {
 			report_error( ERROR_QUERY_CMD_GET_SUMMARIZER_FUNCTION_INSTANCE, service.getLastStrusError( ) );
@@ -241,9 +248,9 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 					service.deleteQueryEvalInterface( );
 					service.deleteQueryProcessorInterface( );
 					return;
-			}
+			}			
 		}
-		query_eval->addSummarizerFunction( name, summarizer, summarizer_parameters, it->attribute );
+		query_eval->addSummarizerFunction( name, summarizer, summarizer_parameters );
 	}
 
 	// 1.3) construct the various feature sets
@@ -279,8 +286,8 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	// TODO: defineMetaDataRestriction
 
 	// 3.1) execute query
-	
-	std::vector<strus::ResultDocument> ranklist = query->evaluate( );
+
+	strus::QueryResult result = query->evaluate( );
 	if( service.hasError( ) ) {
 		report_error( ERROR_QUERY_CMD_QUERY_EVALUATE, service.getLastStrusError( ) );
 		delete query;
@@ -294,13 +301,13 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	
 	QueryResponse response;
 	
-	for( std::vector<strus::ResultDocument>::const_iterator it = ranklist.begin( ); it != ranklist.end( ); it++ ) {
+	for( std::vector<strus::ResultDocument>::const_iterator it = result.ranks( ).begin( ); it != result.ranks( ).end( ); it++ ) {
 			Rank rank;
 			
 			rank.docno = (*it).docno( );
 			rank.weight = (*it).weight( );
-						
-			for( std::vector<strus::ResultDocument::Attribute>::const_iterator ait = (*it).attributes( ).begin( ); ait != (*it).attributes( ).end( ); ait++ ) {
+			
+			for( std::vector<strus::SummaryElement>::const_iterator ait = (*it).summaryElements( ).begin( ); ait != (*it).summaryElements( ).end( ); ait++ ) {
 				rank.attributes.push_back( std::make_pair( ait->name( ), ait->value( ) ) );
 			}
 

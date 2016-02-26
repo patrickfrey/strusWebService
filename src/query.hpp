@@ -250,7 +250,7 @@ struct QueryRequest : public QueryRequestBase {
 		standard_scheme.params.push_back( std::make_pair( "k1", ParameterValue( DEFAULT_BM25_K1 ) ) );
 		standard_scheme.params.push_back( std::make_pair( "b", ParameterValue( DEFAULT_BM25_B ) ) );
 		standard_scheme.params.push_back( std::make_pair( "avgdoclen", ParameterValue( DEFAULT_BM25_AVGDOCLEN ) ) );
-		standard_scheme.params.push_back( std::make_pair( "doclen", ParameterValue( DEFAULT_BM25_METADATA_DOCLEN ) ) );
+		standard_scheme.params.push_back( std::make_pair( "metadata_doclen", ParameterValue( DEFAULT_BM25_METADATA_DOCLEN ) ) );
 		standard_scheme.params.push_back( std::make_pair( "match", ParameterValue( "feat" ) ) );
 		standard_scheme.weight = 1.0;
 		weighting.push_back( standard_scheme );

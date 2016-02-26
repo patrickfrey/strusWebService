@@ -28,7 +28,7 @@
 			function get_weighting_parameters( ) {
 				var params = [];
 				$( '*[id^="weighting_param_"]' ).each( function( ) {
-					var key = $(this).attr( 'id' ).split( '_' )[2];
+					var key = $(this).attr( 'id' ).split( '_' ).slice( 2 ).join( '_' );
 					var value;
 					if( $(this).is( 'select' ) ) {
 						value = $(this).find( ":selected" ).text( );
@@ -57,7 +57,7 @@
 			function get_summarizer_parameter( ) {
 				var params = [];
 				$( '*[id^="summarizer_param_"]' ).each( function( ) {
-					var key = $(this).attr( 'id' ).split( '_' )[2];
+					var key = $(this).attr( 'id' ).split( '_' ).slice( 2 ).join( '_' );
 					var value;
 					if( $(this).is( 'select' ) ) {
 						value = $(this).find( ":selected" ).text( );
