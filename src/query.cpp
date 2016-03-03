@@ -131,12 +131,6 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		return;
 	}
 
-	strus::MetaDataReaderInterface *metadata = service.getMetaDataReaderInterface( name );
-	if( !metadata ) {
-		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_METADATA_READER, service.getLastStrusError( ) );
-		return;
-	}
-
 	strus::QueryEvalInterface *query_eval = service.getQueryEvalInterface( );
 	if( !query_eval ) {
 		report_error( ERROR_QUERY_CMD_CREATE_QUERY_EVAL_INTERFACE, service.getLastStrusError( ) );
