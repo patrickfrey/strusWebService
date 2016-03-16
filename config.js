@@ -14,7 +14,8 @@
 			//"compression" : true,
 			"metadata" : [
 					{ "name" : "doclen", "type" : "UInt16" },
-					{ "name" : "docweight", "type" : "Float32" }
+					{ "name" : "docweight", "type" : "Float32" },
+					{ "name" : "date", "type" : "UInt16" }
 			]
 		}
 	},
