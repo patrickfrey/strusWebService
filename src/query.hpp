@@ -416,7 +416,7 @@ struct traits<struct Feature *> {
 		}
 		
 		f->name = v.get<std::string>( "name" );
-		f->weight = v.get<float>( "weight" );
+		f->weight = v.get<double>( "weight" );
 		
 		return f;
 	}
@@ -520,7 +520,7 @@ struct traits<struct WeightingConfiguration> {
 		}
 		s.name = v.get<std::string>( "name" );
 		s.params = v.get<std::vector<std::pair<std::string, struct ParameterValue> > >( "params" );
-		s.weight = v.get<float>( "weight" );
+		s.weight = v.get<double>( "weight" );
 		return s;
 	}
 	
