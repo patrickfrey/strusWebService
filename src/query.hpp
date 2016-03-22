@@ -688,7 +688,7 @@ struct traits<struct MetadataCondition> {
 		if( v.type( ) != is_object ) {
 			throw bad_value_cast( );
 		}
-		c.operator_ = v.get<std::string>( "op" );
+		c.operator_ = v.get<std::string>( "operator" );
 		c.name = v.get<std::string>( "name" );
 		c.value = parameterValueGet( v, "value" );
 
@@ -697,7 +697,7 @@ struct traits<struct MetadataCondition> {
 	
 	static void set( value &v, struct MetadataCondition const &c )
 	{
-		v.set( "op", c.operator_ );
+		v.set( "operator", c.operator_ );
 		v.set( "name", c.name );
 		parameterValueSet( v, "value", c.value );
 	}
