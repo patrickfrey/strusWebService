@@ -202,6 +202,50 @@ struct SummarizerConfiguration {
 	std::vector<std::pair<std::string, struct ParameterValue> > params;
 };
 
+struct MetadataCondition {
+	std::string operator_;
+	std::string name;
+	struct ParameterValue value;
+	
+	const strus::MetaDataRestrictionInterface::CompareOperator operatorEnum( ) const
+	{
+		if( operator_ == "lt" || operator_ == "<" ) {
+			return strus::MetaDataRestrictionInterface::CompareLess;
+		} else if( operator_ == "lte" || operator_ == "<=" || operator_ == "=<" ) {
+			return strus::MetaDataRestrictionInterface::CompareLessEqual;
+		} else if( operator_ == "eq" || operator_ == "=" || operator_ == "==" ) {
+			return strus::MetaDataRestrictionInterface::CompareEqual;
+		} else if( operator_ == "ne" || operator_ == "!=" || operator_ == "<>" ) {
+			return strus::MetaDataRestrictionInterface::CompareNotEqual;
+		} else if( operator_ == "gte" || operator_ == "=>" || operator_ == ">=" ) {
+			return strus::MetaDataRestrictionInterface::CompareGreaterEqual;
+		} else if( operator_ == "gt" || operator_ == ">" ) {
+			return strus::MetaDataRestrictionInterface::CompareGreater;
+		} else {
+			throw std::runtime_error( "unknown metadata condition operator" );
+		}
+	}
+	
+	const strus::ArithmeticVariant numberValue( ) const
+	{
+		switch( value.type ) {
+			case PARAMETER_TYPE_STRING:
+				throw std::runtime_error( "value in metadata condition cannot be a string, must be a number" );
+		
+			case PARAMETER_TYPE_NUMERIC:
+				return value.n;
+				
+			case PARAMETER_TYPE_UNKNOWN:
+			default:
+				throw std::runtime_error( "type of valie in metadata condition is unknown" );
+		}
+	}
+};
+
+struct MetadataRestriction {
+	std::vector<struct MetadataCondition> conditions;
+};
+
 struct QueryRequestBase {
 };
 
@@ -214,18 +258,19 @@ struct QueryRequest : public QueryRequestBase {
 	std::vector<std::string> exclude;
 	std::vector<struct WeightingConfiguration> weighting;
 	std::vector<struct SummarizerConfiguration> summarizer;
+	std::vector<struct MetadataRestriction> metadata;
 	
 	QueryRequest( ) : 
 		first_rank( DEFAULT_QUERY_FIRST_RANK ),
 		nof_ranks( DEFAULT_QUERY_NOF_RANKS ),
 		features( ), select( ), restrict( ), exclude( ),
-		weighting( ), summarizer( ) { }
+		weighting( ), summarizer( ), metadata( ) { }
 
 	QueryRequest( const std::string &_text, size_t _first_rank = DEFAULT_QUERY_FIRST_RANK, size_t _nof_ranks = DEFAULT_QUERY_NOF_RANKS ) :
 		first_rank( _first_rank ),
 		nof_ranks( _nof_ranks ),
 		features( ), select( ), restrict( ), exclude( ),
-		weighting( ), summarizer( )
+		weighting( ), summarizer( ), metadata( )
 	{
 		// TODO: standard query assumes a default type, must be in configuration
 		// of the service with a compiled in default being 'word'.
@@ -259,14 +304,15 @@ struct QueryRequest : public QueryRequestBase {
 		standard_summarizer.attribute = DEFAULT_ATTRIBUTE_DOCID;
 		standard_summarizer.name = DEFAULT_SUMMARIZER;
 		standard_summarizer.params.push_back( std::make_pair( "name", ParameterValue( DEFAULT_ATTRIBUTE_DOCID ) ) );
-		summarizer.push_back( standard_summarizer );
+		summarizer.push_back( standard_summarizer );		
 	}
 	
 	QueryRequest( const QueryRequest &q )
 		: first_rank( q.first_rank ),
 		nof_ranks( q.nof_ranks ),
 		features( q.features ), select( q.select ), restrict( q.restrict ), exclude( q.exclude ),
-		weighting( q.weighting ), summarizer( q.summarizer )
+		weighting( q.weighting ), summarizer( q.summarizer ),
+		metadata( q.metadata )
 	{
 		for( std::size_t i = 0; i < q.features.size( ); i++ ) {
 			features[i] = dynamic_cast<Feature *>( q.features[i]->clone( ) );
@@ -283,6 +329,7 @@ struct QueryRequest : public QueryRequestBase {
 		exclude = q.exclude;
 		weighting = q.weighting;
 		summarizer = q.summarizer;
+		metadata = q.metadata;
 		
 		for( std::size_t i = 0; i < q.features.size( ); i++ ){
 			features[i] = dynamic_cast<Feature *>( q.features[i]->clone( ) );
@@ -371,7 +418,9 @@ struct traits<QueryRequest> {
 		standard_summarizer.name = DEFAULT_SUMMARIZER;
 		standard_summarizer.params.push_back( std::make_pair( "name", ParameterValue( DEFAULT_ATTRIBUTE_DOCID ) ) );
 		standard_summarizers.push_back( standard_summarizer );
+		std::vector<struct MetadataRestriction> standard_metadata;
 		q.summarizer = v.get<std::vector<struct SummarizerConfiguration> >( "summarizer", standard_summarizers );
+		q.metadata = v.get<std::vector<struct MetadataRestriction > >( "metadata", standard_metadata );
 		return q;
 	}
 	
@@ -385,6 +434,7 @@ struct traits<QueryRequest> {
 		v.set( "exclude", q.exclude );
 		v.set( "weighting", q.weighting );
 		v.set( "summarizer", q.summarizer );
+		v.set( "metadata", q.metadata );
 	}
 };
 
@@ -532,6 +582,79 @@ struct traits<struct WeightingConfiguration> {
 	}
 };
 
+static void parameterValueSet( value &v, const char *name, const struct ParameterValue &p )
+{
+	switch( p.type ) {
+		case PARAMETER_TYPE_STRING:
+			v.set( name, p.s );
+			break;
+		
+		case PARAMETER_TYPE_NUMERIC:
+			switch( p.n.type ) {
+				case strus::ArithmeticVariant::Null:
+					v.set( name, cppcms::json::null( ) );
+					break;
+				
+				case strus::ArithmeticVariant::Int:
+					v.set( name, p.n.toint( ) );
+					break;
+					
+				case strus::ArithmeticVariant::UInt:
+					v.set( name, p.n.touint( ) );
+					break;
+					
+				case strus::ArithmeticVariant::Float:
+					v.set( name, p.n.tofloat( ) );
+					break;
+				
+				default:
+					throw bad_value_cast( );
+			}
+			break;
+		
+		case PARAMETER_TYPE_UNKNOWN:
+		default:
+			throw bad_value_cast( );
+	}
+}
+
+static struct ParameterValue parameterValueGet( value const &v, const char *name )
+{
+	struct ParameterValue p;
+	
+	value val = v[name];
+	switch( val.type( ) ) {
+		case is_string:
+			p.type = PARAMETER_TYPE_STRING;
+			p.s = v.get<std::string>( name );
+			break;
+					
+		case is_number:
+			p.type = PARAMETER_TYPE_NUMERIC;
+			if( is_of_type( val, p.n.variant.Int ) ) {
+				p.n = v.get<BOOST_TYPEOF( p.n.variant.Int )>( name );
+			} else if( is_of_type( val, p.n.variant.UInt ) ) {
+				p.n = v.get<BOOST_TYPEOF( p.n.variant.UInt )>( name );
+			} else if( is_of_type( val, p.n.variant.Float ) ) {
+				p.n = v.get<BOOST_TYPEOF( p.n.variant.Float )>( name );
+			} else {
+				throw bad_value_cast( );
+			}
+			break;
+			
+		case is_undefined:
+		case is_null:
+			// TODO: how do we map absence
+		case is_object:
+		case is_array:	
+		case is_boolean:
+		default:
+			throw bad_value_cast( );
+	}
+	
+	return p;
+}
+
 template<>
 struct traits<std::pair< std::string, struct ParameterValue> > {
 	
@@ -544,35 +667,7 @@ struct traits<std::pair< std::string, struct ParameterValue> > {
 		}
 		
 		p.first = v.get<std::string>( "key" );
-		value val = v["value"];
-		switch( val.type( ) ) {
-			case is_string:
-				p.second.type = PARAMETER_TYPE_STRING;
-				p.second.s = v.get<std::string>( "value" );
-				break;
-						
-			case is_number:
-				p.second.type = PARAMETER_TYPE_NUMERIC;
-				if( is_of_type( val, p.second.n.variant.Int ) ) {
-					p.second.n = v.get<BOOST_TYPEOF( p.second.n.variant.Int )>( "value" );
-				} else if( is_of_type( val, p.second.n.variant.UInt ) ) {
-					p.second.n = v.get<BOOST_TYPEOF( p.second.n.variant.UInt )>( "value" );
-				} else if( is_of_type( val, p.second.n.variant.Float ) ) {
-					p.second.n = v.get<BOOST_TYPEOF( p.second.n.variant.Float )>( "value" );
-				} else {
-					throw bad_value_cast( );
-				}
-				break;
-				
-			case is_undefined:
-			case is_null:
-				// TODO: how do we map absence
-			case is_object:
-			case is_array:	
-			case is_boolean:
-			default:
-				throw bad_value_cast( );
-		}
+		p.second = parameterValueGet( v, "value" );
 				
 		return p;
 	}
@@ -580,38 +675,51 @@ struct traits<std::pair< std::string, struct ParameterValue> > {
 	static void set( value &v, std::pair< std::string, struct ParameterValue> const &p )
 	{
 		v.set( "key", p.first );
-		switch( p.second.type ) {
-			case PARAMETER_TYPE_STRING:
-				v.set( "value", p.second.s );
-				break;
-			
-			case PARAMETER_TYPE_NUMERIC:
-				switch( p.second.n.type ) {
-					case strus::ArithmeticVariant::Null:
-						v.set( "value", cppcms::json::null( ) );
-						break;
-					
-					case strus::ArithmeticVariant::Int:
-						v.set( "value", p.second.n.toint( ) );
-						break;
-						
-					case strus::ArithmeticVariant::UInt:
-						v.set( "value", p.second.n.touint( ) );
-						break;
-						
-					case strus::ArithmeticVariant::Float:
-						v.set( "value", p.second.n.tofloat( ) );
-						break;
-					
-					default:
-						throw bad_value_cast( );
-				}
-				break;
-			
-			case PARAMETER_TYPE_UNKNOWN:
-			default:
-				throw bad_value_cast( );
+		parameterValueSet( v, "value", p.second );
+	}
+};
+
+template<>
+struct traits<struct MetadataCondition> {
+
+	static struct MetadataCondition get( value const &v )
+	{
+		struct MetadataCondition c;
+		if( v.type( ) != is_object ) {
+			throw bad_value_cast( );
 		}
+		c.operator_ = v.get<std::string>( "op" );
+		c.name = v.get<std::string>( "name" );
+		c.value = parameterValueGet( v, "value" );
+
+		return c;
+	}
+	
+	static void set( value &v, struct MetadataCondition const &c )
+	{
+		v.set( "op", c.operator_ );
+		v.set( "name", c.name );
+		parameterValueSet( v, "value", c.value );
+	}
+};
+
+template<>
+struct traits<struct MetadataRestriction> {
+
+	static struct MetadataRestriction get( value const &v )
+	{
+		struct MetadataRestriction r;
+		if( v.type( ) != is_object ) {
+			throw bad_value_cast( );
+		}
+		r.conditions = v.get<std::vector<struct MetadataCondition> >( "condition" );
+
+		return r;
+	}
+	
+	static void set( value &v, struct MetadataRestriction const &c )
+	{
+		v.set( "condition", c.conditions );
 	}
 };
 

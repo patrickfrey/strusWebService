@@ -43,6 +43,7 @@
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerFunctionInstanceInterface.hpp"
 #include "strus/queryResult.hpp"
+#include "strus/metaDataRestrictionInterface.hpp"
 
 #include <vector>
 #include <string>
@@ -277,8 +278,15 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		(*it)->produceQuery( query_processor, query );
 	}
 	
-	// TODO: defineMetaDataRestriction
-
+	// 2.3) append metadata filtering conditions
+	for( std::vector<MetadataRestriction>::const_iterator rit = qry_req.metadata.begin( ); rit != qry_req.metadata.end( ); rit++ ) {
+		for( std::vector<MetadataCondition>::const_iterator cit = rit->conditions.begin( ); cit != rit->conditions.end( ); cit++ ) {
+			bool newGroup = cit == rit->conditions.begin( );
+			query->addMetaDataRestrictionCondition(
+				cit->operatorEnum( ), cit->name, cit->numberValue( ), newGroup );
+		}
+	}
+		
 	// 3.1) execute query
 
 	strus::QueryResult result = query->evaluate( );
