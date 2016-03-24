@@ -302,6 +302,9 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	// TODO: fill in also per ranklist data (currently we have none)
 	
 	QueryResponse response;
+
+	response.documents_ranked = result.nofDocumentsRanked( );
+	response.passes_evaluated = result.evaluationPass( );
 	
 	for( std::vector<strus::ResultDocument>::const_iterator it = result.ranks( ).begin( ); it != result.ranks( ).end( ); it++ ) {
 			Rank rank;
