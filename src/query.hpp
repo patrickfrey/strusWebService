@@ -365,6 +365,7 @@ struct Rank {
 };
 
 struct QueryResponse : public QueryResponseBase {
+	std::size_t documents_visited;
 	std::size_t documents_ranked;
 	std::size_t passes_evaluated;
 	std::vector<Rank> ranks;	
@@ -734,16 +735,18 @@ struct traits<QueryResponse> {
 		if( v.type( ) != is_object ) {
 			throw bad_value_cast( );
 		}
-		r.documents_ranked = v.get<std::size_t>( "documents_ranked" );
 		r.passes_evaluated = v.get<std::size_t>( "passes_evaluated" );
+		r.documents_ranked = v.get<std::size_t>( "documents_ranked" );
+		r.documents_visited = v.get<std::size_t>( "documents_visited" );
 		r.ranks = v.get<std::vector<Rank> >( "ranks" );
 		return r;
 	}
 	
 	static void set( value &v, QueryResponse const &r )
 	{
-		v.set( "documents_ranked", r.documents_ranked );
 		v.set( "passes_evaluated", r.passes_evaluated );
+		v.set( "documents_ranked", r.documents_ranked );
+		v.set( "documents_visited", r.documents_visited );
 		v.set( "ranks", r.ranks );
 	}
 };

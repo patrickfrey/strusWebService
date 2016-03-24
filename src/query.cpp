@@ -303,8 +303,9 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	
 	QueryResponse response;
 
-	response.documents_ranked = result.nofDocumentsRanked( );
 	response.passes_evaluated = result.evaluationPass( );
+	response.documents_ranked = result.nofDocumentsRanked( );
+	response.documents_visited = result.nofDocumentsVisited( );
 	
 	for( std::vector<strus::ResultDocument>::const_iterator it = result.ranks( ).begin( ); it != result.ranks( ).end( ); it++ ) {
 			Rank rank;
