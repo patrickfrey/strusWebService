@@ -170,7 +170,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 					return;
 			}
 		}
-		query_eval->addWeightingFunction( scheme, function, weighting_parameters, it->weight );
+		query_eval->addWeightingFunction( scheme, function, weighting_parameters );
 	}
 
 	// 1.2) define summarizer configuration

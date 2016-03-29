@@ -153,7 +153,7 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 	}
 	
 	// metadata
-	for( std::vector<std::pair<std::string, strus::ArithmeticVariant> >::const_iterator it = ins_doc.metadata.begin( );
+	for( std::vector<std::pair<std::string, strus::NumericVariant> >::const_iterator it = ins_doc.metadata.begin( );
 		it != ins_doc.metadata.end( ); it++ ) {
 		doc->setMetaData( (*it).first, (*it).second );
 	}
@@ -445,7 +445,7 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 		// TODO: should we report the type too? We have it in index/config already
 		// std::string type( metadata->getType( idx ) );
 		strus::Index h = metadata->elementHandle( name );
-		strus::ArithmeticVariant value = metadata->getValue( h );
+		strus::NumericVariant value = metadata->getValue( h );
 		answer.metadata.push_back( std::make_pair( name, value ) );
 	}
 

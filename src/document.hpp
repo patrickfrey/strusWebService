@@ -15,7 +15,7 @@
 
 #include "utils.hpp"
 
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "strus/index.hpp"
 
 #include <boost/typeof/typeof.hpp>
@@ -32,7 +32,7 @@ struct DocumentRequestBase {
 
 struct DocumentInsertRequest : public DocumentRequestBase {
 	std::vector<std::pair<std::string, std::string> > attributes;
-	std::vector<std::pair<std::string, strus::ArithmeticVariant> > metadata;
+	std::vector<std::pair<std::string, strus::NumericVariant> > metadata;
 	std::vector<boost::tuple<std::string, std::string, strus::Index> > forward;
 	std::vector<boost::tuple<std::string, std::string, strus::Index> > search;
 };
@@ -46,7 +46,7 @@ struct DocumentGetRequest : public DocumentRequestBase {
 struct DocumentGetAnswer {
 	strus::Index docno;
 	std::vector<std::pair<std::string, std::string> > attributes;
-	std::vector<std::pair<std::string, strus::ArithmeticVariant> > metadata;
+	std::vector<std::pair<std::string, strus::NumericVariant> > metadata;
 	std::vector<boost::tuple<std::string, std::string, strus::Index> > forward;
 	std::vector<boost::tuple<std::string, std::string, strus::Index> > search;
 };
@@ -93,7 +93,7 @@ struct traits<DocumentInsertRequest> {
 		// TODO: should we also accept int, float? how can we fall back?
 		d.docid = v.get<std::string>( "docid", "" );
 		d.attributes = v.get<std::vector<std::pair<std::string, std::string> > >( "attributes" );
-		d.metadata = v.get<std::vector<std::pair<std::string, strus::ArithmeticVariant> > >( "metadata" );
+		d.metadata = v.get<std::vector<std::pair<std::string, strus::NumericVariant> > >( "metadata" );
 		d.forward = v.get<std::vector<boost::tuple<std::string, std::string, strus::Index> > >( "forward" );
 		d.search = v.get<std::vector<boost::tuple<std::string, std::string, strus::Index> > >( "search" );
 		return d;
@@ -183,7 +183,7 @@ struct traits<DocumentGetAnswer> {
 		}
 		a.docno = v.get<strus::Index>( "docno" );
 		a.attributes = v.get<std::vector<std::pair<std::string, std::string> > >( "attributes" );
-		a.metadata = v.get<std::vector<std::pair<std::string, strus::ArithmeticVariant> > >( "metadata" );
+		a.metadata = v.get<std::vector<std::pair<std::string, strus::NumericVariant> > >( "metadata" );
 		a.forward = v.get<std::vector<boost::tuple<std::string, std::string, strus::Index> > >( "forward" );
 		a.search = v.get<std::vector<boost::tuple<std::string, std::string, strus::Index> > >( "search" );
 
@@ -225,11 +225,11 @@ struct traits<std::pair<std::string, std::string> > {
 };
 
 template<>
-struct traits<std::pair<std::string, strus::ArithmeticVariant> > {
+struct traits<std::pair<std::string, strus::NumericVariant> > {
 	
-	static std::pair<std::string, strus::ArithmeticVariant> get( value const &v )
+	static std::pair<std::string, strus::NumericVariant> get( value const &v )
 	{
-		std::pair<std::string, strus::ArithmeticVariant> p;
+		std::pair<std::string, strus::NumericVariant> p;
 		
 		if( v.type( ) != is_object) {
 			throw bad_value_cast( );
@@ -269,23 +269,23 @@ struct traits<std::pair<std::string, strus::ArithmeticVariant> > {
 		return p;
 	}
 
-	static void set( value &v, std::pair<std::string, strus::ArithmeticVariant> const &p )
+	static void set( value &v, std::pair<std::string, strus::NumericVariant> const &p )
 	{
 		v.set( "key", p.first );
 		switch( p.second.type ) {
-			case strus::ArithmeticVariant::Null:
+			case strus::NumericVariant::Null:
 				v.set( "value", cppcms::json::null( ) );
 				break;
 			
-			case strus::ArithmeticVariant::Int:
+			case strus::NumericVariant::Int:
 				v.set( "value", p.second.toint( ) );
 				break;
 				
-			case strus::ArithmeticVariant::UInt:
+			case strus::NumericVariant::UInt:
 				v.set( "value", p.second.touint( ) );
 				break;
 				
-			case strus::ArithmeticVariant::Float:
+			case strus::NumericVariant::Float:
 				v.set( "value", p.second.tofloat( ) );
 				break;
 			

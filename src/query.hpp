@@ -13,7 +13,7 @@
 
 #include "master.hpp"
 
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "strus/queryInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 
@@ -149,7 +149,7 @@ enum ParameterType {
 struct ParameterValue {
 	enum ParameterType type;
 	std::string s;
-	strus::ArithmeticVariant n;
+	strus::NumericVariant n;
 	bool b;
 	
 	ParameterValue( )
@@ -171,7 +171,6 @@ struct ParameterValue {
 struct WeightingConfiguration {
 	std::string name;
 	std::vector<std::pair<std::string, struct ParameterValue> > params;
-	float weight;
 };
 
 struct SummarizerConfiguration {
@@ -204,7 +203,7 @@ struct MetadataCondition {
 		}
 	}
 	
-	const strus::ArithmeticVariant numberValue( ) const
+	const strus::NumericVariant numberValue( ) const
 	{
 		switch( value.type ) {
 			case PARAMETER_TYPE_STRING:
@@ -275,7 +274,6 @@ struct QueryRequest : public QueryRequestBase {
 		standard_scheme.params.push_back( std::make_pair( "avgdoclen", ParameterValue( DEFAULT_BM25_AVGDOCLEN ) ) );
 		standard_scheme.params.push_back( std::make_pair( "metadata_doclen", ParameterValue( DEFAULT_BM25_METADATA_DOCLEN ) ) );
 		standard_scheme.params.push_back( std::make_pair( "match", ParameterValue( "feat" ) ) );
-		standard_scheme.weight = 1.0;
 		weighting.push_back( standard_scheme );
 
 		struct SummarizerConfiguration standard_summarizer;
@@ -551,7 +549,6 @@ struct traits<struct WeightingConfiguration> {
 		}
 		s.name = v.get<std::string>( "name" );
 		s.params = v.get<std::vector<std::pair<std::string, struct ParameterValue> > >( "params" );
-		s.weight = v.get<double>( "weight" );
 		return s;
 	}
 	
@@ -559,7 +556,6 @@ struct traits<struct WeightingConfiguration> {
 	{
 		v.set( "name", s.name );
 		v.set( "params", s.params );
-		v.set( "weight", s.weight );
 	}
 };
 
@@ -572,19 +568,19 @@ static void parameterValueSet( value &v, const char *name, const struct Paramete
 		
 		case PARAMETER_TYPE_NUMERIC:
 			switch( p.n.type ) {
-				case strus::ArithmeticVariant::Null:
+				case strus::NumericVariant::Null:
 					v.set( name, cppcms::json::null( ) );
 					break;
 				
-				case strus::ArithmeticVariant::Int:
+				case strus::NumericVariant::Int:
 					v.set( name, p.n.toint( ) );
 					break;
 					
-				case strus::ArithmeticVariant::UInt:
+				case strus::NumericVariant::UInt:
 					v.set( name, p.n.touint( ) );
 					break;
 					
-				case strus::ArithmeticVariant::Float:
+				case strus::NumericVariant::Float:
 					v.set( name, p.n.tofloat( ) );
 					break;
 				
