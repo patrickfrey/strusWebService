@@ -117,7 +117,7 @@ Name: struswebservice
 %define main_version @STRUS_WEB_SERVICE_VERSION@
 Version: %{main_version}
 Release: 0.1
-License: GPLv3
+License: MPLv2
 Group: Development/Libraries/C++
 
 Source: %{name}_%{main_version}.tar.gz
