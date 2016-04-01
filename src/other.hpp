@@ -32,48 +32,25 @@ struct FunctionParameter {
 	std::string description;
 	
 	FunctionParameter( ) { }
-	
-	FunctionParameter( strus::WeightingFunctionInterface::Description::Param p )
+		
+	FunctionParameter( strus::FunctionDescription::Parameter p )
 	{
 		name = p.name( );
 		description = p.text( );
 		switch( p.type( ) ) {
-			case strus::WeightingFunctionInterface::Description::Param::Feature:
+			case strus::FunctionDescription::Parameter::Feature:
 				type = FUNCTION_TYPE_FEATURE;
 				break;
-			case strus::WeightingFunctionInterface::Description::Param::Attribute:
+			case strus::FunctionDescription::Parameter::Attribute:
 				type = FUNCTION_TYPE_ATTRIBUTE;
 				break;
-			case strus::WeightingFunctionInterface::Description::Param::Metadata:
+			case strus::FunctionDescription::Parameter::Metadata:
 				type = FUNCTION_TYPE_METADATA;
 				break;
-			case strus::WeightingFunctionInterface::Description::Param::Numeric:
+			case strus::FunctionDescription::Parameter::Numeric:
 				type = FUNCTION_TYPE_NUMERIC;
 				break;
-			case strus::WeightingFunctionInterface::Description::Param::String:
-				type = FUNCTION_TYPE_STRING;
-				break;
-			}
-	}
-
-	FunctionParameter( strus::SummarizerFunctionInterface::Description::Param p )
-	{
-		name = p.name( );
-		description = p.text( );
-		switch( p.type( ) ) {
-			case strus::SummarizerFunctionInterface::Description::Param::Feature:
-				type = FUNCTION_TYPE_FEATURE;
-				break;
-			case strus::SummarizerFunctionInterface::Description::Param::Attribute:
-				type = FUNCTION_TYPE_ATTRIBUTE;
-				break;
-			case strus::SummarizerFunctionInterface::Description::Param::Metadata:
-				type = FUNCTION_TYPE_METADATA;
-				break;
-			case strus::SummarizerFunctionInterface::Description::Param::Numeric:
-				type = FUNCTION_TYPE_NUMERIC;
-				break;
-			case strus::SummarizerFunctionInterface::Description::Param::String:
+			case strus::FunctionDescription::Parameter::String:
 				type = FUNCTION_TYPE_STRING;
 				break;
 			}

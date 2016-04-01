@@ -139,16 +139,16 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 			return;
 		}
 		
-		strus::WeightingFunctionInterface::Description description= wfi->getDescription( );
-		std::vector<strus::WeightingFunctionInterface::Description::Param> p = description.param( );
+		strus::FunctionDescription description= wfi->getDescription( );
+		std::vector<strus::FunctionDescription::Parameter> p = description.parameter( );
 		std::set<std::string> knownFeatureParams;
-		for( std::vector<strus::WeightingFunctionInterface::Description::Param>::const_iterator pit = p.begin( ); pit != p.end( ); pit++ ) {
-			if( pit->type( ) == strus::WeightingFunctionInterface::Description::Param::Feature ) {
+		for( std::vector<strus::FunctionDescription::Parameter>::const_iterator pit = p.begin( ); pit != p.end( ); pit++ ) {
+			if( pit->type( ) == strus::FunctionDescription::Parameter::Feature ) {
 				knownFeatureParams.insert( pit->name( ) );
 			}	
 		}
 		
-		strus::WeightingFunctionInstanceInterface *function = wfi->createInstance( );
+		strus::WeightingFunctionInstanceInterface *function = wfi->createInstance( query_processor );
 		for( std::vector<std::pair<std::string, struct ParameterValue> >::const_iterator pit = it->params.begin( ); pit != it->params.end( ); pit++ ) {
 			switch( pit->second.type ) {
 				case PARAMETER_TYPE_STRING:
@@ -185,11 +185,11 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 			return;
 		}
 
-		strus::SummarizerFunctionInterface::Description description= sum->getDescription( );
-		std::vector<strus::SummarizerFunctionInterface::Description::Param> p = description.param( );
+		strus::FunctionDescription description= sum->getDescription( );
+		std::vector<strus::FunctionDescription::Parameter> p = description.parameter( );
 		std::set<std::string> knownFeatureParams;
-		for( std::vector<strus::SummarizerFunctionInterface::Description::Param>::const_iterator pit = p.begin( ); pit != p.end( ); pit++ ) {
-			if( pit->type( ) == strus::SummarizerFunctionInterface::Description::Param::Feature ) {
+		for( std::vector<strus::FunctionDescription::Parameter>::const_iterator pit = p.begin( ); pit != p.end( ); pit++ ) {
+			if( pit->type( ) == strus::FunctionDescription::Parameter::Feature ) {
 				knownFeatureParams.insert( pit->name( ) );
 			}	
 		}

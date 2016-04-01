@@ -60,11 +60,11 @@ void other::config_cmd( )
 	for( std::vector<std::string>::const_iterator it = weighting_functions.begin( ); it != weighting_functions.end( ); it++ ) {
 		const strus::WeightingFunctionInterface *func = query_processor->getWeightingFunction( *it );
 		WeightingFunctionConfiguration weighting_config;
-		strus::WeightingFunctionInterface::Description description= func->getDescription( );
+		strus::FunctionDescription description = func->getDescription( );
 		weighting_config.name = *it;
 		weighting_config.description = description.text( );
-		std::vector<strus::WeightingFunctionInterface::Description::Param> p = description.param( );
-		for( std::vector<strus::WeightingFunctionInterface::Description::Param>::const_iterator pit = p.begin( ); pit != p.end( ); pit++ ) {
+		std::vector<strus::FunctionDescription::Parameter> p = description.parameter( );
+		for( std::vector<strus::FunctionDescription::Parameter>::const_iterator pit = p.begin( ); pit != p.end( ); pit++ ) {
 			FunctionParameter param( *pit );
 			weighting_config.parameter.push_back( param );
 		}
@@ -75,11 +75,11 @@ void other::config_cmd( )
 	for( std::vector<std::string>::const_iterator it = summarizers.begin( ); it != summarizers.end( ); it++ ) {
 		const strus::SummarizerFunctionInterface *sum = query_processor->getSummarizerFunction( *it );
 		SummarizerFunctionConfiguration sum_config;
-		strus::SummarizerFunctionInterface::Description description = sum->getDescription( );
+		strus::FunctionDescription description = sum->getDescription( );
 		sum_config.name = *it;
 		sum_config.description = description.text( );
-		std::vector<strus::SummarizerFunctionInterface::Description::Param> p = description.param( );
-		for( std::vector<strus::SummarizerFunctionInterface::Description::Param>::const_iterator pit = p.begin( ); pit != p.end( ); pit++ ) {
+		std::vector<strus::FunctionDescription::Parameter> p = description.parameter( );
+		for( std::vector<strus::FunctionDescription::Parameter>::const_iterator pit = p.begin( ); pit != p.end( ); pit++ ) {
 			FunctionParameter param( *pit );
 			sum_config.parameter.push_back( param );
 		}
