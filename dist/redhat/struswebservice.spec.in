@@ -221,9 +221,15 @@ BuildRequires: libcppcms-devel
 Requires: libcppcms
 %endif
 
-BuildRequires: strus-devel >= 0.2.0
-BuildRequires: strus >= 0.2.0
-Requires: strus >= 0.2.0
+BuildRequires: strus-devel >= 0.7.3
+BuildRequires: strus >= 0.7.3
+Requires: strus >= 0.7.3
+BuildRequires: strusanalyzer-devel >= 0.7.1
+BuildRequires: strusanalyzer >= 0.7.1
+Requires: strusanalyzer >= 0.7.1
+BuildRequires: strusmodule-devel >= 0.7.0
+BuildRequires: strusmodule >= 0.7.0
+Requires: strusmodule >= 0.7.0
 
 %if %{rhel} || %{centos} || %{scilin}
 BuildRequires: curl-devel
