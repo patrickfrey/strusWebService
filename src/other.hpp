@@ -134,6 +134,7 @@ struct traits<WeightingFunctionConfiguration> {
 		c.name = v.get<std::string>( "name" );
 		c.description = v.get<std::string>( "description" );
 		c.parameter = v.get<std::vector<FunctionParameter> >( "parameter" );
+		return c;
 	}
 	
 	static void set( value &v, WeightingFunctionConfiguration const &c )
@@ -157,6 +158,7 @@ struct traits<SummarizerFunctionConfiguration> {
 		c.name = v.get<std::string>( "name" );
 		c.description = v.get<std::string>( "description" );
 		c.parameter = v.get<std::vector<FunctionParameter> >( "parameter" );
+		return c;
 	}
 	
 	static void set( value &v, SummarizerFunctionConfiguration const &c )
@@ -179,6 +181,7 @@ struct traits<PostingJoinOperatorConfiguration> {
 		}		
 		c.name = v.get<std::string>( "name" );
 		c.description = v.get<std::string>( "description" );
+		return c;
 	}
 	
 	static void set( value &v, PostingJoinOperatorConfiguration const &c )
@@ -214,6 +217,7 @@ struct traits<FunctionParameter> {
 		}
 		p.name = v.get<std::string>( "name" );
 		p.description = v.get<std::string>( "description" );
+		return p;
 	}
 	
 	static void set( value &v, FunctionParameter const &p )
