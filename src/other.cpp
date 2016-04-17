@@ -12,6 +12,7 @@
 #include "other.hpp"
 #include "version.hpp"
 #include "constants.hpp"
+#include "strus/versionStorage.hpp"
 
 #include <cppcms/url_dispatcher.h>  
 #include <cppcms/http_response.h>
@@ -38,7 +39,7 @@ void other::ping_cmd( )
 void other::version_cmd( )
 {
 	cppcms::json::value j;
-	j["version"]["strus"] = STRUS_VERSION_STRING;
+	j["version"]["strus"] = STRUS_STORAGE_VERSION_STRING;
 	j["version"]["webservice"] = STRUS_WEB_SERVICE_VERSION_STRING;
 	
 	report_ok( j );

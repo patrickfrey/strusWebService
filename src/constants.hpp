@@ -37,10 +37,6 @@ const int LEVELDB_DATABASE_DEFAULT_COMPRESSION			= true;
 
 const int DEFAULT_PROTOCOL_PRETTY_PRINT					= false;
 
-// TODO: this should be exported IMHO
-//#include "strus/versionStorage.hpp"
-#define STRUS_VERSION_STRING "0.7.4"
-
 const int DEFAULT_QUERY_FIRST_RANK						= 0;
 
 const int DEFAULT_QUERY_NOF_RANKS						= 10;
