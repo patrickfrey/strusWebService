@@ -69,24 +69,15 @@ void master::close_strus_environment( const std::string &name )
 }
 
 void master::report_error( unsigned int code, const std::string &msg )
-{
-	std::vector<std::string> errors = service.getStrusErrorDetails( );
-	
-	for( std::vector<std::string>::const_iterator it = errors.begin( ); it != errors.end( ); it++ ) {
-		BOOSTER_ERROR( PACKAGE ) << *it;
-	}
+{	
+	BOOSTER_ERROR( PACKAGE ) << msg;
 	
 	response( ).content_type( "application/json" );
 	cppcms::json::value j;  
 	j["result"] = "error";
 	j["err"]["code"] = code;
 	j["err"]["msg"] = msg;
-	if( !errors.empty( ) ) {
-		unsigned int pos = 0;
-		for( std::vector<std::string>::const_iterator it = errors.begin( ); it != errors.end( ); it++, pos++ ) {
-			j["err"]["details"][pos] = *it;
-		}
-	}
+
 	if( protocol_pretty_printing ) {
 		j.save( response( ).out( ), cppcms::json::readable );
 	} else {
@@ -102,17 +93,10 @@ void master::report_ok( )
 }
 
 void master::report_ok( cppcms::json::value &j )
-{
-	std::vector<std::string> errors = service.getStrusErrorDetails( );
-	
+{	
 	response( ).content_type( "application/json" );
 	j["result"] = "ok";
-	if( !errors.empty( ) ) {
-		unsigned int pos = 0;
-		for( std::vector<std::string>::const_iterator it = errors.begin( ); it != errors.end( ); it++, pos++ ) {
-			j["err"]["details"][pos] = *it;
-		}
-	}
+	
 	if( protocol_pretty_printing ) {
 		j.save( response( ).out( ), cppcms::json::readable );
 	} else {

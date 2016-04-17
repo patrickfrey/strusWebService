@@ -62,7 +62,6 @@ class StrusContext {
 	private:
 		std::map<std::string, StrusIndexContext *> context_map;	
 		booster::mutex mutex;
-		FILE *logfile;
 		std::vector<const strus::ModuleEntryPoint *> modules;
 
 	public:
@@ -74,7 +73,6 @@ class StrusContext {
 		StrusIndexContext *acquire( const std::string &name );
 		void release( const std::string &name, StrusIndexContext *ctx );
 
-		std::vector<std::string> getStrusErrorDetails( ) const;
 		void registerModules( strus::QueryProcessorInterface *qpi ) const;
 };
 

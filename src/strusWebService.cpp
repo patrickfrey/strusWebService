@@ -341,11 +341,6 @@ std::string strusWebService::getLastStrusError( ) const
 	return context->errorhnd->fetchError( );
 }
 
-std::vector<std::string> strusWebService::getStrusErrorDetails( ) const
-{
-	return context->getStrusErrorDetails( );
-}
-
 std::string strusWebService::getStorageDirectory( const std::string &base_storage_dir, const std::string &name )
 {
 	std::ostringstream ss;
