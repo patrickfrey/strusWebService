@@ -5,7 +5,7 @@ Binary: struswebservice
 Maintainer: Andreas Baumann <mail@andreasbaumann.cc>
 Architecture: any
 Build-Depends: debhelper (>= 4.1.16), cmake,
- libboost1.53-dev, libboost1.53-thread-dev, libboost1.53-system-dev,
- libboost1.53-date-time-dev, strusbase-dev, strus-dev,  strusanalyzer-dev,
+ libboost1.53-dev, libboost-thread1.53-dev, libboost-system1.53-dev,
+ libboost-date-time1.53-dev, strusbase-dev, strus-dev,  strusanalyzer-dev,
  strustrace-dev, strusmodule-dev, libcppcms-dev, libcurl4-openssl-dev
 Files:
