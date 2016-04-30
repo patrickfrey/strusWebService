@@ -4,7 +4,8 @@ Priority: optional
 Maintainer: Andreas Baumann <mail@andreasbaumann.cc>
 Build-Depends: debhelper (>= 4.1.16), cmake,
  libboost-dev, libboost-thread-dev, libboost-system-dev,
- libboost-date-time-dev, strusbase-dev, strus-dev, strusanalyzer-dev,
+ libboost-date-time-dev, libboost-filesystem-dev,
+ strusbase-dev, strus-dev, strusanalyzer-dev,
  strustrace-dev, strusmodule-dev, libcppcms-dev, libcurl4-openssl-dev
 Standards-Version: 3.8.3
 Homepage: http://github.com/Eurospider/strusWebService
