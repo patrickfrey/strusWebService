@@ -221,9 +221,9 @@ BuildRequires: libcppcms-devel
 Requires: libcppcms
 %endif
 
-BuildRequires: strusBase-devel >= 0.9.0
-BuildRequires: strusBase >= 0.9.0
-Requires: strusBase >= 0.9.0
+BuildRequires: strusbase-devel >= 0.9.0
+BuildRequires: strusbase >= 0.9.0
+Requires: strusbase >= 0.9.0
 BuildRequires: strus-devel >= 0.9.0
 BuildRequires: strus >= 0.9.0
 Requires: strus >= 0.9.0
