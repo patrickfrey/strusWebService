@@ -316,7 +316,7 @@ struct QueryRequest : public QueryRequestBase {
 		
 	virtual ~QueryRequest( ) {
 		for( std::vector<Feature *>::const_iterator it = features.begin( ); it != features.end( ); it++ ) {
-			free( *it );
+			delete *it ;
 		}
 	}
 	
