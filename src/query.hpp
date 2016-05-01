@@ -86,9 +86,11 @@ struct Feature : public Node {
 	float weight;
 
 	Feature( ) : name( "" ), weight( 0.0 ) { }
-	
+		
 	Feature( const std::string &_name, float _weight )
 		: name( _name ), weight( _weight ) { }	
+
+	virtual ~Feature( ) { }
 
 	virtual void produceQuery( strus::QueryProcessorInterface *query_processor, strus::QueryInterface *query ) const
 	{
