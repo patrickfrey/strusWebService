@@ -202,9 +202,10 @@ void index::config_cmd( const std::string name )
 	struct StorageConfiguration config;
 	
 	strus::ValueIteratorInterface *valItr = storage->createTermTypeIterator( );
-	std::vector<std::string> termTypes = valItr->fetchValues( MAX_NOF_FEATURES );
-	for( std::vector<std::string>::const_iterator it = termTypes.begin( ); it != termTypes.end( ); it++ ) {
-		config.types.push_back( *it );
+	std::vector<std::string> termTypes = valItr->fetchValues( FEATURE_ITERATOR_BATCH_SIZE );
+	while( termTypes.size( ) > 0 ) {
+		config.types.insert( config.types.end( ), termTypes.begin( ), termTypes.end( ) );
+		termTypes = valItr->fetchValues( FEATURE_ITERATOR_BATCH_SIZE );
 	}
 	
 	for( strus::Index it = 0; it < metadata->nofElements( ); it++ ) {
