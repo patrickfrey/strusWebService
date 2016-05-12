@@ -23,6 +23,7 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/storageDocumentInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
+#include "strus/valueIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/constants.hpp"
 
@@ -449,11 +450,29 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 		answer.metadata.push_back( std::make_pair( name, value ) );
 	}
 
-// TODO: where to know 'word', 'stem' etc. from!?
-//	strus::ForwardIteratorInterface *forward = storage->createForwardIterator( "" );
-	
-//	delete forward;
+	// get all possible feature types
+	std::vector<std::string> termTypes;
+	strus::ValueIteratorInterface *valItr = storage->createTermTypeIterator( );
+	std::vector<std::string> arr = valItr->fetchValues( FEATURE_ITERATOR_BATCH_SIZE );
+	while( arr.size( ) > 0 ) {
+		termTypes.insert( termTypes.end( ), arr.begin( ), arr.end( ) );
+		arr = valItr->fetchValues( FEATURE_ITERATOR_BATCH_SIZE );
+	}
 
+	// iterate forward index for every feature type
+	for( std::vector<std::string>::const_iterator it = termTypes.begin( ); it != termTypes.end( ); it++ ) {
+		strus::ForwardIteratorInterface *forward = storage->createForwardIterator( *it );
+		forward->skipDoc( answer.docno );
+		strus::Index pos = 0;
+		while( ( pos = forward->skipPos( pos + 1 ) ) != 0 ) {
+			std::string value = forward->fetch( );
+			boost::tuple<std::string, std::string, strus::Index> feature;
+			feature = boost::make_tuple( *it, value, pos );	
+			answer.forward.push_back( feature );
+		}
+		delete forward;
+	}
+	
 	cppcms::json::value j;
 	j["doc"] = answer;
 	
