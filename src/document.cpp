@@ -25,10 +25,13 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/valueIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
+#include "strus/documentTermIteratorInterface.hpp"
 #include "strus/constants.hpp"
 
 #include <sstream>
 #include <algorithm>
+
+#include <boost/algorithm/string/predicate.hpp>
 
 namespace apps {
 
@@ -316,8 +319,6 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 		return;
 	}
 
-	// TODO: error handling, for now we catch at least the document doesn't exist
-	// case above..
 	transaction->deleteDocument( docid );
 
 	transaction->commit( );
@@ -336,6 +337,17 @@ void document::get_payload_cmd( const std::string name )
 {
 	get_cmd( name, "", false );
 }
+
+typedef boost::tuple<std::string, std::string, strus::Index> FeatureType;
+
+struct FeatureLessThan
+{
+	bool operator( )( FeatureType const &f1, FeatureType const &f2 )
+	{
+		if( boost::get<2>( f1 ) < boost::get<2>( f2 ) ) return true;
+		return false;
+	}
+};
 
 void document::get_cmd( const std::string name, const std::string id, bool docid_in_url )
 {
@@ -460,19 +472,47 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 	}
 
 	// iterate forward index for every feature type
-	for( std::vector<std::string>::const_iterator it = termTypes.begin( ); it != termTypes.end( ); it++ ) {
-		strus::ForwardIteratorInterface *forward = storage->createForwardIterator( *it );
+	for( std::vector<std::string>::const_iterator tit = termTypes.begin( ); tit != termTypes.end( ); tit++ ) {
+		strus::ForwardIteratorInterface *forward = storage->createForwardIterator( *tit );
 		forward->skipDoc( answer.docno );
 		strus::Index pos = 0;
 		while( ( pos = forward->skipPos( pos + 1 ) ) != 0 ) {
 			std::string value = forward->fetch( );
-			boost::tuple<std::string, std::string, strus::Index> feature;
-			feature = boost::make_tuple( *it, value, pos );	
+			FeatureType feature;
+			feature = boost::make_tuple( *tit, value, pos );	
 			answer.forward.push_back( feature );
 		}
 		delete forward;
 	}
-	
+	std::sort( answer.forward.begin( ), answer.forward.end( ), FeatureLessThan( ) );
+
+	// iterate search index for document, this is quiet inefficient
+	// by design
+	for( std::vector<std::string>::const_iterator tit = termTypes.begin( ); tit != termTypes.end( ); tit++ ) {
+		strus::DocumentTermIteratorInterface *fit = storage->createDocumentTermIterator( *tit );
+		if( !fit->skipDoc( answer.docno ) ) {
+			delete fit;
+			continue;
+		}
+		strus::DocumentTermIteratorInterface::Term term;
+		while( fit->nextTerm( term ) ) {
+			std::string value = fit->termValue( term.termno );
+			strus::PostingIteratorInterface *pit = storage->createTermPostingIterator( *tit, value );
+			if( pit->skipDoc( answer.docno ) != answer.docno ) {
+				delete fit;
+				continue;
+			}
+			strus::Index pos = 0;
+			while( ( pos = pit->skipPos( pos + 1 ) ) != 0 ) {
+				FeatureType feature;
+				feature = boost::make_tuple( *tit, value, pos );	
+				answer.search.push_back( feature );
+			}
+		}
+		delete fit;
+	}
+	std::sort( answer.search.begin( ), answer.search.end( ), FeatureLessThan( ) );
+
 	cppcms::json::value j;
 	j["doc"] = answer;
 	
