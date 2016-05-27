@@ -21,6 +21,8 @@
 
 #include "strus/errorBufferInterface.hpp"
 
+#include <fstream>
+
 namespace apps {
 
 master::master( strusWebService &service )
@@ -28,6 +30,16 @@ master::master( strusWebService &service )
 	service( service )
 {
 	protocol_pretty_printing = service.settings( ).get<bool>( "protocol.pretty_print", DEFAULT_PROTOCOL_PRETTY_PRINT );
+}
+
+void master::register_democlient_pages( )
+{
+	// catch all redirects pointing to the democlient
+	service.dispatcher( ).assign( "/democlient", &master::redirect_to_democlient, this );
+	service.dispatcher( ).assign( "/democlient/", &master::redirect_to_democlient, this );
+
+	// service built-in democlient
+	service.dispatcher( ).assign( "/democlient/((index\\.html)|(js/.*\\.js)|(css/.*\\.css))", &master::serve_democlient, this, 1 );
 }
 
 void master::register_common_pages( )
@@ -129,6 +141,41 @@ bool master::ensure_json_request( )
 		return false;
 	}
 	return true;
+}
+
+static bool endsWith( const std::string &s, const std::string &end )
+{
+	if( s.length( ) >= end.length( ) ) {
+		return s.compare( s.length( ) - end.length( ), end.length( ), end ) == 0;
+	} else {
+		return false;
+	}
+}
+
+void master::serve_democlient( std::string file_name )
+{
+	std::ifstream f( ( service.settings( ).get<std::string>( "democlient.basedir" ) + "/" + file_name ).c_str( ) );
+	if( !f ) {
+		not_found_404( );
+		return;
+	}
+
+	if( endsWith( file_name, ".css" ) ) {
+		response( ).content_type( "text/css" );
+	} else if( endsWith( file_name, ".js" ) ) {
+		response( ).content_type( "application/javascript" );
+	} else if( endsWith( file_name, ".html" ) ) {
+		response( ).content_type( "text/html" );
+	} else {
+		response( ).content_type( "application/octet-stream" );
+	}
+	
+	response( ).out( ) << f.rdbuf( );
+}
+
+void master::redirect_to_democlient( )
+{
+	response( ).set_redirect_header( "/democlient/index.html" );
 }
 	
 } // namespace apps

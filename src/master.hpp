@@ -40,6 +40,7 @@ class master : public cppcms::application {
 	public:
 		master( strusWebService &service );
 		void register_common_pages( );
+		void register_democlient_pages( );
 		bool get_strus_environment( const std::string &name );
 		void close_strus_environment( const std::string &name );
 
@@ -50,6 +51,8 @@ class master : public cppcms::application {
 		void not_found_404( );
 		bool ensure_post( );
 		bool ensure_json_request( );
+		void serve_democlient( std::string file_name ); 
+		void redirect_to_democlient( );
 
 };
 

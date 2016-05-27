@@ -49,5 +49,10 @@
 			//~ "name" : "./strusWebService.log",
 			//~ "append" : true
 		//~ }
+	},
+	
+	"democlient" : {
+		"enable" : true,
+		"basedir" : "./democlient"
 	}
 }

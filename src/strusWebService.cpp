@@ -45,6 +45,9 @@ strusWebService::strusWebService( cppcms::service &srv, StrusContext *_context )
 	add( query );
 	add( transaction );
 			
+	if( settings( ).get<bool>( "democlient.enable" ) ) {
+		master.register_democlient_pages( );
+	}
 	master.register_common_pages( );
 }
 
