@@ -26,6 +26,7 @@ configure_file( "${PROJECT_SOURCE_DIR}/dist/obs/struswebservice.dsc.in"  "${PROJ
 configure_file( "${PROJECT_SOURCE_DIR}/dist/obs/struswebservice-Debian_7.0.dsc.in"  "${PROJECT_SOURCE_DIR}/dist/obs/struswebservice-Debian_7.0.dsc"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/dist/obs/struswebservice-xUbuntu_12.04.dsc.in"  "${PROJECT_SOURCE_DIR}/dist/obs/struswebservice-xUbuntu_12.04.dsc"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/struswebservice.spec.in"  "${PROJECT_SOURCE_DIR}/dist/redhat/struswebservice.spec"  @ONLY )
+configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-RHEL.in"  "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-RHEL"  @ONLY )
 
 find_library(CPPCMS cppcms)
 find_library(BOOSTER booster)
@@ -65,8 +66,7 @@ link_directories(
 add_executable(strusWebService ${SRC})
 target_link_libraries(strusWebService ${BOOSTER} ${CPPCMS} strus_storage strus_error strus_database_leveldb strus_queryeval strus_queryproc strus_module strus_error ${Boost_LIBRARIES})
 
-install( TARGETS strusWebService RUNTIME DESTINATION bin )
-install( FILES ${CMAKE_SOURCE_DIR}/config.js DESTINATION /etc/strusWebService RENAME strusWebService.conf )
+install( TARGETS strusWebService RUNTIME DESTINATION sbin )
 
 ADD_CUSTOM_TARGET(run @echo runs the web service)
 ADD_CUSTOM_COMMAND(

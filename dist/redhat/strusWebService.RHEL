@@ -1,0 +1,75 @@
+#!/bin/bash
+#
+# Init file for strus web server
+#
+# chkconfig: 345 95 5
+# description: strus web server
+#
+# processname: strusWebService
+# config: /etc/strusWebService/strusWebService.conf
+# pidfile: /var/run/strusWebService/strusWebService.pid
+
+# source function library
+. /etc/rc.d/init.d/functions
+
+RETVAL=0
+prog="strusWebService"
+DOCREPO="strusWebService"
+OPTIONS=
+
+
+runlevel=$(set -- $(runlevel); eval "echo \$$#" )
+
+
+start()
+{
+	echo -n $"Starting $prog: "
+	su - struswebservice -c "$prog -c /etc/$prog/$prog.conf &" || failure
+	RETVAL=$?
+	[ "$RETVAL" = 0 ] && touch /var/lock/subsys/$prog
+	PID=`pidof $prog`
+	if test $? = 0; then
+		test -d /var/run/$prog || mkdir /var/run/$prog
+		echo $PID > /var/run/$prog/$prog.pid
+	else
+		exit 1
+	fi
+	echo
+}
+
+stop()
+{
+	echo -n $"Stopping $prog: "
+	pkill $prog
+	RETVAL=$?
+	if test "$RETVAL" = 0; then
+		rm -f /var/run/$prog/$prog.pid
+		rm -f /var/lock/subsys/$prog
+	fi
+	echo
+}
+
+
+case "$1" in
+	start)
+		start
+		pidof 
+		;;
+	stop)
+		stop
+		;;
+	restart)
+		stop
+		start
+		;;
+	status)
+		echo -n $prog
+		status -p  /var/run/$prog/$prog.pid
+		RETVAL=$?
+		;;
+	*)
+		echo $"Usage: $0 {start|stop|restart|status}"
+		RETVAL=1
+esac
+exit $RETVAL
+
