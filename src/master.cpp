@@ -23,6 +23,14 @@
 
 #include <fstream>
 
+#define BOOST_FILESYSTEM_VERSION 3
+
+#define BOOST_FILESYSTEM_NO_DEPRECATED
+#define BOOST_SYSTEM_NO_DEPRECATED
+
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
+
 namespace apps {
 
 master::master( strusWebService &service )
@@ -154,7 +162,8 @@ static bool endsWith( const std::string &s, const std::string &end )
 
 void master::serve_democlient( std::string file_name )
 {
-	std::ifstream f( ( service.settings( ).get<std::string>( "democlient.basedir" ) + "/" + file_name ).c_str( ) );
+	std::string full_file_name = service.settings( ).get<std::string>( "democlient.basedir" ) + "/" + file_name;
+	std::ifstream f( full_file_name.c_str( ) );
 	if( !f ) {
 		not_found_404( );
 		return;
@@ -169,7 +178,8 @@ void master::serve_democlient( std::string file_name )
 	} else {
 		response( ).content_type( "application/octet-stream" );
 	}
-	
+
+	response( ).content_length( boost::filesystem::file_size( full_file_name ) );	
 	response( ).out( ) << f.rdbuf( );
 }
 
