@@ -281,6 +281,14 @@ install -D -m664 dist/redhat/strusWebService.conf-RHEL $RPM_BUILD_ROOT%{_sysconf
 
 install -d -m775 $RPM_BUILD_ROOT%{_localstatedir}/log/strusWebService
 
+install -d -m755 $RPM_BUILD_ROOT%{_sharedstatedir}/strusWebService
+install -d -m755 $RPM_BUILD_ROOT%{_sharedstatedir}/strusWebService/www
+install -d -m755 $RPM_BUILD_ROOT%{_sharedstatedir}/strusWebService/www/css
+install -d -m755 $RPM_BUILD_ROOT%{_sharedstatedir}/strusWebService/www/js
+install -m664 democlient/index.html $RPM_BUILD_ROOT%{_sharedstatedir}/strusWebService/www/index.html
+install -m664 democlient/css/*.css $RPM_BUILD_ROOT%{_sharedstatedir}/strusWebService/www/css/.
+install -m664 democlient/js/*.js $RPM_BUILD_ROOT%{_sharedstatedir}/strusWebService/www/js/.
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -321,6 +329,13 @@ rm -rf /var/run/strusWebService
 %endif
 %endif
 %attr(0775, struswebservice, struswebservice) %dir %{_localstatedir}/log/strusWebService
+%attr(0775, struswebservice, struswebservice) %dir %{_sharedstatedir}/strusWebService
+%attr(0775, struswebservice, struswebservice) %dir %{_sharedstatedir}/strusWebService/www
+%attr(0775, struswebservice, struswebservice) %dir %{_sharedstatedir}/strusWebService/www/css
+%attr(0775, struswebservice, struswebservice) %dir %{_sharedstatedir}/strusWebService/www/js
+%attr(0440, struswebservice, struswebservice) %{_sharedstatedir}/strusWebService/www/*.html
+%attr(0440, struswebservice, struswebservice) %{_sharedstatedir}/strusWebService/www/css/*.css
+%attr(0440, struswebservice, struswebservice) %{_sharedstatedir}/strusWebService/www/js/*.js
 
 %changelog
 * Sat Apr 30 2016 Andreas Baumann <mail@andreasbaumann.cc> 0.0.3-0.1

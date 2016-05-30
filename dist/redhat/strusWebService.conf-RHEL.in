@@ -4,7 +4,7 @@
 	},
 	
 	"storage" : {
-		"basedir" : "/var/lib/strusWebService",
+		"basedir" : "/var/lib/strusWebService/storage",
 		"default_create_parameters" : {
 			"database" : "leveldb",
 			//"cache_size" : 8388608,
@@ -53,6 +53,6 @@
 	
 	"democlient" : {
 		"enable" : true,
-		"basedir" : "./democlient"
+		"basedir" : "/var/lib/strusWebService/www"
 	}
 }
