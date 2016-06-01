@@ -57,12 +57,63 @@ void index::initialize_default_create_parameters( )
 	BOOSTER_DEBUG( PACKAGE ) << "Default storage configuration parameters:" << j;
 }
 
+struct StorageCreateParameters index::merge_create_parameters( const struct StorageCreateParameters &defaults, const struct StorageCreateParameters &explicit_params )
+{
+	// inherit the non-metadata part of the create parameters
+	struct StorageCreateParameters params = default_create_parameters;
+	params.metadata.clear( );
+		
+	// KLUDGE: for now we do not want the user of the service to be
+	// able to change low-level configuration parameters (or potentially
+	// dangerous parameters like cache sizes, we leave this to the administrator).
+	// metadata definitions on the other hand should be configurable via API
+	// TODO: add roles for the webservice like reader (query), writer, DDL admin, super admin
+	
+	// iterate explicit parameters, issue warnings if default metadata is
+	// being redefined
+	for( std::vector<struct MetadataDefiniton>::const_iterator it = explicit_params.metadata.begin( ); it != explicit_params.metadata.end( ); it++ ) {
+		bool seen_default = false;
+		for( std::vector<struct MetadataDefiniton>::const_iterator it2 = default_create_parameters.metadata.begin( ); it2 != default_create_parameters.metadata.end( ); it2++ ) {
+			if( it->name == it2->name ) {
+				if( it->type == it2->type ) {
+					// explicit override with same type, no problem
+					params.metadata.push_back( *it );
+					seen_default = true;
+					continue;
+				} else {
+					BOOSTER_WARNING( PACKAGE ) << "overwritting an already existing metadata definition for '" << it->name << "'";
+					params.metadata.push_back( *it ); 
+					seen_default = true;
+					continue;
+				}
+			}
+		}
+		if( !seen_default ) {
+			// new defintion
+			params.metadata.push_back( *it );
+		}
+	}
+	
+	// check for default parameters and append them if needed
+	for( std::vector<struct MetadataDefiniton>::const_iterator it = default_create_parameters.metadata.begin( ); it != default_create_parameters.metadata.end( ); it++ ) {
+		bool contains_default = false;
+		for( std::vector<struct MetadataDefiniton>::const_iterator it2 = explicit_params.metadata.begin( ); it2 != explicit_params.metadata.end( ); it2++ ) {
+			if( it->name == it2->name ) {
+				contains_default = true;
+			}
+		}
+		if( !contains_default ) {
+			params.metadata.push_back( *it );
+		}
+	}
+
+	return params;
+}
+
 void index::create_cmd( const std::string name )
 {
 	if( !ensure_post( ) ) return;	
 	if( !ensure_json_request( ) ) return;
-
-	struct StorageCreateParameters params;
 	
 	std::pair<void *, size_t> data = request( ).raw_post_data( );
 	std::istringstream is( std::string( reinterpret_cast<char const *>( data.first ), data.second ) );
@@ -72,9 +123,13 @@ void index::create_cmd( const std::string name )
 		return;
 	}
 	
+	struct StorageCreateParameters params;
+
 	if( p.type( "params" ) == cppcms::json::is_object ) {
 		try {
-			params = p.get<struct StorageCreateParameters>( "params" );
+			struct StorageCreateParameters explicit_params;
+			explicit_params = p.get<struct StorageCreateParameters>( "params" );
+			params = merge_create_parameters( default_create_parameters, explicit_params );
 		} catch( cppcms::json::bad_value_cast &e ) {
 			report_error( ERROR_INDEX_ILLEGAL_JSON, "Illegal storage creation parameter received" );
 			return;

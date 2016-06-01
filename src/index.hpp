@@ -64,8 +64,7 @@ class index : public master {
 		struct StorageCreateParameters default_create_parameters;
 		
 		void initialize_default_create_parameters( );
-		// TODO: or can we pass to get with a different initialzer
-		//~ struct StorageCreateParameters merge_create_parameters( const struct StorageCreateParameters &defaults, const struct StorageCreateParameters &params );
+		struct StorageCreateParameters merge_create_parameters( const struct StorageCreateParameters &defaults, const struct StorageCreateParameters &explicit_params );
 						
 	private:
 		void create_cmd( const std::string name );
