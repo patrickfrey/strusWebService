@@ -1,0 +1,1 @@
+{"config":{"attributes":[],"metadata":[{"name":"authority","type":"UInt8"},{"name":"number","type":"UInt8"},{"name":"session_date","type":"UInt16"},{"name":"pub_date","type":"UInt16"},{"name":"doclen","type":"UInt16"}],"types":[]},"result":"ok"}

@@ -86,11 +86,7 @@ void index::create_cmd( const std::string name )
 		return;
 	}
 		
-	struct StorageCreateParameters combined_params;
-	combined_params = default_create_parameters;
-	// TODO: merge configurations
-
-	std::string config = service.getStorageConfig( storage_base_directory, combined_params, name );
+	std::string config = service.getStorageConfig( storage_base_directory, params, name );
 
 	if( !get_strus_environment( name ) ) {
 		return;

@@ -25,6 +25,11 @@ add_test( NAME index_list COMMAND curlJsonTester index_list )
 
 add_test( NAME index_stats_A COMMAND curlJsonTester index_stats_A )
 
+# index creation with parameter (create, verify metatable, delete index C)
+add_test( NAME create_index_C COMMAND curlJsonTester create_index_C )
+add_test( NAME index_config_C COMMAND curlJsonTester index_config_C )
+add_test( NAME delete_index_C COMMAND curlJsonTester delete_index_C )
+
 # document.cpp
 
 add_test( NAME document_url_docid_insert COMMAND curlJsonTester document_url_docid_insert )
