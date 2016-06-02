@@ -11,6 +11,8 @@
 #include "strusWebService.hpp"
 #include "transaction.hpp"
 
+#include <boost/timer/timer.hpp>
+
 #include <cppcms/url_dispatcher.h>  
 #include <cppcms/http_request.h>
 

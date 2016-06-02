@@ -18,6 +18,8 @@
 #include "curlpp/Easy.hpp"
 #include "curlpp/Options.hpp"
 
+#include <cppcms/json.h>
+
 int main( int argc, char *argv[] )
 {
 	if( argc != 2 ) {
@@ -92,8 +94,37 @@ int main( int argc, char *argv[] )
 	
 	std::cout << "MUST: " << must << std::endl;
 	std::cout << "RES : " << res << std::endl;
+
+	std::istringstream mis( must );
+	cppcms::json::value pmust;
+	if( !pmust.load( mis, true ) ) {
+		std::cerr << "ERROR: Illegal JSON in must file" << std::endl;
+		return 1;
+	}
 	
-	if( res.compare( must ) != 0 ) {
+	std::istringstream ris( res );
+	cppcms::json::value pres;
+	if( !pres.load( ris, true ) ) {
+		std::cerr << "ERROR: Illegal JSON in res file" << std::endl;
+		return 1;
+	}
+	
+	// filter out execution_time in result, in the future we may measure
+	// that the execution time is withing known limits..
+	if( pres.type( "execution_time" ) == cppcms::json::is_number ) {
+		pres.set( "execution_time", 0 );
+	}
+	
+	std::cout << "MUST (JSON): " << pmust << std::endl;
+	std::cout << "RES (JSON) : " << pres << std::endl;
+	
+	std::ostringstream omust;
+	pmust.save( omust );
+	
+	std::ostringstream ores;
+	pres.save( ores );
+					
+	if( ores.str( ).compare( omust.str( ) ) != 0 ) {
 		return 1;
 	}
 	

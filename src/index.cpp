@@ -17,8 +17,10 @@
 #include <cppcms/http_request.h>
 
 #include <booster/log.h>
-#include <sstream>
 
+#include <boost/timer/timer.hpp>
+
+#include <sstream>
 #include <iterator>
 #include <algorithm>
 #include <vector>

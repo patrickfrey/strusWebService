@@ -235,7 +235,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 
 	// TODO:
 	// addRestrictionFeature: keep documents which CONTAIN the feature
-	// addExclusionFeature: keep docuemnts which DON'T CONTAIN the feature
+	// addExclusionFeature: keep documents which DON'T CONTAIN the feature
 	
 	// 2) specific query
 		

@@ -17,7 +17,7 @@
 #include <booster/log.h>
 #include <booster/locale/format.h>
 
-#include <booster/log.h>
+#include <boost/timer/timer.hpp>
 
 #include "strus/storageTransactionInterface.hpp"
 #include "strus/storageClientInterface.hpp"
@@ -62,6 +62,8 @@ void document::insert_payload_cmd( const std::string name )
 
 void document::insert_cmd( const std::string name, const std::string id, bool docid_in_url )
 {
+	boost::timer::cpu_timer timer;
+
 	if( !ensure_post( ) ) return;	
 	if( !ensure_json_request( ) ) return;
 
@@ -87,6 +89,12 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 	} else {
 		report_error( ERROR_DOCUMENT_INSERT_ILLEGAL_JSON, "Expecting a JSON object as JSON document payload" );
 		return;
+	}
+
+	{
+		cppcms::json::value j;
+		j["document"] = ins_doc;
+		BOOSTER_DEBUG( PACKAGE ) << root( ) << "/document/insert: " << j;
 	}
 
 	if( !get_strus_environment( name ) ) {
@@ -209,8 +217,13 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 	}
 
 	delete doc;
-			
-	report_ok( );	
+
+	cppcms::json::value j;
+	j["execution_time"] = (double)timer.elapsed( ).wall / (double)1000000000;
+
+	BOOSTER_DEBUG( PACKAGE ) << root( ) << "/document/insert: " << j;
+	
+	report_ok( j );
 }
 
 void document::update_url_cmd( const std::string name, const std::string id )
@@ -245,6 +258,8 @@ void document::delete_payload_cmd( const std::string name )
 
 void document::delete_cmd( const std::string name, const std::string id, bool docid_in_url )
 {
+	boost::timer::cpu_timer timer;
+
 	if( !ensure_post( ) ) return;	
 	if( !docid_in_url ) {
 		if( !ensure_json_request( ) ) return;
@@ -252,6 +267,7 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 
 	struct DocumentDeleteRequest del_doc;
 	
+	std::string trans_id = "";
 	if( !docid_in_url ) {
 		std::pair<void *, size_t> data = request( ).raw_post_data( );
 		std::istringstream is( std::string( reinterpret_cast<char const *>( data.first ), data.second ) );
@@ -272,6 +288,19 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 			report_error( ERROR_DOCUMENT_DELETE_ILLEGAL_JSON, "Expecting a JSON object as JSON document payload" );
 			return;
 		}
+
+		// transaction id is optional and additional payload along to 'doc'
+		try {
+			trans_id = p.get<std::string>( "transaction.id", "" );
+		} catch( cppcms::json::bad_value_cast &e ) {
+			// be tolerant, transactions are optional
+		}
+	}
+
+	{
+		cppcms::json::value j;
+		j["document"] = del_doc;
+		BOOSTER_DEBUG( PACKAGE ) << root( ) << "/document/delete: " << j;
 	}
 
 	if( !get_strus_environment( name ) ) {
@@ -313,19 +342,35 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 		return;
 	}
 
-	strus::StorageTransactionInterface *transaction = service.createStorageTransactionInterface( name );
-	if( !transaction ) {
-		report_error( ERROR_DOCUMENT_DELETE_CMD_CREATE_STORAGE_TRANSACTION, service.getLastStrusError( ) );
-		return;
+	strus::StorageTransactionInterface *transaction;
+	if( trans_id == "" ) {
+		transaction = service.createStorageTransactionInterface( name );
+		if( !transaction ) {
+			report_error( ERROR_DOCUMENT_DELETE_CMD_CREATE_STORAGE_TRANSACTION, service.getLastStrusError( ) );
+			return;
+		}
+	} else {
+		transaction = service.getStorageTransactionInterface( name, trans_id );
+		if( !transaction ) {
+			report_error( ERROR_DOCUMENT_DELETE_CMD_CREATE_STORAGE_TRANSACTION, "Referencing illegal transaction, no begin transaction seen before" );
+			return;
+		}
 	}
 
 	transaction->deleteDocument( docid );
 
-	transaction->commit( );
+	// autocommit if not part of a transaction
+	if( trans_id == "" ) {
+		transaction->commit( );
+		delete transaction;
+	}
 	
-	delete transaction;
+	cppcms::json::value j;
+	j["execution_time"] = (double)timer.elapsed( ).wall / (double)1000000000;
+
+	BOOSTER_DEBUG( PACKAGE ) << root( ) << "/document/delete: " << j;
 	
- 	report_ok( ); 	
+	report_ok( j );
 }
 
 void document::get_url_cmd( const std::string name, const std::string id )

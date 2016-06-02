@@ -16,6 +16,7 @@
 #include <booster/log.h>
 
 #include <boost/filesystem.hpp>
+#include <boost/timer/timer.hpp>
 
 #include "strus/storageModule.hpp"
 
