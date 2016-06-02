@@ -72,7 +72,7 @@ ADD_CUSTOM_TARGET(run @echo runs the web service)
 ADD_CUSTOM_COMMAND(
   COMMENT "run"
   COMMAND strusWebService
-  ARGS -c ./config.js
+  ARGS -v -c ./config.js
   TARGET run
 )
 
@@ -80,6 +80,6 @@ ADD_CUSTOM_TARGET(debugrun @echo runs the web service in debugger)
 ADD_CUSTOM_COMMAND(
   COMMENT "debugrun"
   COMMAND gdb
-  ARGS --args strusWebService -c ./config.js
+  ARGS --args strusWebService -v -c ./config.js
   TARGET debugrun
 )

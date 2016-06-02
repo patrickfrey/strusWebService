@@ -50,7 +50,7 @@ static bool is_of_type( cppcms::json::value const &v, T x )
 			double n;
 			double d = std::modf( v.number( ), &n );
 			if( std::abs( d ) < std::numeric_limits<float>::epsilon( ) ) {
-				// the fractional part is smaller than the machine eplsilon
+				// the fractional part is smaller than the machine epsilon
 				// of float (right?), so it is an integer
 				return true;
 			}

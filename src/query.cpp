@@ -85,9 +85,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		j["query"] = qry_req;
 		BOOSTER_DEBUG( PACKAGE ) << "Query: " << j;
 	}
-	
-	//~ my_object.save(std::cout,cppcms::json::readable);  
-	
+		
 	
 	if( !get_strus_environment( name ) ) {
 		return;
