@@ -53,6 +53,7 @@ class master : public cppcms::application {
 		bool ensure_json_request( );
 		void serve_democlient( std::string file_name ); 
 		void redirect_to_democlient( );
+		std::string root( ) const;
 
 };
 

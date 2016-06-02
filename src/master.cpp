@@ -185,7 +185,12 @@ void master::serve_democlient( std::string file_name )
 
 void master::redirect_to_democlient( )
 {
-	response( ).set_redirect_header( service.settings( ).get<std::string>( "http.script" ) +"/democlient/index.html" );
+	response( ).set_redirect_header( root( ) +"/democlient/index.html" );
+}
+
+std::string master::root( ) const
+{
+	return service.settings( ).get<std::string>( "http.script" );
 }
 	
 } // namespace apps
