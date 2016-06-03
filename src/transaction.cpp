@@ -11,6 +11,8 @@
 #include "strusWebService.hpp"
 #include "transaction.hpp"
 
+#include <booster/log.h>
+
 #include <boost/timer/timer.hpp>
 
 #include <cppcms/url_dispatcher.h>  
@@ -42,7 +44,7 @@ void transaction::begin_payload_cmd( const std::string name )
 }
 
 void transaction::begin_cmd( const std::string name, const std::string tid, bool tid_in_url )
-{
+{	
 	if( !ensure_post( ) ) return;	
 
 	struct TransactionBeginRequest trans_begin;
@@ -110,7 +112,9 @@ void transaction::begin_cmd( const std::string name, const std::string tid, bool
 		return;
 	}
 
-	report_ok( );
+	BOOSTER_INFO( PACKAGE ) << "begin(" << trans_id << ")";
+	
+	report_ok( );	
 }
 
 void transaction::commit_url_cmd( const std::string name, const std::string tid )
@@ -125,6 +129,8 @@ void transaction::commit_payload_cmd( const std::string name )
 
 void transaction::commit_cmd( const std::string name, const std::string tid, bool tid_in_url )
 {
+	boost::timer::cpu_timer timer;
+
 	if( !ensure_post( ) ) return;	
 
 	struct TransactionBeginRequest trans_commit;
@@ -195,8 +201,15 @@ void transaction::commit_cmd( const std::string name, const std::string tid, boo
 	transaction->commit( );
 
 	service.deleteStorageTransactionInterface( name, trans_id );
-	
-	report_ok( );
+
+	cppcms::json::value j;
+	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	j["execution_time"] = execution_time;
+
+	BOOSTER_INFO( PACKAGE ) << "commit(" << trans_id << ", " << execution_time << "s)";
+	BOOSTER_DEBUG( PACKAGE ) << "commit(" << trans_id << "): " << j;
+
+	report_ok( j );
 }
 
 void transaction::rollback_url_cmd( const std::string name, const std::string tid )
@@ -211,6 +224,8 @@ void transaction::rollback_payload_cmd( const std::string name )
 
 void transaction::rollback_cmd( const std::string name, const std::string tid, bool tid_in_url )
 {
+	boost::timer::cpu_timer timer;
+
 	if( !ensure_post( ) ) return;	
 
 	struct TransactionBeginRequest trans_rollback;
@@ -282,7 +297,14 @@ void transaction::rollback_cmd( const std::string name, const std::string tid, b
 
 	service.deleteStorageTransactionInterface( name, trans_id );
 	
-	report_ok( );
+	cppcms::json::value j;
+	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	j["execution_time"] = execution_time;
+
+	BOOSTER_INFO( PACKAGE ) << "rollback(" << trans_id << ", " << execution_time << "s)";
+	BOOSTER_DEBUG( PACKAGE ) << "rollback(" << trans_id << "): " << j;
+
+	report_ok( j );
 }
 
 } // namespace apps

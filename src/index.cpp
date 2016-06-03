@@ -177,6 +177,8 @@ void index::create_cmd( const std::string name )
 	service.registerStorageConfig( name, config );
 	
 	delete database;
+
+	BOOSTER_INFO( PACKAGE ) << "create_index(" << name << ")";
 			
 	report_ok( );
 }
@@ -208,6 +210,8 @@ void index::delete_cmd( const std::string name )
 		report_error( ERROR_INDEX_DESTROY_CMD_DESTROY_DATABASE, service.getLastStrusError( ) );
 		return;
 	}
+
+	BOOSTER_INFO( PACKAGE ) << "delete_index(" << name << ")";
 			
 	report_ok( );
 }
@@ -275,6 +279,9 @@ void index::config_cmd( const std::string name )
 
 	cppcms::json::value j;
 	j["config"] = config;
+
+	BOOSTER_INFO( PACKAGE ) << "config_index(" << name << ")";
+	BOOSTER_DEBUG( PACKAGE ) << "config_index(" << name << "): " << j;
 	
 	report_ok( j );	
 }
@@ -313,6 +320,9 @@ void index::stats_cmd( const std::string name )
 		
 	cppcms::json::value j;
 	j["stats"] = stats;
+
+	BOOSTER_INFO( PACKAGE ) << "stats_index(" << name << ")";
+	BOOSTER_DEBUG( PACKAGE ) << "stats_index(" << name << "): " << j;
 	
 	report_ok( j );
 }
@@ -348,6 +358,9 @@ void index::list_cmd( )
 	}
 	std::sort( v.begin( ), v.end( ) );
 	j["indexes"] = v;
+
+	BOOSTER_INFO( PACKAGE ) << "list_indexes";
+	BOOSTER_DEBUG( PACKAGE ) << "list_indexes: " << j;
 
 	report_ok( j );
 }

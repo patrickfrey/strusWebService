@@ -44,7 +44,7 @@
 	},
 	
 	"logging" : {
-		"level" : "notice",
+		"level" : "info",
 		//~ "file" : {
 			//~ "name" : "./strusWebService.log",
 			//~ "append" : true

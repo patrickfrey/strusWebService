@@ -87,7 +87,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	{
 		cppcms::json::value j;
 		j["query"] = qry_req;
-		BOOSTER_DEBUG( PACKAGE ) << root( ) << "/query: " << j;
+		BOOSTER_DEBUG( PACKAGE ) << "query: " << j;
 	}
 		
 	if( !get_strus_environment( name ) ) {
@@ -307,7 +307,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	j["ranklist"] = response;
 	j["execution_time"] = (double)timer.elapsed( ).wall / (double)1000000000;
 
-	BOOSTER_DEBUG( PACKAGE ) << root( ) << "/query: " << j;
+	BOOSTER_DEBUG( PACKAGE ) << "query: " << j;
 	
 	report_ok( j );
 }

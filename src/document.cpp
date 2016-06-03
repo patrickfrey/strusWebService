@@ -91,10 +91,30 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 		return;
 	}
 
+	// docid can come from the JSON payload or directly in the URL
+	std::string docid;
+	if( docid_in_url ) {
+		docid = id;
+	} else {
+		if( ins_doc.docid.compare( "" ) == 0 ) {
+			report_error( ERROR_DOCUMENT_INSERT_CMD_DOCID_REQUIRED, "docid must be part of the JSON payload as field of 'doc'" );
+			return;
+		}
+		docid = ins_doc.docid;
+	}
+
+	// transaction id is optional and additional payload along to 'doc'
+	std::string trans_id = "";
+	try {
+		trans_id = p.get<std::string>( "transaction.id", "" );
+	} catch( cppcms::json::bad_value_cast &e ) {
+		// be tolerant, transactions are optional
+	}
+	
 	{
 		cppcms::json::value j;
 		j["document"] = ins_doc;
-		BOOSTER_DEBUG( PACKAGE ) << root( ) << "/document/insert: " << j;
+		BOOSTER_DEBUG( PACKAGE ) << "insert(" << docid << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << "): " << j;
 	}
 
 	if( !get_strus_environment( name ) ) {
@@ -116,26 +136,6 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 	if( !storage ) {
 		report_error( ERROR_DOCUMENT_INSERT_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
-	}
-
-	// docid can come from the JSON payload or directly in the URL
-	std::string docid;
-	if( docid_in_url ) {
-		docid = id;
-	} else {
-		if( ins_doc.docid.compare( "" ) == 0 ) {
-			report_error( ERROR_DOCUMENT_INSERT_CMD_DOCID_REQUIRED, "docid must be part of the JSON payload as field of 'doc'" );
-			return;
-		}
-		docid = ins_doc.docid;
-	}
-
-	// transaction id is optional and additional payload along to 'doc'
-	std::string trans_id = "";
-	try {
-		trans_id = p.get<std::string>( "transaction.id", "" );
-	} catch( cppcms::json::bad_value_cast &e ) {
-		// be tolerant, transactions are optional
 	}
 
 	strus::StorageTransactionInterface *transaction;
@@ -219,9 +219,11 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 	delete doc;
 
 	cppcms::json::value j;
-	j["execution_time"] = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	j["execution_time"] = execution_time;
 
-	BOOSTER_DEBUG( PACKAGE ) << root( ) << "/document/insert: " << j;
+	BOOSTER_INFO( PACKAGE ) << "insert(" << docid << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << execution_time << "s)";
+	BOOSTER_DEBUG( PACKAGE ) << "insert(" << docid << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << "): " << j;
 	
 	report_ok( j );
 }
@@ -297,10 +299,22 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 		}
 	}
 
+	// docid can come from the JSON payload or directly in the URL
+	std::string docid;
+	if( docid_in_url ) {
+		docid = id;
+	} else {
+		if( del_doc.docid.compare( "" ) == 0 ) {
+			report_error( ERROR_DOCUMENT_DELETE_CMD_DOCID_REQUIRED, "docid must be part of the JSON payload as field of 'doc'" );
+			return;
+		}
+		docid = del_doc.docid;
+	}
+
 	{
 		cppcms::json::value j;
 		j["document"] = del_doc;
-		BOOSTER_DEBUG( PACKAGE ) << root( ) << "/document/delete: " << j;
+		BOOSTER_DEBUG( PACKAGE ) << "delete(" << docid << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << "): " << j;
 	}
 
 	if( !get_strus_environment( name ) ) {
@@ -322,18 +336,6 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 	if( !storage ) {
 		report_error( ERROR_DOCUMENT_DELETE_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
-	}
-
-	// docid can come from the JSON payload or directly in the URL
-	std::string docid;
-	if( docid_in_url ) {
-		docid = id;
-	} else {
-		if( del_doc.docid.compare( "" ) == 0 ) {
-			report_error( ERROR_DOCUMENT_DELETE_CMD_DOCID_REQUIRED, "docid must be part of the JSON payload as field of 'doc'" );
-			return;
-		}
-		docid = del_doc.docid;
 	}
 
 	strus::Index docno = storage->documentNumber( docid );
@@ -366,10 +368,12 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 	}
 	
 	cppcms::json::value j;
-	j["execution_time"] = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	j["execution_time"] = execution_time;
 
-	BOOSTER_DEBUG( PACKAGE ) << root( ) << "/document/delete: " << j;
-	
+	BOOSTER_INFO( PACKAGE ) << "delete(" << docid << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << execution_time << "s)";
+	BOOSTER_DEBUG( PACKAGE ) << "delete(" << docid << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << "): " << j;
+
 	report_ok( j );
 }
 
@@ -396,6 +400,8 @@ struct FeatureLessThan
 
 void document::get_cmd( const std::string name, const std::string id, bool docid_in_url )
 {
+	boost::timer::cpu_timer timer;
+
 	if( !docid_in_url ) {
 		if( !ensure_post( ) ) return;	
 		if( !ensure_json_request( ) ) return;
@@ -403,6 +409,7 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 	
 	struct DocumentGetRequest get_doc;
 
+	std::string trans_id = "";
 	if( !docid_in_url ) {
 		std::pair<void *, size_t> data = request( ).raw_post_data( );
 		std::istringstream is( std::string( reinterpret_cast<char const *>( data.first ), data.second ) );
@@ -423,6 +430,31 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 			report_error( ERROR_DOCUMENT_GET_ILLEGAL_JSON, "Expecting a JSON object as JSON document payload" );
 			return;
 		}
+
+		// transaction id is optional and additional payload along to 'doc'
+		try {
+			trans_id = p.get<std::string>( "transaction.id", "" );
+		} catch( cppcms::json::bad_value_cast &e ) {
+			// be tolerant, transactions are optional
+		}
+	}
+
+	// docid can come from the JSON payload or directly in the URL
+	std::string docid;
+	if( docid_in_url ) {
+		docid = id;
+	} else {
+		if( get_doc.docid.compare( "" ) == 0 ) {
+			report_error( ERROR_DOCUMENT_DELETE_CMD_DOCID_REQUIRED, "docid must be part of the JSON payload as field of 'doc'" );
+			return;
+		}
+		docid = get_doc.docid;
+	}
+
+	{
+		cppcms::json::value j;
+		j["document"] = get_doc;
+		BOOSTER_DEBUG( PACKAGE ) << "get(" << docid << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << "): " << j;
 	}
 
 	if( !get_strus_environment( name ) ) {
@@ -444,18 +476,6 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 	if( !storage ) {
 		report_error( ERROR_DOCUMENT_GET_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
-	}
-
-	// docid can come from the JSON payload or directly in the URL
-	std::string docid;
-	if( docid_in_url ) {
-		docid = id;
-	} else {
-		if( get_doc.docid.compare( "" ) == 0 ) {
-			report_error( ERROR_DOCUMENT_DELETE_CMD_DOCID_REQUIRED, "docid must be part of the JSON payload as field of 'doc'" );
-			return;
-		}
-		docid = get_doc.docid;
 	}
 
 	DocumentGetAnswer answer;
@@ -558,8 +578,15 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 	}
 	std::sort( answer.search.begin( ), answer.search.end( ), FeatureLessThan( ) );
 
+	// TODO: how to use transactions here?
+	
 	cppcms::json::value j;
 	j["doc"] = answer;
+	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	j["execution_time"] = execution_time;
+
+	BOOSTER_INFO( PACKAGE ) << "get(" << docid << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << execution_time << "s)";
+	BOOSTER_DEBUG( PACKAGE ) << "get(" << docid << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << "): " << j;
 	
 	report_ok( j );	
 }
@@ -576,6 +603,8 @@ void document::exists_payload_cmd( const std::string name )
 
 void document::exists_cmd( const std::string name, const std::string id, bool docid_in_url )
 {
+	boost::timer::cpu_timer timer;
+
 	if( !docid_in_url ) {
 		if( !ensure_post( ) ) return;	
 		if( !ensure_json_request( ) ) return;
