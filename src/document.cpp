@@ -114,7 +114,7 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 	{
 		cppcms::json::value j;
 		j["document"] = ins_doc;
-		BOOSTER_DEBUG( PACKAGE ) << "insert(" << docid << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << "): " << j;
+		BOOSTER_DEBUG( PACKAGE ) << "insert(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << "): " << j;
 	}
 
 	if( !get_strus_environment( name ) ) {
@@ -222,8 +222,8 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "insert(" << docid << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << execution_time << "s)";
-	BOOSTER_DEBUG( PACKAGE ) << "insert(" << docid << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << "): " << j;
+	BOOSTER_INFO( PACKAGE ) << "insert(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << ", " << execution_time << "s)";
+	BOOSTER_DEBUG( PACKAGE ) << "insert(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << "): " << j;
 	
 	report_ok( j );
 }
@@ -314,7 +314,7 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 	{
 		cppcms::json::value j;
 		j["document"] = del_doc;
-		BOOSTER_DEBUG( PACKAGE ) << "delete(" << docid << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << "): " << j;
+		BOOSTER_DEBUG( PACKAGE ) << "delete(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << "): " << j;
 	}
 
 	if( !get_strus_environment( name ) ) {
@@ -371,8 +371,8 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "delete(" << docid << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << execution_time << "s)";
-	BOOSTER_DEBUG( PACKAGE ) << "delete(" << docid << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << "): " << j;
+	BOOSTER_INFO( PACKAGE ) << "delete(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << ", " << execution_time << "s)";
+	BOOSTER_DEBUG( PACKAGE ) << "delete(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << "): " << j;
 
 	report_ok( j );
 }
@@ -454,7 +454,7 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 	{
 		cppcms::json::value j;
 		j["document"] = get_doc;
-		BOOSTER_DEBUG( PACKAGE ) << "get(" << docid << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << "): " << j;
+		BOOSTER_DEBUG( PACKAGE ) << "get(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << name << "): " << j;
 	}
 
 	if( !get_strus_environment( name ) ) {
@@ -585,8 +585,8 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "get(" << docid << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << execution_time << "s)";
-	BOOSTER_DEBUG( PACKAGE ) << "get(" << docid << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << "): " << j;
+	BOOSTER_INFO( PACKAGE ) << "get(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << ", " << execution_time << "s)";
+	BOOSTER_DEBUG( PACKAGE ) << "get(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << "): " << j;
 	
 	report_ok( j );	
 }

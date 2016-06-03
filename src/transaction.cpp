@@ -112,7 +112,7 @@ void transaction::begin_cmd( const std::string name, const std::string tid, bool
 		return;
 	}
 
-	BOOSTER_INFO( PACKAGE ) << "begin(" << trans_id << ")";
+	BOOSTER_INFO( PACKAGE ) << "begin(" << name << ", " << trans_id << ")";
 	
 	report_ok( );	
 }
@@ -206,8 +206,8 @@ void transaction::commit_cmd( const std::string name, const std::string tid, boo
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "commit(" << trans_id << ", " << execution_time << "s)";
-	BOOSTER_DEBUG( PACKAGE ) << "commit(" << trans_id << "): " << j;
+	BOOSTER_INFO( PACKAGE ) << "commit(" << name << ", " << trans_id << ", " << execution_time << "s)";
+	BOOSTER_DEBUG( PACKAGE ) << "commit(" << name << ", " << trans_id << "): " << j;
 
 	report_ok( j );
 }
@@ -301,8 +301,8 @@ void transaction::rollback_cmd( const std::string name, const std::string tid, b
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "rollback(" << trans_id << ", " << execution_time << "s)";
-	BOOSTER_DEBUG( PACKAGE ) << "rollback(" << trans_id << "): " << j;
+	BOOSTER_INFO( PACKAGE ) << "rollback(" << name << ", " << trans_id << ", " << execution_time << "s)";
+	BOOSTER_DEBUG( PACKAGE ) << "rollback(" << name << ", " << trans_id << "): " << j;
 
 	report_ok( j );
 }
