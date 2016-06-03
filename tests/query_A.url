@@ -1,3 +1,63 @@
 POST
 http://localhost:8080/strus/query/A
-{ "query" : { "text" : "hello", "first_rank" : 0, "nof_ranks" : 10, "weighting" : [ { "name": "metadata", "params": [ { "key": "name", "value": "docweight" } ], "weight": 0.0 }, { "name": "tf", "params": [ { "key": "match", "value": "x" } ], "weight": 1.0 } ], "summarizer": [ { "attribute" : "docid", "name" : "attribute", "params" : [ { "key": "name", "value" : "docid" } ] }, { "attribute" : "title", "name" : "attribute", "params" : [ { "key": "name", "value" : "title" } ] } ] } }
+{
+    "query": {
+        "text": "hello",
+        "first_rank": 0,
+        "nof_ranks": 10,
+        "features": [
+            {
+                "name": "feat",
+                "term": {
+                    "type": "word",
+                    "value": "hello"
+                },
+                "weight": 1
+            },
+            {
+                "name": "sel",
+                "expression": {
+                    "operator": "union",
+                    "range": 0,
+                    "cardinality": 0,
+                    "terms": [
+                        {
+                            "type": "word",
+                            "value": "hello"
+                        }
+                    ]
+                },
+                "weight": 1
+            }
+        ],
+        "select": [
+            "sel"
+        ],
+        "restrict": [],
+        "exclude": [],
+        "weighting": [
+            {
+                "name": "metadata",
+                "params": [
+                    {
+                        "key": "name",
+                        "value": ""
+                    }
+                ],
+                "weight": 1
+            }
+        ],
+        "summarizer": [
+            {
+                "attribute": "attribute",
+                "name": "attribute",
+                "params": [
+                    {
+                        "key": "name",
+                        "value": ""
+                    }
+                ]
+            }
+        ]
+    }
+    
