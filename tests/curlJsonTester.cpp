@@ -46,6 +46,10 @@ int main( int argc, char *argv[] )
 	}
 	testurlfile.close( );
 
+	std::cout << "METHOD: " << method << std::endl;
+	std::cout << "URL: " << urlstr << std::endl;
+	std::cout << "DATA: " << data << std::endl;
+
 	std::ostringstream os;
 	curlpp::Easy request;
 	curlpp::options::WriteStream ws( &os );

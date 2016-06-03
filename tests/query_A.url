@@ -41,7 +41,7 @@ http://localhost:8080/strus/query/A
                 "params": [
                     {
                         "key": "name",
-                        "value": ""
+                        "value": "doclen"
                     }
                 ],
                 "weight": 1
@@ -54,10 +54,10 @@ http://localhost:8080/strus/query/A
                 "params": [
                     {
                         "key": "name",
-                        "value": ""
+                        "value": "docid"
                     }
                 ]
             }
         ]
     }
-    
+}
