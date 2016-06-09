@@ -299,7 +299,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %pre
 /usr/bin/getent group struswebservice >/dev/null || /usr/sbin/groupadd struswebservice > /dev/null 2>&1
-/usr/bin/getent passwd struswebservice >/dev/null || /usr/sbin/useradd -g struswebservice struswebservice -c "StrusWebService user" -d /dev/null > /dev/null 2>&1
+/usr/bin/getent passwd struswebservice >/dev/null || /usr/sbin/useradd -g struswebservice struswebservice -c "StrusWebService user" -d %{_sharedstatedir}/strusWebService > /dev/null 2>&1
 
 %post
 /sbin/chkconfig --add strusWebService
