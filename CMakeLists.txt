@@ -72,7 +72,7 @@ ADD_CUSTOM_TARGET(run @echo runs the web service)
 ADD_CUSTOM_COMMAND(
   COMMENT "run"
   COMMAND strusWebService
-  ARGS -v -c ./config.js
+  ARGS -v -c ${PROJECT_SOURCE_DIR}/config.js
   TARGET run
 )
 
