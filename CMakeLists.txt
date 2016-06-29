@@ -80,6 +80,6 @@ ADD_CUSTOM_TARGET(debugrun @echo runs the web service in debugger)
 ADD_CUSTOM_COMMAND(
   COMMENT "debugrun"
   COMMAND gdb
-  ARGS --args strusWebService -v -c ./config.js
+  ARGS --args strusWebService -v -c ${PROJECT_SOURCE_DIR}/config.js
   TARGET debugrun
 )
