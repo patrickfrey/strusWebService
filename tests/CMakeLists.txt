@@ -1,9 +1,15 @@
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
-include_directories( "${PROJECT_SOURCE_DIR}/3rdParty/curlpp/include" "${CURL_INCLUDE_DIRS}" )
+include_directories( "${PROJECT_SOURCE_DIR}/src" "${PROJECT_SOURCE_DIR}/3rdParty/curlpp/include" "${CURL_INCLUDE_DIRS}" )
 
 add_executable( curlJsonTester curlJsonTester.cpp)
 target_link_libraries( curlJsonTester "${CURL_LIBRARIES}" ${CPPCMS} curlpp_static)
+
+# low-level tests
+
+add_executable( queryStructTester queryStructTester.cpp)
+
+add_test( NAME query_struct COMMAND queryStructTester )
 
 # other.cpp
 
@@ -76,6 +82,8 @@ add_test( NAME transaction_delete_commit COMMAND curlJsonTester transaction_comm
 
 add_test( NAME query_in_url COMMAND curlJsonTester query_in_url )
 add_test( NAME query_A COMMAND curlJsonTester query_A )
+add_test( NAME query_subexpression_A COMMAND curlJsonTester query_subexpression_A )
+add_test( NAME query_summarizer COMMAND curlJsonTester query_summarizer )
 
 # index.cpp (cleaning up)
 

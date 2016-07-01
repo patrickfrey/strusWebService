@@ -24,12 +24,16 @@
 
 #include <vector>
 #include <string>
+#include <utility>
 
 #include <boost/typeof/typeof.hpp>
+#include <boost/shared_ptr.hpp>
 
 struct Node {
 	virtual void produceQuery( strus::QueryProcessorInterface *query_processor, strus::QueryInterface *query ) const = 0;
 	virtual Node *clone( ) const = 0;
+	virtual ~Node( ) { }
+	virtual bool isEmpty( ) const = 0;
 };
 
 struct Term : public Node {
@@ -50,24 +54,49 @@ struct Term : public Node {
 	{
 		return new Term( *this );
 	}		
+	
+	virtual bool isEmpty( ) const
+	{
+		return type == "" && value == "";
+	}
 };
 
 struct Expression : public Node {
 	std::string operator_;
 	int range;
 	int cardinality;
-	std::vector<Term> terms;	
+	std::vector<boost::shared_ptr<Node> > terms;	
 	
 	Expression( ) : operator_( "" ), range( 0 ), cardinality( 0 ), terms( ) { }
 	
-	Expression( const std::string &_operator, int _range, int _cardinality, const std::vector<Term> &_terms )
+	Expression( const std::string &_operator, int _range, int _cardinality, const std::vector<boost::shared_ptr<Node> > &_terms )
 		: operator_( _operator ), range( _range ), cardinality( _cardinality ),
-		terms( _terms ) { }
+		terms( )
+	{
+		terms.reserve( _terms.size( ) );
+		for( std::vector<boost::shared_ptr<Node> >::const_iterator it = _terms.begin( ); it != _terms.end( ); it++ ) {
+			terms.push_back( boost::shared_ptr<Node>( it->get( )->clone( ) ) );
+		}
+	}
+	
+	Expression &operator=( const Expression &e )
+	{
+		operator_ = e.operator_;
+		range = e.range;
+		cardinality = e.cardinality;
+
+		terms.reserve( e.terms.size( ) );
+		for( std::vector<boost::shared_ptr<Node> >::const_iterator it = e.terms.begin( ); it != e.terms.end( ); it++ ) {
+			terms.push_back( boost::shared_ptr<Node>( it->get( )->clone( ) ) );
+		}
+		
+		return *this;
+	}
 
 	virtual void produceQuery( strus::QueryProcessorInterface *query_processor, strus::QueryInterface *query ) const
 	{
-		for( std::vector<Term>::const_iterator it = terms.begin( ); it != terms.end( ); it++ ) {
-			it->produceQuery( query_processor, query );
+		for( std::vector<boost::shared_ptr<Node> >::const_iterator it = terms.begin( ); it != terms.end( ); it++ ) {
+			it->get( )->produceQuery( query_processor, query );
 		}
 			
 		const strus::PostingJoinOperatorInterface *op = query_processor->getPostingJoinOperator( operator_ );
@@ -78,7 +107,12 @@ struct Expression : public Node {
 	virtual Node *clone( ) const
 	{
 		return new Expression( *this );
-	}		
+	}
+
+	virtual bool isEmpty( ) const
+	{
+		return operator_ == "" && range == 0 && cardinality == 0 && terms.size( ) == 0;
+	}
 };
 
 struct Feature : public Node {
@@ -90,8 +124,6 @@ struct Feature : public Node {
 	Feature( const std::string &_name, float _weight )
 		: name( _name ), weight( _weight ) { }	
 
-	virtual ~Feature( ) { }
-
 	virtual void produceQuery( strus::QueryProcessorInterface *query_processor, strus::QueryInterface *query ) const
 	{
 	}
@@ -100,6 +132,11 @@ struct Feature : public Node {
 	{
 		return new Feature( *this );
 	}		
+
+	virtual bool isEmpty( ) const
+	{
+		return name == "";
+	}
 };
 
 struct TermFeature : public Feature {
@@ -120,6 +157,11 @@ struct TermFeature : public Feature {
 	{
 		return new TermFeature( *this );
 	}		
+
+	virtual bool isEmpty( ) const
+	{
+		return name == "" && term.isEmpty( );
+	}
 };
 
 struct ExpressionFeature : public Feature {
@@ -140,6 +182,11 @@ struct ExpressionFeature : public Feature {
 	{
 		return new ExpressionFeature( *this );
 	}		
+
+	virtual bool isEmpty( ) const
+	{
+		return name == "" && expression.isEmpty( );
+	}
 };
                             
 enum ParameterType {
@@ -262,8 +309,8 @@ struct QueryRequest : public QueryRequestBase {
 		TermFeature *feature = new TermFeature( "feat", Term( "word", _text ), 1.0 );
 		features.push_back( feature );
 
-		std::vector<Term> terms;
-		terms.push_back( Term( "word", _text ) );
+		std::vector<boost::shared_ptr<Node> > terms;
+		terms.push_back( boost::shared_ptr<Node>( new Term( "word", _text ) ) );
 		ExpressionFeature *expr = new ExpressionFeature( "sel", Expression( "contains", 0, 0, terms ), 1.0 );
 		features.push_back( expr );
 		
@@ -428,16 +475,16 @@ struct traits<struct Feature *> {
 			throw bad_value_cast( );
 		}
 
-		Expression expr = v.get<Expression>( "expression", Expression( ) );
-		Term term = v.get<Term>( "term", Term( ) );
+		Expression expr = v.get<Expression>( "value.expression", Expression( ) );
+		Term term = v.get<Term>( "value.term", Term( ) );
 
 		Feature *f = 0;
 		
-		if( expr.operator_.compare( "" ) == 0 && term.type.compare( "" ) != 0 ) {
+		if( !term.isEmpty( ) && expr.isEmpty( ) ) {
 			f = new TermFeature( );
 			dynamic_cast<TermFeature *>( f )->term = term;
 		}
-		if( expr.operator_.compare( "" ) != 0 && term.type.compare( "" ) == 0 ) {
+		if( !expr.isEmpty( ) && term.isEmpty( ) ) {
 			f = new ExpressionFeature( );
 			dynamic_cast<ExpressionFeature *>( f )->expression = expr;
 		}
@@ -459,13 +506,55 @@ struct traits<struct Feature *> {
 
 		const TermFeature *termFeat = dynamic_cast<const TermFeature *>( f );
 		if( termFeat != 0 ) {
-			v.set( "term", termFeat->term );
+			v.set( "value.term", termFeat->term );
 		}
 		
 		const ExpressionFeature *exprFeat = dynamic_cast<const ExpressionFeature *>( f );
 		if( exprFeat != 0 ) {
-			v.set( "expression", exprFeat->expression );
+			v.set( "value.expression", exprFeat->expression );
 		}			
+	}
+};
+
+template<>
+struct traits<struct boost::shared_ptr<Node> > {
+	
+	static struct boost::shared_ptr<Node> get( value const &v )
+	{
+		if( v.type( ) != is_object ) {
+			throw bad_value_cast( );
+		}
+
+		Expression expr = v.get<Expression>( "expression", Expression( ) );
+		Term term = v.get<Term>( "term", Term( ) );
+
+		boost::shared_ptr<Node> n;
+		
+		if( !term.isEmpty( ) && expr.isEmpty( ) ) {
+			n.reset( term.clone( ) );
+		}
+		if( !expr.isEmpty( ) && term.isEmpty( ) ) {
+			n.reset( expr.clone( ) );
+		}
+		
+		if( n.get( ) == 0 ) {
+			throw bad_value_cast( );
+		}
+		
+		return n;
+	}
+	
+	static void set( value &v, boost::shared_ptr< Node > const &n )
+	{
+		const Term *term = dynamic_cast<const Term *>( n.get( ) );
+		if( term != 0 ) {
+			v.set( "term", *term );
+		}
+		
+		const Expression *expr = dynamic_cast<const Expression *>( n.get( ) );
+		if( expr != 0 ) {
+			v.set( "expression", *expr );
+		}
 	}
 };
 
@@ -481,7 +570,7 @@ struct traits<struct Expression> {
 		e.operator_ = v.get<std::string>( "operator" );
 		e.range = v.get<int>( "range" );
 		e.cardinality = v.get<int>( "cardinality" );
-		e.terms = v.get<std::vector<Term> >( "terms" );
+		e.terms = v.get<std::vector<boost::shared_ptr<Node> > >( "terms" );
 		
 		return e;
 	}

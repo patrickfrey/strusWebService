@@ -36,6 +36,7 @@ dist/redhat/struswebservice.spec
 # Compiled Programs
 strusWebService
 tests/curlJsonTester
+tests/queryStructTester
 
 # results of the test program
 tests/*.res

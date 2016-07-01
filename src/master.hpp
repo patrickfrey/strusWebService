@@ -59,4 +59,33 @@ class master : public cppcms::application {
 
 } // namespace apps
 
+namespace cppcms {
+	namespace json {
+
+template<>
+struct traits<std::pair<std::string, std::string> > {
+	
+	static std::pair<std::string, std::string> get( value const &v )
+	{
+		std::pair<std::string, std::string> p;
+
+		if( v.type( ) != is_object) {
+			throw bad_value_cast( );
+		}
+		
+		p.first = v.get<std::string>( "key" );
+		p.second = v.get<std::string>( "value" );
+		
+		return p;
+	}
+	
+	static void set( value &v, std::pair<std::string, std::string> const &p )
+	{
+		v.set( "key", p.first );
+		v.set( "value", p.second );
+	}
+};
+
+} } // namespace cppcms::json
+
 #endif
