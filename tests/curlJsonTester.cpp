@@ -56,10 +56,10 @@ int main( int argc, char *argv[] )
 	request.setOpt( ws );
 	curlpp::options::Url url( urlstr );
 	request.setOpt( url );
-    request.setOpt( new curlpp::options::Verbose( true ) ); 
-    std::list<std::string> header;
+	request.setOpt( new curlpp::options::Verbose( true ) ); 
+    	std::list<std::string> header;
 	std::istringstream is( data );
-    if( method.compare( "POST" ) == 0 ) {
+	if( method.compare( "POST" ) == 0 ) {
 		request.setOpt( new curlpp::options::Post( true ) );
 		std::ostringstream ss3;
 		ss3 << "Content-Length: " << data.size( );

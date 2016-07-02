@@ -25,9 +25,24 @@ http://localhost:8080/strus/query/A
 						"cardinality": 0,
 						"terms": [
 							{
-								"term": {
-									"type": "word",
-									"value": "hello"
+								"expression": {
+									"operator": "intersect",
+									"range": 0,
+									"cardinality": 0,
+									"terms": [
+										{
+											"term": {
+												"type": "word",
+												"value": "hello"
+											}
+										},
+										{
+											"term": {
+												"type": "word",
+												"value": "hello"
+											}
+										}
+									]
 								}
 							}
 						]

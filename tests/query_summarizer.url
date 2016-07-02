@@ -63,6 +63,16 @@ http://localhost:8080/strus/query/A
                         "value": "docid"
                     }
                 ]
+            },
+            {
+                "attribute": "title",
+                "name": "attribute",
+                "params": [
+                    {
+                        "key": "name",
+                        "value": "title"
+                    }
+                ]
             }
         ]
     }

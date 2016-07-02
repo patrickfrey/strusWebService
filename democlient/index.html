@@ -90,10 +90,12 @@
 					features.push( 
 						{
 							name: "feat",
-							term: {
-								// TODO: dropdown for picking types, types must come from the server
-								type: "word",
-								value: words[i]
+							value: {
+								term: {
+									// TODO: dropdown for picking types, types must come from the server
+									type: "word",
+									value: words[i]
+								}
 							},
 							weight: 1.0
 						}
@@ -102,11 +104,13 @@
 				features.push(
 					{
 						name: "sel",
-						expression : {
-							operator: $( '#operator' ).val( ),
-							range: parseInt( $( '#range' ).val( ) ),
-							cardinality: parseInt( $( '#cardinality' ).val( ) ),
-							terms: get_terms( $( '#search' ).val( ) )
+						value: {
+							expression : {
+								operator: $( '#operator' ).val( ),
+								range: parseInt( $( '#range' ).val( ) ),
+								cardinality: parseInt( $( '#cardinality' ).val( ) ),
+								terms: get_terms( $( '#search' ).val( ) )
+							}
 						},
 						weight: 1.0								
 					}				
@@ -120,9 +124,11 @@
 				for( var i in words ) {
 					terms.push( 
 						{
-							// TODO: dropdown for picking types, types must come from the server
-							type: "word",
-							value: words[i]
+							term: {
+								// TODO: dropdown for picking types, types must come from the server
+								type: "word",
+								value: words[i]
+							}
 						}
 					);
 				}
