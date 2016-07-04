@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
-include_directories( "${PROJECT_SOURCE_DIR}/src" "${PROJECT_SOURCE_DIR}/3rdParty/curlpp/include" "${CURL_INCLUDE_DIRS}" )
+include_directories(
+	"${PROJECT_SOURCE_DIR}/src"
+	"${PROJECT_SOURCE_DIR}/3rdParty/curlpp/include" "${CURL_INCLUDE_DIRS}"
+	"${strus_INCLUDE_DIRS}"
+)
+
+link_directories(
+	"${strus_LIBRARY_DIRS}"
+)
 
 add_executable( curlJsonTester curlJsonTester.cpp)
 target_link_libraries( curlJsonTester "${CURL_LIBRARIES}" ${CPPCMS} curlpp_static)
