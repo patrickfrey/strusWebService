@@ -281,7 +281,13 @@ void index::config_cmd( const std::string name )
 	j["config"] = config;
 
 	BOOSTER_INFO( PACKAGE ) << "config_index(" << name << ")";
-	BOOSTER_DEBUG( PACKAGE ) << "config_index(" << name << "): " << j;
+	std::ostringstream ss;
+	if( protocol_pretty_printing ) {
+		j.save( ss, cppcms::json::readable );
+	} else {
+		j.save( ss, cppcms::json::compact );
+	}
+	BOOSTER_DEBUG( PACKAGE ) << "config_index(" << name << "): " << ss.str( );
 	
 	report_ok( j );	
 }
@@ -322,7 +328,13 @@ void index::stats_cmd( const std::string name )
 	j["stats"] = stats;
 
 	BOOSTER_INFO( PACKAGE ) << "stats_index(" << name << ")";
-	BOOSTER_DEBUG( PACKAGE ) << "stats_index(" << name << "): " << j;
+	std::ostringstream ss;
+	if( protocol_pretty_printing ) {
+		j.save( ss, cppcms::json::readable );
+	} else {
+		j.save( ss, cppcms::json::compact );
+	}
+	BOOSTER_DEBUG( PACKAGE ) << "stats_index(" << name << "): " << ss.str( );
 	
 	report_ok( j );
 }
@@ -360,7 +372,13 @@ void index::list_cmd( )
 	j["indexes"] = v;
 
 	BOOSTER_INFO( PACKAGE ) << "list_indexes";
-	BOOSTER_DEBUG( PACKAGE ) << "list_indexes: " << j;
+	std::ostringstream ss;
+	if( protocol_pretty_printing ) {
+		j.save( ss, cppcms::json::readable );
+	} else {
+		j.save( ss, cppcms::json::compact );
+	}
+	BOOSTER_DEBUG( PACKAGE ) << "list_indexes: " << ss.str( );
 
 	report_ok( j );
 }
@@ -379,6 +397,15 @@ void index::exists_cmd( const std::string name )
 	cppcms::json::value j;
 	j["exists"] = dbi->exists( config );
 	
+	BOOSTER_INFO( PACKAGE ) << "list_indexes";
+	std::ostringstream ss;
+	if( protocol_pretty_printing ) {
+		j.save( ss, cppcms::json::readable );
+	} else {
+		j.save( ss, cppcms::json::compact );
+	}
+	BOOSTER_DEBUG( PACKAGE ) << "exists_index: " << ss.str( );
+
 	report_ok( j );
 }
 

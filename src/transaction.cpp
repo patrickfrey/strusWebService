@@ -207,7 +207,13 @@ void transaction::commit_cmd( const std::string name, const std::string tid, boo
 	j["execution_time"] = execution_time;
 
 	BOOSTER_INFO( PACKAGE ) << "commit(" << name << ", " << trans_id << ", " << execution_time << "s)";
-	BOOSTER_DEBUG( PACKAGE ) << "commit(" << name << ", " << trans_id << "): " << j;
+	std::ostringstream ss;
+	if( protocol_pretty_printing ) {
+		j.save( ss, cppcms::json::readable );
+	} else {
+		j.save( ss, cppcms::json::compact );
+	}	
+	BOOSTER_DEBUG( PACKAGE ) << "commit(" << name << ", " << trans_id << "): " << ss.str( );
 
 	report_ok( j );
 }
@@ -302,7 +308,13 @@ void transaction::rollback_cmd( const std::string name, const std::string tid, b
 	j["execution_time"] = execution_time;
 
 	BOOSTER_INFO( PACKAGE ) << "rollback(" << name << ", " << trans_id << ", " << execution_time << "s)";
-	BOOSTER_DEBUG( PACKAGE ) << "rollback(" << name << ", " << trans_id << "): " << j;
+	std::ostringstream ss;
+	if( protocol_pretty_printing ) {
+		j.save( ss, cppcms::json::readable );
+	} else {
+		j.save( ss, cppcms::json::compact );
+	}
+	BOOSTER_DEBUG( PACKAGE ) << "rollback(" << name << ", " << trans_id << "): " << ss.str( );
 
 	report_ok( j );
 }
