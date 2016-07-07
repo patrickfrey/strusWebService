@@ -406,8 +406,10 @@ void index::list_cmd( )
 	}
 	std::sort( v.begin( ), v.end( ) );
 	j["indexes"] = v;
+	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "list_indexes";
+	BOOSTER_INFO( PACKAGE ) << "list_indexes(" << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
@@ -421,6 +423,8 @@ void index::list_cmd( )
 
 void index::exists_cmd( const std::string name )
 {
+	boost::timer::cpu_timer timer;
+
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
 
@@ -432,8 +436,10 @@ void index::exists_cmd( const std::string name )
 
 	cppcms::json::value j;
 	j["exists"] = dbi->exists( config );
+	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	j["execution_time"] = execution_time;
 	
-	BOOSTER_INFO( PACKAGE ) << "list_indexes";
+	BOOSTER_INFO( PACKAGE ) << "exists_index(" << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
