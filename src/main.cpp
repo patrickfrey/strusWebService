@@ -45,6 +45,7 @@ int main( int argc, char *argv[] )
       ( "help,h", "Print help page" ) 
       ( "version,V", "Print version" )
       ( "verbose,v", "Enable verbose output" )
+      ( "pretty-print,p", "Enable pretty-printing of JSON" )
       ( "config,c", "Configuraton file" );
 	boost::program_options::variables_map vm;
 	
@@ -105,7 +106,7 @@ int main( int argc, char *argv[] )
 				srv.settings( ).get<std::string>( "extensions.directory" ), 
 				srv.settings( ).get<std::vector<std::string> >( "extensions.modules" ) );
 			
-			srv.applications_pool( ).mount( cppcms::applications_factory<apps::strusWebService, StrusContext *>( strusContext ) );
+			srv.applications_pool( ).mount( cppcms::applications_factory<apps::strusWebService, StrusContext *, bool>( strusContext, vm.count( "pretty-print" ) ) );
 	
 			srv.run( );
 			

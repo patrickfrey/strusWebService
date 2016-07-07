@@ -43,7 +43,7 @@ class strusWebService : public cppcms::application {
 		apps::transaction transaction;
 		
 	public:
-		strusWebService( cppcms::service &srv, StrusContext *context );
+		strusWebService( cppcms::service &srv, StrusContext *context, bool pretty_print );
 		bool hasError( ) const;
 		std::string getLastStrusError( ) const;
 		std::vector<std::string> getStrusErrorDetails( ) const;

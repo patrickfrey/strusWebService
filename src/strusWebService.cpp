@@ -27,7 +27,7 @@
 
 namespace apps {
 
-strusWebService::strusWebService( cppcms::service &srv, StrusContext *_context )
+strusWebService::strusWebService( cppcms::service &srv, StrusContext *_context, bool pretty_print )
 	: cppcms::application( srv ), context( _context ),
 	storage_base_directory( settings( ).get<std::string>( "storage.basedir" ) ),
 	qpi( 0 ), qei( 0 ),
@@ -49,6 +49,16 @@ strusWebService::strusWebService( cppcms::service &srv, StrusContext *_context )
 		master.register_democlient_pages( );
 	}
 	master.register_common_pages( );
+	
+	if( !pretty_print ) {
+		pretty_print = settings( ).get<bool>( "protocol.pretty_print", DEFAULT_PROTOCOL_PRETTY_PRINT );
+	}
+	master.set_pretty_printing( pretty_print );
+	other.set_pretty_printing( pretty_print );
+	index.set_pretty_printing( pretty_print );
+	document.set_pretty_printing( pretty_print );
+	query.set_pretty_printing( pretty_print );
+	transaction.set_pretty_printing( pretty_print );
 }
 
 StrusIndexContext *strusWebService::getOrCreateStrusContext( const std::string &name )

@@ -43,6 +43,7 @@ class master : public cppcms::application {
 		void register_democlient_pages( );
 		bool get_strus_environment( const std::string &name );
 		void close_strus_environment( const std::string &name );
+		void set_pretty_printing( bool enable );
 
 	protected:
 		void report_ok( );
