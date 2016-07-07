@@ -313,8 +313,6 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	j["ranklist"] = response;
 	j["execution_time"] = (double)timer.elapsed( ).wall / (double)1000000000;
 
-	std::cout << "USING PRETTY: " << this << " " << protocol_pretty_printing << std::endl;
-
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
