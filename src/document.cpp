@@ -114,7 +114,13 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 	{
 		cppcms::json::value j;
 		j["document"] = ins_doc;
-		BOOSTER_DEBUG( PACKAGE ) << "insert(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << "): " << j;
+		std::ostringstream ss;
+		if( protocol_pretty_printing ) {
+			j.save( ss, cppcms::json::readable );
+		} else {
+			j.save( ss, cppcms::json::compact );
+		}
+		BOOSTER_DEBUG( PACKAGE ) << "insert(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << "): " << ss.str( );
 	}
 
 	if( !get_strus_environment( name ) ) {
@@ -223,7 +229,13 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 	j["execution_time"] = execution_time;
 
 	BOOSTER_INFO( PACKAGE ) << "insert(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << ", " << execution_time << "s)";
-	BOOSTER_DEBUG( PACKAGE ) << "insert(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << "): " << j;
+	std::ostringstream ss;
+	if( protocol_pretty_printing ) {
+		j.save( ss, cppcms::json::readable );
+	} else {
+		j.save( ss, cppcms::json::compact );
+	}	
+	BOOSTER_DEBUG( PACKAGE ) << "insert(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << "): " << ss.str( );
 	
 	report_ok( j );
 }
@@ -314,7 +326,13 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 	{
 		cppcms::json::value j;
 		j["document"] = del_doc;
-		BOOSTER_DEBUG( PACKAGE ) << "delete(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << "): " << j;
+		std::ostringstream ss;
+		if( protocol_pretty_printing ) {
+			j.save( ss, cppcms::json::readable );
+		} else {
+			j.save( ss, cppcms::json::compact );
+		}
+		BOOSTER_DEBUG( PACKAGE ) << "delete(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << "): " << ss.str( );
 	}
 
 	if( !get_strus_environment( name ) ) {
@@ -372,7 +390,13 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 	j["execution_time"] = execution_time;
 
 	BOOSTER_INFO( PACKAGE ) << "delete(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << ", " << execution_time << "s)";
-	BOOSTER_DEBUG( PACKAGE ) << "delete(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << "): " << j;
+	std::ostringstream ss;
+	if( protocol_pretty_printing ) {
+		j.save( ss, cppcms::json::readable );
+	} else {
+		j.save( ss, cppcms::json::compact );
+	}
+	BOOSTER_DEBUG( PACKAGE ) << "delete(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << "): " << ss.str( );
 
 	report_ok( j );
 }
@@ -454,7 +478,13 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 	{
 		cppcms::json::value j;
 		j["document"] = get_doc;
-		BOOSTER_DEBUG( PACKAGE ) << "get(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << name << "): " << j;
+		std::ostringstream ss;
+		if( protocol_pretty_printing ) {
+			j.save( ss, cppcms::json::readable );
+		} else {
+			j.save( ss, cppcms::json::compact );
+		}
+		BOOSTER_DEBUG( PACKAGE ) << "get(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << name << "): " << ss.str( );
 	}
 
 	if( !get_strus_environment( name ) ) {
@@ -586,7 +616,13 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 	j["execution_time"] = execution_time;
 
 	BOOSTER_INFO( PACKAGE ) << "get(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << ", " << execution_time << "s)";
-	BOOSTER_DEBUG( PACKAGE ) << "get(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << "): " << j;
+	std::ostringstream ss;
+	if( protocol_pretty_printing ) {
+		j.save( ss, cppcms::json::readable );
+	} else {
+		j.save( ss, cppcms::json::compact );
+	}
+	BOOSTER_DEBUG( PACKAGE ) << "get(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << "): " << ss.str( );
 	
 	report_ok( j );	
 }
@@ -673,6 +709,17 @@ void document::exists_cmd( const std::string name, const std::string id, bool do
 			
 	cppcms::json::value j;
 	j["exists"] = exists;
+	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	j["execution_time"] = execution_time;
+
+	BOOSTER_INFO( PACKAGE ) << "exists(" << name << ", <implicit>" << ", " << docid << ", " << execution_time << "s)";
+	std::ostringstream ss;
+	if( protocol_pretty_printing ) {
+		j.save( ss, cppcms::json::readable );
+	} else {
+		j.save( ss, cppcms::json::compact );
+	}
+	BOOSTER_DEBUG( PACKAGE ) << "exists(" << name << ", <implicit>" << ", " << docid << "): " << ss.str( );
 	
 	report_ok( j );
 }

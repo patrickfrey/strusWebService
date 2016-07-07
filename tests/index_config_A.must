@@ -1,1 +1,1 @@
-{"config":{"attributes":["attr1","attr2","docid","title"],"metadata":[{"name":"date","type":"UInt16"},{"name":"doclen","type":"UInt16"},{"name":"docweight","type":"Float32"}],"types":["word"]},"result":"ok"}
+{"config":{"attributes":["attr1","attr2","docid","title"],"metadata":[{"name":"date","type":"UInt16"},{"name":"doclen","type":"UInt16"},{"name":"docweight","type":"Float32"}],"types":["word"]},"execution_time":0,"result":"ok"}
