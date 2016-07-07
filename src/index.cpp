@@ -114,6 +114,8 @@ struct StorageCreateParameters index::merge_create_parameters( const struct Stor
 
 void index::create_cmd( const std::string name )
 {
+	boost::timer::cpu_timer timer;
+
 	if( !ensure_post( ) ) return;	
 	if( !ensure_json_request( ) ) return;
 	
@@ -177,14 +179,27 @@ void index::create_cmd( const std::string name )
 	service.registerStorageConfig( name, config );
 	
 	delete database;
+		
+	cppcms::json::value j;
+	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "create_index(" << name << ")";
-			
-	report_ok( );
+	BOOSTER_INFO( PACKAGE ) << "create_index(" << name << ", " << execution_time << "s)";
+	std::ostringstream ss;
+	if( protocol_pretty_printing ) {
+		j.save( ss, cppcms::json::readable );
+	} else {
+		j.save( ss, cppcms::json::compact );
+	}	
+	BOOSTER_DEBUG( PACKAGE ) << "create_index(" << name << "): " << ss.str( );
+	
+	report_ok( j );
 }
 
 void index::delete_cmd( const std::string name )
 {
+	boost::timer::cpu_timer timer;
+
 	if( !ensure_post( ) ) return;
 
 	// close all handles, we are going to delete the index now
@@ -210,14 +225,27 @@ void index::delete_cmd( const std::string name )
 		report_error( ERROR_INDEX_DESTROY_CMD_DESTROY_DATABASE, service.getLastStrusError( ) );
 		return;
 	}
-
-	BOOSTER_INFO( PACKAGE ) << "delete_index(" << name << ")";
 			
-	report_ok( );
+	cppcms::json::value j;
+	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	j["execution_time"] = execution_time;
+
+	BOOSTER_INFO( PACKAGE ) << "delete_index(" << name << ", " << execution_time << "s)";
+	std::ostringstream ss;
+	if( protocol_pretty_printing ) {
+		j.save( ss, cppcms::json::readable );
+	} else {
+		j.save( ss, cppcms::json::compact );
+	}	
+	BOOSTER_DEBUG( PACKAGE ) << "delete_index(" << name << "): " << ss.str( );
+	
+	report_ok( j );
 }
 
 void index::config_cmd( const std::string name )
 {
+	boost::timer::cpu_timer timer;
+
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
 
@@ -279,8 +307,10 @@ void index::config_cmd( const std::string name )
 
 	cppcms::json::value j;
 	j["config"] = config;
+	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "config_index(" << name << ")";
+	BOOSTER_INFO( PACKAGE ) << "config_index(" << name << ", " << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
@@ -288,12 +318,14 @@ void index::config_cmd( const std::string name )
 		j.save( ss, cppcms::json::compact );
 	}
 	BOOSTER_DEBUG( PACKAGE ) << "config_index(" << name << "): " << ss.str( );
-	
+
 	report_ok( j );	
 }
 
 void index::stats_cmd( const std::string name )
 {
+	boost::timer::cpu_timer timer;
+
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
 
@@ -326,8 +358,10 @@ void index::stats_cmd( const std::string name )
 		
 	cppcms::json::value j;
 	j["stats"] = stats;
+	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "stats_index(" << name << ")";
+	BOOSTER_INFO( PACKAGE ) << "stats_index(" << name << ", " << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
@@ -341,6 +375,8 @@ void index::stats_cmd( const std::string name )
 
 void index::list_cmd( )
 {
+	boost::timer::cpu_timer timer;
+
 	typedef std::vector<boost::filesystem::directory_entry> dirlist;
 	dirlist dirs;
 	
