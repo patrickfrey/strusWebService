@@ -35,9 +35,9 @@ namespace apps {
 
 master::master( strusWebService &service )
 	: application( service.service( ) ),
-	service( service )
+	service( service ), protocol_pretty_printing( false )
 {
-	protocol_pretty_printing = service.settings( ).get<bool>( "protocol.pretty_print", DEFAULT_PROTOCOL_PRETTY_PRINT );
+	std::cout << "CONSTRUCTOR: " << this << " " << protocol_pretty_printing << std::endl;
 }
 
 void master::register_democlient_pages( )
@@ -86,6 +86,11 @@ void master::close_strus_environment( const std::string &name )
 
 	dbi = NULL;
 	sti = NULL;
+}
+
+void master::set_pretty_printing( bool enable ) {
+	protocol_pretty_printing = enable;
+	std::cout << "PRETTY: " << this << " " << protocol_pretty_printing << std::endl;
 }
 
 void master::report_error( unsigned int code, const std::string &msg )
