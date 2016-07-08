@@ -73,6 +73,8 @@ class index : public master {
 		void stats_cmd( const std::string name );
 		void list_cmd( );
 		void exists_cmd( const std::string name );
+		void open_cmd( const std::string name );
+		void close_cmd( const std::string name );
 };
 
 } // namespace apps

@@ -43,6 +43,8 @@ index::index( strusWebService &service, std::string storage_base_directory )
 	service.dispatcher( ).assign( "/index/stats/(\\w+)", &index::stats_cmd, this, 1 );
 	service.dispatcher( ).assign( "/index/list", &index::list_cmd, this );
 	service.dispatcher( ).assign( "/index/exists/(\\w+)", &index::exists_cmd, this, 1 );
+	service.dispatcher( ).assign( "/index/open/(\\w+)", &index::open_cmd, this, 1 );
+	service.dispatcher( ).assign( "/index/close/(\\w+)", &index::close_cmd, this, 1 );
 }
 
 index::~index( )
@@ -447,6 +449,93 @@ void index::exists_cmd( const std::string name )
 		j.save( ss, cppcms::json::compact );
 	}
 	BOOSTER_DEBUG( PACKAGE ) << "exists_index: " << ss.str( );
+
+	report_ok( j );
+}
+
+void index::open_cmd( const std::string name )
+{
+	boost::timer::cpu_timer timer;
+
+	struct StorageCreateParameters combined_params;
+	combined_params = default_create_parameters;
+
+	if( !get_strus_environment( name ) ) {
+		return;
+	}
+
+	std::string config = service.getStorageConfig( storage_base_directory, combined_params, name );
+	
+	if( !dbi->exists( config ) ) {
+		report_error( ERROR_INDEX_OPEN_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
+		return;
+	}
+
+	strus::DatabaseClientInterface *database = service.getDatabaseClientInterface( name );
+	if( !database ) {
+		report_error( ERROR_INDEX_OPEN_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
+		return;
+	}
+
+	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
+	if( !storage ) {
+		delete database;
+		report_error( ERROR_INDEX_OPEN_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
+		return;
+	}
+	
+	cppcms::json::value j;
+	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	j["execution_time"] = execution_time;
+	
+	BOOSTER_INFO( PACKAGE ) << "open_index(" << execution_time << "s)";
+	std::ostringstream ss;
+	if( protocol_pretty_printing ) {
+		j.save( ss, cppcms::json::readable );
+	} else {
+		j.save( ss, cppcms::json::compact );
+	}
+	BOOSTER_DEBUG( PACKAGE ) << "open_index: " << ss.str( );
+
+	report_ok( j );
+}
+
+void index::close_cmd( const std::string name )
+{
+	boost::timer::cpu_timer timer;
+
+	if( !get_strus_environment( name ) ) {
+		return;
+	}
+
+	struct StorageCreateParameters combined_params;
+	combined_params = default_create_parameters;
+
+	if( !get_strus_environment( name ) ) {
+		return;
+	}
+
+	std::string config = service.getStorageConfig( storage_base_directory, combined_params, name );
+	
+	if( !dbi->exists( config ) ) {
+		report_error( ERROR_INDEX_CLOSE_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
+		return;
+	}
+	
+	close_strus_environment( name );
+
+	cppcms::json::value j;
+	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	j["execution_time"] = execution_time;
+	
+	BOOSTER_INFO( PACKAGE ) << "close_index(" << execution_time << "s)";
+	std::ostringstream ss;
+	if( protocol_pretty_printing ) {
+		j.save( ss, cppcms::json::readable );
+	} else {
+		j.save( ss, cppcms::json::compact );
+	}
+	BOOSTER_DEBUG( PACKAGE ) << "close_index: " << ss.str( );
 
 	report_ok( j );
 }
