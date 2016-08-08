@@ -238,10 +238,14 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	for( std::vector<std::string>::const_iterator it = qry_req.select.begin( ); it != qry_req.select.end( ); it++ ) {
 		query_eval->addSelectionFeature( *it );
 	}
-
-	// TODO:
-	// addRestrictionFeature: keep documents which CONTAIN the feature
-	// addExclusionFeature: keep documents which DON'T CONTAIN the feature
+	
+	for( std::vector<std::string>::const_iterator it = qry_req.restrict.begin( ); it != qry_req.restrict.end( ); it++ ) {
+		query_eval->addRestrictionFeature( *it );
+	}
+	
+	for( std::vector<std::string>::const_iterator it = qry_req.exclude.begin( ); it != qry_req.exclude.end( ); it++ ) {
+		query_eval->addExclusionFeature( *it );
+	}
 	
 	// 2) specific query
 		
