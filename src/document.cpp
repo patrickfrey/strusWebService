@@ -207,6 +207,7 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 		std::ostringstream ss;
 		ss << booster::locale::format( "Token positions of document {1} are out or range (document too big, only {2} token positions were assigned, maximum allowed position is %{3})" )
 			% docid % maxPos % strus::Constants::storage_max_position_info( );
+		// we cannot insert a document this way, so discard it
 		delete doc;
 		// TODO: warning or error?
 		// TODO: ignore error in transaction or roll it back?
