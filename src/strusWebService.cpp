@@ -212,6 +212,18 @@ strus::StorageTransactionInterface *strusWebService::getStorageTransactionInterf
 	return stti;
 }
 
+std::vector<std::string> strusWebService::getAllTransactionsIdsOfIndex( const std::string &name )
+{
+	StrusIndexContext *ctx = context->acquire( name );
+	std::vector<std::string> v;
+	std::map<std::string, strus::StorageTransactionInterface *>::iterator it;
+	for( it = ctx->trans_map.begin( ); it != ctx->trans_map.end( ); it++ ) {
+		v.push_back( (*it).first );
+	}
+	context->release( name, ctx );
+	return v;
+}
+
 strus::QueryEvalInterface *strusWebService::getQueryEvalInterface( )
 {
 	if( qei == 0 ) {

@@ -31,6 +31,7 @@ transaction::transaction( strusWebService &service )
 	service.dispatcher( ).assign( "/transaction/commit/(\\w+)", &transaction::commit_payload_cmd, this, 1  );
 	service.dispatcher( ).assign( "/transaction/rollback/(\\w+)/(\\w+)", &transaction::rollback_url_cmd, this, 1, 2  );
 	service.dispatcher( ).assign( "/transaction/rollback/(\\w+)", &transaction::rollback_payload_cmd, this, 1  );
+	service.dispatcher( ).assign( "/transaction/list/(\\w+)", &transaction::list_cmd, this, 1 );
 }
 
 void transaction::begin_url_cmd( const std::string name, const std::string tid )
@@ -315,6 +316,39 @@ void transaction::rollback_cmd( const std::string name, const std::string tid, b
 		j.save( ss, cppcms::json::compact );
 	}
 	BOOSTER_DEBUG( PACKAGE ) << "rollback(" << name << ", " << trans_id << "): " << ss.str( );
+
+	report_ok( j );
+}
+
+void transaction::list_cmd( const std::string name )
+{
+	boost::timer::cpu_timer timer;
+
+	if( !get_strus_environment( name ) ) {
+		return;
+	}
+
+	if( !dbi->exists( service.getConfigString( name ) ) ) {
+		report_error( ERROR_TRANSACTION_LIST_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
+		return;
+	}
+	
+	cppcms::json::value j;
+	j["result"] = "ok";
+	std::vector<std::string> v = service.getAllTransactionsIdsOfIndex( name );
+	std::sort( v.begin( ), v.end( ) );
+	j["transactions"] = v;
+	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	j["execution_time"] = execution_time;
+
+	BOOSTER_INFO( PACKAGE ) << "list_transactions(" << execution_time << "s)";
+	std::ostringstream ss;
+	if( protocol_pretty_printing ) {
+		j.save( ss, cppcms::json::readable );
+	} else {
+		j.save( ss, cppcms::json::compact );
+	}
+	BOOSTER_DEBUG( PACKAGE ) << "list_transactions: " << ss.str( );
 
 	report_ok( j );
 }

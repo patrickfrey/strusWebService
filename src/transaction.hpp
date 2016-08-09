@@ -45,6 +45,7 @@ class transaction : public master {
 		void rollback_url_cmd( const std::string name, const std::string tid );
 		void rollback_payload_cmd( const std::string name );
 		void rollback_cmd( const std::string name, const std::string tid, bool tid_in_url );
+		void list_cmd( const std::string name );
 };
 
 } // namespace apps

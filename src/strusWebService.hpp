@@ -61,6 +61,7 @@ class strusWebService : public cppcms::application {
 		strus::StorageTransactionInterface *createStorageTransactionInterface( const std::string &name );
 		strus::StorageTransactionInterface *createStorageTransactionInterface( const std::string &name, const std::string &id );
 		strus::StorageTransactionInterface *getStorageTransactionInterface( const std::string &name, const std::string &id );
+		std::vector<std::string> getAllTransactionsIdsOfIndex( const std::string &name );
 		strus::QueryEvalInterface *getQueryEvalInterface( );
 		strus::QueryProcessorInterface* getQueryProcessorInterface( );		
 		std::string getConfigString( const std::string &name );
