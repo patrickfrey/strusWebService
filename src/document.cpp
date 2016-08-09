@@ -208,8 +208,9 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 		ss << booster::locale::format( "Token positions of document {1} are out or range (document too big, only {2} token positions were assigned, maximum allowed position is %{3})" )
 			% docid % maxPos % strus::Constants::storage_max_position_info( );
 		delete doc;
-		delete transaction;
 		// TODO: warning or error?
+		// TODO: ignore error in transaction or roll it back?
+		// see issue #55
 		report_error( ERROR_DOCUMENT_INSERT_TOO_BIG_POSITION, ss.str( ) );
 		return;
 	}
