@@ -7,11 +7,11 @@
 		"basedir" : "./storage",
 		"default_create_parameters" : {
 			"database" : "leveldb",
-			//"cache_size" : 8388608,
-			//"max_open_files" : 1000,
-			//"write_buffer_size" : 4194304,
-			//"block_size" : 4096,
-			//"compression" : true,
+			"cache_size" : 8388608,
+			"max_open_files" : 512,
+			"write_buffer_size" : 8192,
+			"block_size" : 4096,
+			"compression" : true,
 			"metadata" : [
 					{ "name" : "doclen", "type" : "UInt16" },
 					{ "name" : "docweight", "type" : "Float32" },
