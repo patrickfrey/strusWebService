@@ -19,6 +19,60 @@
 #include <boost/timer/timer.hpp>
 
 #include "strus/storageModule.hpp"
+#include "strus/versionModule.hpp"
+#include "strus/versionAnalyzer.hpp"
+#include "strus/versionTrace.hpp"
+
+static bool matchModuleVersion( const strus::ModuleEntryPoint* entryPoint, int& errorcode )
+{
+	const char* loader_signature = STRUS_MODULE_SIGNATURE;
+	//... signature contains major version number in it
+	if (std::strcmp( entryPoint->signature, loader_signature) != 0)
+	{
+		errorcode = strus::ModuleEntryPoint::ErrorSignature;
+		return false;
+	}
+	unsigned short expected_modversion_minor = STRUS_MODULE_VERSION_MINOR;
+	if (entryPoint->modversion_minor > expected_modversion_minor)
+	{
+		errorcode = strus::ModuleEntryPoint::ErrorModMinorVersion;
+		return false;
+	}
+	unsigned short expected_compversion_major = 0;
+	unsigned short expected_compversion_minor = 0;
+	switch (entryPoint->type)
+	{
+		case strus::ModuleEntryPoint::Analyzer:
+			expected_compversion_major = STRUS_ANALYZER_VERSION_MAJOR;
+			expected_compversion_minor = STRUS_ANALYZER_VERSION_MINOR;
+			break;
+
+		case strus::ModuleEntryPoint::Storage:
+			expected_compversion_major = STRUS_STORAGE_VERSION_MAJOR;
+			expected_compversion_minor = STRUS_STORAGE_VERSION_MINOR;
+			break;
+
+		case strus::ModuleEntryPoint::Trace:
+			expected_compversion_major = STRUS_TRACE_VERSION_MAJOR;
+			expected_compversion_minor = STRUS_TRACE_VERSION_MINOR;
+			break;
+
+		default:
+			errorcode = strus::ModuleEntryPoint::ErrorUnknownModuleType;
+			return false;
+	}
+	if (entryPoint->compversion_major != expected_compversion_major)
+	{
+		errorcode = strus::ModuleEntryPoint::ErrorCompMajorVersion;
+		return false;
+	}
+	if (entryPoint->compversion_minor < expected_compversion_minor)
+	{
+		errorcode = strus::ModuleEntryPoint::ErrorCompMinorVersion;
+		return false;
+	}
+	return true;
+}
 
 StrusContext::StrusContext( unsigned int nof_threads, const std::string moduleDir, const std::vector<std::string> modules_ )
 	: context_map( ), modules( )
@@ -33,7 +87,7 @@ StrusContext::StrusContext( unsigned int nof_threads, const std::string moduleDi
 		BOOSTER_DEBUG( PACKAGE ) << "Loading module '" << fullPath.string( ) << "'";
 		
 		strus::ModuleEntryPoint::Status status;
-		const strus::ModuleEntryPoint *entrypoint = strus::loadModuleEntryPoint( fullPath.string( ).c_str( ), status );
+		const strus::ModuleEntryPoint *entrypoint = strus::loadModuleEntryPoint( fullPath.string( ).c_str( ), status, &matchModuleVersion );
 		if( !entrypoint ) {
 			BOOSTER_WARNING( PACKAGE ) << "failed loading extension module '" << fullPath.string( ) << "': " << status.errormsg;
 			continue;
