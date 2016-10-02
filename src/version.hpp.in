@@ -11,9 +11,9 @@
 #ifndef VERSION_HPP
 #define VERSION_HPP
 
-#define PACKAGE "strusWebService"
+#include "strus/versionStorage.hpp"
 
-#define STRUS_STORAGE_VERSION_MAJOR @STRUS_WEB_SERVICE_MAJOR_VERSION@
+#define PACKAGE "strusWebService"
 
 #define STRUS_WEB_SERVICE_MINOR_VERSION @STRUS_WEB_SERVICE_MINOR_VERSION@
 
