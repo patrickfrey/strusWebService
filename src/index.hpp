@@ -75,6 +75,7 @@ class index : public master {
 		void exists_cmd( const std::string name );
 		void open_cmd( const std::string name );
 		void close_cmd( const std::string name );
+		void swap_cmd( const std::string name1, const std::string name2 );
 };
 
 } // namespace apps
