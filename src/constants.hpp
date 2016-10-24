@@ -33,8 +33,6 @@ const int LEVELDB_DATABASE_DEFAULT_WRITE_BUFFER_SIZE	= 4 << 20;
 // TODO: this should be 1 for Snappy compression
 const int LEVELDB_DATABASE_DEFAULT_COMPRESSION			= true;
 
-#define PACKAGE_STRUS "strus"
-
 const int DEFAULT_PROTOCOL_PRETTY_PRINT					= false;
 
 const int DEFAULT_QUERY_FIRST_RANK						= 0;
