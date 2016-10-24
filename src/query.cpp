@@ -105,12 +105,6 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		return;
 	}
 
-	strus::DatabaseClientInterface *database = service.getDatabaseClientInterface( name );
-	if( !database ) {
-		report_error( ERROR_QUERY_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
-		return;
-	}
-
 	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
 	if( !storage ) {
 		report_error( ERROR_QUERY_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
