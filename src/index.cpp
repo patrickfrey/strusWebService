@@ -165,24 +165,11 @@ void index::create_cmd( const std::string name )
 		report_error( ERROR_INDEX_CREATE_CMD_MKDIR_STORAGE_DIR, err.message( ) );
 		return;
 	}
-		
-	if( !dbi->createDatabase( config ) ) {
-		report_error( ERROR_INDEX_CREATE_CMD_CREATE_DATABASE, service.getLastStrusError( ) );
-		return;
-	}
-	
-	strus::DatabaseClientInterface *database = dbi->createClient( config );
-	if( !database ) {
-		report_error( ERROR_INDEX_CREATE_CMD_CREATE_CLIENT, service.getLastStrusError( ) );
-		return;
-	}
 
-	sti->createStorage( config, database );
+	sti->createStorage( config, dbi );
 	
 	service.registerStorageConfig( name, config );
 	
-	delete database;
-		
 	cppcms::json::value j;
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
@@ -263,12 +250,6 @@ void index::config_cmd( const std::string name )
 		return;
 	}
 
-	strus::DatabaseClientInterface *database = service.getDatabaseClientInterface( name );
-	if( !database ) {
-		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
-		return;
-	}
-
 	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
 	if( !storage ) {
 		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
@@ -343,15 +324,8 @@ void index::stats_cmd( const std::string name )
 		return;
 	}
 
-	strus::DatabaseClientInterface *database = service.getDatabaseClientInterface( name );
-	if( !database ) {
-		report_error( ERROR_INDEX_STATS_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
-		return;
-	}
-
 	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
 	if( !storage ) {
-		delete database;
 		report_error( ERROR_INDEX_STATS_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
@@ -472,15 +446,8 @@ void index::open_cmd( const std::string name )
 		return;
 	}
 
-	strus::DatabaseClientInterface *database = service.getDatabaseClientInterface( name );
-	if( !database ) {
-		report_error( ERROR_INDEX_OPEN_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
-		return;
-	}
-
 	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
 	if( !storage ) {
-		delete database;
 		report_error( ERROR_INDEX_OPEN_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}

@@ -109,27 +109,11 @@ strus::StorageInterface *strusWebService::getStorageInterface( const std::string
 	return ctx->sti;
 }
 
-strus::DatabaseClientInterface *strusWebService::getDatabaseClientInterface( const std::string &name )
-{
-	StrusIndexContext *ctx = context->acquire( name );
-	if( ctx->dbci == 0 ) {
-		strus::DatabaseInterface *dbi = ctx->dbi;		
-		strus::DatabaseClientInterface *dbci = dbi->createClient( ctx->config );
-		if( dbci == 0 ) {
-			context->release( name, ctx );
-			return 0;
-		}
-		ctx->dbci = dbci;
-	}
-	context->release( name, ctx );
-	return ctx->dbci;
-}
-
 strus::StorageClientInterface *strusWebService::getStorageClientInterface( const std::string &name )
 {
 	StrusIndexContext *ctx = context->acquire( name );
 	if( ctx->stci == 0 ) {
-		strus::StorageClientInterface *stci = ctx->sti->createClient( ctx->config, ctx->dbci, 0 );
+		strus::StorageClientInterface *stci = ctx->sti->createClient( ctx->config, ctx->dbi, 0 );
 		if( stci == 0 ) {
 			context->release( name, ctx );
 			return 0;
@@ -273,19 +257,6 @@ void strusWebService::deleteStorageInterface( const std::string &name )
 	context->release( name, ctx );
 }
 
-void strusWebService::deleteDatabaseClientInterface( const std::string &name )
-{
-	StrusIndexContext *ctx = context->acquire( name );
-	if( ctx == 0 ) {
-		return;
-	}
-	if( ctx->dbci != 0 ) {
-		delete ctx->dbci;
-		ctx->dbci = 0;
-	}
-	context->release( name, ctx );
-}
-
 void strusWebService::deleteStorageClientInterface( const std::string &name )
 {
 	StrusIndexContext *ctx = context->acquire( name );
@@ -295,10 +266,6 @@ void strusWebService::deleteStorageClientInterface( const std::string &name )
 	if( ctx->stci != 0 ) {
 		delete ctx->stci;
 		ctx->stci = 0;
-		// deletes implicitly also dbci?!
-		// TODO: I thought I pass a database reference to the storage object?
-		// For now we just set dbci to 0 too without deleting it
-		ctx->dbci = 0;
 	}
 	context->release( name, ctx );
 }

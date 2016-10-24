@@ -17,7 +17,6 @@
 
 #include "strus/databaseInterface.hpp"
 #include "strus/storageInterface.hpp"
-#include "strus/databaseClientInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/attributeReaderInterface.hpp"
@@ -39,7 +38,6 @@ struct StrusIndexContext {
 	std::string config;
 	strus::DatabaseInterface *dbi;
 	strus::StorageInterface *sti;
-	strus::DatabaseClientInterface *dbci;
 	strus::StorageClientInterface *stci;
 	strus::MetaDataReaderInterface *mdri;
 	strus::AttributeReaderInterface *atri;
@@ -47,14 +45,12 @@ struct StrusIndexContext {
 	
 	public:
 		StrusIndexContext( ) : config( "" ),
-			dbi( 0 ), sti( 0 ),
-			dbci( 0 ), stci( 0 ),
+			dbi( 0 ), sti( 0 ), stci( 0 ),
 			mdri( 0 ), atri( 0 ) { }
 
 		StrusIndexContext( const std::string &_config )
 			: config( _config ),
-			dbi( 0 ), sti( 0 ),
-			dbci( 0 ), stci( 0 ),
+			dbi( 0 ), sti( 0 ),	stci( 0 ),
 			mdri( 0 ), atri( 0 ) { }			
 };
 

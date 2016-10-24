@@ -54,7 +54,6 @@ class strusWebService : public cppcms::application {
 		void registerStorageConfig( const std::string &name, const std::string &config );
 		strus::DatabaseInterface *getDataBaseInterface( const std::string &name );
 		strus::StorageInterface *getStorageInterface( const std::string &name );
-		strus::DatabaseClientInterface *getDatabaseClientInterface( const std::string &name );
 		strus::StorageClientInterface *getStorageClientInterface( const std::string &name );
 		strus::MetaDataReaderInterface *getMetaDataReaderInterface( const std::string &name );
 		strus::AttributeReaderInterface *getAttributeReaderInterface( const std::string &name );
@@ -68,7 +67,6 @@ class strusWebService : public cppcms::application {
 		void deleteStorageTransactionInterface( const std::string &name, const std::string &id );
 		void deleteDataBaseInterface( const std::string &name );
 		void deleteStorageInterface( const std::string &name );
-		void deleteDatabaseClientInterface( const std::string &name );
 		void deleteStorageClientInterface( const std::string &name );
 		void deleteMetaDataReaderInterface( const std::string &name );
 		void deleteAttributeReaderInterface( const std::string &name );

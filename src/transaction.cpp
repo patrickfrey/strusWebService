@@ -83,11 +83,11 @@ void transaction::begin_cmd( const std::string name, const std::string tid, bool
 		return;
 	}
 
-	strus::DatabaseClientInterface *database = service.getDatabaseClientInterface( name );
-	if( !database ) {
-		report_error( ERROR_TRANSACTION_BEGIN_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
-		return;
-	}
+	//~ strus::DatabaseClientInterface *database = service.getDatabaseClientInterface( name );
+	//~ if( !database ) {
+		//~ report_error( ERROR_TRANSACTION_BEGIN_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
+		//~ return;
+	//~ }
 
 	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
 	if( !storage ) {
@@ -169,11 +169,11 @@ void transaction::commit_cmd( const std::string name, const std::string tid, boo
 		return;
 	}
 
-	strus::DatabaseClientInterface *database = service.getDatabaseClientInterface( name );
-	if( !database ) {
-		report_error( ERROR_TRANSACTION_COMMIT_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
-		return;
-	}
+	//~ strus::DatabaseClientInterface *database = service.getDatabaseClientInterface( name );
+	//~ if( !database ) {
+		//~ report_error( ERROR_TRANSACTION_COMMIT_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
+		//~ return;
+	//~ }
 
 	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
 	if( !storage ) {
@@ -270,11 +270,11 @@ void transaction::rollback_cmd( const std::string name, const std::string tid, b
 		return;
 	}
 
-	strus::DatabaseClientInterface *database = service.getDatabaseClientInterface( name );
-	if( !database ) {
-		report_error( ERROR_TRANSACTION_ROLLBACK_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
-		return;
-	}
+	//~ strus::DatabaseClientInterface *database = service.getDatabaseClientInterface( name );
+	//~ if( !database ) {
+		//~ report_error( ERROR_TRANSACTION_ROLLBACK_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
+		//~ return;
+	//~ }
 
 	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
 	if( !storage ) {

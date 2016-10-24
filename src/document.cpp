@@ -132,12 +132,6 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 		return;
 	}
 
-	strus::DatabaseClientInterface *database = service.getDatabaseClientInterface( name );
-	if( !database ) {
-		report_error( ERROR_DOCUMENT_INSERT_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
-		return;
-	}
-
 	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
 	if( !storage ) {
 		report_error( ERROR_DOCUMENT_INSERT_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
@@ -346,12 +340,6 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 		return;
 	}
 
-	strus::DatabaseClientInterface *database = service.getDatabaseClientInterface( name );
-	if( !database ) {
-		report_error( ERROR_DOCUMENT_DELETE_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
-		return;
-	}
-
 	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
 	if( !storage ) {
 		report_error( ERROR_DOCUMENT_DELETE_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
@@ -495,12 +483,6 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 
 	if( !dbi->exists( service.getConfigString( name ) ) ) {
 		report_error( ERROR_DOCUMENT_GET_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
-		return;
-	}
-
-	strus::DatabaseClientInterface *database = service.getDatabaseClientInterface( name );
-	if( !database ) {
-		report_error( ERROR_DOCUMENT_GET_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
 
@@ -678,12 +660,6 @@ void document::exists_cmd( const std::string name, const std::string id, bool do
 
 	if( !dbi->exists( service.getConfigString( name ) ) ) {
 		report_error( ERROR_DOCUMENT_EXISTS_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
-		return;
-	}
-
-	strus::DatabaseClientInterface *database = service.getDatabaseClientInterface( name );
-	if( !database ) {
-		report_error( ERROR_DOCUMENT_EXISTS_CMD_CREATE_DATABASE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
 
