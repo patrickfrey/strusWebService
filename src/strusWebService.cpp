@@ -83,7 +83,7 @@ strus::DatabaseInterface *strusWebService::getDataBaseInterface( const std::stri
 {
 	StrusIndexContext *ctx = getOrCreateStrusContext( name );
 	if( ctx->dbi == 0 ) {
-		strus::DatabaseInterface *dbi = strus::createDatabase_leveldb( context->errorhnd );
+		strus::DatabaseInterface *dbi = strus::createDatabaseType_leveldb( context->errorhnd );
 		if( dbi == 0 ) {
 			context->release( name, ctx );
 			return 0;
@@ -98,7 +98,7 @@ strus::StorageInterface *strusWebService::getStorageInterface( const std::string
 {
 	StrusIndexContext *ctx = getOrCreateStrusContext( name );
 	if( ctx->sti == 0 ) {
-		strus::StorageInterface *sti = strus::createStorage( context->errorhnd );
+		strus::StorageInterface *sti = strus::createStorageType_std( context->errorhnd );
 		if( sti == 0 ) {
 			context->release( name, ctx );
 			return 0;
