@@ -232,6 +232,14 @@ void index::delete_cmd( const std::string name )
 	report_ok( j );
 }
 
+static bool metadata_definition_sorter( struct MetadataDefiniton const &meta1, struct MetadataDefiniton const &meta2 )
+{
+    if( meta1.name != meta2.name ) {
+        return meta1.name < meta2.name;
+    }
+    return meta1.type < meta2.type;
+}
+ 
 void index::config_cmd( const std::string name )
 {
 	boost::timer::cpu_timer timer;
@@ -283,7 +291,7 @@ void index::config_cmd( const std::string name )
 		meta.type = metadata->getType( it );		
 		config.metadata.push_back( meta );
 	}
-	std::sort( config.metadata.begin( ), config.metadata.end( ) );
+	std::sort( config.metadata.begin( ), config.metadata.end( ), &metadata_definition_sorter );
 
 	std::vector<std::string> attrNames = attributeReader->getAttributeNames( );
 	std::sort( attrNames.begin( ), attrNames.end( ) );
