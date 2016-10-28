@@ -91,7 +91,7 @@ int main( int argc, char *argv[] )
                 booster::log::logger::instance( ).set_default_level( booster::log::logger::string_to_level( "debug" ) );
             }
 		
-			BOOSTER_INFO( "strusCms" ) << "Restarting strus web service..";
+			BOOSTER_INFO( PACKAGE ) << "Restarting strus web service..";
 
 			unsigned int nof_threads;
 			if( srv->procs_no( ) == 0 ) {
@@ -112,7 +112,7 @@ int main( int argc, char *argv[] )
 			delete strusContext;
 
 			if( got_sighup ) {
-				BOOSTER_INFO( "strusWebService" ) << "Reloading configuration on SIGHUP..";
+				BOOSTER_INFO( PACKAGE ) << "Reloading configuration on SIGHUP..";
 				got_sighup = false;
 			} else {
 				terminate = true;
@@ -123,7 +123,7 @@ int main( int argc, char *argv[] )
 			
 		} catch( std::exception const &e ) {
 			if( srv != 0 ) {
-                BOOSTER_ERROR( "strusWebService" ) << e.what() ;
+                BOOSTER_ERROR( PACKAGE ) << e.what() ;
                 srv->shutdown( );
                 delete srv;
             } else {
