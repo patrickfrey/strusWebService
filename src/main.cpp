@@ -22,14 +22,14 @@
 
 static bool terminate = false;
 static bool got_sighup = false;
-static cppcms::service *global_srv = 0;
+static cppcms::service *srv = 0;
 
 static void handle_signal( int sig )
 {
 	switch( sig ) {
 		case SIGHUP:
 			got_sighup = true;
-			if( global_srv ) global_srv->shutdown( );
+			if( srv ) srv->shutdown( );
 			break;
 		
 		default:
@@ -84,31 +84,30 @@ int main( int argc, char *argv[] )
       
 	signal( SIGHUP, handle_signal );
 	while( !terminate ) {
-		cppcms::service srv( argc, argv );
-		global_srv = &srv;
-
-		if( vm.count( "verbose" ) ) {
-			booster::log::logger::instance( ).set_default_level( booster::log::logger::string_to_level( "debug" ) );
-		}
-		
 		try {
+            srv = new cppcms::service( argc, argv );
+
+            if( vm.count( "verbose" ) ) {
+                booster::log::logger::instance( ).set_default_level( booster::log::logger::string_to_level( "debug" ) );
+            }
+		
 			BOOSTER_INFO( "strusCms" ) << "Restarting strus web service..";
 
 			unsigned int nof_threads;
-			if( srv.procs_no( ) == 0 ) {
-				nof_threads = srv.threads_no( );
+			if( srv->procs_no( ) == 0 ) {
+				nof_threads = srv->threads_no( );
 			} else {
-				nof_threads = srv.procs_no( ) * srv.threads_no( );
+				nof_threads = srv->procs_no( ) * srv->threads_no( );
 			}
 			BOOSTER_DEBUG( PACKAGE ) << "Using '" << nof_threads << "' threads for strus logging buffers";
 			
 			StrusContext *strusContext = new StrusContext( nof_threads,
-				srv.settings( ).get<std::string>( "extensions.directory" ), 
-				srv.settings( ).get<std::vector<std::string> >( "extensions.modules" ) );
+				srv->settings( ).get<std::string>( "extensions.directory" ), 
+				srv->settings( ).get<std::vector<std::string> >( "extensions.modules" ) );
 			
-			srv.applications_pool( ).mount( cppcms::applications_factory<apps::strusWebService, StrusContext *, bool>( strusContext, vm.count( "pretty-print" ) ) );
+			srv->applications_pool( ).mount( cppcms::applications_factory<apps::strusWebService, StrusContext *, bool>( strusContext, vm.count( "pretty-print" ) ) );
 	
-			srv.run( );
+			srv->run( );
 			
 			delete strusContext;
 
@@ -118,14 +117,21 @@ int main( int argc, char *argv[] )
 			} else {
 				terminate = true;
 			}
+
+            srv->shutdown( );
+            delete srv;		
 			
 		} catch( std::exception const &e ) {
-			BOOSTER_ERROR( "strusWebService" ) << e.what() ;
-			srv.shutdown( );
-			continue;
+			if( srv != 0 ) {
+                BOOSTER_ERROR( "strusWebService" ) << e.what() ;
+                srv->shutdown( );
+                delete srv;
+            } else {
+                std::cerr << "FATAL: Fatal error on startup: " << e.what( ) << std::endl;
+            }
+			return 1;
 		}
 
-		srv.shutdown( );		
 	}
 	
 	return 0;
