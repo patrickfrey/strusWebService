@@ -40,13 +40,13 @@ static void handle_signal( int sig )
 
 int main( int argc, char *argv[] )
 {
-    boost::program_options::options_description desc( "Options" ); 
-    desc.add_options( ) 
-      ( "help,h", "Print help page" ) 
-      ( "version,V", "Print version" )
-      ( "verbose,v", "Enable verbose output" )
-      ( "pretty-print,p", "Enable pretty-printing of JSON" )
-      ( "config,c", "Configuraton file" );
+	boost::program_options::options_description desc( "Options" ); 
+	desc.add_options( ) 
+	  ( "help,h", "Print help page" ) 
+	  ( "version,V", "Print version" )
+	  ( "verbose,v", "Enable verbose output" )
+	  ( "pretty-print,p", "Enable pretty-printing of JSON" )
+	  ( "config,c", "Configuraton file" );
 	boost::program_options::variables_map vm;
 	
 	try {
@@ -81,15 +81,15 @@ int main( int argc, char *argv[] )
 		std::cerr << desc;
 		return 1;
 	}
-      
+	  
 	signal( SIGHUP, handle_signal );
 	while( !terminate ) {
 		try {
-            srv = new cppcms::service( argc, argv );
+			srv = new cppcms::service( argc, argv );
 
-            if( vm.count( "verbose" ) ) {
-                booster::log::logger::instance( ).set_default_level( booster::log::logger::string_to_level( "debug" ) );
-            }
+			if( vm.count( "verbose" ) ) {
+				booster::log::logger::instance( ).set_default_level( booster::log::logger::string_to_level( "debug" ) );
+			}
 		
 			BOOSTER_INFO( PACKAGE ) << "Restarting strus web service..";
 
@@ -118,17 +118,17 @@ int main( int argc, char *argv[] )
 				terminate = true;
 			}
 
-            srv->shutdown( );
-            delete srv;		
+			srv->shutdown( );
+			delete srv;		
 			
 		} catch( std::exception const &e ) {
 			if( srv != 0 ) {
-                BOOSTER_ERROR( PACKAGE ) << e.what() ;
-                srv->shutdown( );
-                delete srv;
-            } else {
-                std::cerr << "FATAL: Fatal error on startup: " << e.what( ) << std::endl;
-            }
+				BOOSTER_ERROR( PACKAGE ) << e.what() ;
+				srv->shutdown( );
+				delete srv;
+			} else {
+				std::cerr << "FATAL: Fatal error on startup: " << e.what( ) << std::endl;
+			}
 			return 1;
 		}
 
