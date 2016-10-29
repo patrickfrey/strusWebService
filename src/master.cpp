@@ -74,6 +74,8 @@ bool master::get_strus_environment( const std::string &name )
 
 void master::close_strus_environment( const std::string &name )
 {
+	service.abortRunningTransactions( name );
+	
 	service.deleteQueryEvalInterface( );
 	service.deleteQueryProcessorInterface( );
 	service.deleteAttributeReaderInterface( name );

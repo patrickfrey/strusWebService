@@ -19,6 +19,8 @@
 
 #include <booster/locale/format.h>
 
+#include <boost/filesystem.hpp>
+
 #include <sstream>
 
 #include "strus/lib/queryeval.hpp"
@@ -38,6 +40,8 @@ strusWebService::strusWebService( cppcms::service &srv, StrusContext *_context, 
 	query( *this ),
 	transaction( *this )
 {
+    BOOSTER_DEBUG( PACKAGE ) << "Starting strus web service";
+    
 	add( master );
 	add( other );
 	add( index );
@@ -59,6 +63,12 @@ strusWebService::strusWebService( cppcms::service &srv, StrusContext *_context, 
 	document.set_pretty_printing( pretty_print );
 	query.set_pretty_printing( pretty_print );
 	transaction.set_pretty_printing( pretty_print );
+}
+
+strusWebService::~strusWebService( )
+{
+    BOOSTER_DEBUG( PACKAGE ) << "Shutting down strus web service";
+    abortAllRunningTransactions( );
 }
 
 StrusIndexContext *strusWebService::getOrCreateStrusContext( const std::string &name )
@@ -386,6 +396,50 @@ std::string strusWebService::getStorageConfig( const std::string &base_storage_d
 	BOOSTER_DEBUG( PACKAGE ) << "Simple storage config string: " << config;
 	
 	return config;	
+}
+
+void strusWebService::abortRunningTransactions( const std::string &name )
+{
+	std::vector<std::string> transactions = getAllTransactionsIdsOfIndex( name );
+	for( std::vector<std::string >::const_iterator trans_id = transactions.begin( ); trans_id != transactions.end( ); trans_id++ ) {
+		strus::StorageTransactionInterface *transaction = getStorageTransactionInterface( name, *trans_id );
+		if( transaction != 0 ) {
+			BOOSTER_INFO( PACKAGE ) << "forcing rollback on transaction '" << *trans_id << "' in index '" << name << "'";
+			transaction->rollback( );
+			deleteStorageTransactionInterface( name, *trans_id );
+		}
+	}
+}
+
+void strusWebService::abortAllRunningTransactions( )
+{
+	std::vector<std::string> indexes = getAllIndexNames( );
+    
+    for( std::vector<std::string>::const_iterator index = indexes.begin( ); index != indexes.end( ); index++ ) {
+        abortRunningTransactions( *index );
+    }
+}
+
+std::vector<std::string> strusWebService::getAllIndexNames( )
+{
+	typedef std::vector<boost::filesystem::directory_entry> dirlist;
+	dirlist dirs;
+	
+	boost::filesystem::path dir( storage_base_directory );
+        		  
+	std::copy( boost::filesystem::directory_iterator( storage_base_directory ),
+		boost::filesystem::directory_iterator( ), std::back_inserter( dirs ) );
+
+	std::vector<std::string> v;
+	for( dirlist::const_iterator it = dirs.begin( ); it != dirs.end( ); it++ ) {
+		std::string last;
+		for( boost::filesystem::path::iterator pit = it->path( ).begin( ); pit != it->path( ).end( ); pit++ ) {
+			last = pit->native( );
+		}
+		v.push_back( last );
+	}
+    
+	return v;
 }
 
 } // namespace apps

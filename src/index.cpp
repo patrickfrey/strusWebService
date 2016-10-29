@@ -13,7 +13,7 @@
 
 #include "strus/valueIteratorInterface.hpp"
 
-#include <cppcms/url_dispatcher.h>  
+#include <cppcms/url_dispatcher.h>
 #include <cppcms/http_request.h>
 
 #include <booster/log.h>
@@ -34,9 +34,9 @@ namespace apps {
 index::index( strusWebService &service, std::string storage_base_directory )
 	: master( service ),
 	storage_base_directory( storage_base_directory )
-{	
+{
 	initialize_default_create_parameters( );
-	
+
 	service.dispatcher( ).assign( "/index/create/(\\w+)", &index::create_cmd, this, 1 );
 	service.dispatcher( ).assign( "/index/delete/(\\w+)", &index::delete_cmd, this, 1 );
 	service.dispatcher( ).assign( "/index/config/(\\w+)", &index::config_cmd, this, 1 );
@@ -51,7 +51,7 @@ index::index( strusWebService &service, std::string storage_base_directory )
 index::~index( )
 {
 }
-		
+
 void index::initialize_default_create_parameters( )
 {
 	default_create_parameters = service.settings( ).get<struct StorageCreateParameters>( "storage.default_create_parameters" );
@@ -67,13 +67,13 @@ struct StorageCreateParameters index::merge_create_parameters( const struct Stor
 	// inherit the non-metadata part of the create parameters
 	struct StorageCreateParameters params = default_create_parameters;
 	params.metadata.clear( );
-		
+
 	// KLUDGE: for now we do not want the user of the service to be
 	// able to change low-level configuration parameters (or potentially
 	// dangerous parameters like cache sizes, we leave this to the administrator).
 	// metadata definitions on the other hand should be configurable via API
 	// TODO: add roles for the webservice like reader (query), writer, DDL admin, super admin
-	
+
 	// iterate explicit parameters, issue warnings if default metadata is
 	// being redefined
 	for( std::vector<struct MetadataDefiniton>::const_iterator it = explicit_params.metadata.begin( ); it != explicit_params.metadata.end( ); it++ ) {
@@ -87,7 +87,7 @@ struct StorageCreateParameters index::merge_create_parameters( const struct Stor
 					continue;
 				} else {
 					BOOSTER_WARNING( PACKAGE ) << "overwritting an already existing metadata definition for '" << it->name << "'";
-					params.metadata.push_back( *it ); 
+					params.metadata.push_back( *it );
 					seen_default = true;
 					continue;
 				}
@@ -98,7 +98,7 @@ struct StorageCreateParameters index::merge_create_parameters( const struct Stor
 			params.metadata.push_back( *it );
 		}
 	}
-	
+
 	// check for default parameters and append them if needed
 	for( std::vector<struct MetadataDefiniton>::const_iterator it = default_create_parameters.metadata.begin( ); it != default_create_parameters.metadata.end( ); it++ ) {
 		bool contains_default = false;
@@ -119,9 +119,9 @@ void index::create_cmd( const std::string name )
 {
 	boost::timer::cpu_timer timer;
 
-	if( !ensure_post( ) ) return;	
+	if( !ensure_post( ) ) return;
 	if( !ensure_json_request( ) ) return;
-	
+
 	std::pair<void *, size_t> data = request( ).raw_post_data( );
 	std::istringstream is( std::string( reinterpret_cast<char const *>( data.first ), data.second ) );
 	cppcms::json::value p;
@@ -129,7 +129,7 @@ void index::create_cmd( const std::string name )
 		report_error( ERROR_INDEX_ILLEGAL_JSON, "Illegal JSON received" );
 		return;
 	}
-	
+
 	struct StorageCreateParameters params;
 
 	if( p.type( "params" ) == cppcms::json::is_object ) {
@@ -147,7 +147,7 @@ void index::create_cmd( const std::string name )
 		report_error( ERROR_INDEX_ILLEGAL_JSON, "Expecting a JSON object as storage creation parameter" );
 		return;
 	}
-		
+
 	std::string config = service.getStorageConfig( storage_base_directory, params, name );
 
 	if( !get_strus_environment( name ) ) {
@@ -158,7 +158,7 @@ void index::create_cmd( const std::string name )
 		report_error( ERROR_INDEX_CREATE_DATABASE_EXISTS, "An index with that name already exists" );
 		return;
 	}
-	
+
 	boost::system::error_code err;
 	if( !boost::filesystem::create_directories(
 		service.getStorageDirectory( storage_base_directory, name ), err ) ) {
@@ -167,9 +167,9 @@ void index::create_cmd( const std::string name )
 	}
 
 	sti->createStorage( config, dbi );
-	
+
 	service.registerStorageConfig( name, config );
-	
+
 	cppcms::json::value j;
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
@@ -180,9 +180,9 @@ void index::create_cmd( const std::string name )
 		j.save( ss, cppcms::json::readable );
 	} else {
 		j.save( ss, cppcms::json::compact );
-	}	
+	}
 	BOOSTER_DEBUG( PACKAGE ) << "create_index(" << name << "): " << ss.str( );
-	
+
 	report_ok( j );
 }
 
@@ -205,17 +205,17 @@ void index::delete_cmd( const std::string name )
 	if( !get_strus_environment( name ) ) {
 		return;
 	}
-	
+
 	if( !dbi->exists( config ) ) {
 		report_error( ERROR_INDEX_DESTROY_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
 		return;
 	}
-	
+
 	if( !dbi->destroyDatabase( config ) ) {
 		report_error( ERROR_INDEX_DESTROY_CMD_DESTROY_DATABASE, service.getLastStrusError( ) );
 		return;
 	}
-			
+
 	cppcms::json::value j;
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
@@ -226,20 +226,20 @@ void index::delete_cmd( const std::string name )
 		j.save( ss, cppcms::json::readable );
 	} else {
 		j.save( ss, cppcms::json::compact );
-	}	
+	}
 	BOOSTER_DEBUG( PACKAGE ) << "delete_index(" << name << "): " << ss.str( );
-	
+
 	report_ok( j );
 }
 
 static bool metadata_definition_sorter( struct MetadataDefiniton const &meta1, struct MetadataDefiniton const &meta2 )
 {
-    if( meta1.name != meta2.name ) {
-        return meta1.name < meta2.name;
-    }
-    return meta1.type < meta2.type;
+	if( meta1.name != meta2.name ) {
+		return meta1.name < meta2.name;
+	}
+	return meta1.type < meta2.type;
 }
- 
+
 void index::config_cmd( const std::string name )
 {
 	boost::timer::cpu_timer timer;
@@ -274,21 +274,21 @@ void index::config_cmd( const std::string name )
 	if( !attributeReader ) {
 		report_error( ERROR_DOCUMENT_GET_CMD_CREATE_ATTRIBUTE_READER, service.getLastStrusError( ) );
 		return;
-	}	
+	}
 
 	struct StorageConfiguration config;
-	
+
 	strus::ValueIteratorInterface *valItr = storage->createTermTypeIterator( );
 	std::vector<std::string> termTypes = valItr->fetchValues( FEATURE_ITERATOR_BATCH_SIZE );
 	while( termTypes.size( ) > 0 ) {
 		config.types.insert( config.types.end( ), termTypes.begin( ), termTypes.end( ) );
 		termTypes = valItr->fetchValues( FEATURE_ITERATOR_BATCH_SIZE );
 	}
-	
+
 	for( strus::Index it = 0; it < metadata->nofElements( ); it++ ) {
 		struct MetadataDefiniton meta;
 		meta.name = metadata->getName( it );
-		meta.type = metadata->getType( it );		
+		meta.type = metadata->getType( it );
 		config.metadata.push_back( meta );
 	}
 	std::sort( config.metadata.begin( ), config.metadata.end( ), &metadata_definition_sorter );
@@ -311,7 +311,7 @@ void index::config_cmd( const std::string name )
 	}
 	BOOSTER_DEBUG( PACKAGE ) << "config_index(" << name << "): " << ss.str( );
 
-	report_ok( j );	
+	report_ok( j );
 }
 
 void index::stats_cmd( const std::string name )
@@ -337,10 +337,10 @@ void index::stats_cmd( const std::string name )
 		report_error( ERROR_INDEX_STATS_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
-	
+
 	struct StorageStatistics stats;
 	stats.nof_docs = storage->nofDocumentsInserted( );
-		
+
 	cppcms::json::value j;
 	j["stats"] = stats;
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
@@ -354,7 +354,7 @@ void index::stats_cmd( const std::string name )
 		j.save( ss, cppcms::json::compact );
 	}
 	BOOSTER_DEBUG( PACKAGE ) << "stats_index(" << name << "): " << ss.str( );
-	
+
 	report_ok( j );
 }
 
@@ -362,10 +362,8 @@ void index::list_cmd( )
 {
 	boost::timer::cpu_timer timer;
 
-	typedef std::vector<boost::filesystem::directory_entry> dirlist;
-	dirlist dirs;
-	
 	boost::filesystem::path dir( storage_base_directory );
+
 	if( exists( dir ) ) {
 		if( !is_directory( dir ) ) {
 			report_error( ERROR_INDEX_STATS_CMD_ILLEGAL_STORAGE_DIR, "Base storage directory is not a directory" );
@@ -375,21 +373,12 @@ void index::list_cmd( )
 		report_error( ERROR_INDEX_STATS_CMD_ILLEGAL_STORAGE_DIR, "Base storage directory does not exist" );
 		return;
 	}
-		  
-	std::copy( boost::filesystem::directory_iterator( storage_base_directory ),
-		boost::filesystem::directory_iterator( ), std::back_inserter( dirs ) );
+
+	std::vector<std::string> v = service.getAllIndexNames( );
+	std::sort( v.begin( ), v.end( ) );
 
 	cppcms::json::value j;
 	j["result"] = "ok";
-	std::vector<std::string> v;
-	for( dirlist::const_iterator it = dirs.begin( ); it != dirs.end( ); it++ ) {
-		std::string last;
-		for( boost::filesystem::path::iterator pit = it->path( ).begin( ); pit != it->path( ).end( ); pit++ ) {
-			last = pit->native( );
-		}
-		v.push_back( last );
-	}
-	std::sort( v.begin( ), v.end( ) );
 	j["indexes"] = v;
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
@@ -423,7 +412,7 @@ void index::exists_cmd( const std::string name )
 	j["exists"] = dbi->exists( config );
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
-	
+
 	BOOSTER_INFO( PACKAGE ) << "exists_index(" << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
@@ -448,7 +437,7 @@ void index::open_cmd( const std::string name )
 	}
 
 	std::string config = service.getStorageConfig( storage_base_directory, combined_params, name );
-	
+
 	if( !dbi->exists( config ) ) {
 		report_error( ERROR_INDEX_OPEN_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
 		return;
@@ -459,11 +448,11 @@ void index::open_cmd( const std::string name )
 		report_error( ERROR_INDEX_OPEN_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
-	
+
 	cppcms::json::value j;
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
-	
+
 	BOOSTER_INFO( PACKAGE ) << "open_index(" << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
@@ -492,18 +481,18 @@ void index::close_cmd( const std::string name )
 	}
 
 	std::string config = service.getStorageConfig( storage_base_directory, combined_params, name );
-	
+
 	if( !dbi->exists( config ) ) {
 		report_error( ERROR_INDEX_CLOSE_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
 		return;
 	}
-	
+
 	close_strus_environment( name );
 
 	cppcms::json::value j;
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
-	
+
 	BOOSTER_INFO( PACKAGE ) << "close_index(" << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
@@ -528,7 +517,7 @@ void index::swap_cmd( const std::string name1, const std::string name2 )
 	combined_params = default_create_parameters;
 
 	std::string config1 = service.getStorageConfig( storage_base_directory, combined_params, name1 );
-	
+
 	if( !dbi->exists( config1 ) ) {
 		report_error( ERROR_INDEX_SWAP_CMD_NO_SUCH_DATABASE1, "First search index does not exist" );
 		return;
@@ -548,7 +537,7 @@ void index::swap_cmd( const std::string name1, const std::string name2 )
 	}
 
 	close_strus_environment( name2 );
-	
+
 	boost::filesystem::path path1( storage_base_directory ); path1 /= name1;
 	boost::filesystem::path path2( storage_base_directory ); path2 /= name2;
 	boost::filesystem::path pathtmp( storage_base_directory ); pathtmp /= "_tmp";
@@ -565,11 +554,11 @@ void index::swap_cmd( const std::string name1, const std::string name2 )
 	if( err.value( ) != boost::system::errc::success ) {
 		report_error( ERROR_INDEX_SWAP_CMD_RENAME_ERROR, err.message( ) );
 	}
-	
+
 	cppcms::json::value j;
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
-	
+
 	BOOSTER_INFO( PACKAGE ) << "swap_index(" << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {

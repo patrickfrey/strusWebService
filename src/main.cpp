@@ -23,6 +23,7 @@
 static bool terminate = false;
 static bool got_sighup = false;
 static cppcms::service *srv = 0;
+static StrusContext *strusContext = 0;
 
 static void handle_signal( int sig )
 {
@@ -101,7 +102,7 @@ int main( int argc, char *argv[] )
 			}
 			BOOSTER_DEBUG( PACKAGE ) << "Using '" << nof_threads << "' threads for strus logging buffers";
 			
-			StrusContext *strusContext = new StrusContext( nof_threads,
+			strusContext = new StrusContext( nof_threads,
 				srv->settings( ).get<std::string>( "extensions.directory" ), 
 				srv->settings( ).get<std::vector<std::string> >( "extensions.modules" ) );
 			
@@ -109,19 +110,25 @@ int main( int argc, char *argv[] )
 	
 			srv->run( );
 			
-			delete strusContext;
-
 			if( got_sighup ) {
 				BOOSTER_INFO( PACKAGE ) << "Reloading configuration on SIGHUP..";
 				got_sighup = false;
 			} else {
+				BOOSTER_INFO( PACKAGE ) << "Received shutdown command..";
 				terminate = true;
 			}
 
 			srv->shutdown( );
-			delete srv;		
-			
+			delete srv;
+			srv = 0;
+
+			delete strusContext;
+			strusContext = 0;
+						
 		} catch( std::exception const &e ) {
+			if( strusContext != 0 ) {
+				delete strusContext;
+			}
 			if( srv != 0 ) {
 				BOOSTER_ERROR( PACKAGE ) << e.what() ;
 				srv->shutdown( );
@@ -133,6 +140,8 @@ int main( int argc, char *argv[] )
 		}
 
 	}
+
+	BOOSTER_INFO( PACKAGE ) << "Service terminated..";
 	
 	return 0;
 }
