@@ -78,7 +78,11 @@ add_test( NAME transaction_insert_doc2 COMMAND curlJsonTester transaction_insert
 
 add_test( NAME transaction_insert_doc3 COMMAND curlJsonTester transaction_insert_doc3 )
 
+add_test( NAME transaction_list_before_commit COMMAND curlJsonTester transaction_list_before_commit )
+
 add_test( NAME transaction_commit COMMAND curlJsonTester transaction_commit )
+
+add_test( NAME transaction_list_after_commit COMMAND curlJsonTester transaction_list_after_commit )
 
 add_test( NAME transaction_delete_begin COMMAND curlJsonTester transaction_begin )
 
