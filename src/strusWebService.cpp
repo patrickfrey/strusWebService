@@ -220,6 +220,9 @@ std::vector<std::string> strusWebService::getAllTransactionsIdsOfIndex( const st
 {
 	StrusIndexContext *ctx = context->acquire( name );
 	std::vector<std::string> v;
+	if( ctx == 0 ) {
+        return v;
+    }
 	std::map<std::string, strus::StorageTransactionInterface *>::iterator it;
 	for( it = ctx->trans_map.begin( ); it != ctx->trans_map.end( ); it++ ) {
 		v.push_back( (*it).first );
@@ -436,11 +439,16 @@ std::vector<std::string> strusWebService::getAllIndexNames( )
 	dirlist dirs;
 	
 	boost::filesystem::path dir( storage_base_directory );
+
+	std::vector<std::string> v;
+
+	if( !exists( dir ) ) {
+        return v;
+	}
         		  
 	std::copy( boost::filesystem::directory_iterator( storage_base_directory ),
 		boost::filesystem::directory_iterator( ), std::back_inserter( dirs ) );
 
-	std::vector<std::string> v;
 	for( dirlist::const_iterator it = dirs.begin( ); it != dirs.end( ); it++ ) {
 		std::string last;
 		for( boost::filesystem::path::iterator pit = it->path( ).begin( ); pit != it->path( ).end( ); pit++ ) {
