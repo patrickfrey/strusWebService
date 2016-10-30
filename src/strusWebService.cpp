@@ -27,10 +27,12 @@
 #include "strus/lib/queryproc.hpp"
 #include "strus/storageTransactionInterface.hpp"
 
+#include <signal.h>
+
 namespace apps {
 
-strusWebService::strusWebService( cppcms::service &srv, StrusContext *_context, bool pretty_print )
-	: cppcms::application( srv ), context( _context ),
+strusWebService::strusWebService( cppcms::service &_srv, StrusContext *_context, bool pretty_print )
+	: cppcms::application( _srv ), srv( _srv ), context( _context ),
 	storage_base_directory( settings( ).get<std::string>( "storage.basedir" ) ),
 	qpi( 0 ), qei( 0 ),
 	master( *this ),
@@ -63,6 +65,14 @@ strusWebService::strusWebService( cppcms::service &srv, StrusContext *_context, 
 	document.set_pretty_printing( pretty_print );
 	query.set_pretty_printing( pretty_print );
 	transaction.set_pretty_printing( pretty_print );
+    
+    try {
+        if( settings( ).get<bool>( "debug.enable_quit_command" ) ) {
+            other.set_allow_quit_command( true );
+        }
+    } catch( std::bad_cast &e ) {
+        // option not configured
+    }
 }
 
 strusWebService::~strusWebService( )
@@ -440,6 +450,11 @@ std::vector<std::string> strusWebService::getAllIndexNames( )
 	}
     
 	return v;
+}
+
+void strusWebService::raiseTerminationFlag( )
+{
+    srv.shutdown( );
 }
 
 } // namespace apps

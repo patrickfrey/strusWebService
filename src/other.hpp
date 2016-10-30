@@ -86,11 +86,14 @@ class other : public master {
 
 	public:
 		other( strusWebService &service );
+		void set_allow_quit_command( bool allow_quit_command );
 		
 	private:
+		bool allow_quit_command;
 		void ping_cmd( );
 		void version_cmd( );
 		void config_cmd( );
+		void quit_cmd( );
 };
 
 } // namespace apps

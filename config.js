@@ -54,5 +54,9 @@
 	"democlient" : {
 		"enable" : true,
 		"basedir" : "./democlient"
+	},
+	
+	"debug" : {
+		"enable_quit_command" : true
 	}
 }

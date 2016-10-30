@@ -23,11 +23,17 @@
 namespace apps {
 
 other::other( strusWebService &service )
-	: master( service )
+	: master( service ), allow_quit_command( false )
 {
 	service.dispatcher( ).assign( "/ping", &other::ping_cmd, this );
 	service.dispatcher( ).assign( "/version", &other::version_cmd, this );
 	service.dispatcher( ).assign( "/config", &other::config_cmd, this );	
+	service.dispatcher( ).assign( "/quit", &other::quit_cmd, this );
+}
+
+void other::set_allow_quit_command( bool _allow_quit_command )
+{
+	allow_quit_command = _allow_quit_command;
 }
 
 void other::ping_cmd( )
@@ -103,6 +109,20 @@ void other::config_cmd( )
 
 	j["config"] = config;
 	report_ok( j );
+}
+
+void other::quit_cmd( )
+{
+	cppcms::json::value j;
+
+	if( !allow_quit_command ) {
+		not_found_404( );
+		return;
+	}
+	
+	report_ok( j );
+	
+	service.raiseTerminationFlag( );
 }
 
 } // namespace apps

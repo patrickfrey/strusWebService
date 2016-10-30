@@ -65,6 +65,7 @@ class StrusContext {
 
 	public:
 		StrusContext( unsigned int nof_threads, const std::string moduleDir, const std::vector<std::string> modules );
+		virtual ~StrusContext( );
 		
 		StrusIndexContext *acquire( const std::string &name );
 		void release( const std::string &name, StrusIndexContext *ctx );
