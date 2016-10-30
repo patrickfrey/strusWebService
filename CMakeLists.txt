@@ -15,6 +15,7 @@ include( cmake/find_strus_package.cmake )
 include( cmake/boost.cmake )
 include( cmake/dist.cmake )
 include( cmake/FindCURL.cmake )
+include( cmake/FindCppCms.cmake )
 
 find_strus_package( core )
 find_strus_package( module )
@@ -27,15 +28,6 @@ configure_file( "${PROJECT_SOURCE_DIR}/dist/obs/struswebservice-Debian_7.0.dsc.i
 configure_file( "${PROJECT_SOURCE_DIR}/dist/obs/struswebservice-xUbuntu_12.04.dsc.in"  "${PROJECT_SOURCE_DIR}/dist/obs/struswebservice-xUbuntu_12.04.dsc"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/struswebservice.spec.in"  "${PROJECT_SOURCE_DIR}/dist/redhat/struswebservice.spec"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-RHEL.in"  "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-RHEL"  @ONLY )
-
-find_library(CPPCMS cppcms)
-find_library(BOOSTER booster)
-
-find_path(CPPCMS_INC cppcms/application.h)
-find_path(BOOSTER_INC booster/shared_ptr.h)
-
-include_directories(${CPPCMS_INC})
-include_directories(${BOOSTER_INC})
 
 add_subdirectory( 3rdParty/curlpp )
 
@@ -56,15 +48,19 @@ set(SRC
 )
 
 include_directories(
+	"${Boost_INCLUDE_DIRS}"
 	"${strus_INCLUDE_DIRS}"
+	"${LIBBOOSTER_INCLUDE_DIR}"
+	"${LIBCPPCMS_INCLUDE_DIR}"
 )
 
 link_directories(
+	"${Boost_LIBRARY_DIRS}"
 	"${strus_LIBRARY_DIRS}"
 )
 
 add_executable(strusWebService ${SRC})
-target_link_libraries(strusWebService ${BOOSTER} ${CPPCMS} strus_storage strus_error strus_database_leveldb strus_queryeval strus_queryproc strus_module strus_error ${Boost_LIBRARIES})
+target_link_libraries(strusWebService ${Boost_LIBRARIES} ${LIBCPPCMS_LIBRARY} ${LIBBOOSTER_LIBRARY} strus_storage strus_error strus_database_leveldb strus_queryeval strus_queryproc strus_module strus_error ${Boost_LIBRARIES})
 
 install( TARGETS strusWebService RUNTIME DESTINATION sbin )
 
