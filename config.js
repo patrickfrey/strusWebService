@@ -35,8 +35,10 @@
 		"api" : "http",
 		"ip" : "0.0.0.0",
 		"port" : 8080,
-		//~ worker_processes : 5,
-		//~ worker_threads : 25
+		// setting anything but 0 or 1 is illegal currently!
+		"worker_processes" : 0,
+		"worker_threads" : 4,
+		"applications_pool_size" : 8
 	},
 	
 	"security" : {
