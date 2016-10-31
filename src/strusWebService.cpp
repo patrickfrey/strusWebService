@@ -78,14 +78,13 @@ strusWebService::strusWebService( cppcms::service &_srv, StrusContext *_context,
 strusWebService::~strusWebService( )
 {
     BOOSTER_DEBUG( PACKAGE ) << "Shutting down strus web service";
-    abortAllRunningTransactions( );
 }
 
 StrusIndexContext *strusWebService::getOrCreateStrusContext( const std::string &name )
 {
 	StrusIndexContext *ctx = context->acquire( name );
 	if( ctx == 0 ) {
-		ctx = new StrusIndexContext( getStorageConfig( storage_base_directory, name ) );
+		ctx = new StrusIndexContext( name, getStorageConfig( storage_base_directory, name ) );
 	}
 	context->release( name, ctx );
 	return ctx;
