@@ -29,6 +29,7 @@ namespace apps {
 class strusWebService : public cppcms::application {
 
 	private:
+        cppcms::service &srv;
 		StrusContext *context;
 		std::string storage_base_directory;
 		strus::QueryProcessorInterface *qpi;
@@ -44,6 +45,7 @@ class strusWebService : public cppcms::application {
 		
 	public:
 		strusWebService( cppcms::service &srv, StrusContext *context, bool pretty_print );
+        virtual ~strusWebService( );
 		bool hasError( ) const;
 		std::string getLastStrusError( ) const;
 		std::vector<std::string> getStrusErrorDetails( ) const;
@@ -72,6 +74,10 @@ class strusWebService : public cppcms::application {
 		void deleteAttributeReaderInterface( const std::string &name );
 		void deleteQueryEvalInterface( );
 		void deleteQueryProcessorInterface( );
+        void abortAllRunningTransactions( );
+        void abortRunningTransactions( const std::string &name );
+        std::vector<std::string> getAllIndexNames( );
+        void raiseTerminationFlag( );
 };
 
 } // namespace apps

@@ -102,6 +102,14 @@ StrusContext::StrusContext( unsigned int nof_threads, const std::string moduleDi
 	}
 }
 
+StrusContext::~StrusContext( )
+{
+    BOOSTER_DEBUG( PACKAGE ) << "Shutting down strus context";
+    for( std::map<std::string, StrusIndexContext *>::iterator it = context_map.begin( ); it != context_map.end( ); it++ ) {
+        delete it->second;
+    }
+}
+
 void StrusContext::registerModules( strus::QueryProcessorInterface *qpi ) const
 {
 	for( std::vector<const strus::ModuleEntryPoint *>::const_iterator it = modules.begin( ); it != modules.end( ); it++ ) {

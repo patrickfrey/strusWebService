@@ -11,11 +11,12 @@ link_directories(
 )
 
 add_executable( curlJsonTester curlJsonTester.cpp)
-target_link_libraries( curlJsonTester "${CURL_LIBRARIES}" ${CPPCMS} curlpp_static)
+target_link_libraries( curlJsonTester "${CURL_LIBRARIES}" ${LIBCPPCMS_LIBRARY} ${LIBBOOSTER_LIBRARY} curlpp_static)
 
 # low-level tests
 
 add_executable( queryStructTester queryStructTester.cpp)
+target_link_libraries( queryStructTester ${LIBCPPCMS_LIBRARY} ${LIBBOOSTER_LIBRARY})
 
 add_test( NAME query_struct COMMAND queryStructTester )
 
@@ -78,7 +79,11 @@ add_test( NAME transaction_insert_doc2 COMMAND curlJsonTester transaction_insert
 
 add_test( NAME transaction_insert_doc3 COMMAND curlJsonTester transaction_insert_doc3 )
 
+add_test( NAME transaction_list_before_commit COMMAND curlJsonTester transaction_list_before_commit )
+
 add_test( NAME transaction_commit COMMAND curlJsonTester transaction_commit )
+
+add_test( NAME transaction_list_after_commit COMMAND curlJsonTester transaction_list_after_commit )
 
 add_test( NAME transaction_delete_begin COMMAND curlJsonTester transaction_begin )
 

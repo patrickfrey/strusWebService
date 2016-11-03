@@ -22,14 +22,15 @@
 
 static bool terminate = false;
 static bool got_sighup = false;
-static cppcms::service *global_srv = 0;
+static cppcms::service *srv = 0;
+static StrusContext *strusContext = 0;
 
 static void handle_signal( int sig )
 {
 	switch( sig ) {
 		case SIGHUP:
 			got_sighup = true;
-			if( global_srv ) global_srv->shutdown( );
+			if( srv ) srv->shutdown( );
 			break;
 		
 		default:
@@ -40,13 +41,13 @@ static void handle_signal( int sig )
 
 int main( int argc, char *argv[] )
 {
-    boost::program_options::options_description desc( "Options" ); 
-    desc.add_options( ) 
-      ( "help,h", "Print help page" ) 
-      ( "version,V", "Print version" )
-      ( "verbose,v", "Enable verbose output" )
-      ( "pretty-print,p", "Enable pretty-printing of JSON" )
-      ( "config,c", "Configuraton file" );
+	boost::program_options::options_description desc( "Options" ); 
+	desc.add_options( ) 
+	  ( "help,h", "Print help page" ) 
+	  ( "version,V", "Print version" )
+	  ( "verbose,v", "Enable verbose output" )
+	  ( "pretty-print,p", "Enable pretty-printing of JSON" )
+	  ( "config,c", "Configuraton file" );
 	boost::program_options::variables_map vm;
 	
 	try {
@@ -81,52 +82,66 @@ int main( int argc, char *argv[] )
 		std::cerr << desc;
 		return 1;
 	}
-      
+	  
 	signal( SIGHUP, handle_signal );
 	while( !terminate ) {
-		cppcms::service srv( argc, argv );
-		global_srv = &srv;
-
-		if( vm.count( "verbose" ) ) {
-			booster::log::logger::instance( ).set_default_level( booster::log::logger::string_to_level( "debug" ) );
-		}
-		
 		try {
-			BOOSTER_INFO( "strusCms" ) << "Restarting strus web service..";
+			srv = new cppcms::service( argc, argv );
+
+			if( vm.count( "verbose" ) ) {
+				booster::log::logger::instance( ).set_default_level( booster::log::logger::string_to_level( "debug" ) );
+			}
+		
+			BOOSTER_INFO( PACKAGE ) << "Restarting strus web service..";
 
 			unsigned int nof_threads;
-			if( srv.procs_no( ) == 0 ) {
-				nof_threads = srv.threads_no( );
+			if( srv->procs_no( ) == 0 ) {
+				nof_threads = srv->threads_no( );
 			} else {
-				nof_threads = srv.procs_no( ) * srv.threads_no( );
+				nof_threads = srv->procs_no( ) * srv->threads_no( );
 			}
 			BOOSTER_DEBUG( PACKAGE ) << "Using '" << nof_threads << "' threads for strus logging buffers";
 			
-			StrusContext *strusContext = new StrusContext( nof_threads,
-				srv.settings( ).get<std::string>( "extensions.directory" ), 
-				srv.settings( ).get<std::vector<std::string> >( "extensions.modules" ) );
+			strusContext = new StrusContext( nof_threads,
+				srv->settings( ).get<std::string>( "extensions.directory" ), 
+				srv->settings( ).get<std::vector<std::string> >( "extensions.modules" ) );
 			
-			srv.applications_pool( ).mount( cppcms::applications_factory<apps::strusWebService, StrusContext *, bool>( strusContext, vm.count( "pretty-print" ) ) );
+			srv->applications_pool( ).mount( cppcms::applications_factory<apps::strusWebService, StrusContext *, bool>( strusContext, vm.count( "pretty-print" ) ) );
 	
-			srv.run( );
+			srv->run( );
 			
-			delete strusContext;
-
 			if( got_sighup ) {
-				BOOSTER_INFO( "strusWebService" ) << "Reloading configuration on SIGHUP..";
+				BOOSTER_INFO( PACKAGE ) << "Reloading configuration on SIGHUP..";
 				got_sighup = false;
 			} else {
+				BOOSTER_INFO( PACKAGE ) << "Received shutdown command..";
 				terminate = true;
 			}
-			
+
+			srv->shutdown( );
+			delete srv;
+			srv = 0;
+
+			delete strusContext;
+			strusContext = 0;
+						
 		} catch( std::exception const &e ) {
-			BOOSTER_ERROR( "strusWebService" ) << e.what() ;
-			srv.shutdown( );
-			continue;
+			if( strusContext != 0 ) {
+				delete strusContext;
+			}
+			if( srv != 0 ) {
+				BOOSTER_ERROR( PACKAGE ) << e.what() ;
+				srv->shutdown( );
+				delete srv;
+			} else {
+				std::cerr << "FATAL: Fatal error on startup: " << e.what( ) << std::endl;
+			}
+			return 1;
 		}
 
-		srv.shutdown( );		
 	}
+
+	BOOSTER_INFO( PACKAGE ) << "Service terminated..";
 	
 	return 0;
 }

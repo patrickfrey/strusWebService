@@ -19,16 +19,20 @@
 
 #include <booster/locale/format.h>
 
+#include <boost/filesystem.hpp>
+
 #include <sstream>
 
 #include "strus/lib/queryeval.hpp"
 #include "strus/lib/queryproc.hpp"
 #include "strus/storageTransactionInterface.hpp"
 
+#include <signal.h>
+
 namespace apps {
 
-strusWebService::strusWebService( cppcms::service &srv, StrusContext *_context, bool pretty_print )
-	: cppcms::application( srv ), context( _context ),
+strusWebService::strusWebService( cppcms::service &_srv, StrusContext *_context, bool pretty_print )
+	: cppcms::application( _srv ), srv( _srv ), context( _context ),
 	storage_base_directory( settings( ).get<std::string>( "storage.basedir" ) ),
 	qpi( 0 ), qei( 0 ),
 	master( *this ),
@@ -38,6 +42,8 @@ strusWebService::strusWebService( cppcms::service &srv, StrusContext *_context, 
 	query( *this ),
 	transaction( *this )
 {
+    BOOSTER_DEBUG( PACKAGE ) << "Starting strus web service";
+    
 	add( master );
 	add( other );
 	add( index );
@@ -59,13 +65,26 @@ strusWebService::strusWebService( cppcms::service &srv, StrusContext *_context, 
 	document.set_pretty_printing( pretty_print );
 	query.set_pretty_printing( pretty_print );
 	transaction.set_pretty_printing( pretty_print );
+    
+    try {
+        if( settings( ).get<bool>( "debug.enable_quit_command" ) ) {
+            other.set_allow_quit_command( true );
+        }
+    } catch( std::bad_cast &e ) {
+        // option not configured
+    }
+}
+
+strusWebService::~strusWebService( )
+{
+    BOOSTER_DEBUG( PACKAGE ) << "Shutting down strus web service";
 }
 
 StrusIndexContext *strusWebService::getOrCreateStrusContext( const std::string &name )
 {
 	StrusIndexContext *ctx = context->acquire( name );
 	if( ctx == 0 ) {
-		ctx = new StrusIndexContext( getStorageConfig( storage_base_directory, name ) );
+		ctx = new StrusIndexContext( name, getStorageConfig( storage_base_directory, name ) );
 	}
 	context->release( name, ctx );
 	return ctx;
@@ -200,6 +219,9 @@ std::vector<std::string> strusWebService::getAllTransactionsIdsOfIndex( const st
 {
 	StrusIndexContext *ctx = context->acquire( name );
 	std::vector<std::string> v;
+	if( ctx == 0 ) {
+        return v;
+    }
 	std::map<std::string, strus::StorageTransactionInterface *>::iterator it;
 	for( it = ctx->trans_map.begin( ); it != ctx->trans_map.end( ); it++ ) {
 		v.push_back( (*it).first );
@@ -386,6 +408,60 @@ std::string strusWebService::getStorageConfig( const std::string &base_storage_d
 	BOOSTER_DEBUG( PACKAGE ) << "Simple storage config string: " << config;
 	
 	return config;	
+}
+
+void strusWebService::abortRunningTransactions( const std::string &name )
+{
+	std::vector<std::string> transactions = getAllTransactionsIdsOfIndex( name );
+	for( std::vector<std::string >::const_iterator trans_id = transactions.begin( ); trans_id != transactions.end( ); trans_id++ ) {
+		strus::StorageTransactionInterface *transaction = getStorageTransactionInterface( name, *trans_id );
+		if( transaction != 0 ) {
+			BOOSTER_INFO( PACKAGE ) << "forcing rollback on transaction '" << *trans_id << "' in index '" << name << "'";
+			transaction->rollback( );
+			deleteStorageTransactionInterface( name, *trans_id );
+		}
+	}
+}
+
+void strusWebService::abortAllRunningTransactions( )
+{
+	std::vector<std::string> indexes = getAllIndexNames( );
+    
+    for( std::vector<std::string>::const_iterator index = indexes.begin( ); index != indexes.end( ); index++ ) {
+        abortRunningTransactions( *index );
+    }
+}
+
+std::vector<std::string> strusWebService::getAllIndexNames( )
+{
+	typedef std::vector<boost::filesystem::directory_entry> dirlist;
+	dirlist dirs;
+	
+	boost::filesystem::path dir( storage_base_directory );
+
+	std::vector<std::string> v;
+
+	if( !exists( dir ) ) {
+        return v;
+	}
+        		  
+	std::copy( boost::filesystem::directory_iterator( storage_base_directory ),
+		boost::filesystem::directory_iterator( ), std::back_inserter( dirs ) );
+
+	for( dirlist::const_iterator it = dirs.begin( ); it != dirs.end( ); it++ ) {
+		std::string last;
+		for( boost::filesystem::path::iterator pit = it->path( ).begin( ); pit != it->path( ).end( ); pit++ ) {
+			last = pit->native( );
+		}
+		v.push_back( last );
+	}
+    
+	return v;
+}
+
+void strusWebService::raiseTerminationFlag( )
+{
+    srv.shutdown( );
 }
 
 } // namespace apps
