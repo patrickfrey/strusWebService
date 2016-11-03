@@ -66,13 +66,8 @@ strusWebService::strusWebService( cppcms::service &_srv, StrusContext *_context,
 	query.set_pretty_printing( pretty_print );
 	transaction.set_pretty_printing( pretty_print );
     
-    try {
-        if( settings( ).get<bool>( "debug.protocol.enable_quit_command" ) ) {
-            other.set_allow_quit_command( true );
-        }
-    } catch( std::bad_cast &e ) {
-        // option not configured
-    }
+    bool allow_quit_command = settings( ).get<bool>( "debug.protocol.enable_quit_command", DEFAULT_PROTOCOL_ENABLE_QUIT_COMMAND );
+	other.set_allow_quit_command( allow_quit_command );
 }
 
 strusWebService::~strusWebService( )
