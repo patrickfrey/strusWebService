@@ -1,8 +1,4 @@
-{
-	"protocol" : {
-//		"pretty_print" : false
-	},
-	
+{	
 	"storage" : {
 		"basedir" : "./storage",
 		"default_create_parameters" : {
@@ -59,6 +55,9 @@
 	},
 	
 	"debug" : {
-		"enable_quit_command" : true
-	}
+		"protocol" : {
+			//~ "pretty_print" : true,
+			//~ "enable_quit_command" : true
+		}
+	}		
 }

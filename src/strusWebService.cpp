@@ -57,7 +57,7 @@ strusWebService::strusWebService( cppcms::service &_srv, StrusContext *_context,
 	master.register_common_pages( );
 	
 	if( !pretty_print ) {
-		pretty_print = settings( ).get<bool>( "protocol.pretty_print", DEFAULT_PROTOCOL_PRETTY_PRINT );
+		pretty_print = settings( ).get<bool>( "debug.protocol.pretty_print", DEFAULT_PROTOCOL_PRETTY_PRINT );
 	}
 	master.set_pretty_printing( pretty_print );
 	other.set_pretty_printing( pretty_print );
@@ -67,7 +67,7 @@ strusWebService::strusWebService( cppcms::service &_srv, StrusContext *_context,
 	transaction.set_pretty_printing( pretty_print );
     
     try {
-        if( settings( ).get<bool>( "debug.enable_quit_command" ) ) {
+        if( settings( ).get<bool>( "debug.protocol.enable_quit_command" ) ) {
             other.set_allow_quit_command( true );
         }
     } catch( std::bad_cast &e ) {
