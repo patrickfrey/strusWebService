@@ -122,6 +122,8 @@ void index::create_cmd( const std::string name )
 	if( !ensure_post( ) ) return;
 	if( !ensure_json_request( ) ) return;
 
+	log_request( );
+
 	std::pair<void *, size_t> data = request( ).raw_post_data( );
 	std::istringstream is( std::string( reinterpret_cast<char const *>( data.first ), data.second ) );
 	cppcms::json::value p;
@@ -129,7 +131,7 @@ void index::create_cmd( const std::string name )
 		report_error( ERROR_INDEX_ILLEGAL_JSON, "Illegal JSON received" );
 		return;
 	}
-
+	
 	struct StorageCreateParameters params;
 
 	if( p.type( "params" ) == cppcms::json::is_object ) {
@@ -192,6 +194,8 @@ void index::delete_cmd( const std::string name )
 
 	if( !ensure_post( ) ) return;
 
+	log_request( );
+
 	// close all handles, we are going to delete the index now
 	// TODO: what if in parallel other clients access it? locking with timeout or
 	// error to this worker's client?
@@ -243,6 +247,8 @@ static bool metadata_definition_sorter( struct MetadataDefiniton const &meta1, s
 void index::config_cmd( const std::string name )
 {
 	boost::timer::cpu_timer timer;
+
+	log_request( );
 
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
@@ -318,6 +324,8 @@ void index::stats_cmd( const std::string name )
 {
 	boost::timer::cpu_timer timer;
 
+	log_request( );
+
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
 
@@ -374,6 +382,8 @@ void index::list_cmd( )
 		return;
 	}
 
+	log_request( );
+
 	std::vector<std::string> v = service.getAllIndexNames( );
 	std::sort( v.begin( ), v.end( ) );
 
@@ -398,6 +408,8 @@ void index::list_cmd( )
 void index::exists_cmd( const std::string name )
 {
 	boost::timer::cpu_timer timer;
+
+	log_request( );
 
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
@@ -428,6 +440,8 @@ void index::exists_cmd( const std::string name )
 void index::open_cmd( const std::string name )
 {
 	boost::timer::cpu_timer timer;
+
+	log_request( );
 
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
@@ -469,6 +483,8 @@ void index::close_cmd( const std::string name )
 {
 	boost::timer::cpu_timer timer;
 
+	log_request( );
+
 	if( !get_strus_environment( name ) ) {
 		return;
 	}
@@ -508,6 +524,8 @@ void index::close_cmd( const std::string name )
 void index::swap_cmd( const std::string name1, const std::string name2 )
 {
 	boost::timer::cpu_timer timer;
+
+	log_request( );
 
 	if( !get_strus_environment( name1 ) ) {
 		return;

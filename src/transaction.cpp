@@ -48,6 +48,8 @@ void transaction::begin_cmd( const std::string name, const std::string tid, bool
 {	
 	if( !ensure_post( ) ) return;	
 
+	log_request( );
+
 	struct TransactionBeginRequest trans_begin;
 
 	if( !tid_in_url ) {
@@ -127,6 +129,8 @@ void transaction::commit_cmd( const std::string name, const std::string tid, boo
 	boost::timer::cpu_timer timer;
 
 	if( !ensure_post( ) ) return;	
+
+	log_request( );
 
 	struct TransactionBeginRequest trans_commit;
 
@@ -223,6 +227,8 @@ void transaction::rollback_cmd( const std::string name, const std::string tid, b
 
 	if( !ensure_post( ) ) return;	
 
+	log_request( );
+
 	struct TransactionBeginRequest trans_rollback;
 
 	if( !tid_in_url ) {
@@ -305,6 +311,8 @@ void transaction::rollback_cmd( const std::string name, const std::string tid, b
 void transaction::list_cmd( const std::string name )
 {
 	boost::timer::cpu_timer timer;
+
+	log_request( );
 
 	if( !get_strus_environment( name ) ) {
 		return;

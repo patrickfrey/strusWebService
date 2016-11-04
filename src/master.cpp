@@ -21,8 +21,6 @@
 
 #include "strus/errorBufferInterface.hpp"
 
-#include <fstream>
-
 #define BOOST_FILESYSTEM_VERSION 3
 
 #define BOOST_FILESYSTEM_NO_DEPRECATED
@@ -88,10 +86,16 @@ void master::close_strus_environment( const std::string &name )
 	sti = NULL;
 }
 
-void master::set_pretty_printing( bool enable ) {
+void master::set_pretty_printing( bool enable )
+{
 	protocol_pretty_printing = enable;
 }
 
+void master::set_log_requests( bool enable )
+{
+	log_requests = enable;
+}
+	
 void master::report_error( unsigned int code, const std::string &msg )
 {	
 	BOOSTER_ERROR( PACKAGE ) << msg;
@@ -153,6 +157,27 @@ bool master::ensure_json_request( )
 		return false;
 	}
 	return true;
+}
+
+void master::log_request( )
+{
+	if( log_requests ) {
+		std::ofstream *os = service.log_request_stream( );
+
+		std::string request_method = request( ).request_method( );
+		*os << request_method << std::endl;
+		// TODO: how to find whether we are secure or not? later..
+		*os << "http" << "://"
+			<< request( ).http_host( ) << request( ).script_name( )
+			<< request( ).path_info( ) << std::endl;
+		if( request_method == "GET" ) {
+			*os << std::endl;
+		} else if( request_method == "POST" ) {
+			std::pair<void *, size_t> data = request( ).raw_post_data( );
+			std::string payload = std::string( reinterpret_cast<char const *>( data.first ), data.second );
+			*os << payload << std::endl;
+		}			
+	}
 }
 
 static bool endsWith( const std::string &s, const std::string &end )

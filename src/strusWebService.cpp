@@ -34,7 +34,7 @@ namespace apps {
 strusWebService::strusWebService( cppcms::service &_srv, StrusContext *_context, bool pretty_print )
 	: cppcms::application( _srv ), srv( _srv ), context( _context ),
 	storage_base_directory( settings( ).get<std::string>( "storage.basedir" ) ),
-	qpi( 0 ), qei( 0 ),
+	qpi( 0 ), qei( 0 ), log_requests( DEFAULT_DEBUG_LOG_REQUESTS ),
 	master( *this ),
 	other( *this ),
 	index( *this, settings( ).get<std::string>( "storage.basedir" ) ),
@@ -42,8 +42,8 @@ strusWebService::strusWebService( cppcms::service &_srv, StrusContext *_context,
 	query( *this ),
 	transaction( *this )
 {
-    BOOSTER_DEBUG( PACKAGE ) << "Starting strus web service";
-    
+	BOOSTER_DEBUG( PACKAGE ) << "Starting strus web service";
+	
 	add( master );
 	add( other );
 	add( index );
@@ -57,7 +57,7 @@ strusWebService::strusWebService( cppcms::service &_srv, StrusContext *_context,
 	master.register_common_pages( );
 	
 	if( !pretty_print ) {
-		pretty_print = settings( ).get<bool>( "debug.protocol.pretty_print", DEFAULT_PROTOCOL_PRETTY_PRINT );
+		pretty_print = settings( ).get<bool>( "debug.protocol.pretty_print", DEFAULT_DEBUG_PROTOCOL_PRETTY_PRINT );
 	}
 	master.set_pretty_printing( pretty_print );
 	other.set_pretty_printing( pretty_print );
@@ -65,14 +65,28 @@ strusWebService::strusWebService( cppcms::service &_srv, StrusContext *_context,
 	document.set_pretty_printing( pretty_print );
 	query.set_pretty_printing( pretty_print );
 	transaction.set_pretty_printing( pretty_print );
-    
-    bool allow_quit_command = settings( ).get<bool>( "debug.protocol.enable_quit_command", DEFAULT_PROTOCOL_ENABLE_QUIT_COMMAND );
+	
+	log_requests = settings( ).get<bool>( "debug.log_requests", DEFAULT_DEBUG_LOG_REQUESTS );
+	log_request_filename = settings( ).get<std::string>( "debug.request_file", DEFAULT_DEBUG_REQUEST_FILE );
+	
+	master.set_log_requests( log_requests );
+	other.set_log_requests( log_requests );
+	index.set_log_requests( log_requests );
+	document.set_log_requests( log_requests );
+	query.set_log_requests( log_requests );
+	transaction.set_log_requests( log_requests );
+	
+	bool allow_quit_command = settings( ).get<bool>( "debug.protocol.enable_quit_command", DEFAULT_DEBUG_PROTOCOL_ENABLE_QUIT_COMMAND );
 	other.set_allow_quit_command( allow_quit_command );
 }
 
 strusWebService::~strusWebService( )
 {
-    BOOSTER_DEBUG( PACKAGE ) << "Shutting down strus web service";
+	BOOSTER_DEBUG( PACKAGE ) << "Shutting down strus web service";
+
+	for( std::map<pthread_t, std::ofstream *>::iterator it = log_request_streams.begin( ); it != log_request_streams.end( ); it++ ) {
+		delete it->second;
+	}
 }
 
 StrusIndexContext *strusWebService::getOrCreateStrusContext( const std::string &name )
@@ -215,8 +229,8 @@ std::vector<std::string> strusWebService::getAllTransactionsIdsOfIndex( const st
 	StrusIndexContext *ctx = context->acquire( name );
 	std::vector<std::string> v;
 	if( ctx == 0 ) {
-        return v;
-    }
+		return v;
+	}
 	std::map<std::string, strus::StorageTransactionInterface *>::iterator it;
 	for( it = ctx->trans_map.begin( ); it != ctx->trans_map.end( ); it++ ) {
 		v.push_back( (*it).first );
@@ -421,10 +435,10 @@ void strusWebService::abortRunningTransactions( const std::string &name )
 void strusWebService::abortAllRunningTransactions( )
 {
 	std::vector<std::string> indexes = getAllIndexNames( );
-    
-    for( std::vector<std::string>::const_iterator index = indexes.begin( ); index != indexes.end( ); index++ ) {
-        abortRunningTransactions( *index );
-    }
+	
+	for( std::vector<std::string>::const_iterator index = indexes.begin( ); index != indexes.end( ); index++ ) {
+		abortRunningTransactions( *index );
+	}
 }
 
 std::vector<std::string> strusWebService::getAllIndexNames( )
@@ -437,9 +451,9 @@ std::vector<std::string> strusWebService::getAllIndexNames( )
 	std::vector<std::string> v;
 
 	if( !exists( dir ) ) {
-        return v;
+		return v;
 	}
-        		  
+				  
 	std::copy( boost::filesystem::directory_iterator( storage_base_directory ),
 		boost::filesystem::directory_iterator( ), std::back_inserter( dirs ) );
 
@@ -450,13 +464,36 @@ std::vector<std::string> strusWebService::getAllIndexNames( )
 		}
 		v.push_back( last );
 	}
-    
+	
 	return v;
 }
 
 void strusWebService::raiseTerminationFlag( )
 {
-    srv.shutdown( );
+	srv.shutdown( );
+}
+
+std::ofstream *strusWebService::log_request_stream( )
+{
+// TODO: have booster::thread support for this (or am I missing something?)
+#ifndef _WIN32
+	pthread_t tid = pthread_self( );
+	
+	std::map<pthread_t, std::ofstream *>::iterator it;
+	it = log_request_streams.find( tid );
+	if( it == log_request_streams.end( ) ) {
+		// TODO: boost::filesystem::like paths needed
+		std::ostringstream ss;
+		ss << log_request_filename << "-" << tid;
+		std::ofstream *os = new std::ofstream( ss.str( ).c_str( ), std::ofstream::out | std::ofstream::app );
+		log_request_streams[tid] = os;
+		return os;
+	} else {
+		return it->second;
+	}
+#else
+#error We need pthread identifier on Windows
+#endif
 }
 
 } // namespace apps

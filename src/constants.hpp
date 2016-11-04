@@ -33,9 +33,13 @@ const int LEVELDB_DATABASE_DEFAULT_WRITE_BUFFER_SIZE = 4 << 20;
 // TODO: this should be 1 for Snappy compression
 const bool LEVELDB_DATABASE_DEFAULT_COMPRESSION = true;
 
-const bool DEFAULT_PROTOCOL_PRETTY_PRINT = false;
+const bool DEFAULT_DEBUG_PROTOCOL_PRETTY_PRINT = false;
 
-const bool DEFAULT_PROTOCOL_ENABLE_QUIT_COMMAND = false;
+const bool DEFAULT_DEBUG_LOG_REQUESTS = false;
+
+const std::string DEFAULT_DEBUG_REQUEST_FILE = "log_request";
+
+const bool DEFAULT_DEBUG_PROTOCOL_ENABLE_QUIT_COMMAND = false;
 
 const int DEFAULT_QUERY_FIRST_RANK = 0;
 

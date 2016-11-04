@@ -40,6 +40,8 @@ void other::ping_cmd( )
 {
 	cppcms::json::value j;
 	j["ping"] = "pong";
+
+	log_request( );
 	
 	report_ok( j );
 }
@@ -49,6 +51,8 @@ void other::version_cmd( )
 	cppcms::json::value j;
 	j["version"]["strus"] = STRUS_STORAGE_VERSION_STRING;
 	j["version"]["webservice"] = STRUS_WEB_SERVICE_VERSION_STRING;
+
+	log_request( );
 	
 	report_ok( j );
 }
@@ -62,6 +66,8 @@ void other::config_cmd( )
 		report_error( ERROR_OTHER_CMD_CREATE_QUERY_PROCESSOR, service.getLastStrusError( ) );
 		return;
 	}
+
+	log_request( );
 	
 	ServiceConfiguration config;
 
@@ -119,6 +125,8 @@ void other::quit_cmd( )
 		not_found_404( );
 		return;
 	}
+
+	log_request( );
 	
 	report_ok( j );
 	
