@@ -20,6 +20,14 @@
 
 #include <cppcms/application.h>  
 
+#ifndef _WIN32
+#include <pthread.h>
+#else
+#error Not done for Windows currently
+#endif
+
+#include <fstream>
+
 #include "strusContext.hpp"
 
 #include "strus/queryEvalInterface.hpp"
@@ -34,7 +42,10 @@ class strusWebService : public cppcms::application {
 		std::string storage_base_directory;
 		strus::QueryProcessorInterface *qpi;
 		strus::QueryEvalInterface *qei;
-
+        bool log_requests;
+		std::string log_request_filename;
+        std::map<pthread_t, std::ofstream *> log_request_streams;
+        
 	public:
 		apps::master master;
 		apps::other other;
@@ -78,6 +89,7 @@ class strusWebService : public cppcms::application {
         void abortRunningTransactions( const std::string &name );
         std::vector<std::string> getAllIndexNames( );
         void raiseTerminationFlag( );
+        std::ofstream *log_request_stream( );
 };
 
 } // namespace apps

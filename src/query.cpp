@@ -56,6 +56,8 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		if( !ensure_post( ) ) return;	
 		if( !ensure_json_request( ) ) return;
 	}
+
+	log_request( );
 	
 	struct QueryRequest qry_req; 
 

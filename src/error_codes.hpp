@@ -11,6 +11,10 @@
 #ifndef ERROR_CODES_H
 #define ERROR_CODES_H
 
+// Important note: Do NOT delete entries, barely comment them out!
+// Do not reuse entries, just creating new ones is allowed!
+// This ensures the client error codes remain consistent over time.
+
 const int ERROR_BASE										= 1000;
 
 // generic protocol errors

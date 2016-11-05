@@ -67,6 +67,8 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 	if( !ensure_post( ) ) return;	
 	if( !ensure_json_request( ) ) return;
 
+	log_request( );
+
 	struct DocumentInsertRequest ins_doc;
 	
 	std::pair<void *, size_t> data = request( ).raw_post_data( );
@@ -275,6 +277,8 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 		if( !ensure_json_request( ) ) return;
 	}
 
+	log_request( );
+
 	struct DocumentDeleteRequest del_doc;
 	
 	std::string trans_id = "";
@@ -420,6 +424,8 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 		if( !ensure_post( ) ) return;	
 		if( !ensure_json_request( ) ) return;
 	}
+
+	log_request( );
 	
 	struct DocumentGetRequest get_doc;
 
@@ -629,6 +635,8 @@ void document::exists_cmd( const std::string name, const std::string id, bool do
 		if( !ensure_post( ) ) return;	
 		if( !ensure_json_request( ) ) return;
 	}
+
+	log_request( );
 
 	struct DocumentGetRequest get_doc;
 

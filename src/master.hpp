@@ -20,7 +20,6 @@
 #include <vector>
 #include <string>
 #include <cstdio>
-#include <map>
 
 #include "strus/databaseInterface.hpp"
 #include "strus/storageInterface.hpp"
@@ -34,6 +33,7 @@ class master : public cppcms::application {
 	protected:
 		strusWebService &service;
 		bool protocol_pretty_printing;
+		bool log_requests;
 		strus::DatabaseInterface *dbi;
 		strus::StorageInterface *sti;
 		
@@ -44,6 +44,7 @@ class master : public cppcms::application {
 		bool get_strus_environment( const std::string &name );
 		void close_strus_environment( const std::string &name );
 		void set_pretty_printing( bool enable );
+		void set_log_requests( bool enable );
 
 	protected:
 		void report_ok( );
@@ -52,6 +53,7 @@ class master : public cppcms::application {
 		void not_found_404( );
 		bool ensure_post( );
 		bool ensure_json_request( );
+		void log_request( );
 		void serve_democlient( std::string file_name ); 
 		void redirect_to_democlient( );
 		std::string root( ) const;
