@@ -13,6 +13,7 @@
 #include <string>
 #include <sstream>
 #include <streambuf>
+#include <stdexcept>
 
 #include "curlpp/cURLpp.hpp"
 #include "curlpp/Easy.hpp"
@@ -67,62 +68,67 @@ static int send_request( const std::string &method, const std::string &urlstr, c
 
 int main( int argc, char *argv[] )
 {
-	if( argc != 2 ) {
-		std::cerr << "ERROR: Expecting a filename of a request log." << std::endl;
-		return 1;
-	}
-	
-	std::ifstream is( argv[1] );
-	if( !is.good( ) ) {
-		std::cerr << "ERROR: file '" << argv[1] << "' not openable." << std::endl;
-		return 1;
-	}
-
-	std::string line;
-	unsigned int lineNo = 1;
-	enum {
-		STATE_UNKNOWN,
-		STATE_METHOD,
-		STATE_URL,
-		STATE_DATA
-	} state = STATE_UNKNOWN;
-	std::string method;
-	std::string urlstr;
-	std::string data;
-	while( std::getline( is, line ) ) {
-		switch( state ) {
-			case STATE_UNKNOWN:
-			case STATE_METHOD:
-				if( line == "GET" || line == "POST" ) {
-					state = STATE_URL;
-					method = line;
-				} else {
-					std::cerr << "ERROR: expecting GET or POST" << std::endl;
-					return 1;
-				}
-				break;
-			
-			case STATE_URL:
-				urlstr = line;
-				state = STATE_DATA;
-				break;
-			
-			case STATE_DATA:
-				if( line == "GET" || line == "POST" ) {
-					send_request( method, urlstr, data );
-					state = STATE_URL;
-					data.clear( );
-				} else {
-					data.append( line );
-				}
-				break;
+	try {
+		if( argc != 2 ) {
+			std::cerr << "ERROR: Expecting a filename of a request log." << std::endl;
+			return 1;
 		}
-		lineNo++;
-	}
-	if( state == STATE_DATA ) {
-		send_request( method, urlstr, data );
-	}
+		
+		std::ifstream is( argv[1] );
+		if( !is.good( ) ) {
+			std::cerr << "ERROR: file '" << argv[1] << "' not openable." << std::endl;
+			return 1;
+		}
+
+		std::string line;
+		unsigned int lineNo = 1;
+		enum {
+			STATE_UNKNOWN,
+			STATE_METHOD,
+			STATE_URL,
+			STATE_DATA
+		} state = STATE_UNKNOWN;
+		std::string method;
+		std::string urlstr;
+		std::string data;
+		while( std::getline( is, line ) ) {
+			switch( state ) {
+				case STATE_UNKNOWN:
+				case STATE_METHOD:
+					if( line == "GET" || line == "POST" ) {
+						state = STATE_URL;
+						method = line;
+					} else {
+						std::cerr << "ERROR: expecting GET or POST" << std::endl;
+						return 1;
+					}
+					break;
+				
+				case STATE_URL:
+					urlstr = line;
+					state = STATE_DATA;
+					break;
+				
+				case STATE_DATA:
+					if( line == "GET" || line == "POST" ) {
+						send_request( method, urlstr, data );
+						state = STATE_URL;
+						data.clear( );
+					} else {
+						data.append( line );
+					}
+					break;
+			}
+			lineNo++;
+		}
+		if( state == STATE_DATA ) {
+			send_request( method, urlstr, data );
+		}
 	
-	return 0;
-	
+		return 0;
+		
+	} catch( std::exception &e ) {
+		std::cerr << "ERROR: " << e.what( ) << std::endl;
+		return 1;
+	}
 }
