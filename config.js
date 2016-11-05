@@ -55,8 +55,8 @@
 	},
 	
 	"debug" : {
-		"log_requests" : true,
-		"request_file" : "./requests.log",
+		//~ "log_requests" : true,
+		//~ "request_file" : "./requests.log",
 		"protocol" : {
 			//~ "pretty_print" : true,
 			//~ "enable_quit_command" : true

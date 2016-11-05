@@ -37,6 +37,7 @@ dist/redhat/struswebservice.spec
 strusWebService
 tests/curlJsonTester
 tests/queryStructTester
+tests/curlFeeder
 
 # results of the test program
 tests/*.res

@@ -10,13 +10,16 @@ link_directories(
 	"${strus_LIBRARY_DIRS}"
 )
 
+add_executable( queryStructTester queryStructTester.cpp)
+target_link_libraries( queryStructTester ${LIBCPPCMS_LIBRARY} ${LIBBOOSTER_LIBRARY})
+
 add_executable( curlJsonTester curlJsonTester.cpp)
 target_link_libraries( curlJsonTester "${CURL_LIBRARIES}" ${LIBCPPCMS_LIBRARY} ${LIBBOOSTER_LIBRARY} curlpp_static)
 
-# low-level tests
+add_executable( curlFeeder curlFeeder.cpp)
+target_link_libraries( curlFeeder "${CURL_LIBRARIES}" ${LIBCPPCMS_LIBRARY} ${LIBBOOSTER_LIBRARY} curlpp_static)
 
-add_executable( queryStructTester queryStructTester.cpp)
-target_link_libraries( queryStructTester ${LIBCPPCMS_LIBRARY} ${LIBBOOSTER_LIBRARY})
+# low-level tests
 
 add_test( NAME query_struct COMMAND queryStructTester )
 
