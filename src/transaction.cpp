@@ -75,18 +75,23 @@ void transaction::begin_cmd( const std::string name, const std::string tid, bool
 			return;
 		}
 	}
+
+	service.lockIndex( name );
 	
 	if( !get_strus_environment( name ) ) {
+		service.unlockIndex( name );
 		return;
 	}
 
 	if( !dbi->exists( service.getConfigString( name ) ) ) {
+		service.unlockIndex( name );
 		report_error( ERROR_TRANSACTION_BEGIN_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
 		return;
 	}
 
 	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
 	if( !storage ) {
+		service.unlockIndex( name );
 		report_error( ERROR_TRANSACTION_BEGIN_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
@@ -105,9 +110,12 @@ void transaction::begin_cmd( const std::string name, const std::string tid, bool
 
 	strus::StorageTransactionInterface *transaction = service.createStorageTransactionInterface( name, trans_id );
 	if( !transaction ) {
+		service.unlockIndex( name );
 		report_error( ERROR_TRANSACTION_BEGIN_CMD_CREATE_STORAGE_TRANSACTION, service.getLastStrusError( ) );
 		return;
 	}
+
+	service.unlockIndex( name );
 
 	BOOSTER_INFO( PACKAGE ) << "begin(" << name << ", " << trans_id << ")";
 	
@@ -158,17 +166,22 @@ void transaction::commit_cmd( const std::string name, const std::string tid, boo
 		}
 	}
 	
+	service.lockIndex( name );
+
 	if( !get_strus_environment( name ) ) {
+		service.unlockIndex( name );
 		return;
 	}
 
 	if( !dbi->exists( service.getConfigString( name ) ) ) {
+		service.unlockIndex( name );
 		report_error( ERROR_TRANSACTION_COMMIT_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
 		return;
 	}
 
 	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
 	if( !storage ) {
+		service.unlockIndex( name );
 		report_error( ERROR_TRANSACTION_COMMIT_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
@@ -179,6 +192,7 @@ void transaction::commit_cmd( const std::string name, const std::string tid, boo
 		trans_id = tid;
 	} else {
 		if( trans_commit.id.compare( "" ) == 0 ) {
+			service.unlockIndex( name );
 			report_error( ERROR_TRANSACTION_COMMIT_CMD_DOCID_REQUIRED, "transaction id 'id' must be part of the JSON payload as field of 'transaction'" );
 			return;
 		}
@@ -187,6 +201,7 @@ void transaction::commit_cmd( const std::string name, const std::string tid, boo
 
 	strus::StorageTransactionInterface *transaction = service.getStorageTransactionInterface( name, trans_id );
 	if( !transaction ) {
+		service.unlockIndex( name );
 		report_error( ERROR_TRANSACTION_COMMIT_CMD_GET_STORAGE_TRANSACTION, service.getLastStrusError( ) );
 		return;
 	}
@@ -194,6 +209,8 @@ void transaction::commit_cmd( const std::string name, const std::string tid, boo
 	transaction->commit( );
 
 	service.deleteStorageTransactionInterface( name, trans_id );
+
+	service.unlockIndex( name );
 
 	cppcms::json::value j;
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
@@ -254,18 +271,23 @@ void transaction::rollback_cmd( const std::string name, const std::string tid, b
 			return;
 		}
 	}
+
+	service.lockIndex( name );
 	
 	if( !get_strus_environment( name ) ) {
+		service.unlockIndex( name );
 		return;
 	}
 
 	if( !dbi->exists( service.getConfigString( name ) ) ) {
+		service.unlockIndex( name );
 		report_error( ERROR_TRANSACTION_ROLLBACK_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
 		return;
 	}
 
 	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
 	if( !storage ) {
+		service.unlockIndex( name );
 		report_error( ERROR_TRANSACTION_ROLLBACK_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
@@ -276,6 +298,7 @@ void transaction::rollback_cmd( const std::string name, const std::string tid, b
 		trans_id = tid;
 	} else {
 		if( trans_rollback.id.compare( "" ) == 0 ) {
+			service.unlockIndex( name );
 			report_error( ERROR_TRANSACTION_ROLLBACK_CMD_DOCID_REQUIRED, "transaction id 'id' must be part of the JSON payload as field of 'transaction'" );
 			return;
 		}
@@ -284,11 +307,14 @@ void transaction::rollback_cmd( const std::string name, const std::string tid, b
 
 	strus::StorageTransactionInterface *transaction = service.getStorageTransactionInterface( name, trans_id );
 	if( !transaction ) {
+		service.unlockIndex( name );
 		report_error( ERROR_TRANSACTION_ROLLBACK_CMD_GET_STORAGE_TRANSACTION, service.getLastStrusError( ) );
 		return;
 	}
 
 	transaction->rollback( );
+
+	service.unlockIndex( name );
 
 	service.deleteStorageTransactionInterface( name, trans_id );
 	
@@ -314,11 +340,14 @@ void transaction::list_cmd( const std::string name )
 
 	log_request( );
 
+	service.lockIndex( name );
+
 	if( !get_strus_environment( name ) ) {
 		return;
 	}
 
 	if( !dbi->exists( service.getConfigString( name ) ) ) {
+		service.unlockIndex( name );
 		report_error( ERROR_TRANSACTION_LIST_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
 		return;
 	}
@@ -330,6 +359,8 @@ void transaction::list_cmd( const std::string name )
 	j["transactions"] = v;
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
+
+	service.unlockIndex( name );
 
 	BOOSTER_INFO( PACKAGE ) << "list_transactions(" << execution_time << "s)";
 	std::ostringstream ss;

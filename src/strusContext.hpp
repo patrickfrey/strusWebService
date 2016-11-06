@@ -46,6 +46,7 @@ struct StrusIndexContext {
 	strus::MetaDataReaderInterface *mdri;
 	strus::AttributeReaderInterface *atri;
 	std::map<std::string, strus::StorageTransactionInterface *> trans_map;
+	booster::mutex mutex;
 
 	public:
 		StrusIndexContext( ) : name( "" ), config( "" ),
@@ -68,6 +69,16 @@ struct StrusIndexContext {
 			if( dbi != 0 ) delete dbi;
 		}
 		
+		void lock( )
+		{
+			mutex.lock( );
+		}
+		
+		void unlock( )
+		{
+			mutex.unlock( );
+		}
+		
 	private:
 		void abortAllRunningTransactions( )
 		{
@@ -82,7 +93,7 @@ struct StrusIndexContext {
 class StrusContext {
 	private:
 		std::map<std::string, StrusIndexContext *> context_map;
-		booster::mutex mutex;
+		booster::mutex map_mutex;
 		std::vector<const strus::ModuleEntryPoint *> modules;
 
 	public:
@@ -94,6 +105,9 @@ class StrusContext {
 
 		StrusIndexContext *acquire( const std::string &name );
 		void release( const std::string &name, StrusIndexContext *ctx );
+
+        void lockIndex( const std::string &name );
+        void unlockIndex( const std::string &name );
 
 		void registerModules( strus::QueryProcessorInterface *qpi ) const;
 };

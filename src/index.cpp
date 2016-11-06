@@ -196,29 +196,36 @@ void index::delete_cmd( const std::string name )
 
 	log_request( );
 
+	service.lockIndex( name );
+	
 	// close all handles, we are going to delete the index now
 	// TODO: what if in parallel other clients access it? locking with timeout or
 	// error to this worker's client?
 	close_strus_environment( name );
-
+	
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
 
 	std::string config = service.getStorageConfig( storage_base_directory, combined_params, name );
 
 	if( !get_strus_environment( name ) ) {
+		service.unlockIndex( name );
 		return;
 	}
 
 	if( !dbi->exists( config ) ) {
+	service.unlockIndex( name );
 		report_error( ERROR_INDEX_DESTROY_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
 		return;
 	}
 
 	if( !dbi->destroyDatabase( config ) ) {
+		service.unlockIndex( name );
 		report_error( ERROR_INDEX_DESTROY_CMD_DESTROY_DATABASE, service.getLastStrusError( ) );
 		return;
 	}
+
+	service.unlockIndex( name );
 
 	cppcms::json::value j;
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
@@ -250,34 +257,41 @@ void index::config_cmd( const std::string name )
 
 	log_request( );
 
+	service.lockIndex( name );
+
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
 
 	std::string configStr = service.getStorageConfig( storage_base_directory, combined_params, name );
 
 	if( !get_strus_environment( name ) ) {
+		service.unlockIndex( name );
 		return;
 	}
 
 	if( !dbi->exists( configStr ) ) {
+		service.unlockIndex( name );
 		report_error( ERROR_INDEX_CONFIG_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
 		return;
 	}
 
 	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
 	if( !storage ) {
+		service.unlockIndex( name );
 		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
 
 	strus::MetaDataReaderInterface *metadata = service.getMetaDataReaderInterface( name );
 	if( !metadata ) {
+		service.unlockIndex( name );
 		report_error( ERROR_INDEX_CONFIG_CMD_CREATE_METADATA_READER, service.getLastStrusError( ) );
 		return;
 	}
 
 	strus::AttributeReaderInterface *attributeReader = service.getAttributeReaderInterface( name );
 	if( !attributeReader ) {
+		service.unlockIndex( name );
 		report_error( ERROR_DOCUMENT_GET_CMD_CREATE_ATTRIBUTE_READER, service.getLastStrusError( ) );
 		return;
 	}
@@ -290,6 +304,7 @@ void index::config_cmd( const std::string name )
 		config.types.insert( config.types.end( ), termTypes.begin( ), termTypes.end( ) );
 		termTypes = valItr->fetchValues( FEATURE_ITERATOR_BATCH_SIZE );
 	}
+	delete valItr;
 
 	for( strus::Index it = 0; it < metadata->nofElements( ); it++ ) {
 		struct MetadataDefiniton meta;
@@ -302,6 +317,8 @@ void index::config_cmd( const std::string name )
 	std::vector<std::string> attrNames = attributeReader->getAttributeNames( );
 	std::sort( attrNames.begin( ), attrNames.end( ) );
 	config.attributes = attrNames;
+
+	service.unlockIndex( name );
 
 	cppcms::json::value j;
 	j["config"] = config;
@@ -326,28 +343,35 @@ void index::stats_cmd( const std::string name )
 
 	log_request( );
 
+	service.lockIndex( name );
+
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
 
 	std::string configStr = service.getStorageConfig( storage_base_directory, combined_params, name );
 
 	if( !get_strus_environment( name ) ) {
+		service.unlockIndex( name );
 		return;
 	}
 
 	if( !dbi->exists( configStr ) ) {
+		service.unlockIndex( name );
 		report_error( ERROR_INDEX_STATS_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
 		return;
 	}
 
 	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
 	if( !storage ) {
+		service.unlockIndex( name );
 		report_error( ERROR_INDEX_STATS_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
 
 	struct StorageStatistics stats;
 	stats.nof_docs = storage->nofDocumentsInserted( );
+
+	service.unlockIndex( name );
 
 	cppcms::json::value j;
 	j["stats"] = stats;
@@ -411,10 +435,13 @@ void index::exists_cmd( const std::string name )
 
 	log_request( );
 
+	service.lockIndex( name );
+
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
 
 	if( !get_strus_environment( name ) ) {
+		service.unlockIndex( name );
 		return;
 	}
 
@@ -424,6 +451,8 @@ void index::exists_cmd( const std::string name )
 	j["exists"] = dbi->exists( config );
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
+
+	service.unlockIndex( name );
 
 	BOOSTER_INFO( PACKAGE ) << "exists_index(" << execution_time << "s)";
 	std::ostringstream ss;
@@ -443,25 +472,32 @@ void index::open_cmd( const std::string name )
 
 	log_request( );
 
+	service.lockIndex( name );
+
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
 
 	if( !get_strus_environment( name ) ) {
+		service.unlockIndex( name );
 		return;
 	}
 
 	std::string config = service.getStorageConfig( storage_base_directory, combined_params, name );
 
 	if( !dbi->exists( config ) ) {
+		service.unlockIndex( name );
 		report_error( ERROR_INDEX_OPEN_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
 		return;
 	}
 
 	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
 	if( !storage ) {
+		service.unlockIndex( name );
 		report_error( ERROR_INDEX_OPEN_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
+
+	service.unlockIndex( name );
 
 	cppcms::json::value j;
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
@@ -485,7 +521,10 @@ void index::close_cmd( const std::string name )
 
 	log_request( );
 
+	service.lockIndex( name );
+
 	if( !get_strus_environment( name ) ) {
+		service.unlockIndex( name );
 		return;
 	}
 
@@ -493,17 +532,21 @@ void index::close_cmd( const std::string name )
 	combined_params = default_create_parameters;
 
 	if( !get_strus_environment( name ) ) {
+		service.unlockIndex( name );
 		return;
 	}
 
 	std::string config = service.getStorageConfig( storage_base_directory, combined_params, name );
 
 	if( !dbi->exists( config ) ) {
+		service.unlockIndex( name );
 		report_error( ERROR_INDEX_CLOSE_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
 		return;
 	}
 
 	close_strus_environment( name );
+
+	service.unlockIndex( name );
 
 	cppcms::json::value j;
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
@@ -541,6 +584,9 @@ void index::swap_cmd( const std::string name1, const std::string name2 )
 		return;
 	}
 
+	service.lockIndex( name1 );
+	service.lockIndex( name2 );
+
 	close_strus_environment( name1 );
 
 	if( !get_strus_environment( name1 ) ) {
@@ -572,6 +618,9 @@ void index::swap_cmd( const std::string name1, const std::string name2 )
 	if( err.value( ) != boost::system::errc::success ) {
 		report_error( ERROR_INDEX_SWAP_CMD_RENAME_ERROR, err.message( ) );
 	}
+
+	service.unlockIndex( name2 );
+	service.unlockIndex( name1 );
 
 	cppcms::json::value j;
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
