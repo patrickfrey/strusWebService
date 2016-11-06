@@ -33,8 +33,8 @@
 		"port" : 8080,
 		// setting anything but 0 or 1 is illegal currently!
 		"worker_processes" : 0,
-		"worker_threads" : 8,
-		"applications_pool_size" : 8
+		"worker_threads" : 4,
+		"applications_pool_size" : 4
 	},
 	
 	"security" : {
