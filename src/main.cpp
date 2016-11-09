@@ -92,7 +92,7 @@ int main( int argc, char *argv[] )
 				booster::log::logger::instance( ).set_default_level( booster::log::logger::string_to_level( "debug" ) );
 			}
 		
-			BOOSTER_INFO( PACKAGE ) << "Restarting strus web service..";
+			BOOSTER_INFO( PACKAGE ) << "Starting strus web service..";
 
 			unsigned int nof_threads;
 			if( srv->procs_no( ) == 0 ) {
@@ -102,7 +102,7 @@ int main( int argc, char *argv[] )
 			}
 			BOOSTER_DEBUG( PACKAGE ) << "Using '" << nof_threads << "' threads for strus logging buffers";
 			
-			strusContext = new StrusContext( nof_threads,
+			strusContext = new StrusContext( nof_threads + 1,
 				srv->settings( ).get<std::string>( "extensions.directory" ), 
 				srv->settings( ).get<std::vector<std::string> >( "extensions.modules" ) );
 			
@@ -118,23 +118,31 @@ int main( int argc, char *argv[] )
 				terminate = true;
 			}
 
-			srv->shutdown( );
-			delete srv;
-			srv = 0;
-
-			delete strusContext;
-			strusContext = 0;
-						
-		} catch( std::exception const &e ) {
-			if( strusContext != 0 ) {
-				delete strusContext;
+			try {
+				srv->shutdown( );
+				delete srv;
+				srv = 0;
+			} catch( std::exception &e ) {
+				srv = 0;
 			}
+			
+			try {
+				delete strusContext;
+				strusContext = 0;
+			} catch( std::exception &e ) {
+				strusContext = 0;
+			}
+						
+		} catch( std::exception &e ) {
 			if( srv != 0 ) {
 				BOOSTER_ERROR( PACKAGE ) << e.what() ;
 				srv->shutdown( );
 				delete srv;
 			} else {
 				std::cerr << "FATAL: Fatal error on startup: " << e.what( ) << std::endl;
+			}
+			if( strusContext != 0 ) {
+				delete strusContext;
 			}
 			return 1;
 		}

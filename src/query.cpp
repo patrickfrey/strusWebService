@@ -97,30 +97,37 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		}
 		BOOSTER_DEBUG( PACKAGE ) << "query_request(" << name << "): " << ss.str( );
 	}
+
+	service.lockIndex( name, true );
 		
 	if( !get_strus_environment( name ) ) {
+		service.unlockIndex( name );
 		return;
 	}
 
 	if( !dbi->exists( service.getConfigString( name ) ) ) {
+		service.unlockIndex( name );
 		report_error( ERROR_QUERY_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
 		return;
 	}
 
 	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
 	if( !storage ) {
+		service.unlockIndex( name );
 		report_error( ERROR_QUERY_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
 
 	strus::QueryEvalInterface *query_eval = service.getQueryEvalInterface( );
 	if( !query_eval ) {
+		service.unlockIndex( name );
 		report_error( ERROR_QUERY_CMD_CREATE_QUERY_EVAL_INTERFACE, service.getLastStrusError( ) );
 		return;
 	}
 
 	strus::QueryProcessorInterface *query_processor = service.getQueryProcessorInterface( );
 	if( !query_processor ) {
+		service.unlockIndex( name );
 		report_error( ERROR_QUERY_CMD_CREATE_QUERY_PROCESSOR, service.getLastStrusError( ) );
 		service.deleteQueryEvalInterface( );
 		return;
@@ -139,6 +146,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 			report_error( ERROR_QUERY_CMD_GET_WEIGHTING_FUNCTION, service.getLastStrusError( ) );
 			service.deleteQueryEvalInterface( );
 			service.deleteQueryProcessorInterface( );
+			service.unlockIndex( name );
 			return;
 		}
 		
@@ -170,6 +178,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 					report_error( ERROR_QUERY_CMD_GET_WEIGHTING_FUNCTION_PARAMETER, "Unknown type of weighting function parameter, internal error, check query object parsing!" );
 					service.deleteQueryEvalInterface( );
 					service.deleteQueryProcessorInterface( );
+					service.unlockIndex( name );
 					return;
 			}
 		}
@@ -185,6 +194,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 			report_error( ERROR_QUERY_CMD_GET_SUMMARIZER_FUNCTION_INSTANCE, service.getLastStrusError( ) );
 			service.deleteQueryEvalInterface( );
 			service.deleteQueryProcessorInterface( );
+			service.unlockIndex( name );
 			return;
 		}
 
@@ -202,6 +212,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 			report_error( ERROR_QUERY_CMD_GET_SUMMARIZER_FUNCTION_INSTANCE, service.getLastStrusError( ) );
 			service.deleteQueryEvalInterface( );
 			service.deleteQueryProcessorInterface( );
+			service.unlockIndex( name );
 			return;
 		}
 
@@ -223,6 +234,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 					report_error( ERROR_QUERY_CMD_GET_WEIGHTING_FUNCTION_PARAMETER, "Unknown type of weighting function parameter, internal error, check query object parsing!" );
 					service.deleteQueryEvalInterface( );
 					service.deleteQueryProcessorInterface( );
+					service.unlockIndex( name );
 					return;
 			}			
 		}
@@ -250,6 +262,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		report_error( ERROR_QUERY_CMD_CREATE_QUERY, service.getLastStrusError( ) );
 		service.deleteQueryEvalInterface( );
 		service.deleteQueryProcessorInterface( );
+		service.unlockIndex( name );
 		return;
 	}
 	
@@ -280,6 +293,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		delete query;
 		service.deleteQueryEvalInterface( );
 		service.deleteQueryProcessorInterface( );
+		service.unlockIndex( name );
 		return;
 	}
 
@@ -308,6 +322,8 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 	delete query;
 	service.deleteQueryEvalInterface( );
 	service.deleteQueryProcessorInterface( );
+
+	service.unlockIndex( name );
 
 	cppcms::json::value j;
 	j["ranklist"] = response;

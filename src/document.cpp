@@ -125,17 +125,22 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 		BOOSTER_DEBUG( PACKAGE ) << "insert(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << "): " << ss.str( );
 	}
 
+	service.lockIndex( name, false );
+
 	if( !get_strus_environment( name ) ) {
+		service.unlockIndex( name );
 		return;
 	}
 
 	if( !dbi->exists( service.getConfigString( name ) ) ) {
+		service.unlockIndex( name );
 		report_error( ERROR_DOCUMENT_INSERT_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
 		return;
 	}
 
 	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
 	if( !storage ) {
+		service.unlockIndex( name );
 		report_error( ERROR_DOCUMENT_INSERT_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
@@ -144,12 +149,14 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 	if( trans_id == "" ) {
 		transaction = service.createStorageTransactionInterface( name );
 		if( !transaction ) {
+			service.unlockIndex( name );
 			report_error( ERROR_DOCUMENT_INSERT_CMD_CREATE_STORAGE_TRANSACTION, service.getLastStrusError( ) );
 			return;
 		}
 	} else {
 		transaction = service.getStorageTransactionInterface( name, trans_id );
 		if( !transaction ) {
+			service.unlockIndex( name );
 			report_error( ERROR_DOCUMENT_INSERT_CMD_GET_STORAGE_TRANSACTION, "Referencing illegal transaction, no begin transaction seen before" );
 			return;
 		}
@@ -203,6 +210,7 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 		std::ostringstream ss;
 		ss << booster::locale::format( "Token positions of document {1} are out or range (document too big, only {2} token positions were assigned, maximum allowed position is %{3})" )
 			% docid % maxPos % strus::Constants::storage_max_position_info( );
+		service.unlockIndex( name );
 		// we cannot insert a document this way, so discard it
 		delete doc;
 		// TODO: warning or error?
@@ -219,6 +227,8 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 		transaction->commit( );
 		delete transaction;
 	}
+
+	service.unlockIndex( name );
 
 	delete doc;
 
@@ -335,23 +345,29 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 		BOOSTER_DEBUG( PACKAGE ) << "delete(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << "): " << ss.str( );
 	}
 
+	service.lockIndex( name, false );
+
 	if( !get_strus_environment( name ) ) {
+		service.unlockIndex( name );
 		return;
 	}
 
 	if( !dbi->exists( service.getConfigString( name ) ) ) {
+		service.unlockIndex( name );
 		report_error( ERROR_DOCUMENT_DELETE_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
 		return;
 	}
 
 	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
 	if( !storage ) {
+		service.unlockIndex( name );
 		report_error( ERROR_DOCUMENT_DELETE_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
 
 	strus::Index docno = storage->documentNumber( docid );
 	if( docno == 0 ) {
+		service.unlockIndex( name );
 		report_error( ERROR_DOCUMENT_DELETE_CMD_NO_SUCH_DOCUMENT, "Document to delete doesn't exist" );
 		return;
 	}
@@ -360,12 +376,14 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 	if( trans_id == "" ) {
 		transaction = service.createStorageTransactionInterface( name );
 		if( !transaction ) {
+			service.unlockIndex( name );
 			report_error( ERROR_DOCUMENT_DELETE_CMD_CREATE_STORAGE_TRANSACTION, service.getLastStrusError( ) );
 			return;
 		}
 	} else {
 		transaction = service.getStorageTransactionInterface( name, trans_id );
 		if( !transaction ) {
+			service.unlockIndex( name );
 			report_error( ERROR_DOCUMENT_DELETE_CMD_CREATE_STORAGE_TRANSACTION, "Referencing illegal transaction, no begin transaction seen before" );
 			return;
 		}
@@ -378,6 +396,8 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 		transaction->commit( );
 		delete transaction;
 	}
+
+	service.unlockIndex( name );
 	
 	cppcms::json::value j;
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
@@ -483,17 +503,22 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 		BOOSTER_DEBUG( PACKAGE ) << "get(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << name << "): " << ss.str( );
 	}
 
+	service.lockIndex( name, false );
+
 	if( !get_strus_environment( name ) ) {
+		service.unlockIndex( name );
 		return;
 	}
 
 	if( !dbi->exists( service.getConfigString( name ) ) ) {
+		service.unlockIndex( name );
 		report_error( ERROR_DOCUMENT_GET_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
 		return;
 	}
 
 	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
 	if( !storage ) {
+		service.unlockIndex( name );
 		report_error( ERROR_DOCUMENT_GET_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
@@ -502,6 +527,7 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 	answer.docno = storage->documentNumber( docid );
 	
 	if( answer.docno == 0 ) {
+		service.unlockIndex( name );
 		report_error( ERROR_DOCUMENT_GET_CMD_NO_SUCH_DOCUMENT, "Document doesn't exist" );
 		return;
 	}
@@ -509,6 +535,7 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 	// attributes
 	strus::AttributeReaderInterface *attributeReader = service.getAttributeReaderInterface( name );
 	if( !attributeReader ) {
+		service.unlockIndex( name );
 		report_error( ERROR_DOCUMENT_GET_CMD_CREATE_ATTRIBUTE_READER, service.getLastStrusError( ) );
 		return;
 	}
@@ -555,6 +582,7 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 		termTypes.insert( termTypes.end( ), arr.begin( ), arr.end( ) );
 		arr = valItr->fetchValues( FEATURE_ITERATOR_BATCH_SIZE );
 	}
+	delete valItr;
 
 	// iterate forward index for every feature type
 	for( std::vector<std::string>::const_iterator tit = termTypes.begin( ); tit != termTypes.end( ); tit++ ) {
@@ -585,6 +613,7 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 			strus::PostingIteratorInterface *pit = storage->createTermPostingIterator( *tit, value );
 			if( pit->skipDoc( answer.docno ) != answer.docno ) {
 				delete fit;
+				delete pit;
 				continue;
 			}
 			strus::Index pos = 0;
@@ -593,10 +622,13 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 				feature = boost::make_tuple( *tit, value, pos );	
 				answer.search.push_back( feature );
 			}
+			delete pit;
 		}
 		delete fit;
 	}
 	std::sort( answer.search.begin( ), answer.search.end( ), FeatureLessThan( ) );
+
+	service.unlockIndex( name );
 
 	// TODO: how to use transactions here?
 	
@@ -661,18 +693,23 @@ void document::exists_cmd( const std::string name, const std::string id, bool do
 			return;
 		}
 	}
+
+	service.lockIndex( name, false );
 	
 	if( !get_strus_environment( name ) ) {
+		service.unlockIndex( name );
 		return;
 	}
 
 	if( !dbi->exists( service.getConfigString( name ) ) ) {
 		report_error( ERROR_DOCUMENT_EXISTS_CMD_NO_SUCH_DATABASE, "No search index with that name exists" );
+		service.unlockIndex( name );
 		return;
 	}
 
 	strus::StorageClientInterface *storage = service.getStorageClientInterface( name );
 	if( !storage ) {
+		service.unlockIndex( name );
 		report_error( ERROR_DOCUMENT_EXISTS_CMD_CREATE_STORAGE_CLIENT, service.getLastStrusError( ) );
 		return;
 	}
@@ -683,6 +720,7 @@ void document::exists_cmd( const std::string name, const std::string id, bool do
 		docid = id;
 	} else {
 		if( get_doc.docid.compare( "" ) == 0 ) {
+			service.unlockIndex( name );
 			report_error( ERROR_DOCUMENT_DELETE_CMD_DOCID_REQUIRED, "docid must be part of the JSON payload as field of 'doc'" );
 			return;
 		}
@@ -692,6 +730,8 @@ void document::exists_cmd( const std::string name, const std::string id, bool do
 	// translate docid to internal docno
 	strus::Index docno = storage->documentNumber( docid );
 	bool exists = ( docno > 0 );
+
+	service.unlockIndex( name );
 			
 	cppcms::json::value j;
 	j["exists"] = exists;
