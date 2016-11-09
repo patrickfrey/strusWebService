@@ -582,6 +582,7 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 		termTypes.insert( termTypes.end( ), arr.begin( ), arr.end( ) );
 		arr = valItr->fetchValues( FEATURE_ITERATOR_BATCH_SIZE );
 	}
+	delete valItr;
 
 	// iterate forward index for every feature type
 	for( std::vector<std::string>::const_iterator tit = termTypes.begin( ); tit != termTypes.end( ); tit++ ) {
@@ -612,6 +613,7 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 			strus::PostingIteratorInterface *pit = storage->createTermPostingIterator( *tit, value );
 			if( pit->skipDoc( answer.docno ) != answer.docno ) {
 				delete fit;
+				delete pit;
 				continue;
 			}
 			strus::Index pos = 0;
@@ -620,6 +622,7 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 				feature = boost::make_tuple( *tit, value, pos );	
 				answer.search.push_back( feature );
 			}
+			delete pit;
 		}
 		delete fit;
 	}
