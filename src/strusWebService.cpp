@@ -496,9 +496,9 @@ std::ofstream *strusWebService::log_request_stream( )
 #endif
 }
 
-void strusWebService::lockIndex( const std::string &name )
+void strusWebService::lockIndex( const std::string &name, bool exclusive )
 {
-	context->lockIndex( name );
+	context->lockIndex( name, exclusive );
 }
 
 void strusWebService::unlockIndex( const std::string &name )

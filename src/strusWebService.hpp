@@ -90,7 +90,7 @@ class strusWebService : public cppcms::application {
         std::vector<std::string> getAllIndexNames( );
         void raiseTerminationFlag( );
         std::ofstream *log_request_stream( );
-        void lockIndex( const std::string &name );
+        void lockIndex( const std::string &name, bool exclusive );
         void unlockIndex( const std::string &name );
 };
 

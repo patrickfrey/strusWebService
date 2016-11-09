@@ -98,7 +98,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 		BOOSTER_DEBUG( PACKAGE ) << "query_request(" << name << "): " << ss.str( );
 	}
 
-	service.lockIndex( name );
+	service.lockIndex( name, true );
 		
 	if( !get_strus_environment( name ) ) {
 		service.unlockIndex( name );

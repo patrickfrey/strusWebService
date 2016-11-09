@@ -125,7 +125,7 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 		BOOSTER_DEBUG( PACKAGE ) << "insert(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << "): " << ss.str( );
 	}
 
-	service.lockIndex( name );
+	service.lockIndex( name, false );
 
 	if( !get_strus_environment( name ) ) {
 		service.unlockIndex( name );
@@ -345,7 +345,7 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 		BOOSTER_DEBUG( PACKAGE ) << "delete(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << "): " << ss.str( );
 	}
 
-	service.lockIndex( name );
+	service.lockIndex( name, false );
 
 	if( !get_strus_environment( name ) ) {
 		service.unlockIndex( name );
@@ -503,7 +503,7 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 		BOOSTER_DEBUG( PACKAGE ) << "get(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << name << "): " << ss.str( );
 	}
 
-	service.lockIndex( name );
+	service.lockIndex( name, false );
 
 	if( !get_strus_environment( name ) ) {
 		service.unlockIndex( name );
@@ -694,7 +694,7 @@ void document::exists_cmd( const std::string name, const std::string id, bool do
 		}
 	}
 
-	service.lockIndex( name );
+	service.lockIndex( name, false );
 	
 	if( !get_strus_environment( name ) ) {
 		service.unlockIndex( name );

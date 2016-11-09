@@ -188,13 +188,17 @@ void StrusContext::release( const std::string &name, StrusIndexContext *ctx )
 	//~ map_mutex.unlock( );
 }
 
-void StrusContext::lockIndex( const std::string &name )
+void StrusContext::lockIndex( const std::string &name, bool exclusive )
 {
 	//~ map_mutex.lock( );
 	std::map<std::string, StrusIndexContext *>::iterator it;
 	it = context_map.find( name );
 	if( it != context_map.end( ) ) {
-		it->second->lock( );
+		if( exclusive ) {
+			it->second->write_lock( );
+		} else {
+			it->second->read_lock( );
+		}
 	}
 	//~ map_mutex.unlock( );
 }

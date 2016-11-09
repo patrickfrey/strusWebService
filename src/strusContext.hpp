@@ -30,6 +30,8 @@
 #include <booster/thread.h>
 #include <booster/log.h>
 
+#include <boost/thread.hpp>
+
 #include "strus/lib/error.hpp"
 #include "strus/errorBufferInterface.hpp"
 
@@ -46,7 +48,8 @@ struct StrusIndexContext {
 	strus::MetaDataReaderInterface *mdri;
 	strus::AttributeReaderInterface *atri;
 	std::map<std::string, strus::StorageTransactionInterface *> trans_map;
-	booster::mutex mutex;
+	boost::shared_mutex mutex;
+	bool exclusive;
 
 	public:
 		StrusIndexContext( ) : name( "" ), config( "" ),
@@ -69,14 +72,25 @@ struct StrusIndexContext {
 			if( dbi != 0 ) delete dbi;
 		}
 		
-		void lock( )
+		void read_lock( )
 		{
+			exclusive = false;
+			mutex.lock_shared( );
+		}
+		
+		void write_lock( )
+		{
+			exclusive = true;
 			mutex.lock( );
 		}
 		
 		void unlock( )
 		{
-			mutex.unlock( );
+			if( exclusive ) {
+				mutex.unlock( );
+			} else {
+				mutex.unlock_shared( );
+			}
 		}
 		
 	private:
@@ -93,7 +107,7 @@ struct StrusIndexContext {
 class StrusContext {
 	private:
 		std::map<std::string, StrusIndexContext *> context_map;
-		booster::mutex map_mutex;
+		//~ booster::mutex map_mutex;
 		std::vector<const strus::ModuleEntryPoint *> modules;
 
 	public:
@@ -106,7 +120,7 @@ class StrusContext {
 		StrusIndexContext *acquire( const std::string &name );
 		void release( const std::string &name, StrusIndexContext *ctx );
 
-        void lockIndex( const std::string &name );
+        void lockIndex( const std::string &name, bool exclusive );
         void unlockIndex( const std::string &name );
 
 		void registerModules( strus::QueryProcessorInterface *qpi ) const;

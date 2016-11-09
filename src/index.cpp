@@ -196,7 +196,7 @@ void index::delete_cmd( const std::string name )
 
 	log_request( );
 
-	service.lockIndex( name );
+	service.lockIndex( name, true );
 	
 	// close all handles, we are going to delete the index now
 	// TODO: what if in parallel other clients access it? locking with timeout or
@@ -257,7 +257,7 @@ void index::config_cmd( const std::string name )
 
 	log_request( );
 
-	service.lockIndex( name );
+	service.lockIndex( name, false );
 
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
@@ -343,7 +343,7 @@ void index::stats_cmd( const std::string name )
 
 	log_request( );
 
-	service.lockIndex( name );
+	service.lockIndex( name, false );
 
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
@@ -435,7 +435,7 @@ void index::exists_cmd( const std::string name )
 
 	log_request( );
 
-	service.lockIndex( name );
+	service.lockIndex( name, false );
 
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
@@ -472,7 +472,7 @@ void index::open_cmd( const std::string name )
 
 	log_request( );
 
-	service.lockIndex( name );
+	service.lockIndex( name, true );
 
 	struct StorageCreateParameters combined_params;
 	combined_params = default_create_parameters;
@@ -521,7 +521,7 @@ void index::close_cmd( const std::string name )
 
 	log_request( );
 
-	service.lockIndex( name );
+	service.lockIndex( name, true );
 
 	if( !get_strus_environment( name ) ) {
 		service.unlockIndex( name );
@@ -584,8 +584,8 @@ void index::swap_cmd( const std::string name1, const std::string name2 )
 		return;
 	}
 
-	service.lockIndex( name1 );
-	service.lockIndex( name2 );
+	service.lockIndex( name1, true );
+	service.lockIndex( name2, true );
 
 	close_strus_environment( name1 );
 

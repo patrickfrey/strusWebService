@@ -76,7 +76,7 @@ void transaction::begin_cmd( const std::string name, const std::string tid, bool
 		}
 	}
 
-	service.lockIndex( name );
+	service.lockIndex( name, false );
 	
 	if( !get_strus_environment( name ) ) {
 		service.unlockIndex( name );
@@ -166,7 +166,7 @@ void transaction::commit_cmd( const std::string name, const std::string tid, boo
 		}
 	}
 	
-	service.lockIndex( name );
+	service.lockIndex( name, false );
 
 	if( !get_strus_environment( name ) ) {
 		service.unlockIndex( name );
@@ -272,7 +272,7 @@ void transaction::rollback_cmd( const std::string name, const std::string tid, b
 		}
 	}
 
-	service.lockIndex( name );
+	service.lockIndex( name, false );
 	
 	if( !get_strus_environment( name ) ) {
 		service.unlockIndex( name );
@@ -340,7 +340,7 @@ void transaction::list_cmd( const std::string name )
 
 	log_request( );
 
-	service.lockIndex( name );
+	service.lockIndex( name, false );
 
 	if( !get_strus_environment( name ) ) {
 		return;
