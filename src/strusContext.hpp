@@ -30,8 +30,6 @@
 #include <booster/thread.h>
 #include <booster/log.h>
 
-#include <boost/thread.hpp>
-
 #include "strus/lib/error.hpp"
 #include "strus/errorBufferInterface.hpp"
 
@@ -48,8 +46,7 @@ struct StrusIndexContext {
 	strus::MetaDataReaderInterface *mdri;
 	strus::AttributeReaderInterface *atri;
 	std::map<std::string, strus::StorageTransactionInterface *> trans_map;
-	boost::shared_mutex mutex;
-	bool exclusive;
+	booster::shared_mutex mutex;
 
 	public:
 		StrusIndexContext( ) : name( "" ), config( "" ),
@@ -74,23 +71,17 @@ struct StrusIndexContext {
 		
 		void read_lock( )
 		{
-			exclusive = false;
-			mutex.lock_shared( );
+			mutex.shared_lock( );
 		}
 		
 		void write_lock( )
 		{
-			exclusive = true;
-			mutex.lock( );
+			mutex.unique_lock( );
 		}
 		
 		void unlock( )
 		{
-			if( exclusive ) {
-				mutex.unlock( );
-			} else {
-				mutex.unlock_shared( );
-			}
+			mutex.unlock( );
 		}
 		
 	private:
