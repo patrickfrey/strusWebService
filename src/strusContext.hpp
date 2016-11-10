@@ -47,7 +47,6 @@ struct StrusIndexContext {
 	strus::AttributeReaderInterface *atri;
 	std::map<std::string, strus::StorageTransactionInterface *> trans_map;
 	booster::mutex mutex;
-	//~ booster::shared_mutex mutex;
 
 	public:
 		StrusIndexContext( ) : name( "" ), config( "" ),
@@ -73,19 +72,16 @@ struct StrusIndexContext {
 		void read_lock( )
 		{
 			mutex.lock( );
-			//~ mutex.shared_lock( );
 		}
 		
 		void write_lock( )
 		{
 			mutex.lock( );
-			//~ mutex.unique_lock( );
 		}
 		
 		void unlock( )
 		{
 			mutex.unlock( );
-			//~ mutex.unlock( );
 		}
 		
 	private:
@@ -102,7 +98,6 @@ struct StrusIndexContext {
 class StrusContext {
 	private:
 		std::map<std::string, StrusIndexContext *> context_map;
-		//~ booster::mutex map_mutex;
 		std::vector<const strus::ModuleEntryPoint *> modules;
 
 	public:
