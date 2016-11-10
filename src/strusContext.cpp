@@ -173,7 +173,6 @@ StrusIndexContext *StrusContext::acquire( const std::string &name )
 	} else {
 		return it->second;
 	}
-	//~ map_mutex.lock( );
 }
 
 void StrusContext::release( const std::string &name, StrusIndexContext *ctx )
@@ -185,12 +184,10 @@ void StrusContext::release( const std::string &name, StrusIndexContext *ctx )
 	} else {
 		it->second = ctx;
 	}
-	//~ map_mutex.unlock( );
 }
 
 void StrusContext::lockIndex( const std::string &name, bool exclusive )
 {
-	//~ map_mutex.lock( );
 	std::map<std::string, StrusIndexContext *>::iterator it;
 	it = context_map.find( name );
 	if( it != context_map.end( ) ) {
@@ -200,16 +197,13 @@ void StrusContext::lockIndex( const std::string &name, bool exclusive )
 			it->second->read_lock( );
 		}
 	}
-	//~ map_mutex.unlock( );
 }
 
 void StrusContext::unlockIndex( const std::string &name )
 {
-	//~ map_mutex.lock( );
 	std::map<std::string, StrusIndexContext *>::iterator it;
 	it = context_map.find( name );
 	if( it != context_map.end( ) ) {
 		it->second->unlock( );
 	}
-	//~ map_mutex.unlock( );
 }
