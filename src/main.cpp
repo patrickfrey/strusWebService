@@ -132,6 +132,8 @@ int main( int argc, char *argv[] )
 			} catch( std::exception &e ) {
 				strusContext = 0;
 			}
+			
+			booster::log::logger::instance( ).remove_all_sinks( );
 						
 		} catch( std::exception &e ) {
 			if( srv != 0 ) {
