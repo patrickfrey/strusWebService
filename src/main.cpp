@@ -86,6 +86,8 @@ int main( int argc, char *argv[] )
 	signal( SIGHUP, handle_signal );
 	while( !terminate ) {
 		try {
+			booster::log::logger::instance( ).remove_all_sinks( );
+
 			srv = new cppcms::service( argc, argv );
 
 			if( vm.count( "verbose" ) ) {
@@ -132,7 +134,7 @@ int main( int argc, char *argv[] )
 			} catch( std::exception &e ) {
 				strusContext = 0;
 			}
-						
+									
 		} catch( std::exception &e ) {
 			if( srv != 0 ) {
 				BOOSTER_ERROR( PACKAGE ) << e.what() ;

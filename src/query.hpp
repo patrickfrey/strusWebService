@@ -248,7 +248,7 @@ struct MetadataCondition {
 		} else if( operator_ == "gt" || operator_ == ">" ) {
 			return strus::MetaDataRestrictionInterface::CompareGreater;
 		} else {
-			throw std::runtime_error( "unknown metadata condition operator" );
+			throw booster::runtime_error( "unknown metadata condition operator" );
 		}
 	}
 	
@@ -256,14 +256,14 @@ struct MetadataCondition {
 	{
 		switch( value.type ) {
 			case PARAMETER_TYPE_STRING:
-				throw std::runtime_error( "value in metadata condition cannot be a string, must be a number" );
+				throw booster::runtime_error( "value in metadata condition cannot be a string, must be a number" );
 		
 			case PARAMETER_TYPE_NUMERIC:
 				return value.n;
 				
 			case PARAMETER_TYPE_UNKNOWN:
 			default:
-				throw std::runtime_error( "type of valie in metadata condition is unknown" );
+				throw booster::runtime_error( "type of value in metadata condition is unknown" );
 		}
 	}
 };
