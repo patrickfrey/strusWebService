@@ -1,8 +1,8 @@
-# Eurospider - Roadmap
+# strusWebService - Roadmap
 
-This document describes the current status and the upcoming milestones of the Eurospider project.
+This document describes the current status and the upcoming milestones of the strusWebService project.
 
-*Updated: Fri, 11 Nov 2016 08:12:41 GMT*
+*Updated: Fri, 11 Nov 2016 08:19:00 GMT*
 
 #### Milestone Summary
 
