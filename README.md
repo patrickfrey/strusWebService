@@ -15,3 +15,5 @@ is exposed, not from other parts of strus (e. g. strusAnalyzer).
 
 A small presentation of ideas is available
 [here](http://www.andreasbaumann.cc/presentations/struswebservice.html).
+
+Roadmap is available [here](strusWebService/blob/master/ROADMAP.md).
