@@ -37,6 +37,7 @@ add_subdirectory( tests )
 
 set(SRC
 	src/main.cpp
+	src/strusIndexContext.cpp
 	src/strusContext.cpp
 	src/strusWebService.cpp
 	src/master.cpp

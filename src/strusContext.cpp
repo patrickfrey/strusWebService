@@ -11,12 +11,9 @@
 #include "strusContext.hpp"
 #include "version.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include <booster/log.h>
 
 #include <boost/filesystem.hpp>
-#include <boost/timer/timer.hpp>
 
 #include "strus/storageModule.hpp"
 #include "strus/versionModule.hpp"

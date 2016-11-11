@@ -32,68 +32,9 @@
 
 #include "strus/lib/error.hpp"
 #include "strus/errorBufferInterface.hpp"
-
 #include "strus/moduleEntryPoint.hpp"
 
-#include "version.hpp"
-
-struct StrusIndexContext {
-	std::string name;
-	std::string config;
-	strus::DatabaseInterface *dbi;
-	strus::StorageInterface *sti;
-	strus::StorageClientInterface *stci;
-	strus::MetaDataReaderInterface *mdri;
-	strus::AttributeReaderInterface *atri;
-	std::map<std::string, strus::StorageTransactionInterface *> trans_map;
-	booster::mutex mutex;
-
-	public:
-		StrusIndexContext( ) : name( "" ), config( "" ),
-			dbi( 0 ), sti( 0 ), stci( 0 ),
-			mdri( 0 ), atri( 0 ) { }
-
-		StrusIndexContext( const std::string &_name, const std::string &_config )
-			: name( _name ), config( _config ),
-			dbi( 0 ), sti( 0 ), stci( 0 ),
-			mdri( 0 ), atri( 0 ) { }
-			
-		virtual ~StrusIndexContext( )
-		{
-			abortAllRunningTransactions( );
-			
-			if( atri != 0 ) delete atri;
-			if( mdri != 0 ) delete mdri;
-			if( stci != 0 ) delete stci;
-			if( sti != 0 ) delete sti;
-			if( dbi != 0 ) delete dbi;
-		}
-		
-		void read_lock( )
-		{
-			mutex.lock( );
-		}
-		
-		void write_lock( )
-		{
-			mutex.lock( );
-		}
-		
-		void unlock( )
-		{
-			mutex.unlock( );
-		}
-		
-	private:
-		void abortAllRunningTransactions( )
-		{
-			for( std::map<std::string, strus::StorageTransactionInterface *>::const_iterator it = trans_map.begin( ); it != trans_map.end( ); it++ ) {
-				BOOSTER_INFO( PACKAGE ) << "forcing rollback on transaction '" << it->first << "' in index '" << name << "'";
-				it->second->rollback( );
-				delete it->second;
-			}
-		}
-};
+#include "strusIndexContext.hpp"
 
 class StrusContext {
 	private:
