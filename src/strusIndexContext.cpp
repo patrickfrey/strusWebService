@@ -53,9 +53,23 @@ void StrusIndexContext::unlock( )
 
 void StrusIndexContext::abortAllRunningTransactions( )
 {
-	for( std::map<std::string, strus::StorageTransactionInterface *>::const_iterator it = trans_map.begin( ); it != trans_map.end( ); it++ ) {
+	for( std::map<std::string, StrusTransactionInfo>::const_iterator it = trans_map.begin( ); it != trans_map.end( ); it++ ) {
 		BOOSTER_INFO( PACKAGE ) << "forcing rollback on transaction '" << it->first << "' in index '" << name << "'";
-		it->second->rollback( );
-		delete it->second;
+		it->second.stti->rollback( );
+		delete it->second.stti;
+	}
+}
+
+void StrusIndexContext::terminateIdleTransactions( unsigned int max_livetime )
+{
+	for( std::map<std::string, StrusTransactionInfo>::iterator it = trans_map.begin( ); it != trans_map.end( ); it++ ) {	
+		unsigned int age = time( 0 ) - it->second.last_used;
+		BOOSTER_DEBUG( PACKAGE ) << "transaction '" << it->first << "' has age " << age;
+		if( age > max_livetime ) {
+			BOOSTER_WARNING( PACKAGE ) << "forcing rollback on idle transaction '" << it->first << "' (age: " << age << " seconds)";
+			it->second.stti->rollback( );
+			delete it->second.stti;
+			trans_map.erase( it );
+		}
 	}
 }

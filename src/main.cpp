@@ -104,7 +104,7 @@ int main( int argc, char *argv[] )
 			}
 			BOOSTER_DEBUG( PACKAGE ) << "Using '" << nof_threads << "' threads for strus logging buffers";
 			
-			strusContext = new StrusContext( nof_threads + 1,
+			strusContext = new StrusContext( srv, nof_threads + 1,
 				srv->settings( ).get<std::string>( "extensions.directory" ), 
 				srv->settings( ).get<std::vector<std::string> >( "extensions.modules" ) );
 			

@@ -28,6 +28,7 @@
 #include "strus/storageTransactionInterface.hpp"
 
 #include <signal.h>
+#include <ctime>
 
 namespace apps {
 
@@ -193,7 +194,7 @@ strus::StorageTransactionInterface *strusWebService::createStorageTransactionInt
 strus::StorageTransactionInterface *strusWebService::createStorageTransactionInterface( const std::string &name, const std::string &id )
 {
 	StrusIndexContext *ctx = context->acquire( name );
-	std::map<std::string, strus::StorageTransactionInterface *>::iterator it;
+	std::map<std::string, StrusTransactionInfo>::iterator it;
 	it = ctx->trans_map.find( id );
 	strus::StorageTransactionInterface *stti;
 	if( it == ctx->trans_map.end( ) ) {
@@ -201,9 +202,11 @@ strus::StorageTransactionInterface *strusWebService::createStorageTransactionInt
 		if( stti == 0 ) {
 			return 0;
 		}
-		ctx->trans_map[id] = stti;
+		ctx->trans_map[id].stti = stti;
+		ctx->trans_map[id].last_used = time( 0 );
 	} else {
-		stti = ctx->trans_map[id];
+		ctx->trans_map[id].last_used = time( 0 );
+		stti = ctx->trans_map[id].stti;
 	}
 	context->release( name, ctx );
 	return stti;
@@ -212,28 +215,32 @@ strus::StorageTransactionInterface *strusWebService::createStorageTransactionInt
 strus::StorageTransactionInterface *strusWebService::getStorageTransactionInterface( const std::string &name, const std::string &id )
 {
 	StrusIndexContext *ctx = context->acquire( name );
-	std::map<std::string, strus::StorageTransactionInterface *>::iterator it;
+	std::map<std::string, StrusTransactionInfo>::iterator it;
 	it = ctx->trans_map.find( id );
 	strus::StorageTransactionInterface *stti;
 	if( it == ctx->trans_map.end( ) ) {
 		return 0;
 	} else {
-		stti = ctx->trans_map[id];
+		ctx->trans_map[id].last_used = time( 0 );
+		stti = ctx->trans_map[id].stti;
 	}
 	context->release( name, ctx );
 	return stti;
 }
 
-std::vector<std::string> strusWebService::getAllTransactionsIdsOfIndex( const std::string &name )
+std::vector<TransactionData> strusWebService::getAllTransactionsDataOfIndex( const std::string &name )
 {
 	StrusIndexContext *ctx = context->acquire( name );
-	std::vector<std::string> v;
+	std::vector<TransactionData> v;
 	if( ctx == 0 ) {
 		return v;
 	}
-	std::map<std::string, strus::StorageTransactionInterface *>::iterator it;
+	std::map<std::string, StrusTransactionInfo>::iterator it;
 	for( it = ctx->trans_map.begin( ); it != ctx->trans_map.end( ); it++ ) {
-		v.push_back( (*it).first );
+		TransactionData d;
+		d.id = (*it).first;
+		d.age = time( 0 ) - (*it).second.last_used;
+		v.push_back( d );
 	}
 	context->release( name, ctx );
 	return v;
@@ -330,10 +337,10 @@ void strusWebService::deleteAttributeReaderInterface( const std::string &name )
 void strusWebService::deleteStorageTransactionInterface( const std::string &name, const std::string &id )
 {
 	StrusIndexContext *ctx = context->acquire( name );
-	std::map<std::string, strus::StorageTransactionInterface *>::iterator it;
+	std::map<std::string, StrusTransactionInfo>::iterator it;
 	it = ctx->trans_map.find( id );
 	if( it != ctx->trans_map.end( ) ) {
-		delete it->second;
+		delete it->second.stti;
 		ctx->trans_map.erase( it );
 	}
 }
@@ -421,13 +428,13 @@ std::string strusWebService::getStorageConfig( const std::string &base_storage_d
 
 void strusWebService::abortRunningTransactions( const std::string &name )
 {
-	std::vector<std::string> transactions = getAllTransactionsIdsOfIndex( name );
-	for( std::vector<std::string >::const_iterator trans_id = transactions.begin( ); trans_id != transactions.end( ); trans_id++ ) {
-		strus::StorageTransactionInterface *transaction = getStorageTransactionInterface( name, *trans_id );
+	std::vector<TransactionData> transactions = getAllTransactionsDataOfIndex( name );
+	for( std::vector<TransactionData>::const_iterator trans_data = transactions.begin( ); trans_data != transactions.end( ); trans_data++ ) {
+		strus::StorageTransactionInterface *transaction = getStorageTransactionInterface( name, trans_data->id );
 		if( transaction != 0 ) {
-			BOOSTER_INFO( PACKAGE ) << "forcing rollback on transaction '" << *trans_id << "' in index '" << name << "'";
+			BOOSTER_INFO( PACKAGE ) << "forcing rollback on transaction '" << trans_data->id << "' in index '" << name << "'";
 			transaction->rollback( );
-			deleteStorageTransactionInterface( name, *trans_id );
+			deleteStorageTransactionInterface( name, trans_data->id );
 		}
 	}
 }

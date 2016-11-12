@@ -28,6 +28,11 @@ struct TransactionCommitRequest : public TransactionRequestBase {
 struct TransactionRollbackRequest : public TransactionRequestBase {
 };
 
+struct TransactionData {
+	std::string id;
+	unsigned int age;
+};
+
 namespace apps {
 
 class transaction : public master {
@@ -99,7 +104,7 @@ struct traits<TransactionRollbackRequest> {
 	static TransactionRollbackRequest get( value const &v )
 	{
 		TransactionRollbackRequest t;
-		if( v.type( ) != is_object) {
+		if( v.type( ) != is_object ) {
 			throw bad_value_cast( );
 		}
 		// TODO: should we also accept int, float? how can we fall back?
@@ -113,6 +118,27 @@ struct traits<TransactionRollbackRequest> {
 	}
 };
 
+template<>
+struct traits<TransactionData> {
+	
+	static TransactionData get( value const &v )
+	{
+		TransactionData d;
+		if( v.type( ) != is_object ) {
+			throw bad_value_cast( );
+		}
+		d.id = v.get<std::string>( "id", "" );
+		d.age = v.get<unsigned int>( "age", 0 );
+		return d;
+	}
+	
+	static void set( value &v, TransactionData const &d )
+	{
+		v.set( "id", d.id );
+		v.set( "age", d.age );
+	}
+};
+		
 } } // namespace cppcms::json
 
 #endif

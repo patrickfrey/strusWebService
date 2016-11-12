@@ -25,16 +25,25 @@
 
 #include "version.hpp"
 
-struct StrusIndexContext {
-	std::string name;
-	std::string config;
-	strus::DatabaseInterface *dbi;
-	strus::StorageInterface *sti;
-	strus::StorageClientInterface *stci;
-	strus::MetaDataReaderInterface *mdri;
-	strus::AttributeReaderInterface *atri;
-	std::map<std::string, strus::StorageTransactionInterface *> trans_map;
-	booster::mutex mutex;
+#include <ctime>
+
+class StrusTransactionInfo {
+	public:
+		strus::StorageTransactionInterface *stti;
+		time_t last_used;
+};
+
+class StrusIndexContext {
+	public:
+		std::string name;
+		std::string config;
+		strus::DatabaseInterface *dbi;
+		strus::StorageInterface *sti;
+		strus::StorageClientInterface *stci;
+		strus::MetaDataReaderInterface *mdri;
+		strus::AttributeReaderInterface *atri;
+		std::map<std::string, StrusTransactionInfo> trans_map;
+		booster::mutex mutex;
 
 	public:
 		StrusIndexContext( );
@@ -44,6 +53,7 @@ struct StrusIndexContext {
 		void read_lock( );
 		void write_lock( );
 		void unlock( );
+		void terminateIdleTransactions( unsigned int max_livetime );
 		
 	private:
 		void abortAllRunningTransactions( );

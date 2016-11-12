@@ -334,6 +334,14 @@ void transaction::rollback_cmd( const std::string name, const std::string tid, b
 	report_ok( j );
 }
 
+static bool transaction_data_sorter( struct TransactionData const &data1, struct TransactionData const &data2 )
+{
+	if( data1.id != data2.id ) {
+		return data1.id < data2.id;
+	}
+	return data1.age < data2.age;
+}
+
 void transaction::list_cmd( const std::string name )
 {
 	boost::timer::cpu_timer timer;
@@ -354,8 +362,8 @@ void transaction::list_cmd( const std::string name )
 	
 	cppcms::json::value j;
 	j["result"] = "ok";
-	std::vector<std::string> v = service.getAllTransactionsIdsOfIndex( name );
-	std::sort( v.begin( ), v.end( ) );
+	std::vector<TransactionData> v = service.getAllTransactionsDataOfIndex( name );
+	std::sort( v.begin( ), v.end( ), &transaction_data_sorter );
 	j["transactions"] = v;
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;

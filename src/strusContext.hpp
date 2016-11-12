@@ -36,16 +36,24 @@
 
 #include "strusIndexContext.hpp"
 
+#include <booster/aio/deadline_timer.h>
+#include <booster/system_error.h>
+#include <ctime>
+#include <cppcms/service.h>  
+
 class StrusContext {
 	private:
 		std::map<std::string, StrusIndexContext *> context_map;
 		std::vector<const strus::ModuleEntryPoint *> modules;
+        booster::aio::deadline_timer timer;
+        time_t last_wake;
+        unsigned int transaction_max_idle_time;
 
 	public:
 		strus::ErrorBufferInterface *errorhnd;
 
 	public:
-		StrusContext( unsigned int nof_threads, const std::string moduleDir, const std::vector<std::string> modules );
+		StrusContext( cppcms::service *srv, unsigned int nof_threads, const std::string moduleDir, const std::vector<std::string> modules );
 		virtual ~StrusContext( );
 
 		StrusIndexContext *acquire( const std::string &name );
@@ -55,6 +63,10 @@ class StrusContext {
         void unlockIndex( const std::string &name );
 
 		void registerModules( strus::QueryProcessorInterface *qpi ) const;
+
+	private:
+		void onTimer( booster::system::error_code const& e );
+		void terminateIdleTransactions( );
 };
 
 #endif

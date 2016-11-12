@@ -16,6 +16,10 @@
 		}
 	},
 	
+	"transactions" : {
+		"max_idle_time" : 30
+	},
+	
 	"extensions" : {
 		"directory" : "/usr/lib64/strus/modules",
 		"modules" : [
