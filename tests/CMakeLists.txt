@@ -92,7 +92,7 @@ add_test( NAME transaction_delete_begin COMMAND curlJsonTester transaction_begin
 
 add_test( NAME transaction_delete_doc2 COMMAND curlJsonTester transaction_delete_doc2 )
 
-add_test( NAME transaction_delete_commit COMMAND curlJsonTester transaction_commit )
+add_test( NAME transaction_delete_commit COMMAND curlJsonTester transaction_delete_commit )
 
 # query.cpp
 

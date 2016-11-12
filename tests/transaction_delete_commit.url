@@ -1,0 +1,3 @@
+POST
+http://localhost:8080/strus/transaction/commit/A/1
+
