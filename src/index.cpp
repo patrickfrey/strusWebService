@@ -26,6 +26,7 @@
 #include <vector>
 #include <utility>
 #include <istream>
+#include <iomanip>
 
 #include <boost/filesystem.hpp>
 
@@ -176,7 +177,7 @@ void index::create_cmd( const std::string name )
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "create_index(" << name << ", " << execution_time << "s)";
+	BOOSTER_INFO( PACKAGE ) << "create_index(" << name << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
@@ -231,7 +232,7 @@ void index::delete_cmd( const std::string name )
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "delete_index(" << name << ", " << execution_time << "s)";
+	BOOSTER_INFO( PACKAGE ) << "delete_index(" << name << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
@@ -325,7 +326,7 @@ void index::config_cmd( const std::string name )
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "config_index(" << name << ", " << execution_time << "s)";
+	BOOSTER_INFO( PACKAGE ) << "config_index(" << name << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
@@ -378,7 +379,7 @@ void index::stats_cmd( const std::string name )
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "stats_index(" << name << ", " << execution_time << "s)";
+	BOOSTER_INFO( PACKAGE ) << "stats_index(" << name << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
@@ -417,7 +418,7 @@ void index::list_cmd( )
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "list_indexes(" << execution_time << "s)";
+	BOOSTER_INFO( PACKAGE ) << "list_indexes(" << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
@@ -454,7 +455,7 @@ void index::exists_cmd( const std::string name )
 
 	service.unlockIndex( name );
 
-	BOOSTER_INFO( PACKAGE ) << "exists_index(" << execution_time << "s)";
+	BOOSTER_INFO( PACKAGE ) << "exists_index(" << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
@@ -503,7 +504,7 @@ void index::open_cmd( const std::string name )
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "open_index(" << execution_time << "s)";
+	BOOSTER_INFO( PACKAGE ) << "open_index(" << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
@@ -552,7 +553,7 @@ void index::close_cmd( const std::string name )
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "close_index(" << execution_time << "s)";
+	BOOSTER_INFO( PACKAGE ) << "close_index(" << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
@@ -626,7 +627,7 @@ void index::swap_cmd( const std::string name1, const std::string name2 )
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "swap_index(" << execution_time << "s)";
+	BOOSTER_INFO( PACKAGE ) << "swap_index(" << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );

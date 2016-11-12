@@ -20,6 +20,8 @@
 
 #include <cppcms/json.h>
 
+#include <iomanip>
+
 namespace apps {
 
 transaction::transaction( strusWebService &service )
@@ -219,7 +221,7 @@ void transaction::commit_cmd( const std::string name, const std::string tid, boo
 	j["execution_time"] = execution_time;
 	j["nof_documents_affected"] = nof_documents_affected;
 
-	BOOSTER_INFO( PACKAGE ) << "commit(" << name << ", " << trans_id << ", " << nof_documents_affected << ", " << execution_time << "s)";
+	BOOSTER_INFO( PACKAGE ) << "commit(" << name << ", " << trans_id << ", " << nof_documents_affected << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
@@ -325,7 +327,7 @@ void transaction::rollback_cmd( const std::string name, const std::string tid, b
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "rollback(" << name << ", " << trans_id << ", " << execution_time << "s)";
+	BOOSTER_INFO( PACKAGE ) << "rollback(" << name << ", " << trans_id << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
@@ -373,7 +375,7 @@ void transaction::list_cmd( const std::string name )
 
 	service.unlockIndex( name );
 
-	BOOSTER_INFO( PACKAGE ) << "list_transactions(" << execution_time << "s)";
+	BOOSTER_INFO( PACKAGE ) << "list_transactions(" << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
