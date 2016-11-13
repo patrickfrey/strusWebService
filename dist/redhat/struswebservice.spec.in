@@ -272,11 +272,20 @@ make %{?_smp_mflags}
 
 make DESTDIR=$RPM_BUILD_ROOT install
 
+%if %{rhel} || %{centos} || %{scilin} || %{fedora}
+install -D -m664 dist/redhat/strusWebService.conf-RHEL $RPM_BUILD_ROOT%{_sysconfdir}/strusWebService/strusWebService.conf
+%endif
+
 %if %{rhel} || %{centos} || %{scilin}
-%if %{rhel6} || %{centos6} || %{scilin6}
+%if %{rhel7} || %{centos7} || %{scilin7}
+install -D -m644 dist/redhat/strusWebService.service $RPM_BUILD_ROOT%{_unitdir}/strusWebService.service
+%else
 install -D -m775 dist/redhat/strusWebService.RHEL $RPM_BUILD_ROOT%{_initrddir}/strusWebService
 %endif
-install -D -m664 dist/redhat/strusWebService.conf-RHEL $RPM_BUILD_ROOT%{_sysconfdir}/strusWebService/strusWebService.conf
+%endif
+
+%if %{fedora}
+install -D -m644 dist/redhat/strusWebService.service $RPM_BUILD_ROOT%{_unitdir}/strusWebService.service
 %endif
 
 install -d -m775 $RPM_BUILD_ROOT%{_localstatedir}/log/strusWebService
@@ -288,6 +297,16 @@ install -d -m755 $RPM_BUILD_ROOT%{_sharedstatedir}/strusWebService/www/js
 install -m664 democlient/index.html $RPM_BUILD_ROOT%{_sharedstatedir}/strusWebService/www/index.html
 install -m664 democlient/css/*.css $RPM_BUILD_ROOT%{_sharedstatedir}/strusWebService/www/css/.
 install -m664 democlient/js/*.js $RPM_BUILD_ROOT%{_sharedstatedir}/strusWebService/www/js/.
+
+%if %{rhel} || %{centos} || %{scilin}
+%if %{rhel7} || %{centos7} || %{scilin7}
+install -D -m644 packaging/redhat/strusWebService-firewalld.xml $RPM_BUILD_ROOT%{_prefix}/lib/firewalld/services/strusWebService.xml
+%endif
+%endif
+
+%if %{fedora}
+install -D -m644 packaging/redhat/strusWebService-firewalld.xml $RPM_BUILD_ROOT%{_prefix}/lib/firewalld/services/strusWebService.xml
+%endif
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -338,6 +357,9 @@ rm -rf /var/run/strusWebService
 %attr(0440, struswebservice, struswebservice) %{_sharedstatedir}/strusWebService/www/js/*.js
 
 %changelog
+* Sat Nov 13 2016 Andreas Baumann <mail@andreasbaumann.cc> 0.0.4-0.1
+- bugfix and stabilisation release
+
 * Sat Apr 30 2016 Andreas Baumann <mail@andreasbaumann.cc> 0.0.3-0.1
 - used in first demo projects
 
