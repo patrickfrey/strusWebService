@@ -357,8 +357,14 @@ rm -rf /var/run/strusWebService
 %attr(0440, struswebservice, struswebservice) %{_sharedstatedir}/strusWebService/www/js/*.js
 
 %changelog
-* Sat Nov 13 2016 Andreas Baumann <mail@andreasbaumann.cc> 0.0.4-0.1
-- bugfix and stabilisation release
+#upcoming:
+#* Sat Nov 13 2016 Andreas Baumann <mail@andreasbaumann.cc> 0.0.5-0.1
+#- bugfix and stabilisation release, mainly concurrency issues
+#- transaction garbage collection and close at shutdown
+
+* Sat 22 Oct 2016 Andreas Baumann <mail@andreasbaumann.cc> 0.0.4-0.1
+- bugfixes
+- new commands: swap, close, open index, list transactions, get document
 
 * Sat Apr 30 2016 Andreas Baumann <mail@andreasbaumann.cc> 0.0.3-0.1
 - used in first demo projects
