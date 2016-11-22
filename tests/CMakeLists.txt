@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
 include_directories(
+	"${Boost_INCLUDE_DIRS}"
 	"${PROJECT_SOURCE_DIR}/src"
 	"${PROJECT_SOURCE_DIR}/3rdParty/curlpp/include" "${CURL_INCLUDE_DIRS}"
+	"${LIBBOOSTER_INCLUDE_DIR}"
+	"${LIBCPPCMS_INCLUDE_DIR}"
 	"${strus_INCLUDE_DIRS}"
 )
 

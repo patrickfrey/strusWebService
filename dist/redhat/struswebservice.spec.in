@@ -300,12 +300,12 @@ install -m664 democlient/js/*.js $RPM_BUILD_ROOT%{_sharedstatedir}/strusWebServi
 
 %if %{rhel} || %{centos} || %{scilin}
 %if %{rhel7} || %{centos7} || %{scilin7}
-install -D -m644 packaging/redhat/strusWebService-firewalld.xml $RPM_BUILD_ROOT%{_prefix}/lib/firewalld/services/strusWebService.xml
+install -D -m644 dist/redhat/strusWebService-firewalld.xml $RPM_BUILD_ROOT%{_prefix}/lib/firewalld/services/strusWebService.xml
 %endif
 %endif
 
 %if %{fedora}
-install -D -m644 packaging/redhat/strusWebService-firewalld.xml $RPM_BUILD_ROOT%{_prefix}/lib/firewalld/services/strusWebService.xml
+install -D -m644 dist/redhat/strusWebService-firewalld.xml $RPM_BUILD_ROOT%{_prefix}/lib/firewalld/services/strusWebService.xml
 %endif
 
 %clean
@@ -343,9 +343,23 @@ rm -rf /var/run/strusWebService
 %dir %attr(0755, root, root) %{_sysconfdir}/strusWebService
 %config(noreplace) %attr(0644, root, root) %{_sysconfdir}/strusWebService/strusWebService.conf
 %if %{rhel} || %{centos} || %{scilin}
-%if %{rhel6} || %{centos6} || %{scilin6}
+%if %{rhel7} || %{centos7} || %{scilin7}
+%{_unitdir}/strusWebService.service
+%else
 %attr( 554, root, root) %{_initrddir}/strusWebService
 %endif
+%endif
+%if %{fedora}
+%dir %attr(0755, root, root) %{_unitdir}
+%{_unitdir}/strusWebService.service
+%endif
+%if %{rhel} || %{centos} || %{scilin}
+%if %{rhel7} || %{centos7} || %{scilin7}
+%{_prefix}/lib/firewalld/services/strusWebService.xml
+%endif
+%endif
+%if %{fedora}
+%{_prefix}/lib/firewalld/services/strusWebService.xml
 %endif
 %attr(0775, struswebservice, struswebservice) %dir %{_localstatedir}/log/strusWebService
 %attr(0775, struswebservice, struswebservice) %dir %{_sharedstatedir}/strusWebService
@@ -358,11 +372,11 @@ rm -rf /var/run/strusWebService
 
 %changelog
 #upcoming:
-#* Sat Nov 13 2016 Andreas Baumann <mail@andreasbaumann.cc> 0.0.5-0.1
+#* Sun Nov 13 2016 Andreas Baumann <mail@andreasbaumann.cc> 0.0.5-0.1
 #- bugfix and stabilisation release, mainly concurrency issues
 #- transaction garbage collection and close at shutdown
 
-* Sat 22 Oct 2016 Andreas Baumann <mail@andreasbaumann.cc> 0.0.4-0.1
+* Sat Oct 22 2016 Andreas Baumann <mail@andreasbaumann.cc> 0.0.4-0.1
 - bugfixes
 - new commands: swap, close, open index, list transactions, get document
 
