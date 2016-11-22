@@ -165,8 +165,8 @@ BuildRequires: sles-release
 
 %if %{rhel} || %{centos} || %{scilin} || %{fedora}
 %if %{rhel5} || %{rhel6} || %{centos5} || %{centos6} || %{scilin5} || %{scilin6}
-Requires: boost153 >= 1.53.0
-BuildRequires: boost153-devel >= 1.53.0
+Requires: strusboost >= 1.53.0
+BuildRequires: strusboost-devel >= 1.53.0
 %else
 Requires: boost >= 1.53.0
 Requires: boost-thread >= 1.53.0
@@ -178,8 +178,8 @@ BuildRequires: boost-devel
 
 %if %{suse} || %{sles}
 %if %{sles11}
-Requires: boost153 >= 1.53.0
-BuildRequires: boost153-devel >= 1.53.0
+Requires: strusboost >= 1.53.0
+BuildRequires: strusboost-devel >= 1.53.0
 %endif
 %if %{osu131}
 Requires: libboost_thread1_53_0 >= 1.53.0
@@ -207,18 +207,18 @@ BuildRequires: boost-devel
 %endif
 
 %if %{rhel} || %{centos} || %{scilin}
-BuildRequires: libcppcms-devel
-Requires: libcppcms
+BuildRequires: libstruscppcms-devel
+Requires: libstruscppcms
 %endif
 
 %if %{fedora}
-BuildRequires: libcppcms-devel
-Requires: libcppcms
+BuildRequires: libstruscppcms-devel
+Requires: libstruscppcms
 %endif
 
 %if %{suse} || %{sles}
-BuildRequires: libcppcms-devel
-Requires: libcppcms
+BuildRequires: libstruscppcms-devel
+Requires: libstruscppcms
 %endif
 
 BuildRequires: strusbase-devel >= 0.9.0
