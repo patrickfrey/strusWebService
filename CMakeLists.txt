@@ -28,6 +28,7 @@ configure_file( "${PROJECT_SOURCE_DIR}/dist/obs/struswebservice-Debian_7.0.dsc.i
 configure_file( "${PROJECT_SOURCE_DIR}/dist/obs/struswebservice-xUbuntu_12.04.dsc.in"  "${PROJECT_SOURCE_DIR}/dist/obs/struswebservice-xUbuntu_12.04.dsc"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/struswebservice.spec.in"  "${PROJECT_SOURCE_DIR}/dist/redhat/struswebservice.spec"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-RHEL.in"  "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-RHEL"  @ONLY )
+configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-RHEL7.in"  "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-RHEL7"  @ONLY )
 
 add_subdirectory( 3rdParty/curlpp )
 
