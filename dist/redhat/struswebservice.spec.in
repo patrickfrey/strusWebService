@@ -79,14 +79,8 @@
 %endif
 
 %define suse 0
-%define osu131 0
 %define osu132 0
 %define osufactory 0
-%if 0%{?suse_version} == 1310
-%define dist osu131
-%define osu131 1
-%define suse 1
-%endif
 %if 0%{?suse_version} == 1320
 %define dist osu132
 %define osu132 1
