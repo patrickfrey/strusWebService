@@ -175,15 +175,6 @@ BuildRequires: boost-devel
 Requires: strusboost >= 1.53.0
 BuildRequires: strusboost-devel >= 1.53.0
 %endif
-%if %{osu131}
-Requires: libboost_thread1_53_0 >= 1.53.0
-Requires: libboost_atomic1_53_0 >= 1.53.0
-Requires: libboost_system1_53_0 >= 1.53.0
-Requires: libboost_date_time1_53_0 >= 1.53.0
-BuildRequires: boost-devel
-# for some reason OBS doesn't pull in libboost_atomic1_53_0 automatically!?
-BuildRequires: libboost_atomic1_53_0 >= 1.53.0
-%endif
 %if %{osu132} || %{sles12}
 Requires: libboost_thread1_54_0 >= 1.54.0
 Requires: libboost_atomic1_54_0 >= 1.54.0
