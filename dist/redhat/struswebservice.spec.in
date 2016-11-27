@@ -264,8 +264,17 @@ install -D -m664 dist/redhat/strusWebService.conf-RHEL $RPM_BUILD_ROOT%{_sysconf
 install -D -m664 dist/redhat/strusWebService.conf-RHEL7 $RPM_BUILD_ROOT%{_sysconfdir}/strusWebService/strusWebService.conf
 %endif
 %endif
+
 %if %{fedora}
 install -D -m664 dist/redhat/strusWebService.conf-RHEL7 $RPM_BUILD_ROOT%{_sysconfdir}/strusWebService/strusWebService.conf
+%endif
+
+%if %{suse} || %{sles}
+%if %{sles11}
+install -D -m664 dist/redhat/strusWebService.conf-SLES11 $RPM_BUILD_ROOT%{_sysconfdir}/strusWebService/strusWebService.conf
+%else
+install -D -m664 dist/redhat/strusWebService.conf-SUSE $RPM_BUILD_ROOT%{_sysconfdir}/strusWebService/strusWebService.conf
+%endif
 %endif
 
 %if %{rhel} || %{centos} || %{scilin}
@@ -278,6 +287,14 @@ install -D -m775 dist/redhat/strusWebService.RHEL $RPM_BUILD_ROOT%{_initrddir}/s
 
 %if %{fedora}
 install -D -m644 dist/redhat/strusWebService.service $RPM_BUILD_ROOT%{_unitdir}/strusWebService.service
+%endif
+
+%if %{suse} || %{sles}
+%if %{sles11}
+install -D -m775 dist/redhat/strusWebService.SLES11 $RPM_BUILD_ROOT%{_initrddir}/strusWebService
+%else
+install -D -m644 dist/redhat/strusWebService.service $RPM_BUILD_ROOT%{_unitdir}/strusWebService.service
+%endif
 %endif
 
 install -d -m775 $RPM_BUILD_ROOT%{_localstatedir}/log/strusWebService
@@ -300,6 +317,8 @@ install -D -m644 dist/redhat/strusWebService-firewalld.xml $RPM_BUILD_ROOT%{_pre
 install -D -m644 dist/redhat/strusWebService-firewalld.xml $RPM_BUILD_ROOT%{_prefix}/lib/firewalld/services/strusWebService.xml
 %endif
 
+# SUSE: TODO yast2 firewall?
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -313,15 +332,57 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/getent passwd struswebservice >/dev/null || /usr/sbin/useradd -g struswebservice struswebservice -c "StrusWebService user" -d %{_sharedstatedir}/strusWebService > /dev/null 2>&1
 
 %post
+%if %{rhel} || %{centos} || %{scilin}
+%if %{rhel7} || %{centos7} || %{scilin7}
+/sbin/systemctl enable strusWebService
+/sbin/systemctl start strusWebService
+%else
 /sbin/chkconfig --add strusWebService
 /sbin/chkconfig strusWebService on
 /sbin/service strusWebService start > /dev/null 2>&1
+%endif
+%endif
+%if %{fedora}
+/sbin/systemctl enable strusWebService.service
+/sbin/systemctl start strusWebService.service
+%endif
+%if %{suse} || %{sles}
+%if %{sles11}
+/sbin/chkconfig --add strusWebService
+/sbin/chkconfig strusWebService on
+/sbin/service strusWebService start > /dev/null 2>&1
+%else
+/sbin/systemctl enable strusWebService.service
+/sbin/systemctl start strusWebService.service
+%endif
+%endif
 
 %preun
 if [ "$1" = 0 ]; then
+%if %{rhel} || %{centos} || %{scilin}
+%if %{rhel7} || %{centos7} || %{scilin7}
+    systemctl stop strusWebService.service   
+    systemctl disable strusWebService.service
+%else
 	/sbin/service strusWebService stop > /dev/null 2>&1
 	/sbin/chkconfig strusWebService off
 	/sbin/chkconfig --del strusWebService
+%endif
+%endif
+%if %{fedora}
+    systemctl stop strusWebService.service   
+    systemctl disable strusWebService.service
+%endif
+%if %{suse} || %{sles}
+%if %{sles11}
+	/sbin/service strusWebService stop > /dev/null 2>&1
+	/sbin/chkconfig strusWebService off
+	/sbin/chkconfig --del strusWebService
+%else
+    systemctl stop strusWebService.service   
+    systemctl disable strusWebService.service
+%endif
+%endif
 	rm -rf /var/log/strusWebService/*
 fi
 
@@ -344,6 +405,14 @@ rm -rf /var/run/strusWebService
 %if %{fedora}
 %dir %attr(0755, root, root) %{_unitdir}
 %{_unitdir}/strusWebService.service
+%endif
+%if %{suse} || %{sles}
+%if %{sles11}
+%attr( 554, root, root) %{_initrddir}/strusWebService
+%else
+%dir %attr(0755, root, root) %{_unitdir}
+%{_unitdir}/strusWebService.service
+%endif
 %endif
 %if %{rhel} || %{centos} || %{scilin}
 %if %{rhel7} || %{centos7} || %{scilin7}
