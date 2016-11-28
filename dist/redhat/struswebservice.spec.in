@@ -147,8 +147,14 @@ BuildRequires: generic-release
 %endif
 %if %{suse}
 BuildRequires: openSUSE-release
+BuildRequires: shadow >= 3.2
+BuildRequires: systemd
 %endif
 %if %{sles}
+%if %{sles12}
+BuildRequires: systemd
+%endif
+BuildRequires: shadow >= 3.2
 %if %{sles12}
 #exists in sles12, missing on OBS!
 #BuildRequires: sles-release
@@ -297,15 +303,15 @@ install -D -m644 dist/redhat/strusWebService.service $RPM_BUILD_ROOT%{_unitdir}/
 %endif
 %endif
 
-install -d -m775 $RPM_BUILD_ROOT%{_localstatedir}/log/strusWebService
+install -d -m755 $RPM_BUILD_ROOT%{_localstatedir}/log/strusWebService
 
-install -d -m755 $RPM_BUILD_ROOT%{_sharedstatedir}/strusWebService
-install -d -m755 $RPM_BUILD_ROOT%{_sharedstatedir}/strusWebService/www
-install -d -m755 $RPM_BUILD_ROOT%{_sharedstatedir}/strusWebService/www/css
-install -d -m755 $RPM_BUILD_ROOT%{_sharedstatedir}/strusWebService/www/js
-install -m664 democlient/index.html $RPM_BUILD_ROOT%{_sharedstatedir}/strusWebService/www/index.html
-install -m664 democlient/css/*.css $RPM_BUILD_ROOT%{_sharedstatedir}/strusWebService/www/css/.
-install -m664 democlient/js/*.js $RPM_BUILD_ROOT%{_sharedstatedir}/strusWebService/www/js/.
+install -d -m755 $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService
+install -d -m755 $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/www
+install -d -m755 $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/www/css
+install -d -m755 $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/www/js
+install -m444 democlient/index.html $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/www/index.html
+install -m444 democlient/css/*.css $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/www/css/.
+install -m444 democlient/js/*.js $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/www/js/.
 
 %if %{rhel} || %{centos} || %{scilin}
 %if %{rhel7} || %{centos7} || %{scilin7}
@@ -328,8 +334,8 @@ rm -rf $RPM_BUILD_ROOT
 #pkill strusWebService
 
 %pre
-/usr/bin/getent group struswebservice >/dev/null || /usr/sbin/groupadd struswebservice > /dev/null 2>&1
-/usr/bin/getent passwd struswebservice >/dev/null || /usr/sbin/useradd -g struswebservice struswebservice -c "StrusWebService user" -d %{_sharedstatedir}/strusWebService > /dev/null 2>&1
+/usr/bin/getent group struswebservice >/dev/null || /usr/sbin/groupadd struswebservice
+/usr/bin/getent passwd struswebservice >/dev/null || /usr/sbin/useradd -g struswebservice struswebservice -c "StrusWebService user" -d %{_localstatedir}/lib/strusWebService
 
 %post
 %if %{rhel} || %{centos} || %{scilin}
@@ -352,8 +358,8 @@ rm -rf $RPM_BUILD_ROOT
 /sbin/chkconfig strusWebService on
 /sbin/service strusWebService start > /dev/null 2>&1
 %else
-/sbin/systemctl enable strusWebService.service
-/sbin/systemctl start strusWebService.service
+/usr/bin/systemctl enable strusWebService.service
+/usr/bin/systemctl start strusWebService.service
 %endif
 %endif
 
@@ -422,14 +428,14 @@ rm -rf /var/run/strusWebService
 %if %{fedora}
 %{_prefix}/lib/firewalld/services/strusWebService.xml
 %endif
-%attr(0775, struswebservice, struswebservice) %dir %{_localstatedir}/log/strusWebService
-%attr(0775, struswebservice, struswebservice) %dir %{_sharedstatedir}/strusWebService
-%attr(0775, struswebservice, struswebservice) %dir %{_sharedstatedir}/strusWebService/www
-%attr(0775, struswebservice, struswebservice) %dir %{_sharedstatedir}/strusWebService/www/css
-%attr(0775, struswebservice, struswebservice) %dir %{_sharedstatedir}/strusWebService/www/js
-%attr(0440, struswebservice, struswebservice) %{_sharedstatedir}/strusWebService/www/*.html
-%attr(0440, struswebservice, struswebservice) %{_sharedstatedir}/strusWebService/www/css/*.css
-%attr(0440, struswebservice, struswebservice) %{_sharedstatedir}/strusWebService/www/js/*.js
+%attr(0755, root, root) %dir %{_localstatedir}/log/strusWebService
+%attr(0755, root, root) %dir %{_localstatedir}/lib/strusWebService
+%attr(0755, root, root) %dir %{_localstatedir}/lib/strusWebService/www
+%attr(0755, root, root) %dir %{_localstatedir}/lib/strusWebService/www/css
+%attr(0755, root, root) %dir %{_localstatedir}/lib/strusWebService/www/js
+%attr(0444, root, root) %{_localstatedir}/lib/strusWebService/www/*.html
+%attr(0444, root, root) %{_localstatedir}/lib/strusWebService/www/css/*.css
+%attr(0444, root, root) %{_localstatedir}/lib/strusWebService/www/js/*.js
 
 %changelog
 #upcoming:
