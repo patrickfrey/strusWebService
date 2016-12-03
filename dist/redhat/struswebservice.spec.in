@@ -147,19 +147,21 @@ BuildRequires: generic-release
 %endif
 %if %{suse}
 BuildRequires: openSUSE-release
-BuildRequires: shadow >= 3.2
-BuildRequires: systemd
 %endif
 %if %{sles}
-%if %{sles12}
-BuildRequires: systemd
-%endif
-BuildRequires: shadow >= 3.2
 %if %{sles12}
 #exists in sles12, missing on OBS!
 #BuildRequires: sles-release
 %else
 BuildRequires: sles-release
+%endif
+%endif
+
+%if %{suse} || %{sles}
+BuildRequires: shadow >= 3.2
+%if 0%{?suse_version} >= 1210
+BuildRequires: systemd-rpm-macros
+%{?systemd_requires}
 %endif
 %endif
 
@@ -189,10 +191,10 @@ Requires: libboost_date_time1_54_0 >= 1.54.0
 BuildRequires: boost-devel
 %endif
 %if %{osufactory}
-Requires: libboost_thread1_61_0 >= 1.61.0
-Requires: libboost_atomic1_61_0 >= 1.61.0
-Requires: libboost_system1_61_0 >= 1.61.0
-Requires: libboost_date_time1_61_0 >= 1.61.0
+Requires: libboost_thread1_62_0 >= 1.62.0
+Requires: libboost_atomic1_62_0 >= 1.62.0
+Requires: libboost_system1_62_0 >= 1.62.0
+Requires: libboost_date_time1_62_0 >= 1.62.0
 BuildRequires: boost-devel
 %endif
 %endif
@@ -336,6 +338,11 @@ rm -rf $RPM_BUILD_ROOT
 %pre
 /usr/bin/getent group struswebservice >/dev/null || /usr/sbin/groupadd struswebservice
 /usr/bin/getent passwd struswebservice >/dev/null || /usr/sbin/useradd -g struswebservice struswebservice -c "StrusWebService user" -d %{_localstatedir}/lib/strusWebService
+%if %{suse} || %{sles}
+%if !%{sles11}
+%service_add_pre strusWebService.service
+%endif
+%endif
 
 %post
 %if %{rhel} || %{centos} || %{scilin}
@@ -354,12 +361,10 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 %if %{suse} || %{sles}
 %if %{sles11}
-/sbin/chkconfig --add strusWebService
-/sbin/chkconfig strusWebService on
+%fillup_and_insserv -f strusWebService
 /sbin/service strusWebService start > /dev/null 2>&1
 %else
-/usr/bin/systemctl enable strusWebService.service
-/usr/bin/systemctl start strusWebService.service
+%service_add_post strusWebService.service
 %endif
 %endif
 
@@ -381,18 +386,23 @@ if [ "$1" = 0 ]; then
 %endif
 %if %{suse} || %{sles}
 %if %{sles11}
-	/sbin/service strusWebService stop > /dev/null 2>&1
-	/sbin/chkconfig strusWebService off
-	/sbin/chkconfig --del strusWebService
+%stop_on_removal strusWebService
 %else
-    systemctl stop strusWebService.service   
-    systemctl disable strusWebService.service
+%service_del_preun strusWebService.service
 %endif
 %endif
 	rm -rf /var/log/strusWebService/*
 fi
 
 %postun
+%if %{suse} || %{sles}
+%if %{sles11}
+%restart_on_update service
+%insserv_cleanup
+%else
+%service_del_postun strusWebService.service
+%endif
+%endif
 /usr/sbin/userdel struswebservice
 rm -rf /var/run/strusWebService
 
