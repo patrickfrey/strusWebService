@@ -14,7 +14,6 @@
 
 RETVAL=0
 prog="strusWebService"
-DOCREPO="strusWebService"
 OPTIONS=
 
 
