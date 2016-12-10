@@ -46,6 +46,7 @@ index::index( strusWebService &service, std::string storage_base_directory )
 	service.dispatcher( ).assign( "/index/exists/(\\w+)", &index::exists_cmd, this, 1 );
 	service.dispatcher( ).assign( "/index/open/(\\w+)", &index::open_cmd, this, 1 );
 	service.dispatcher( ).assign( "/index/close/(\\w+)", &index::close_cmd, this, 1 );
+	service.dispatcher( ).assign( "/index/rename/(\\w+)/(\\w+)", &index::rename_cmd, this, 1, 2 );
 	service.dispatcher( ).assign( "/index/swap/(\\w+)/(\\w+)", &index::swap_cmd, this, 1, 2 );
 }
 
@@ -561,6 +562,67 @@ void index::close_cmd( const std::string name )
 		j.save( ss, cppcms::json::compact );
 	}
 	BOOSTER_DEBUG( PACKAGE ) << "close_index: " << ss.str( );
+
+	report_ok( j );
+}
+
+void index::rename_cmd( const std::string name1, const std::string name2 )
+{
+	boost::timer::cpu_timer timer;
+
+	log_request( );
+
+	if( !get_strus_environment( name1 ) ) {
+		return;
+	}
+
+	struct StorageCreateParameters combined_params;
+	combined_params = default_create_parameters;
+
+	std::string config1 = service.getStorageConfig( storage_base_directory, combined_params, name1 );
+
+	if( !dbi->exists( config1 ) ) {
+		report_error( ERROR_INDEX_RENAME_CMD_NO_SUCH_DATABASE, "Search index does not exist" );
+		return;
+	}
+
+	service.lockIndex( name1, true );
+
+	close_strus_environment( name1 );
+
+	if( !get_strus_environment( name1 ) ) {
+		return;
+	}
+
+	std::string config2 = service.getStorageConfig( storage_base_directory, combined_params, name2 );
+
+	if( dbi->exists( config2 ) ) {
+		report_error( ERROR_INDEX_RENAME_CMD_ALREADY_EXISTS, "A search index with that name already exists" );
+		return;
+	}
+
+	boost::filesystem::path path1( storage_base_directory ); path1 /= name1;
+	boost::filesystem::path path2( storage_base_directory ); path2 /= name2;
+	boost::system::error_code err;
+	boost::filesystem::rename( path1, path2, err );
+	if( err.value( ) != boost::system::errc::success ) {
+		report_error( ERROR_INDEX_RENAME_CMD_RENAME_ERROR, err.message( ) );
+	}
+
+	service.unlockIndex( name1 );
+
+	cppcms::json::value j;
+	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	j["execution_time"] = execution_time;
+
+	BOOSTER_INFO( PACKAGE ) << "rename_index(" << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
+	std::ostringstream ss;
+	if( protocol_pretty_printing ) {
+		j.save( ss, cppcms::json::readable );
+	} else {
+		j.save( ss, cppcms::json::compact );
+	}
+	BOOSTER_DEBUG( PACKAGE ) << "rename_index: " << ss.str( );
 
 	report_ok( j );
 }
