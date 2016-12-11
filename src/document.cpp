@@ -30,6 +30,7 @@
 
 #include <sstream>
 #include <algorithm>
+#include <iomanip>
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -236,7 +237,7 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "insert(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << ", " << execution_time << "s)";
+	BOOSTER_INFO( PACKAGE ) << "insert(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
@@ -403,7 +404,7 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "delete(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << ", " << execution_time << "s)";
+	BOOSTER_INFO( PACKAGE ) << "delete(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
@@ -637,7 +638,7 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "get(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << ", " << execution_time << "s)";
+	BOOSTER_INFO( PACKAGE ) << "get(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
@@ -738,7 +739,7 @@ void document::exists_cmd( const std::string name, const std::string id, bool do
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "exists(" << name << ", <implicit>" << ", " << docid << ", " << execution_time << "s)";
+	BOOSTER_INFO( PACKAGE ) << "exists(" << name << ", <implicit>" << ", " << docid << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );

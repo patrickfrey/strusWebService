@@ -20,6 +20,8 @@
 
 #include <cppcms/json.h>
 
+#include <iomanip>
+
 namespace apps {
 
 transaction::transaction( strusWebService &service )
@@ -207,6 +209,8 @@ void transaction::commit_cmd( const std::string name, const std::string tid, boo
 	}
 
 	transaction->commit( );
+	
+	unsigned int nof_documents_affected = transaction->nofDocumentsAffected( );
 
 	service.deleteStorageTransactionInterface( name, trans_id );
 
@@ -215,15 +219,16 @@ void transaction::commit_cmd( const std::string name, const std::string tid, boo
 	cppcms::json::value j;
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
+	j["nof_documents_affected"] = nof_documents_affected;
 
-	BOOSTER_INFO( PACKAGE ) << "commit(" << name << ", " << trans_id << ", " << execution_time << "s)";
+	BOOSTER_INFO( PACKAGE ) << "commit(" << name << ", " << trans_id << ", " << nof_documents_affected << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
 	} else {
 		j.save( ss, cppcms::json::compact );
 	}	
-	BOOSTER_DEBUG( PACKAGE ) << "commit(" << name << ", " << trans_id << "): " << ss.str( );
+	BOOSTER_DEBUG( PACKAGE ) << "commit(" << name << ", " << trans_id << ", " << nof_documents_affected << "): " << ss.str( );
 
 	report_ok( j );
 }
@@ -322,7 +327,7 @@ void transaction::rollback_cmd( const std::string name, const std::string tid, b
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
 
-	BOOSTER_INFO( PACKAGE ) << "rollback(" << name << ", " << trans_id << ", " << execution_time << "s)";
+	BOOSTER_INFO( PACKAGE ) << "rollback(" << name << ", " << trans_id << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );
@@ -332,6 +337,14 @@ void transaction::rollback_cmd( const std::string name, const std::string tid, b
 	BOOSTER_DEBUG( PACKAGE ) << "rollback(" << name << ", " << trans_id << "): " << ss.str( );
 
 	report_ok( j );
+}
+
+static bool transaction_data_sorter( struct TransactionData const &data1, struct TransactionData const &data2 )
+{
+	if( data1.id != data2.id ) {
+		return data1.id < data2.id;
+	}
+	return data1.age < data2.age;
 }
 
 void transaction::list_cmd( const std::string name )
@@ -354,15 +367,15 @@ void transaction::list_cmd( const std::string name )
 	
 	cppcms::json::value j;
 	j["result"] = "ok";
-	std::vector<std::string> v = service.getAllTransactionsIdsOfIndex( name );
-	std::sort( v.begin( ), v.end( ) );
+	std::vector<TransactionData> v = service.getAllTransactionsDataOfIndex( name );
+	std::sort( v.begin( ), v.end( ), &transaction_data_sorter );
 	j["transactions"] = v;
 	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
 	j["execution_time"] = execution_time;
 
 	service.unlockIndex( name );
 
-	BOOSTER_INFO( PACKAGE ) << "list_transactions(" << execution_time << "s)";
+	BOOSTER_INFO( PACKAGE ) << "list_transactions(" << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<service>
+  <short>strusWebService</short>
+  <description>strusWebService JSON over HTTP RESTfull protocol</description>
+  <port protocol="tcp" port="8080"/>
+</service>

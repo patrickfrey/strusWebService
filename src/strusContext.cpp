@@ -10,18 +10,19 @@
 
 #include "strusContext.hpp"
 #include "version.hpp"
-
-#include <boost/algorithm/string.hpp>
+#include "constants.hpp"
 
 #include <booster/log.h>
 
 #include <boost/filesystem.hpp>
-#include <boost/timer/timer.hpp>
 
 #include "strus/storageModule.hpp"
 #include "strus/versionModule.hpp"
 #include "strus/versionAnalyzer.hpp"
 #include "strus/versionTrace.hpp"
+
+#include <booster/intrusive_ptr.h>
+#include <boost/bind.hpp>
 
 static bool matchModuleVersion( const strus::ModuleEntryPoint* entryPoint, int& errorcode )
 {
@@ -74,8 +75,8 @@ static bool matchModuleVersion( const strus::ModuleEntryPoint* entryPoint, int& 
 	return true;
 }
 
-StrusContext::StrusContext( unsigned int nof_threads, const std::string moduleDir, const std::vector<std::string> modules_ )
-	: context_map( ), modules( )
+StrusContext::StrusContext( cppcms::service *srv, unsigned int nof_threads, const std::string moduleDir, const std::vector<std::string> modules_ )
+	: context_map( ), modules( ), timer( srv->get_io_service( ) )
 {	
 	errorhnd = strus::createErrorBuffer_standard( 0, nof_threads );
 	
@@ -100,14 +101,19 @@ StrusContext::StrusContext( unsigned int nof_threads, const std::string moduleDi
 
 		modules.push_back( entrypoint );
 	}
+
+	transaction_max_idle_time = srv->settings( ).get<unsigned int>( "transactions.max_idle_time", DEFAULT_TRANSACTION_MAX_IDLE_TIME );
+
+	last_wake = time( 0 );
+	onTimer( booster::system::error_code( ) );
 }
 
 StrusContext::~StrusContext( )
 {
-    BOOSTER_DEBUG( PACKAGE ) << "Shutting down strus context";
-    for( std::map<std::string, StrusIndexContext *>::iterator it = context_map.begin( ); it != context_map.end( ); it++ ) {
-        delete it->second;
-    }
+	BOOSTER_DEBUG( PACKAGE ) << "Shutting down strus context";
+	for( std::map<std::string, StrusIndexContext *>::iterator it = context_map.begin( ); it != context_map.end( ); it++ ) {
+		delete it->second;
+	}
 }
 
 void StrusContext::registerModules( strus::QueryProcessorInterface *qpi ) const
@@ -206,4 +212,25 @@ void StrusContext::unlockIndex( const std::string &name )
 	if( it != context_map.end( ) ) {
 		it->second->unlock( );
 	}
+}
+
+void StrusContext::terminateIdleTransactions( )
+{
+	BOOSTER_DEBUG( PACKAGE ) << "Checking for long-running transactions";
+	for( std::map<std::string, StrusIndexContext *>::iterator it = context_map.begin( ); it != context_map.end( ); it++ ) {
+		it->second->terminateIdleTransactions( transaction_max_idle_time );
+	}
+}
+
+void StrusContext::onTimer( booster::system::error_code const& e )
+{
+	if( e ) return;
+	
+	if( time( 0 ) - last_wake > DEFAULT_HOUSKEEPING_TIMER_INTERVAL ) {
+		last_wake = time( 0 );		
+		terminateIdleTransactions( );
+	}
+	
+	timer.expires_from_now( booster::ptime::seconds( 1 ) );
+	timer.async_wait( boost::bind( &StrusContext::onTimer, this, _1 ) );
 }

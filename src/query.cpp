@@ -28,6 +28,7 @@
 #include <vector>
 #include <string>
 #include <set>
+#include <iomanip>
 
 namespace apps {
 
@@ -327,8 +328,10 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 
 	cppcms::json::value j;
 	j["ranklist"] = response;
-	j["execution_time"] = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	j["execution_time"] = execution_time;
 
+	BOOSTER_INFO( PACKAGE ) << "query(" << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
 	std::ostringstream ss;
 	if( protocol_pretty_printing ) {
 		j.save( ss, cppcms::json::readable );

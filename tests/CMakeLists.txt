@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
 include_directories(
+	"${Boost_INCLUDE_DIRS}"
 	"${PROJECT_SOURCE_DIR}/src"
 	"${PROJECT_SOURCE_DIR}/3rdParty/curlpp/include" "${CURL_INCLUDE_DIRS}"
+	"${LIBBOOSTER_INCLUDE_DIR}"
+	"${LIBCPPCMS_INCLUDE_DIR}"
 	"${strus_INCLUDE_DIRS}"
 )
 
@@ -92,7 +95,7 @@ add_test( NAME transaction_delete_begin COMMAND curlJsonTester transaction_begin
 
 add_test( NAME transaction_delete_doc2 COMMAND curlJsonTester transaction_delete_doc2 )
 
-add_test( NAME transaction_delete_commit COMMAND curlJsonTester transaction_commit )
+add_test( NAME transaction_delete_commit COMMAND curlJsonTester transaction_delete_commit )
 
 # query.cpp
 
@@ -100,6 +103,21 @@ add_test( NAME query_in_url COMMAND curlJsonTester query_in_url )
 add_test( NAME query_A COMMAND curlJsonTester query_A )
 add_test( NAME query_subexpression_A COMMAND curlJsonTester query_subexpression_A )
 add_test( NAME query_summarizer COMMAND curlJsonTester query_summarizer )
+
+# rename and swapping
+
+add_test( NAME rename_A_D COMMAND curlJsonTester rename_A_D )
+add_test( NAME list_after_rename COMMAND curlJsonTester list_after_rename )
+add_test( NAME swap_B_D COMMAND curlJsonTester swap_B_D )
+add_test( NAME list_after_swap COMMAND curlJsonTester list_after_swap )
+add_test( NAME rename_B_A COMMAND curlJsonTester rename_B_A )
+add_test( NAME rename_D_B COMMAND curlJsonTester rename_D_B )
+add_test( NAME list_after_end_of_swap_renames COMMAND curlJsonTester list_after_end_of_swap_renames )
+
+# explicit open and close
+
+add_test( NAME explicit_open_A COMMAND curlJsonTester explicit_open_A )
+add_test( NAME explicit_close_A COMMAND curlJsonTester explicit_close_A )
 
 # index.cpp (cleaning up)
 

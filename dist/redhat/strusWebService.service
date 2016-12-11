@@ -1,0 +1,12 @@
+[Unit]
+Description=strus web service
+Documentation=man:strusWebService(8) man:strusWebService.conf(5) http://www.project-strus.net
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/strusWebService -c /etc/strusWebService/strusWebService.conf
+ExecReload=/bin/kill -HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target

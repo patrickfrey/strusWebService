@@ -1,6 +1,6 @@
 {	
 	"storage" : {
-		"basedir" : "./storage",
+		"basedir" : "/srv/strusWebService/storage",
 		"default_create_parameters" : {
 			"database" : "leveldb",
 			"cache_size" : 8388608,
@@ -21,7 +21,7 @@
 	},
 	
 	"extensions" : {
-		"directory" : "/usr/lib64/strus/modules",
+		"directory" : "/usr/@LIB_INSTALL_DIR@/strus/modules",
 		"modules" : [
 			"modtest.so"
 		]
@@ -47,22 +47,22 @@
 	
 	"logging" : {
 		"level" : "info",
-		//~ "file" : {
-			//~ "name" : "./strusWebService.log",
-			//~ "append" : true
-		//~ }
+		"file" : {
+			"name" : "/var/log/strusWebService/strusWebService.log",
+			"append" : true
+		}
 	},
 	
 	"democlient" : {
 		"enable" : true,
-		"basedir" : "./democlient"
+		"basedir" : "/var/lib/strusWebService/www"
 	},
 	
 	"debug" : {
 		//~ "log_requests" : true,
 		//~ "request_file" : "./requests.log",
 		"protocol" : {
-			//~ "pretty_print" : true,
+			//~ "pretty_print" : false,
 			//~ "enable_quit_command" : true
 		}
 	}		

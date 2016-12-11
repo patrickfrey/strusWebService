@@ -24,10 +24,11 @@ configure_file( "${PROJECT_SOURCE_DIR}/src/version.hpp.in"  "${PROJECT_SOURCE_DI
 configure_file( "${PROJECT_SOURCE_DIR}/dist/obs/deploy_to_obs.sh.in"  "${PROJECT_SOURCE_DIR}/dist/obs/deploy_to_obs.sh"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/dist/archlinux/PKGBUILD.in"  "${PROJECT_SOURCE_DIR}/dist/archlinux/PKGBUILD"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/dist/obs/struswebservice.dsc.in"  "${PROJECT_SOURCE_DIR}/dist/obs/struswebservice.dsc"  @ONLY )
-configure_file( "${PROJECT_SOURCE_DIR}/dist/obs/struswebservice-Debian_7.0.dsc.in"  "${PROJECT_SOURCE_DIR}/dist/obs/struswebservice-Debian_7.0.dsc"  @ONLY )
-configure_file( "${PROJECT_SOURCE_DIR}/dist/obs/struswebservice-xUbuntu_12.04.dsc.in"  "${PROJECT_SOURCE_DIR}/dist/obs/struswebservice-xUbuntu_12.04.dsc"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/struswebservice.spec.in"  "${PROJECT_SOURCE_DIR}/dist/redhat/struswebservice.spec"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-RHEL.in"  "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-RHEL"  @ONLY )
+configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-RHEL7.in"  "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-RHEL7"  @ONLY )
+configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-SUSE.in"  "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-SUSE"  @ONLY )
+configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-SLES11.in"  "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-SLES11"  @ONLY )
 
 add_subdirectory( 3rdParty/curlpp )
 
@@ -37,6 +38,7 @@ add_subdirectory( tests )
 
 set(SRC
 	src/main.cpp
+	src/strusIndexContext.cpp
 	src/strusContext.cpp
 	src/strusWebService.cpp
 	src/master.cpp
