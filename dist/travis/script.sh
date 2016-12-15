@@ -94,6 +94,7 @@ case $OS in
 			..
 		make VERBOSE=1
 		make run &
+		sleep 10
 		make VERBOSE=1 test
 		pkill strusWebService
 		sudo make VERBOSE=1 install
