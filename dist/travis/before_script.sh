@@ -14,7 +14,8 @@ case $OS in
 			cmake \
 			libboost-all-dev \
 			libleveldb-dev \
-			libcppcms-dev
+			libcppcms-dev \
+			libcurl4-openssl-dev
 		;;
 		
 	Darwin)
@@ -30,6 +31,7 @@ case $OS in
 			snappy \
 			leveldb \
 			cppcms \
+			curl \
 			|| true
 		# make sure cmake finds the brew version of gettext
 		brew link --force gettext || true
