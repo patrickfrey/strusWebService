@@ -45,7 +45,9 @@ for i in $DEPS; do
 				-DLIB_INSTALL_DIR=lib -DCMAKE_CXX_FLAGS=-g \
 				..
 			make VERBOSE=1
+			make run &
 			make VERBOSE=1 test
+			pkill strusWebService
 			sudo make VERBOSE=1 install
 			cd ..
 			;;
@@ -59,7 +61,9 @@ for i in $DEPS; do
 					-DCMAKE_CXX_FLAGS=-g -G 'Unix Makefiles' \
 					..
 				make VERBOSE=1
+				make run &
 				make VERBOSE=1 test
+				pkill strusWebService
 				sudo make VERBOSE=1 install
 				cd ..
 			else
@@ -70,7 +74,9 @@ for i in $DEPS; do
 					-DCMAKE_CXX_FLAGS=-g -G Xcode \
 					..
 				xcodebuild -configuration Release -target ALL_BUILD
+				Release/strusWebService -v -c config.js &
 				xcodebuild -configuration Release -target RUN_TESTS
+				pkill strusWebService
 				sudo xcodebuild -configuration Release -target install
 				cd ..
 			fi
