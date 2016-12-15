@@ -6,10 +6,11 @@ OS=$(uname -s)
 
 case $OS in
 	Linux)
+		# TODO: there is no sign key for cppcms?
 		#curl http://apt.cppcms.com/GPG-key.txt | sudo apt-key add -
 		echo "deb http://apt.cppcms.com/ trusty main" | sudo tee -a /etc/apt/sources.list
 		sudo apt-get update -qq
-		sudo apt-get install -y \
+		sudo apt-get install -y --force-yes \
 			cmake \
 			libboost-all-dev \
 			libleveldb-dev \
