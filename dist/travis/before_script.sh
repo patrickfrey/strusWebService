@@ -6,7 +6,7 @@ OS=$(uname -s)
 
 case $OS in
 	Linux)
-		# TODO: there is no sign key for cppcms?
+		# TODO: there is no sign key for cppcms? Using force for now.. :-)
 		#curl http://apt.cppcms.com/GPG-key.txt | sudo apt-key add -
 		echo "deb http://apt.cppcms.com/ trusty main" | sudo tee -a /etc/apt/sources.list
 		sudo apt-get update -qq
@@ -15,7 +15,7 @@ case $OS in
 			libboost-all-dev \
 			libleveldb-dev \
 			libcppcms-dev \
-			libcurl4-openssl-dev
+			libcurl4-gnutls-dev
 		;;
 		
 	Darwin)
