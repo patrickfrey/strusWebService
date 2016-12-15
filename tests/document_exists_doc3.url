@@ -1,2 +1,2 @@
 GET
-http://localhost:8080/strus/document/exists/A/doc3
+http://127.0.0.1:8080/strus/document/exists/A/doc3

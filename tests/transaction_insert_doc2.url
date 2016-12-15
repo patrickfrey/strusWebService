@@ -1,3 +1,3 @@
 POST
-http://localhost:8080/strus/document/insert/A
+http://127.0.0.1:8080/strus/document/insert/A
 { "transaction" : { "id" : "1" }, "doc" : { "docid" : "doc2", "attributes" : [ { "key" : "title", "value" : "This is a Hello World Document" }, { "key" : "attr1", "value" : "val1" }, { "key" : "attr2", "value" : "val2" } ], "metadata" : [ { "key" : "doclen", "value" : 9888 }, { "key" : "docweight", "value" : 3.1415 } ], "forward" : [ { "type" : "word", "value" : "Hello", "pos": 1 }, { "type" : "word", "value" : "World", "pos" : 2 } ], "search" : [ { "type" : "word", "value" : "hello", "pos": 1 }, { "type" : "word", "value" : "world", "pos" : 2 } ] } }
