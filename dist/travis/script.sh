@@ -122,7 +122,7 @@ case $OS in
 				-DCMAKE_CXX_FLAGS=-g -G Xcode \
 				..
 			xcodebuild -configuration Release -target ALL_BUILD
-			Release/strusWebService -v -c config.js &
+			Release/strusWebService -v -c ../config.js &
 			xcodebuild -configuration Release -target RUN_TESTS
 			pkill strusWebService
 			sudo xcodebuild -configuration Release -target install

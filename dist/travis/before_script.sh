@@ -15,7 +15,7 @@ case $OS in
 			libboost-all-dev \
 			libleveldb-dev \
 			libcppcms-dev \
-			libcurl4-gnutls-dev
+			libcurl4-openssl-dev
 		;;
 		
 	Darwin)
