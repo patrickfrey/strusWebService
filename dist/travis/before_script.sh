@@ -6,7 +6,8 @@ OS=$(uname -s)
 
 case $OS in
 	Linux)
-		cat >>/etc/apt/sources.list <<EOF
+		#curl http://apt.cppcms.com/GPG-key.txt | sudo apt-key add -
+		sudo cat >>/etc/apt/sources.list <<EOF
 deb http://apt.cppcms.com/ trusty main
 deb-src http://apt.cppcms.com/ trusty main
 EOF
