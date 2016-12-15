@@ -6,7 +6,7 @@ OS=$(uname -s)
 
 case $OS in
 	Linux)
-		cat <<EOF
+		cat >>/etc/apt/sources.list <<EOF
 deb http://apt.cppcms.com/ trusty main
 deb-src http://apt.cppcms.com/ trusty main
 EOF
