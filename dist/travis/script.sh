@@ -110,6 +110,7 @@ case $OS in
 				..
 			make VERBOSE=1
 			make run &
+			sleep 10
 			make VERBOSE=1 test
 			pkill strusWebService
 			sudo make VERBOSE=1 install
@@ -123,6 +124,7 @@ case $OS in
 				..
 			xcodebuild -configuration Release -target ALL_BUILD
 			Release/strusWebService -v -c ../config.js &
+			sleep 10
 			xcodebuild -configuration Release -target RUN_TESTS
 			pkill strusWebService
 			sudo xcodebuild -configuration Release -target install
