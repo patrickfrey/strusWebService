@@ -6,16 +6,16 @@ OS=$(uname -s)
 
 case $OS in
 	Linux)
-		cat >>/etc/apt/sources.list <<EOF
-deb http://apt.cppcms.com/ trusty main
-deb-src http://apt.cppcms.com/ trusty main
-EOF
+		# TODO: there is no sign key for cppcms? Using force for now.. :-)
+		#curl http://apt.cppcms.com/GPG-key.txt | sudo apt-key add -
+		echo "deb http://apt.cppcms.com/ trusty main" | sudo tee -a /etc/apt/sources.list
 		sudo apt-get update -qq
-		sudo apt-get install -y \
+		sudo apt-get install -y --force-yes \
 			cmake \
 			libboost-all-dev \
 			libleveldb-dev \
-			libcppcms-dev
+			libcppcms-dev \
+			libcurl4-openssl-dev
 		;;
 		
 	Darwin)
@@ -31,6 +31,7 @@ EOF
 			snappy \
 			leveldb \
 			cppcms \
+			curl \
 			|| true
 		# make sure cmake finds the brew version of gettext
 		brew link --force gettext || true

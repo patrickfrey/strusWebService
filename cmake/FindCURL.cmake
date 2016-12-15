@@ -13,7 +13,6 @@ FIND_PATH(CURL_INCLUDE_DIR curl/curl.h
   /usr/include
   #mingw
   c:/msys/local/include
-  NO_DEFAULT_PATH
   )
 
 MARK_AS_ADVANCED(CURL_INCLUDE_DIR)
@@ -25,7 +24,6 @@ FIND_LIBRARY(CURL_LIBRARY NAMES curl libcurl_imp PATHS
   /usr/local/lib
   /usr/lib
   c:/msys/local/lib
-  NO_DEFAULT_PATH
   )
 
 MARK_AS_ADVANCED(CURL_LIBRARY)
