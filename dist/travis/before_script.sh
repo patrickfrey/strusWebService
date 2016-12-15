@@ -6,11 +6,16 @@ OS=$(uname -s)
 
 case $OS in
 	Linux)
+		cat <<EOF
+deb http://apt.cppcms.com/ trusty main
+deb-src http://apt.cppcms.com/ trusty main
+EOF
 		sudo apt-get update -qq
 		sudo apt-get install -y \
 			cmake \
 			libboost-all-dev \
-			libleveldb-dev
+			libleveldb-dev \
+			libcppcms-dev
 		;;
 		
 	Darwin)
