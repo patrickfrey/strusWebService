@@ -22,14 +22,24 @@
 
 int main( int argc, char *argv[] )
 {
-	if( argc != 2 ) {
+	const char *testpath;
+	const char *name;
+
+	if( argc == 3 ) {
+		testpath = argv[1];
+		name = argv[2];
+	} else if( argc == 2 ) {
+		testpath = ".";
+		name = argv[1];
+	} else {
 		std::cerr << "ERROR: Expecting a test name." << std::endl;
 		return 1;
 	}
-	
+
+	std::cout << "TEST_PATH: " << testpath << std::endl;
 	std::ostringstream ss;
-	std::string testname( argv[1] );
-	ss << testname << ".url";
+	std::string testname( name );
+	ss << testpath << "/" << testname << ".url";
 	std::ifstream testurlfile( ss.str( ).c_str( ) );
 	if( !testurlfile.good( ) ) {
 		std::cerr << "ERROR: URL file '" << ss.str( ) << "' not openable." << std::endl;
@@ -74,7 +84,7 @@ int main( int argc, char *argv[] )
 	std::string res = os.str( );
 	
 	std::ostringstream ss2;
-	ss2 << testname << ".must";
+	ss2 << testpath << "/" << testname << ".must";
 	std::ifstream mustfile( ss2.str( ).c_str( ) );
 	if( !mustfile.good( ) ) {
 		std::cerr << "ERROR: Must file '" << ss2.str( ) << "' not openable." << std::endl;
@@ -88,7 +98,7 @@ int main( int argc, char *argv[] )
 	mustfile.close( );
 	
 	std::ostringstream ss3;
-	ss3 << testname << ".res";
+	ss3 << testpath << "/" << testname << ".res";
 	std::ofstream resfile( ss3.str( ).c_str( ) );
 	if( !resfile.good( ) ) {
 		std::cerr << "ERROR: Result file '" << ss3.str( ) << "' not openable." << std::endl;
