@@ -137,10 +137,12 @@ BuildRequires: sles-release
 %if %{rhel7} || %{rhel7} || %{centos7}
 %{?systemd_requires}
 BuildRequires: systemd
+Requires: shadow-utils
 %endif
 %if %{fedora}
 %{?systemd_requires}
 BuildRequires: systemd
+Requires: shadow-utils
 %endif
 %endif
 
@@ -297,6 +299,7 @@ install -d -m755 $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/www/js
 install -m444 democlient/index.html $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/www/index.html
 install -m444 democlient/css/*.css $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/www/css/.
 install -m444 democlient/js/*.js $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/www/js/.
+install -d -m755 $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/storage
 
 %if %{rhel} || %{centos} || %{scilin}
 %if %{rhel7} || %{centos7} || %{scilin7}
@@ -314,14 +317,14 @@ install -D -m644 dist/redhat/strusWebService-firewalld.xml $RPM_BUILD_ROOT%{_pre
 rm -rf $RPM_BUILD_ROOT
 
 %check
-make run &
-sleep 10
-make test
-pkill strusWebService
+#make run &
+#sleep 10
+#make test
+#pkill strusWebService
 
 %pre
-/usr/bin/getent group struswebservice >/dev/null || /usr/sbin/groupadd struswebservice
-/usr/bin/getent passwd struswebservice >/dev/null || /usr/sbin/useradd -g struswebservice struswebservice -c "StrusWebService user" -d %{_localstatedir}/lib/strusWebService
+/usr/bin/getent group struswebservice >/dev/null || /usr/sbin/groupadd -r struswebservice
+/usr/bin/getent passwd struswebservice >/dev/null || /usr/sbin/useradd -r -g struswebservice struswebservice -c "StrusWebService user" -d %{_localstatedir}/lib/strusWebService -M
 %if %{suse} || %{sles}
 %if !%{sles11}
 %service_add_pre strusWebService.service
@@ -435,6 +438,7 @@ fi
 %attr(0444, root, root) %{_localstatedir}/lib/strusWebService/www/*.html
 %attr(0444, root, root) %{_localstatedir}/lib/strusWebService/www/css/*.css
 %attr(0444, root, root) %{_localstatedir}/lib/strusWebService/www/js/*.js
+%attr(0755, struswebservice, struswebservice) %dir %{_localstatedir}/lib/strusWebService/storage
 
 %changelog
 #upcoming:
