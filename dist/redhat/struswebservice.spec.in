@@ -257,7 +257,7 @@ make %{?_smp_mflags}
 
 make DESTDIR=$RPM_BUILD_ROOT install
 
-%if %{rhel} || %{centos} || %{scilin}
+%if %{rhel} || %{centos} || %{scilin} || %{fedora}
 install -D -m664 dist/redhat/strusWebService.conf-RHEL $RPM_BUILD_ROOT%{_sysconfdir}/strusWebService/strusWebService.conf
 %endif
 
@@ -299,7 +299,17 @@ install -d -m755 $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/www/js
 install -m444 democlient/index.html $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/www/index.html
 install -m444 democlient/css/*.css $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/www/css/.
 install -m444 democlient/js/*.js $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/www/js/.
-install -d -m755 $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/storage
+%if %{rhel} || %{centos} || %{scilin} || %{fedora}
+install -d -m750 $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/storage
+%endif
+%if %{suse} || %{sles}
+%if %{sles11}
+install -d -m750 $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/storage
+%else
+install -d -m750 $RPM_BUILD_ROOT/srv/strusWebService
+install -d -m750 $RPM_BUILD_ROOT/srv/strusWebService/storage
+%endif
+%endif
 
 %if %{rhel} || %{centos} || %{scilin}
 %if %{rhel7} || %{centos7} || %{scilin7}
@@ -388,13 +398,15 @@ fi
 %if %{sles11}
 %restart_on_update service
 %insserv_cleanup
+if [ "$1" = 0 ]; then
+	rm -rf /var/run/strusWebService
+fi
 %else
 %service_del_postun strusWebService.service
 %endif
 %endif
 if [ "$1" = 0 ]; then
 	/usr/sbin/userdel struswebservice
-	rm -rf /var/run/strusWebService
 fi
 
 %files
@@ -430,7 +442,16 @@ fi
 %{_prefix}/lib/firewalld/services/strusWebService.xml
 %endif
 %attr(0755, struswebservice, struswebservice) %dir %{_localstatedir}/log/strusWebService
+%if %{rhel} || %{centos} || %{scilin}
+%if %{rhel6} || %{centos6} || %{scilin6}
 %attr(0755, struswebservice, struswebservice) %dir %{_localstatedir}/run/strusWebService
+%endif
+%endif
+%if %{suse} || %{sles}
+%if %{sles11}
+%attr(0755, struswebservice, struswebservice) %dir %{_localstatedir}/run/strusWebService
+%endif
+%endif
 %attr(0755, root, root) %dir %{_localstatedir}/lib/strusWebService
 %attr(0755, root, root) %dir %{_localstatedir}/lib/strusWebService/www
 %attr(0755, root, root) %dir %{_localstatedir}/lib/strusWebService/www/css
@@ -438,7 +459,18 @@ fi
 %attr(0444, root, root) %{_localstatedir}/lib/strusWebService/www/*.html
 %attr(0444, root, root) %{_localstatedir}/lib/strusWebService/www/css/*.css
 %attr(0444, root, root) %{_localstatedir}/lib/strusWebService/www/js/*.js
-%attr(0755, struswebservice, struswebservice) %dir %{_localstatedir}/lib/strusWebService/storage
+
+%if %{rhel} || %{centos} || %{scilin} || %{fedora}
+%attr(0750, struswebservice, struswebservice) %dir %{_localstatedir}/lib/strusWebService/storage
+%endif
+%if %{suse} || %{sles}
+%if %{sles11}
+%attr(0750, struswebservice, struswebservice) %dir %{_localstatedir}/lib/strusWebService/storage
+%else
+%attr(0750, struswebservice, struswebservice) %dir /srv/strusWebService
+%attr(0750, struswebservice, struswebservice) %dir /srv/strusWebService/storage
+%endif
+%endif
 
 %changelog
 #upcoming:
