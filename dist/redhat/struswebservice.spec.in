@@ -256,15 +256,7 @@ make %{?_smp_mflags}
 make DESTDIR=$RPM_BUILD_ROOT install
 
 %if %{rhel} || %{centos} || %{scilin}
-%if %{rhel6} || %{centos6} || %{scilin6}
 install -D -m664 dist/redhat/strusWebService.conf-RHEL $RPM_BUILD_ROOT%{_sysconfdir}/strusWebService/strusWebService.conf
-%else
-install -D -m664 dist/redhat/strusWebService.conf-RHEL7 $RPM_BUILD_ROOT%{_sysconfdir}/strusWebService/strusWebService.conf
-%endif
-%endif
-
-%if %{fedora}
-install -D -m664 dist/redhat/strusWebService.conf-RHEL7 $RPM_BUILD_ROOT%{_sysconfdir}/strusWebService/strusWebService.conf
 %endif
 
 %if %{suse} || %{sles}
