@@ -296,6 +296,7 @@ install -D -m644 dist/redhat/strusWebService.service $RPM_BUILD_ROOT%{_unitdir}/
 %endif
 
 install -d -m755 $RPM_BUILD_ROOT%{_localstatedir}/log/strusWebService
+install -d -m755 $RPM_BUILD_ROOT%{_localstatedir}/run/strusWebService
 
 install -d -m755 $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService
 install -d -m755 $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/www
@@ -321,9 +322,10 @@ install -D -m644 dist/redhat/strusWebService-firewalld.xml $RPM_BUILD_ROOT%{_pre
 rm -rf $RPM_BUILD_ROOT
 
 %check
-#make run
-#make test
-#pkill strusWebService
+make run &
+sleep 10
+make test
+pkill strusWebService
 
 %pre
 /usr/bin/getent group struswebservice >/dev/null || /usr/sbin/groupadd struswebservice
@@ -395,8 +397,10 @@ fi
 %service_del_postun strusWebService.service
 %endif
 %endif
-/usr/sbin/userdel struswebservice
-rm -rf /var/run/strusWebService
+if [ "$1" = 0 ]; then
+	/usr/sbin/userdel struswebservice
+	rm -rf /var/run/strusWebService
+fi
 
 %files
 %defattr( -, root, root )
@@ -430,7 +434,8 @@ rm -rf /var/run/strusWebService
 %if %{fedora}
 %{_prefix}/lib/firewalld/services/strusWebService.xml
 %endif
-%attr(0755, root, root) %dir %{_localstatedir}/log/strusWebService
+%attr(0755, struswebservice, struswebservice) %dir %{_localstatedir}/log/strusWebService
+%attr(0755, struswebservice, struswebservice) %dir %{_localstatedir}/run/strusWebService
 %attr(0755, root, root) %dir %{_localstatedir}/lib/strusWebService
 %attr(0755, root, root) %dir %{_localstatedir}/lib/strusWebService/www
 %attr(0755, root, root) %dir %{_localstatedir}/lib/strusWebService/www/css
