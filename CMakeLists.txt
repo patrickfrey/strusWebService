@@ -28,6 +28,7 @@ configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/struswebservice.spec.in"  "${
 configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-RHEL.in"  "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-RHEL"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-SUSE.in"  "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-SUSE"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-SLES11.in"  "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-SLES11"  @ONLY )
+configure_file( "${PROJECT_SOURCE_DIR}/dist/archlinux/strusWebService.conf.in"  "${PROJECT_SOURCE_DIR}/dist/archlinux/strusWebService.conf"  @ONLY )
 
 add_subdirectory( 3rdParty/curlpp )
 

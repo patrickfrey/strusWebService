@@ -11,7 +11,13 @@ arch=('i686' 'x86_64')
 url="http://project-strus.net"
 depends=('boost>=1.53' 'boost-libs>=1.53' 'struscppcms' "strusbase>=${_deppkgver}" "strus>=${_deppkgver}" "strusanalyzer>=${_deppkgver}" "strusmodule>=${_deppkgver}" "strusrpc>=${_deppkgver}")
 makedepends=('cmake' 'curl')
-source=("${pkgname}-${_mainpkgver}.tar.gz")
+backup=('etc/strusWebService/strusWebService.conf')
+install='struswebservice.install' 
+source=(
+  "${pkgname}-${_mainpkgver}.tar.gz"
+  "strusWebService.service"
+  "strusWebService.conf"
+)
 
 build() {
   cd ${srcdir}/${pkgname}-${_mainpkgver}
@@ -26,6 +32,17 @@ package() {
 
   msg "Installing.."
   make DESTDIR=${pkgdir} install
+
+  # TODO: we should really convice cmake to install it in the right place
+  install -d -m755 ${pkgdir}/usr/bin
+  mv ${pkgdir}/usr/sbin/strusWebService ${pkgdir}/usr/bin/.
+  rmdir ${pkgdir}/usr/sbin
+  
+  install -D -m644 ${srcdir}/strusWebService.service \
+    ${pkgdir}/usr/lib/systemd/system/strusWebService.service
+
+  install -D -m644 ${srcdir}/strusWebService.conf \
+    ${pkgdir}/etc/strusWebService/strusWebService.conf
 }
 
 check() {

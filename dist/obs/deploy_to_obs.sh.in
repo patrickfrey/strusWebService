@@ -62,10 +62,16 @@ echo " $DEBIAN_CHKSUM $DEBIAN_SIZE ${PACKAGE_NAME}_${PACKAGE_VERSION}.debian.tar
 # Archlinux
 
 cp ${PACKAGE_NAME}-${PACKAGE_VERSION}.tar.gz $OSC_HOME/${PACKAGE_NAME}-${PACKAGE_VERSION}.tar.gz
-
-CHKSUM=`md5sum $OSC_HOME/${PACKAGE_NAME}-${PACKAGE_VERSION}.tar.gz  | cut -f 1 -d' '`
+cp dist/archlinux/strusWebService.service $OSC_HOME/strusWebService.service
+cp dist/archlinux/struswebservice.install $OSC_HOME/struswebservice.install
+cp dist/archlinux/strusWebService.conf $OSC_HOME/strusWebService.conf
 
 cat dist/archlinux/PKGBUILD > $OSC_HOME/PKGBUILD
-echo "md5sums=('$CHKSUM')" >> $OSC_HOME/PKGBUILD
+
+CHKSUM=`md5sum $OSC_HOME/${PACKAGE_NAME}-${PACKAGE_VERSION}.tar.gz  | cut -f 1 -d' '`
+CHKSUM2=`md5sum $OSC_HOME/strusWebService.service | cut -f 1 -d' '`
+CHKSUM3=`md5sum $OSC_HOME/strusWebService.conf | cut -f 1 -d' '`
+echo "md5sums=('$CHKSUM' '$CHKSUM2' '$CHKSUM3')" >> $OSC_HOME/PKGBUILD
 
 sed -i "s/^pkgver=.*/pkgver=\${_mainpkgver}.r${GIT_COMMIT_COUNT}/" $OSC_HOME/PKGBUILD
+
