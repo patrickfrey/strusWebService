@@ -64,6 +64,8 @@ install: build
 	# Add here commands to install the package
 	# The DESTDIR Has To Be Exactly  /usr/src/packages/BUILD/debian/<nameOfPackage>
 	cd build &&	$(MAKE) install DESTDIR=/usr/src/packages/BUILD/debian/struswebservice
+	install -D -m644 dist/debian/strusWebService.service /usr/src/packages/BUILD/debian/struswebservice/etc/systemd/system/strusWebService.service
+	install -D -m644 dist/debian/strusWebService.conf /usr/src/packages/BUILD/debian/struswebservice/etc/strusWebService/strusWebService.conf
 	# --- end custom part for installing
 
 # Build architecture-independent files here.

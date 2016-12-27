@@ -19,6 +19,13 @@ set -e
 
 case "$1" in
 	remove|upgrade|deconfigure)
+		systemctl stop strusWebService.service
+		true; # ignore stop errors
+		systemctl disable strusWebService.service
+
+		rm -rf /var/log/strusWebService
+
+		getent passwd struswebservice >/dev/null && userdel struswebservice
 		;;
 
 	failed-upgrade)
