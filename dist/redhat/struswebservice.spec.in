@@ -137,10 +137,12 @@ BuildRequires: sles-release
 %if %{rhel7} || %{rhel7} || %{centos7}
 %{?systemd_requires}
 BuildRequires: systemd
+Requires: shadow-utils
 %endif
 %if %{fedora}
 %{?systemd_requires}
 BuildRequires: systemd
+Requires: shadow-utils
 %endif
 %endif
 
@@ -161,6 +163,7 @@ Requires: boost >= 1.53.0
 Requires: boost-thread >= 1.53.0
 Requires: boost-system >= 1.53.0
 Requires: boost-date-time >= 1.53.0
+Requires: boost-filesystem >= 1.53.0
 BuildRequires: boost-devel
 %endif
 %endif
@@ -175,6 +178,7 @@ Requires: libboost_thread1_54_0 >= 1.54.0
 Requires: libboost_atomic1_54_0 >= 1.54.0
 Requires: libboost_system1_54_0 >= 1.54.0
 Requires: libboost_date_time1_54_0 >= 1.54.0
+Requires: libboost_filesystem1_54_0 >= 1.54.0
 BuildRequires: boost-devel
 %endif
 %if %{osufactory}
@@ -182,6 +186,7 @@ Requires: libboost_thread1_62_0 >= 1.62.0
 Requires: libboost_atomic1_62_0 >= 1.62.0
 Requires: libboost_system1_62_0 >= 1.62.0
 Requires: libboost_date_time1_62_0 >= 1.62.0
+Requires: libboost_filesystem1_62_0 >= 1.62.0
 BuildRequires: boost-devel
 %endif
 %endif
@@ -252,16 +257,8 @@ make %{?_smp_mflags}
 
 make DESTDIR=$RPM_BUILD_ROOT install
 
-%if %{rhel} || %{centos} || %{scilin}
-%if %{rhel6} || %{centos6} || %{scilin6}
+%if %{rhel} || %{centos} || %{scilin} || %{fedora}
 install -D -m664 dist/redhat/strusWebService.conf-RHEL $RPM_BUILD_ROOT%{_sysconfdir}/strusWebService/strusWebService.conf
-%else
-install -D -m664 dist/redhat/strusWebService.conf-RHEL7 $RPM_BUILD_ROOT%{_sysconfdir}/strusWebService/strusWebService.conf
-%endif
-%endif
-
-%if %{fedora}
-install -D -m664 dist/redhat/strusWebService.conf-RHEL7 $RPM_BUILD_ROOT%{_sysconfdir}/strusWebService/strusWebService.conf
 %endif
 
 %if %{suse} || %{sles}
@@ -293,6 +290,7 @@ install -D -m644 dist/redhat/strusWebService.service $RPM_BUILD_ROOT%{_unitdir}/
 %endif
 
 install -d -m755 $RPM_BUILD_ROOT%{_localstatedir}/log/strusWebService
+install -d -m755 $RPM_BUILD_ROOT%{_localstatedir}/run/strusWebService
 
 install -d -m755 $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService
 install -d -m755 $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/www
@@ -301,6 +299,17 @@ install -d -m755 $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/www/js
 install -m444 democlient/index.html $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/www/index.html
 install -m444 democlient/css/*.css $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/www/css/.
 install -m444 democlient/js/*.js $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/www/js/.
+%if %{rhel} || %{centos} || %{scilin} || %{fedora}
+install -d -m750 $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/storage
+%endif
+%if %{suse} || %{sles}
+%if %{sles11}
+install -d -m750 $RPM_BUILD_ROOT%{_localstatedir}/lib/strusWebService/storage
+%else
+install -d -m750 $RPM_BUILD_ROOT/srv/strusWebService
+install -d -m750 $RPM_BUILD_ROOT/srv/strusWebService/storage
+%endif
+%endif
 
 %if %{rhel} || %{centos} || %{scilin}
 %if %{rhel7} || %{centos7} || %{scilin7}
@@ -318,13 +327,14 @@ install -D -m644 dist/redhat/strusWebService-firewalld.xml $RPM_BUILD_ROOT%{_pre
 rm -rf $RPM_BUILD_ROOT
 
 %check
-#make run
+#make run &
+#sleep 10
 #make test
 #pkill strusWebService
 
 %pre
-/usr/bin/getent group struswebservice >/dev/null || /usr/sbin/groupadd struswebservice
-/usr/bin/getent passwd struswebservice >/dev/null || /usr/sbin/useradd -g struswebservice struswebservice -c "StrusWebService user" -d %{_localstatedir}/lib/strusWebService
+/usr/bin/getent group struswebservice >/dev/null || /usr/sbin/groupadd -r struswebservice
+/usr/bin/getent passwd struswebservice >/dev/null || /usr/sbin/useradd -r -g struswebservice struswebservice -c "StrusWebService user" -d %{_localstatedir}/lib/strusWebService -M
 %if %{suse} || %{sles}
 %if !%{sles11}
 %service_add_pre strusWebService.service
@@ -388,12 +398,16 @@ fi
 %if %{sles11}
 %restart_on_update service
 %insserv_cleanup
+if [ "$1" = 0 ]; then
+	rm -rf /var/run/strusWebService
+fi
 %else
 %service_del_postun strusWebService.service
 %endif
 %endif
-/usr/sbin/userdel struswebservice
-rm -rf /var/run/strusWebService
+if [ "$1" = 0 ]; then
+	/usr/sbin/userdel struswebservice
+fi
 
 %files
 %defattr( -, root, root )
@@ -427,7 +441,17 @@ rm -rf /var/run/strusWebService
 %if %{fedora}
 %{_prefix}/lib/firewalld/services/strusWebService.xml
 %endif
-%attr(0755, root, root) %dir %{_localstatedir}/log/strusWebService
+%attr(0755, struswebservice, struswebservice) %dir %{_localstatedir}/log/strusWebService
+%if %{rhel} || %{centos} || %{scilin}
+%if %{rhel6} || %{centos6} || %{scilin6}
+%attr(0755, struswebservice, struswebservice) %dir %{_localstatedir}/run/strusWebService
+%endif
+%endif
+%if %{suse} || %{sles}
+%if %{sles11}
+%attr(0755, struswebservice, struswebservice) %dir %{_localstatedir}/run/strusWebService
+%endif
+%endif
 %attr(0755, root, root) %dir %{_localstatedir}/lib/strusWebService
 %attr(0755, root, root) %dir %{_localstatedir}/lib/strusWebService/www
 %attr(0755, root, root) %dir %{_localstatedir}/lib/strusWebService/www/css
@@ -436,11 +460,25 @@ rm -rf /var/run/strusWebService
 %attr(0444, root, root) %{_localstatedir}/lib/strusWebService/www/css/*.css
 %attr(0444, root, root) %{_localstatedir}/lib/strusWebService/www/js/*.js
 
+%if %{rhel} || %{centos} || %{scilin} || %{fedora}
+%attr(0750, struswebservice, struswebservice) %dir %{_localstatedir}/lib/strusWebService/storage
+%endif
+%if %{suse} || %{sles}
+%if %{sles11}
+%attr(0750, struswebservice, struswebservice) %dir %{_localstatedir}/lib/strusWebService/storage
+%else
+%attr(0750, struswebservice, struswebservice) %dir /srv/strusWebService
+%attr(0750, struswebservice, struswebservice) %dir /srv/strusWebService/storage
+%endif
+%endif
+
 %changelog
 #upcoming:
 #* Sun Nov 13 2016 Andreas Baumann <mail@andreasbaumann.cc> 0.0.5-0.1
 #- bugfix and stabilisation release, mainly concurrency issues
 #- transaction garbage collection and close at shutdown
+#- packaging on major Linux distributions and tons of OS integration
+#  fixes
 
 * Sat Oct 22 2016 Andreas Baumann <mail@andreasbaumann.cc> 0.0.4-0.1
 - bugfixes

@@ -1,5 +1,5 @@
 POST
-http://localhost:8080/strus/query/A
+http://127.0.0.1:8080/strus/query/A
 {
     "query": {
         "text": "hello",

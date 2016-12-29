@@ -47,4 +47,5 @@ dist/redhat/strusWebService.conf-RHEL
 dist/redhat/strusWebService.conf-RHEL7
 dist/redhat/strusWebService.conf-SLES11
 dist/redhat/strusWebService.conf-SUSE
-
+dist/archlinux/strusWebService.conf
+dist/debian/strusWebService.conf

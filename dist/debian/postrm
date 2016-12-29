@@ -20,9 +20,14 @@ set -e
 
 case "$1" in
 	remove)
+		# keep logfiles and struswebservice user (maybe we have data
+		# owned by this user), purge will clean up..
 		;;
 	
 	purge)
+		rm -rf /var/log/wolframe
+
+		getent passwd struswebservice >/dev/null && userdel struswebservice
 		;;
 	
 	upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)

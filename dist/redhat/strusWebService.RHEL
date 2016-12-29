@@ -15,7 +15,7 @@
 RETVAL=0
 prog="strusWebService"
 OPTIONS=
-
+PIDFILE=/var/run/$prog/$prog.pid
 
 runlevel=$(set -- $(runlevel); eval "echo \$$#" )
 
@@ -39,7 +39,11 @@ start()
 stop()
 {
 	echo -n $"Stopping $prog: "
-	pkill $prog
+	if test -f $PIDFILE; then
+		kill `cat $PIDFILE`
+	else
+		pkill $prog
+	fi
 	RETVAL=$?
 	if test "$RETVAL" = 0; then
 		rm -f /var/run/$prog/$prog.pid
@@ -59,6 +63,7 @@ case "$1" in
 		;;
 	restart)
 		stop
+		sleep 1
 		start
 		;;
 	status)

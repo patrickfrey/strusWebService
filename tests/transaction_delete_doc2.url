@@ -1,3 +1,3 @@
 POST
-http://localhost:8080/strus/document/delete/A
+http://127.0.0.1:8080/strus/document/delete/A
 { "transaction" : { "id" : "1" }, "doc" : { "docid" : "doc2" } }
