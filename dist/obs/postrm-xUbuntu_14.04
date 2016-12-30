@@ -26,6 +26,7 @@ case "$1" in
 	
 	purge)
 		rm -rf /var/log/strusWebService
+		rm -rf /var/run/strusWebService
 
 		getent passwd struswebservice >/dev/null && userdel struswebservice
 		;;

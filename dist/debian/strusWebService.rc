@@ -1,0 +1,118 @@
+#! /bin/sh
+
+### BEGIN INIT INFO
+# Provides:          strusWebService
+# Required-Start:    $remote_fs
+# Required-Stop:     $remote_fs
+# Should-Start:      $named
+# Default-Start:     2 3 4 5
+# Default-Stop:      
+# Short-Description: strus web service daemon
+# Description:       Provides a web service for search functionality
+
+### END INIT INFO
+
+set -e
+
+# /etc/init.d/strusWebService: start and stop the strusWebService daemon
+
+DAEMON=/usr/sbin/strusWebService
+STRUSWEBSERVICE_ENABLE=true
+STRUSWEBSERVICE_OPTS=''
+STRUSWEBSERVICE_CONFIG_FILE=/etc/strusWebService/strusWebService.conf
+STRUSWEBSERVICE_PID_FILE=/var/run/strusWebService/strusWebService.pid
+STRUSWEBSERVICE_NICE_PARM=''
+STRUSWEBSERVICE_IONICE_PARM=''
+
+test -x $DAEMON || exit 0
+
+. /lib/lsb/init-functions
+
+export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
+
+STRUSWEBSERVICE_start() {
+    if [ ! -s "$STRUSWEBSERVICE_CONFIG_FILE" ]; then
+        log_failure_msg "missing or empty config file $STRUSWEBSERVICE_CONFIG_FILE"
+        log_end_msg 1
+        exit 0
+    fi
+    if start-stop-daemon --start --quiet --background \
+        --group struswebservice --chuid struswebservice \
+        --pidfile $STRUSWEBSERVICE_PID_FILE --make-pidfile \
+        $STRUSWEBSERVICE_NICE_PARM --exec $DAEMON \
+        -- -c "$STRUSWEBSERVICE_CONFIG_FILE" $STRUSWEBSERVICE_OPTS
+    then
+        rc=0
+        sleep 1
+        if ! kill -0 $(cat $STRUSWEBSERVICE_PID_FILE) >/dev/null 2>&1; then
+            log_failure_msg "strusWebService daemon failed to start"
+            rc=1
+        fi
+    else
+        rc=1
+    fi
+    if [ $rc -eq 0 ]; then
+        log_end_msg 0
+    else
+        log_end_msg 1
+        rm -f $STRUSWEBSERVICE_PID_FILE
+    fi
+} # STRUSWEBSERVICE_start
+
+
+case "$1" in
+  start)
+	if "$STRUSWEBSERVICE_ENABLE"; then
+	    log_daemon_msg "Starting strusWebService daemon" "strusWebService"
+	    if [ -s $STRUSWEBSERVICE_PID_FILE ] && kill -0 $(cat $STRUSWEBSERVICE_PID_FILE) >/dev/null 2>&1; then
+		log_progress_msg "apparently already running"
+		log_end_msg 0
+		exit 0
+	    fi
+            STRUSWEBSERVICE_start
+        else
+            if [ -s "$STRUSWEBSERVICE_CONFIG_FILE" ]; then
+                [ "$VERBOSE" != no ] && log_warning_msg "strusWebService daemon not enabled in $STRUSWEBSERVICE_DEFAULTS_FILE, not starting..."
+            fi
+	fi
+	;;
+  stop)
+	log_daemon_msg "Stopping strusWebService daemon" "strusWebService"
+	start-stop-daemon --stop --quiet --oknodo --pidfile $STRUSWEBSERVICE_PID_FILE
+	log_end_msg $?
+	rm -f $STRUSWEBSERVICE_PID_FILE
+	;;
+
+  reload|force-reload)
+    pkill -HUP `cat $STRUSWEBSERVICE_PID_FILE`
+	;;
+
+  restart)
+	set +e
+	if $STRUSWEBSERVICE_ENABLE; then
+	    log_daemon_msg "Restarting strusWebService daemon" "strusWebService"
+	    if [ -s $STRUSWEBSERVICE_PID_FILE ] && kill -0 $(cat $STRUSWEBSERVICE_PID_FILE) >/dev/null 2>&1; then
+		start-stop-daemon --stop --quiet --oknodo --pidfile $STRUSWEBSERVICE_PID_FILE || true
+		sleep 1
+	    else
+		log_warning_msg "strusWebService daemon not running, attempting to start."
+	    	rm -f $STRUSWEBSERVICE_PID_FILE
+	    fi
+            STRUSWEBSERVICE_start
+        else
+            if [ -s "$STRUSWEBSERVICE_CONFIG_FILE" ]; then
+                [ "$VERBOSE" != no ] && log_warning_msg "strusWebService daemon not enabled in $STRUSWEBSERVICE_DEFAULTS_FILE, not starting..."
+            fi
+	fi
+	;;
+
+  status)
+	status_of_proc -p $STRUSWEBSERVICE_PID_FILE "$DAEMON" strusWebService
+	exit $?	# notreached due to set -e
+	;;
+  *)
+	echo "Usage: /etc/init.d/strusWebService {start|stop|reload|force-reload|restart|status}"
+	exit 1
+esac
+
+exit 0

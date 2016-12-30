@@ -49,3 +49,4 @@ dist/redhat/strusWebService.conf-SLES11
 dist/redhat/strusWebService.conf-SUSE
 dist/archlinux/strusWebService.conf
 dist/debian/strusWebService.conf
+dist/obs/struswebservice-xUbuntu_14.04.dsc

@@ -18,8 +18,6 @@
 
 #include <booster/log.h>
 
-#include <boost/timer/timer.hpp>
-
 #include <sstream>
 #include <iterator>
 #include <algorithm>
@@ -119,7 +117,7 @@ struct StorageCreateParameters index::merge_create_parameters( const struct Stor
 
 void index::create_cmd( const std::string name )
 {
-	boost::timer::cpu_timer timer;
+	Timer timer;
 
 	if( !ensure_post( ) ) return;
 	if( !ensure_json_request( ) ) return;
@@ -175,7 +173,7 @@ void index::create_cmd( const std::string name )
 	service.registerStorageConfig( name, config );
 
 	cppcms::json::value j;
-	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = timer.elapsed( );;
 	j["execution_time"] = execution_time;
 
 	BOOSTER_INFO( PACKAGE ) << "create_index(" << name << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
@@ -192,7 +190,7 @@ void index::create_cmd( const std::string name )
 
 void index::delete_cmd( const std::string name )
 {
-	boost::timer::cpu_timer timer;
+	Timer timer;
 
 	if( !ensure_post( ) ) return;
 
@@ -230,7 +228,7 @@ void index::delete_cmd( const std::string name )
 	service.unlockIndex( name );
 
 	cppcms::json::value j;
-	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = timer.elapsed( );
 	j["execution_time"] = execution_time;
 
 	BOOSTER_INFO( PACKAGE ) << "delete_index(" << name << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
@@ -255,7 +253,7 @@ static bool metadata_definition_sorter( struct MetadataDefiniton const &meta1, s
 
 void index::config_cmd( const std::string name )
 {
-	boost::timer::cpu_timer timer;
+	Timer timer;
 
 	log_request( );
 
@@ -324,7 +322,7 @@ void index::config_cmd( const std::string name )
 
 	cppcms::json::value j;
 	j["config"] = config;
-	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = timer.elapsed( );
 	j["execution_time"] = execution_time;
 
 	BOOSTER_INFO( PACKAGE ) << "config_index(" << name << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
@@ -341,7 +339,7 @@ void index::config_cmd( const std::string name )
 
 void index::stats_cmd( const std::string name )
 {
-	boost::timer::cpu_timer timer;
+	Timer timer;
 
 	log_request( );
 
@@ -377,7 +375,7 @@ void index::stats_cmd( const std::string name )
 
 	cppcms::json::value j;
 	j["stats"] = stats;
-	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = timer.elapsed( );
 	j["execution_time"] = execution_time;
 
 	BOOSTER_INFO( PACKAGE ) << "stats_index(" << name << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
@@ -394,7 +392,7 @@ void index::stats_cmd( const std::string name )
 
 void index::list_cmd( )
 {
-	boost::timer::cpu_timer timer;
+	Timer timer;
 
 	boost::filesystem::path dir( storage_base_directory );
 
@@ -416,7 +414,7 @@ void index::list_cmd( )
 	cppcms::json::value j;
 	j["result"] = "ok";
 	j["indexes"] = v;
-	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = timer.elapsed( );
 	j["execution_time"] = execution_time;
 
 	BOOSTER_INFO( PACKAGE ) << "list_indexes(" << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
@@ -433,7 +431,7 @@ void index::list_cmd( )
 
 void index::exists_cmd( const std::string name )
 {
-	boost::timer::cpu_timer timer;
+	Timer timer;
 
 	log_request( );
 
@@ -451,7 +449,7 @@ void index::exists_cmd( const std::string name )
 
 	cppcms::json::value j;
 	j["exists"] = dbi->exists( config );
-	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = timer.elapsed( );
 	j["execution_time"] = execution_time;
 
 	service.unlockIndex( name );
@@ -470,7 +468,7 @@ void index::exists_cmd( const std::string name )
 
 void index::open_cmd( const std::string name )
 {
-	boost::timer::cpu_timer timer;
+	Timer timer;
 
 	log_request( );
 
@@ -502,7 +500,7 @@ void index::open_cmd( const std::string name )
 	service.unlockIndex( name );
 
 	cppcms::json::value j;
-	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = timer.elapsed( );
 	j["execution_time"] = execution_time;
 
 	BOOSTER_INFO( PACKAGE ) << "open_index(" << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
@@ -519,7 +517,7 @@ void index::open_cmd( const std::string name )
 
 void index::close_cmd( const std::string name )
 {
-	boost::timer::cpu_timer timer;
+	Timer timer;
 
 	log_request( );
 
@@ -551,7 +549,7 @@ void index::close_cmd( const std::string name )
 	service.unlockIndex( name );
 
 	cppcms::json::value j;
-	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = timer.elapsed( );
 	j["execution_time"] = execution_time;
 
 	BOOSTER_INFO( PACKAGE ) << "close_index(" << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
@@ -568,7 +566,7 @@ void index::close_cmd( const std::string name )
 
 void index::rename_cmd( const std::string name1, const std::string name2 )
 {
-	boost::timer::cpu_timer timer;
+	Timer timer;
 
 	log_request( );
 
@@ -612,7 +610,7 @@ void index::rename_cmd( const std::string name1, const std::string name2 )
 	service.unlockIndex( name1 );
 
 	cppcms::json::value j;
-	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = timer.elapsed( );
 	j["execution_time"] = execution_time;
 
 	BOOSTER_INFO( PACKAGE ) << "rename_index(" << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
@@ -629,7 +627,7 @@ void index::rename_cmd( const std::string name1, const std::string name2 )
 
 void index::swap_cmd( const std::string name1, const std::string name2 )
 {
-	boost::timer::cpu_timer timer;
+	Timer timer;
 
 	log_request( );
 
@@ -686,7 +684,7 @@ void index::swap_cmd( const std::string name1, const std::string name2 )
 	service.unlockIndex( name1 );
 
 	cppcms::json::value j;
-	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = timer.elapsed( );
 	j["execution_time"] = execution_time;
 
 	BOOSTER_INFO( PACKAGE ) << "swap_index(" << std::fixed << std::setprecision( 6 ) << execution_time << "s)";

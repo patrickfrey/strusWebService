@@ -77,6 +77,9 @@ for i in `ls dist/obs/$PACKAGE_NAME-*.dsc`; do
 	cp -a dist/debian $TMPDIR/.
 	test -f dist/obs/control-$OS_ORIG && cp -a dist/obs/control-$OS_ORIG $TMPDIR/debian/control
 	test -f dist/obs/rules-$OS_ORIG && cp -a dist/obs/rules-$OS_ORIG $TMPDIR/debian/rules
+	test -f dist/obs/postinst-$OS_ORIG && cp -a dist/obs/postinst-$OS_ORIG $TMPDIR/debian/postinst
+	test -f dist/obs/postrm-$OS_ORIG && cp -a dist/obs/postrm-$OS_ORIG $TMPDIR/debian/postrm
+	test -f dist/obs/prerm-$OS_ORIG && cp -a dist/obs/prerm-$OS_ORIG $TMPDIR/debian/prerm
 	sed -i "s/${PACKAGE_NAME} (\([0-9.]*\)-\([0-9]*\))/${PACKAGE_NAME} (\1-$GIT_COMMIT_COUNT)/" $TMPDIR/debian/changelog
 
 	OLDDIR=$PWD

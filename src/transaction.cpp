@@ -13,8 +13,6 @@
 
 #include <booster/log.h>
 
-#include <boost/timer/timer.hpp>
-
 #include <cppcms/url_dispatcher.h>  
 #include <cppcms/http_request.h>
 
@@ -136,7 +134,7 @@ void transaction::commit_payload_cmd( const std::string name )
 
 void transaction::commit_cmd( const std::string name, const std::string tid, bool tid_in_url )
 {
-	boost::timer::cpu_timer timer;
+	Timer timer;
 
 	if( !ensure_post( ) ) return;	
 
@@ -217,7 +215,7 @@ void transaction::commit_cmd( const std::string name, const std::string tid, boo
 	service.unlockIndex( name );
 
 	cppcms::json::value j;
-	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = timer.elapsed( );
 	j["execution_time"] = execution_time;
 	j["nof_documents_affected"] = nof_documents_affected;
 
@@ -245,7 +243,7 @@ void transaction::rollback_payload_cmd( const std::string name )
 
 void transaction::rollback_cmd( const std::string name, const std::string tid, bool tid_in_url )
 {
-	boost::timer::cpu_timer timer;
+	Timer timer;
 
 	if( !ensure_post( ) ) return;	
 
@@ -324,7 +322,7 @@ void transaction::rollback_cmd( const std::string name, const std::string tid, b
 	service.deleteStorageTransactionInterface( name, trans_id );
 	
 	cppcms::json::value j;
-	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = timer.elapsed( );
 	j["execution_time"] = execution_time;
 
 	BOOSTER_INFO( PACKAGE ) << "rollback(" << name << ", " << trans_id << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
@@ -349,7 +347,7 @@ static bool transaction_data_sorter( struct TransactionData const &data1, struct
 
 void transaction::list_cmd( const std::string name )
 {
-	boost::timer::cpu_timer timer;
+	Timer timer;
 
 	log_request( );
 
@@ -370,7 +368,7 @@ void transaction::list_cmd( const std::string name )
 	std::vector<TransactionData> v = service.getAllTransactionsDataOfIndex( name );
 	std::sort( v.begin( ), v.end( ), &transaction_data_sorter );
 	j["transactions"] = v;
-	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = timer.elapsed( );
 	j["execution_time"] = execution_time;
 
 	service.unlockIndex( name );

@@ -18,8 +18,6 @@
 #include <cppcms/http_response.h>
 #include <cppcms/json.h>
 
-#include <boost/timer/timer.hpp>
-
 namespace apps {
 
 other::other( strusWebService &service )
