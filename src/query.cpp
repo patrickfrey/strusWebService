@@ -16,8 +16,6 @@
 
 #include <booster/log.h>
 
-#include <boost/timer/timer.hpp>
-
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
@@ -51,7 +49,7 @@ void query::query_payload_cmd( const std::string name )
 	
 void query::query_cmd( const std::string name, const std::string qry, bool query_in_url )
 {
-	boost::timer::cpu_timer timer;
+	Timer timer;
 	
 	if( !query_in_url ) {
 		if( !ensure_post( ) ) return;	
@@ -328,7 +326,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 
 	cppcms::json::value j;
 	j["ranklist"] = response;
-	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = timer.elapsed( );
 	j["execution_time"] = execution_time;
 
 	BOOSTER_INFO( PACKAGE ) << "query(" << std::fixed << std::setprecision( 6 ) << execution_time << "s)";

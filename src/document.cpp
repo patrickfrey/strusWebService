@@ -17,8 +17,6 @@
 #include <booster/log.h>
 #include <booster/locale/format.h>
 
-#include <boost/timer/timer.hpp>
-
 #include "strus/storageTransactionInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/storageDocumentInterface.hpp"
@@ -63,7 +61,7 @@ void document::insert_payload_cmd( const std::string name )
 
 void document::insert_cmd( const std::string name, const std::string id, bool docid_in_url )
 {
-	boost::timer::cpu_timer timer;
+	Timer timer;
 
 	if( !ensure_post( ) ) return;	
 	if( !ensure_json_request( ) ) return;
@@ -234,7 +232,7 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 	delete doc;
 
 	cppcms::json::value j;
-	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = timer.elapsed( );
 	j["execution_time"] = execution_time;
 
 	BOOSTER_INFO( PACKAGE ) << "insert(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
@@ -281,7 +279,7 @@ void document::delete_payload_cmd( const std::string name )
 
 void document::delete_cmd( const std::string name, const std::string id, bool docid_in_url )
 {
-	boost::timer::cpu_timer timer;
+	Timer timer;
 
 	if( !ensure_post( ) ) return;	
 	if( !docid_in_url ) {
@@ -401,7 +399,7 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 	service.unlockIndex( name );
 	
 	cppcms::json::value j;
-	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = timer.elapsed( );
 	j["execution_time"] = execution_time;
 
 	BOOSTER_INFO( PACKAGE ) << "delete(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
@@ -439,7 +437,7 @@ struct FeatureLessThan
 
 void document::get_cmd( const std::string name, const std::string id, bool docid_in_url )
 {
-	boost::timer::cpu_timer timer;
+	Timer timer;
 
 	if( !docid_in_url ) {
 		if( !ensure_post( ) ) return;	
@@ -635,7 +633,7 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 	
 	cppcms::json::value j;
 	j["doc"] = answer;
-	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = timer.elapsed( );
 	j["execution_time"] = execution_time;
 
 	BOOSTER_INFO( PACKAGE ) << "get(" << name << ", " << ( ( trans_id == "" ) ? "<implicit>" : trans_id ) << ", " << docid << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";
@@ -662,7 +660,7 @@ void document::exists_payload_cmd( const std::string name )
 
 void document::exists_cmd( const std::string name, const std::string id, bool docid_in_url )
 {
-	boost::timer::cpu_timer timer;
+	Timer timer;
 
 	if( !docid_in_url ) {
 		if( !ensure_post( ) ) return;	
@@ -736,7 +734,7 @@ void document::exists_cmd( const std::string name, const std::string id, bool do
 			
 	cppcms::json::value j;
 	j["exists"] = exists;
-	double execution_time = (double)timer.elapsed( ).wall / (double)1000000000;
+	double execution_time = timer.elapsed( );
 	j["execution_time"] = execution_time;
 
 	BOOSTER_INFO( PACKAGE ) << "exists(" << name << ", <implicit>" << ", " << docid << ", " << std::fixed << std::setprecision( 6 ) << execution_time << "s)";

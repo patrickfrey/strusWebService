@@ -20,6 +20,12 @@
 
 #include <cppcms/json.h>
 
+#ifdef HAS_CXX11_STD_CHRONO
+#include <chrono>
+#else
+#include <boost/timer/timer.hpp>
+#endif
+
 struct IntegralTypeTag;
 struct FloatingPointTypeTag;
 
@@ -95,5 +101,34 @@ static bool is_of_type( cppcms::json::value const &v, T x )
 {
 	return Types<T>::is_of_type( v, x );
 }
+
+class Timer {
+
+	public:
+#ifdef HAS_CXX11_STD_CHRONO
+		std::chrono::time_point<std::chrono::system_clock> timer;
+#else
+		boost::timer::cpu_timer timer;
+#endif
+	
+	public:
+		Timer( )
+#ifdef HAS_CXX11_STD_CHRONO
+			: timer( std::chrono::system_clock::now( ) )
+#endif
+		{
+		}
+		
+		double elapsed( )
+		{
+#ifdef HAS_CXX11_STD_CHRONO
+			std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now( );
+			std::chrono::duration<double> duration = end - timer;
+			return duration.count( );
+#else
+			return (double)timer.elapsed( ).wall / (double)1000000000;
+#endif
+		}			
+};
 
 #endif
