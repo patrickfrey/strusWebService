@@ -14,7 +14,7 @@ link_directories(
 )
 
 add_executable( queryStructTester queryStructTester.cpp)
-target_link_libraries( queryStructTester ${LIBCPPCMS_LIBRARY} ${LIBBOOSTER_LIBRARY})
+target_link_libraries( queryStructTester ${LIBCPPCMS_LIBRARY} ${LIBBOOSTER_LIBRARY} ${Boost_LIBRARIES})
 
 add_executable( curlJsonTester curlJsonTester.cpp)
 target_link_libraries( curlJsonTester "${CURL_LIBRARIES}" ${LIBCPPCMS_LIBRARY} ${LIBBOOSTER_LIBRARY} curlpp_static)
