@@ -473,12 +473,11 @@ fi
 %endif
 
 %changelog
-#upcoming:
-#* Sun Nov 13 2016 Andreas Baumann <mail@andreasbaumann.cc> 0.0.5-0.1
-#- bugfix and stabilisation release, mainly concurrency issues
-#- transaction garbage collection and close at shutdown
-#- packaging on major Linux distributions and tons of OS integration
-#  fixes
+* Fri Dec 30 2016 Andreas Baumann <mail@andreasbaumann.cc> 0.0.5-0.1
+- bugfix and stabilisation release, mainly concurrency issues
+- transaction garbage collection and close at shutdown
+- packaging on major Linux distributions and tons of OS integration
+  fixes
 
 * Sat Oct 22 2016 Andreas Baumann <mail@andreasbaumann.cc> 0.0.4-0.1
 - bugfixes

@@ -1,8 +1,14 @@
+struswebservice (0.0.5-1) unstable; urgency=low
+  * bugfix and stabilisation release, mainly concurrency issues
+  * transaction garbage collection and close at shutdown
+  * packaging on major Linux distributions and tons of OS integration fixes
+ -- Andreas Baumann <mail@andreasbaumann.cc>  Fri, 30 Dec 2016 14:42:46 +0100
+
 struswebservice (0.0.4-1) unstable; urgency=low
   * bugfixes
   * new commands: swap, close, open index, list transactions, get document
  -- Andreas Baumann <mail@andreasbaumann.cc>  Sat, 22 Oct 2016 15:49:41 +0100
- 
+
 struswebservice (0.0.3-1) unstable; urgency=low
   * fixed packaging, stable pre-release using strus 0.9.0
  -- Andreas Baumann <mail@andreasbaumann.cc>  Sat, 30 Apr 2016 17:09:00 +0100
