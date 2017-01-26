@@ -517,9 +517,9 @@ struct traits<struct Feature *> {
 };
 
 template<>
-struct traits<struct boost::shared_ptr<Node> > {
+struct traits<boost::shared_ptr<Node> > {
 	
-	static struct boost::shared_ptr<Node> get( value const &v )
+	static boost::shared_ptr<Node> get( value const &v )
 	{
 		if( v.type( ) != is_object ) {
 			throw bad_value_cast( );
