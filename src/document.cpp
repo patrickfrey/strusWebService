@@ -609,7 +609,8 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 		strus::DocumentTermIteratorInterface::Term term;
 		while( fit->nextTerm( term ) ) {
 			std::string value = fit->termValue( term.termno );
-			strus::PostingIteratorInterface *pit = storage->createTermPostingIterator( *tit, value );
+			// TODO: length
+			strus::PostingIteratorInterface *pit = storage->createTermPostingIterator( *tit, value, 1 );
 			if( pit->skipDoc( answer.docno ) != answer.docno ) {
 				delete fit;
 				delete pit;
