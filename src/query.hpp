@@ -47,7 +47,8 @@ struct Term : public Node {
 	
 	virtual void produceQuery( strus::QueryProcessorInterface *query_processor, strus::QueryInterface *query ) const
 	{
-		query->pushTerm( type, value );
+		// TODO: any way to have a length != 1 here?
+		query->pushTerm( type, value, 1 );
 	}
 	
 	virtual Node *clone( ) const
