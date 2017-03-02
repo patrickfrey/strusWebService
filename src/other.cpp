@@ -36,6 +36,8 @@ void other::set_allow_quit_command( bool _allow_quit_command )
 
 void other::ping_cmd( )
 {
+	if( !handle_preflight_cors( ) ) return;
+
 	cppcms::json::value j;
 	j["ping"] = "pong";
 
@@ -46,6 +48,8 @@ void other::ping_cmd( )
 
 void other::version_cmd( )
 {
+	if( !handle_preflight_cors( ) ) return;
+
 	cppcms::json::value j;
 	j["version"]["strus"] = STRUS_STORAGE_VERSION_STRING;
 	j["version"]["webservice"] = STRUS_WEB_SERVICE_VERSION_STRING;
@@ -58,6 +62,8 @@ void other::version_cmd( )
 void other::config_cmd( )
 {
 	cppcms::json::value j;
+
+	if( !handle_preflight_cors( ) ) return;
 
 	strus::QueryProcessorInterface *query_processor = service.getQueryProcessorInterface( );
 	if( !query_processor ) {

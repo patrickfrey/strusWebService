@@ -42,7 +42,14 @@
 	},
 	
 	"security" : {
-		"content_length_limit": 16384000
+		"content_length_limit": 16384000,
+		"cors" : {
+			"allowed_origins" : [
+				"http://eeepc.lan:1313",
+				"http://localhost:1313"
+			],
+			"age" : 10
+		}
 	},
 	
 	"logging" : {

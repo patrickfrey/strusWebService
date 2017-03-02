@@ -63,6 +63,7 @@ void document::insert_cmd( const std::string name, const std::string id, bool do
 {
 	Timer timer;
 
+	if( !handle_preflight_cors( ) ) return;
 	if( !ensure_post( ) ) return;	
 	if( !ensure_json_request( ) ) return;
 
@@ -259,6 +260,7 @@ void document::update_payload_cmd( const std::string name )
 
 void document::update_cmd( const std::string name, const std::string id, bool docid_in_url )
 {
+	if( !handle_preflight_cors( ) ) return;
 	if( !ensure_post( ) ) return;	
 	if( !ensure_json_request( ) ) return;
 	
@@ -281,6 +283,7 @@ void document::delete_cmd( const std::string name, const std::string id, bool do
 {
 	Timer timer;
 
+	if( !handle_preflight_cors( ) ) return;
 	if( !ensure_post( ) ) return;	
 	if( !docid_in_url ) {
 		if( !ensure_json_request( ) ) return;
@@ -439,6 +442,7 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 {
 	Timer timer;
 
+	if( !handle_preflight_cors( ) ) return;
 	if( !docid_in_url ) {
 		if( !ensure_post( ) ) return;	
 		if( !ensure_json_request( ) ) return;
@@ -663,6 +667,7 @@ void document::exists_cmd( const std::string name, const std::string id, bool do
 {
 	Timer timer;
 
+	if( !handle_preflight_cors( ) ) return;
 	if( !docid_in_url ) {
 		if( !ensure_post( ) ) return;	
 		if( !ensure_json_request( ) ) return;

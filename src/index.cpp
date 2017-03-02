@@ -119,6 +119,7 @@ void index::create_cmd( const std::string name )
 {
 	Timer timer;
 
+	if( !handle_preflight_cors( ) ) return;
 	if( !ensure_post( ) ) return;
 	if( !ensure_json_request( ) ) return;
 
@@ -192,6 +193,7 @@ void index::delete_cmd( const std::string name )
 {
 	Timer timer;
 
+	if( !handle_preflight_cors( ) ) return;
 	if( !ensure_post( ) ) return;
 
 	log_request( );
