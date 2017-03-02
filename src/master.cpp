@@ -138,6 +138,38 @@ void master::not_found_404( )
 	report_error( 404, "Illegal URL" );
 }
 
+bool master::handle_preflight_cors( )
+{
+	std::vector<std::string> cors_hosts = settings( ).get<std::vector<std::string> >( "security.cors.allowed_origins" );
+	std::string origin = request( ).getenv( "HTTP_ORIGIN" );
+	if( origin.empty( )|| cors_hosts.size( ) == 0 ) {
+		// no Origin header, let's assume we can continue
+		return true;
+	}
+	std::vector<std::string>::const_iterator it, end = cors_hosts.end( );
+	for( it = cors_hosts.begin( ); it != end; it++ ) {
+		if( *it == origin ) {
+			// though Access-Control-Allow-Origin should allow a
+			// list of space separated hosts, in practive only
+			// echoing the origin Origin host works
+			response( ).content_type( "application/json" );
+			response( ).set_header( "Access-Control-Allow-Method", "GET, POST" );
+			response( ).set_header( "Access-Control-Allow-Origin", origin );
+			response( ).set_header( "Access-Control-Allow-Headers", "content-type" );
+			int age = settings( ).get<int>( "security.cors.age" );
+			std::ostringstream ss;
+			ss << age;
+			response( ).set_header( "Access-Control-Max-Age", ss.str( ) );
+			return true;
+		}
+	}
+
+	// drop out of normal processing because we are in the accepted
+	// preflight check. When the allow origin is set, the browser will
+	// act accordingly and come back with the original request
+	return false;
+}
+
 bool master::ensure_post( )
 {
 	if( request( ).request_method( ) != "POST" ) {

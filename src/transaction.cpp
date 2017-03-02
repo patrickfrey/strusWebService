@@ -46,6 +46,7 @@ void transaction::begin_payload_cmd( const std::string name )
 
 void transaction::begin_cmd( const std::string name, const std::string tid, bool tid_in_url )
 {	
+	if( !handle_preflight_cors( ) ) return;
 	if( !ensure_post( ) ) return;	
 
 	log_request( );
@@ -136,6 +137,7 @@ void transaction::commit_cmd( const std::string name, const std::string tid, boo
 {
 	Timer timer;
 
+	if( !handle_preflight_cors( ) ) return;
 	if( !ensure_post( ) ) return;	
 
 	log_request( );
@@ -245,6 +247,7 @@ void transaction::rollback_cmd( const std::string name, const std::string tid, b
 {
 	Timer timer;
 
+	if( !handle_preflight_cors( ) ) return;
 	if( !ensure_post( ) ) return;	
 
 	log_request( );

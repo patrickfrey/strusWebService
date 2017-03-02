@@ -51,6 +51,7 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 {
 	Timer timer;
 	
+	if( !handle_preflight_cors( ) ) return;
 	if( !query_in_url ) {
 		if( !ensure_post( ) ) return;	
 		if( !ensure_json_request( ) ) return;
