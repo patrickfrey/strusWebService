@@ -140,6 +140,11 @@ void master::not_found_404( )
 
 bool master::handle_preflight_cors( )
 {
+	if( !settings( ).get<bool>( "security.cors.enable", false ) ) {
+		// no CORS configured
+		return true;
+	}
+	
 	std::vector<std::string> cors_hosts = settings( ).get<std::vector<std::string> >( "security.cors.allowed_origins" );
 	std::string origin = request( ).getenv( "HTTP_ORIGIN" );
 	if( origin.empty( )|| cors_hosts.size( ) == 0 ) {

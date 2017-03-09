@@ -44,6 +44,7 @@
 	"security" : {
 		"content_length_limit": 16384000,
 		"cors" : {
+			"enable" : true,
 			"allowed_origins" : [
 				"http://eeepc.lan:1313",
 				"http://localhost:1313"
