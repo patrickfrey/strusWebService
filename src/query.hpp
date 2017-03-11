@@ -227,6 +227,7 @@ struct SummarizerConfiguration {
 	std::string attribute;
 	std::string name;
 	std::vector<std::pair<std::string, struct ParameterValue> > params;
+	std::vector<std::pair<std::string, std::string> > resultnames;
 };
 
 struct MetadataCondition {
@@ -619,6 +620,7 @@ struct traits<struct SummarizerConfiguration> {
 		s.attribute = v.get<std::string>( "attribute" );
 		s.name = v.get<std::string>( "name" );
 		s.params = v.get<std::vector<std::pair<std::string, struct ParameterValue> > >( "params" );
+		s.resultnames = v.get<std::vector<std::pair<std::string, std::string> > >( "resultnames", std::vector<std::pair<std::string, std::string> >( ) );
 		return s;
 	}
 	
@@ -627,6 +629,7 @@ struct traits<struct SummarizerConfiguration> {
 		v.set( "attribute", s.attribute );
 		v.set( "name", s.name );
 		v.set( "params", s.params );
+		v.set( "resultnames", s.resultnames );
 	}
 };
 

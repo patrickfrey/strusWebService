@@ -238,6 +238,11 @@ void query::query_cmd( const std::string name, const std::string qry, bool query
 					return;
 			}			
 		}
+		
+		for( std::vector<std::pair<std::string, std::string> >::const_iterator rit = it->resultnames.begin( ); rit != it->resultnames.end( ); rit++ ) {
+			summarizer->defineResultName( rit->second, rit->first );
+		}		
+		
 		query_eval->addSummarizerFunction( name, summarizer, summarizer_parameters );
 	}
 
