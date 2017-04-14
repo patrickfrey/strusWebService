@@ -73,6 +73,8 @@ link_directories(
 add_executable(strusWebService ${SRC})
 target_link_libraries(strusWebService ${Boost_LIBRARIES} ${LIBCPPCMS_LIBRARY} ${LIBBOOSTER_LIBRARY} strus_storage strus_error strus_database_leveldb strus_queryeval strus_queryproc strus_module strus_error ${Boost_LIBRARIES})
 
+include( cmake/report_build_settings.cmake )
+
 install( TARGETS strusWebService RUNTIME DESTINATION sbin )
 
 ADD_CUSTOM_TARGET(run @echo runs the web service)

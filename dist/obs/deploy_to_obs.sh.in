@@ -32,6 +32,7 @@ GIT_COMMIT_COUNT=`git describe --long --tags | cut -f 2 -d -`
 
 cp ${PACKAGE_NAME}-${PACKAGE_VERSION}.tar.gz $OSC_HOME/${PACKAGE_NAME}_${PACKAGE_VERSION}.tar.gz
 cp dist/redhat/$PACKAGE_NAME.spec $OSC_HOME/$PACKAGE_NAME.spec
+cp dist/redhat/*.patch $OSC_HOME/
 sed -i "s/Version:.*/Version: %{main_version}.${GIT_COMMIT_COUNT}/" $OSC_HOME/$PACKAGE_NAME.spec
 
 # Debian/Ubuntu

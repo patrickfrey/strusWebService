@@ -91,6 +91,7 @@ License: MPLv2
 Group: Development/Libraries/C++
 
 Source: %{name}_%{main_version}.tar.gz
+Patch0: struswebservice-0.5.0-sles11-long-long.patch
 
 URL: http://github.com/Eurospider/strusWebService
 
@@ -248,10 +249,16 @@ strus search engine API.
 %prep
 %setup -n %{name}-%{main_version}
 
+%if %{suse} || %{sles}
+%if %{sles11}
+%patch0 -p1
+%endif
+%endif
+
 %build
 
 cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DLIB_INSTALL_DIR=%{_lib} .
-make %{?_smp_mflags}
+make %{?_smp_mflags} VERBOSE=1
 
 %install
 
