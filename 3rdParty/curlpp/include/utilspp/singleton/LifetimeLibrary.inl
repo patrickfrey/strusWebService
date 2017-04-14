@@ -8,7 +8,7 @@ utilspp::setLibraryLongevity(T * obj, unsigned int longevity, TDestroyer d)
          obj, longevity, d);
 
    utilspp::LifetimeLibrarySingleton::instance().add(p);
-};
+}
 
 template<typename T>
 void 

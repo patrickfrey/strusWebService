@@ -2,7 +2,7 @@
 /* config.h.in    Generated from configure.ac by autoheader.   */
 
 /* Define when building curlpp itself */
-/* DO NOT define or undefine this symbol if you are building from the IDE
+/* DO NOT define or undefine this symbol if you are building from the IDE */
 /* using solution files for VC9. Project files define or undefine this from within the IDE */
 //#define BUILDING_CURLPP
 
@@ -61,7 +61,9 @@
 #undef PACKAGE_VERSION
 
 /* Define to 1 if you have the ANSI C header files. */
+#ifndef STDC_HEADERS
 #define STDC_HEADERS
+#endif
 
 /* Version number of package */
 #define VERSION 0.7.2

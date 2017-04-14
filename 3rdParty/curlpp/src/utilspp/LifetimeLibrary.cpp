@@ -36,7 +36,7 @@ utilspp::LifetimeLibraryImpl::add(utilspp::PrivateMembers::LifetimeTracker * tra
    
    *pos = tracker;
    mNbElements++;
-};
+}
 
 void
 utilspp::LifetimeLibraryImpl::terminate()

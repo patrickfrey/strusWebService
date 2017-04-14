@@ -1,0 +1,12 @@
+diff -rauN struswebservice-0.0.5/cmake/build_rules.cmake struswebservice-0.0.5-sles11-long-long-patch/cmake/build_rules.cmake
+--- struswebservice-0.0.5/cmake/build_rules.cmake	2017-04-14 10:23:31.000000000 +0200
++++ struswebservice-0.0.5-sles11-long-long-patch/cmake/build_rules.cmake	2017-04-14 10:35:42.696090003 +0200
+@@ -12,7 +12,7 @@
+ set_property(GLOBAL PROPERTY rule_launch_link ccache)
+ 
+ if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wfatal-errors -fvisibility=hidden" )
++set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -fvisibility=hidden" )
+ set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall -pedantic -Wfatal-errors" )
+ endif()
+ if("${CMAKE_CXX_COMPILER_ID}" MATCHES "[cC]lang")

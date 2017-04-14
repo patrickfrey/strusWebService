@@ -31,7 +31,7 @@ utilspp::setLongevity(T * obj, unsigned int longevity, TDestroyer d)
    *pos = p;
    mNbElements++;
    std::atexit(&atExitFunc);
-};
+}
 
 template<typename T>
 void 
