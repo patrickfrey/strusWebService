@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>strus - strusWebService</title>
+
+		<meta name="description" content="Build systems in open source Software focused on C++ development">
+		<meta name="author" content="Andreas Baumann">
+
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+		
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		  <script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+
+		<meta name="generator" content="Hugo 0.20-DEV" />
+	</head>
+
+	<body>
+
+
+<div class="reveal">
+
+            <!-- Any section element inside of this container is displayed as a slide -->
+            <div class="slides">
+                <section>
+                    <h1>Strus - Web Service</h1>
+                    <p>
+                        <small>Created by <a href="http://www.andreasbaumann.cc">Andreas Baumann</a></small>
+                    </p>
+                    <p>
+                        <small><a href="http://eurospider.github.io/strusWebService">http://eurospider.github.io/strusWebService</a></small>
+                    </p>
+                    <p><small>(C)2015/2016</small></p>
+                </section>
+
+                <section>
+                    <h2>Outline</h2>
+                    <ul>
+                        <li>Have a web service, language independent, for search.</li>
+                        <li>The software to the vision exists, it's called <b>Elasticsearch.</b></li>
+                        <li>Based on Lucene, so we do the same with Strus</li>
+                        <li>Currently there is a Java API which uses this service</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Strus web service</h2>
+                    <ul>
+                        <li>uses JSON and HTTP GET/POST</li>
+                        <li>implemented using <a href="http://cppcms.com/wikipp/en/page/main">CppCMS</a></li>
+                        <li>uses only the <a href="http://patrickfrey.github.io/strus/doc/doxygen/html/index.html">Strus core API</a> currently</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Design rationales</h2>
+                    <ul>
+                        <li>standard technology (HTTP, JSON)</li>
+                        <li>CRUD (all basic functions exists for all classes)</lib>
+                        <li>proxyable and securable</li>
+                        <li>zero-configuration</li>
+                        <li>scalable</li>
+                        <li>C++</li>
+                        <li>MPL v2</li>
+                        <li>runs on Linux, OSX, FreeBSD</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Protocol</h2>
+                    <ul>
+                        <li>Service functions</li>
+                        <li>Index functions</li>
+                        <li>Document functions</li>
+                        <li>Query functions</li>
+                        <li>Transactions</li>
+                        <li>Statistics</li>
+                        <li>Introspection and Configuration</li>
+                    </ul>
+                </section>
+                
+                <section>
+                    <h2>Protocol</h2>
+                    <ul>
+                        <li>Manipulate indexes:
+                            <pre><code class="hljs" data-trim contenteditable>
+curl -XPOST -H 'Content-Type: application/json'
+http://localhost:8080/strus/index/create/A
+'-d { "params" : { } }'
+
+{"result":"ok"}
+
+curl -XPOST http://localhost:8080/strus/index/delete/A
+{"result":"ok"}
+
+curl -XPOST http://localhost:8080/strus/index/exists/A
+{"exists":false,"result":"ok"}
+
+                            </code></pre>
+                        </li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Protocol</h2>
+                    <ul>
+                        <li>Insert document:
+                            <pre><code class="hljs" data-trim contenteditable>
+curl -XPOST -H 'Content-Type: application/json'
+http://localhost:8080/strus/document/insert/A
+-d
+{ "doc" : { "docid" : "doc3",
+    "attributes" : [ 
+    { "key" : "title", "value" : "This is a Hello World Document" },
+    { "key" : "attr1", "value" : "val1" },
+    { "key" : "attr2", "value" : "val2" } ],
+    "metadata" : [ 
+        { "key" : "doclen", "value" : 23773 }, { "key" : "docweight", "value" : 3.1415 } ], 
+    "forward" : [ 
+        { "type" : "word", "value" : "Hello", "pos": 1 },
+        { "type" : "word", "value" : "World", "pos" : 2 } ],
+    "search" : [
+        { "type" : "Word", "value" : "hello", "pos": 1 }, 
+        { "type" : "word", "value" : "world", "pos" : 2 } ] } 
+}
+                            </code></pre>
+                        </li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Protocol</h2>
+                    <ul>
+                        <li>Query:
+                            <pre><code class="hljs" data-trim contenteditable>
+curl -XPOST -H 'Content-Type: application/json'
+http://localhost:8080/strus/query/A
+-d
+{ "query": {
+        "first_rank": 0,
+        "nof_ranks": 20,
+        "weighting": {
+            "scheme": {
+                "name": "bm25",
+                "params": [
+                    {
+                        "key": "b",
+                        "value": 0.75
+                    },
+                    {
+                        "key": "k1",
+                        "value": 1.0001
+                    },
+                    {
+                        "key": "avgdoclen",
+                        "value": 11943
+                    }
+                ]
+            }
+        },
+        "summarizer": [
+            {
+                "attribute": "attribute",
+                "name": "attribute",
+                "params": [
+                    {
+                        "key": "name",
+                        "value": "docid"
+                    }
+                ]
+            }
+        ],
+        "features": [
+            {
+        "name": "feat",
+                "value": {
+                        "term": {
+                                "type": "word",
+                                "value": "hello"
+                                }
+                         },
+                         "weight": 1
+            },
+            {
+                "name": "sel",
+                "value": {
+                         "expression": {
+                                "operator": "union",
+                                        "range": 0,
+                                        "cardinality": 0,
+                                        "terms": [
+                                                {
+                                                        "term": {
+                                                                "type": "word",
+                                                                "value": "hello"
+                                                         }
+                                                }
+                                        ]
+                         }
+                },
+                "weight": 1
+            }
+        ],
+        "select": [
+            "sel"
+        ]
+}
+
+{
+  "execution_time": 0.000983791,
+  "ranklist": {
+    "documents_ranked": 1,
+    "documents_visited": 1,
+    "passes_evaluated": 0,
+    "ranks": [
+      {
+        "attributes": [
+          {
+            "key": "docid",
+            "value": "doc3"
+          }
+        ],
+        "docno": 1,
+        "weight": 0
+      }
+    ]
+  },
+  "result": "ok"
+}
+                            </code></pre>
+                        </li>
+                    </ul>
+                </section>
+                
+                <section>
+                    <h2>Protocol</h2>
+                    <ul>
+                        <li>Transactions:
+                            <pre><code class="hljs" data-trim contenteditable>
+curl -XPOST -H 'Content-Type: application/json'
+http://localhost:8080/strus/transaction/begin/A/T1
+
+curl -XPOST -H 'Content-Type: application/json'
+http://localhost:8080/strus/document/insert/A
+-d
+{ "transaction" : { "id" : "T1" },
+  "doc" : { "docid" : "doc1",
+  ...
+}
+    
+curl -XPOST -H 'Content-Type: application/json'
+http://localhost:8080/strus/transaction/commit/A/T1
+                            </code></pre>
+                        </li>
+                    </ul>
+                </section>                              
+
+                <section>
+                    <h2>Protocol</h2>
+                    <ul>
+                        <li>Introspection (document):
+                            <pre><code class="hljs" data-trim contenteditable>
+curl -XPOST -H 'Content-Type: application/json'
+http://localhost:8080/strus/document/get/A/doc3
+
+{
+  "doc": {
+    "attributes": [
+      {
+        "key": "attr1",
+        "value": "val1"
+      },
+      {
+        "key": "attr2",
+        "value": "val2"
+      },
+      {
+        "key": "docid",
+        "value": "doc3"
+      },
+      {
+        "key": "title",
+        "value": "This is a Hello World Document"
+      }
+    ],
+    "docno": 1,
+    "forward": [
+      {
+        "pos": 1,
+        "type": "word",
+        "value": "Hello"
+      },
+      {
+        "pos": 2,
+        "type": "word",
+        "value": "World"
+      }
+    ],
+    "metadata": [
+      {
+        "key": "docweight",
+        "value": 3.141499996185303
+      },
+        {
+        "key": "doclen",
+        "value": 23773
+      },
+      {
+        "key": "date",
+        "value": 0
+      }
+    ],
+    "search": [
+      {
+        "pos": 1,
+        "type": "word",
+        "value": "hello"
+      },
+      {
+        "pos": 2,
+        "type": "word",
+        "value": "world"
+      }
+    ]
+   },
+  "execution_time": 0.00028157,
+  "result": "ok"
+}   
+                            </code></pre>
+                        </li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Protocol</h2>
+                    <ul>
+                        <li>Statistics and introspection (index):
+                            <pre><code class="hljs" data-trim contenteditable>
+curl http://localhost:8080/strus/index/stats/A
+
+{"result":"ok","stats":{"nof_docs":1}}
+
+curl http://localhost:8080/strus/index/config/A
+
+{"config":{
+    "attributes":["attr1","attr2","docid","title"],
+    "metadata":[{"name":"date","type":"UInt16"},{"name":"doclen","type":"UInt16"},{"name":"docweight","type":"Float32"}],
+    "types":["word"]},
+"result":"ok"}
+                            </code></pre>
+                        </li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Protocol</h2>
+                    <ul>
+                        <li>Statistics and introspection (system):
+                            <pre><code class="hljs" data-trim contenteditable>
+curl http://localhost:8080/strus/config
+{"config":{
+    "posting_join_operators":[
+        "chain","chain_struct","contains","diff","inrange","inrange_struct","intersect","pred","sequence","sequence_struct","succ","union","within","within_struct"],
+    "summarizer_functions":[
+        "accuvariable","attribute","matchphrase","matchpos","matchvariables","metadata"],
+    "weighting_funtions":[
+        "bm25","formula","metadata","td","tf"]},
+"result":"ok"}
+
+   ... 
+   "weighting_functions": [
+      {
+        "description": "Calculate the document weight with the weighting scheme \"BM25\"",
+        "name": "bm25",
+        "parameter": [
+          {
+            "description": "defines the query features to weight",
+            "name": "match",
+            "type": "feature"
+          },
+          {
+            "description": "parameter of the BM25 weighting scheme",
+            "name": "k1",
+            "type": "numeric"
+          },
+    ...
+                            </code></pre>
+                        </li>
+                    </ul>
+                </section>
+                
+                <section>
+                    <h2>Strus web service</h2>
+                    <h3>Links</h3>
+                    <ul>
+                        <li><a href="http://github.com/Eurospider/strusWebService">http://github.com/Eurospider/strusWebService</a></li>
+                        <li><a href="https://build.opensuse.org/package/show/home:PatrickFrey/struswebservice">packages and builds on OBS</a></li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Java API</h2>
+                    <ul>
+                        <li>Uses latest Java 1.8 (aka requires Java 1.8)</li>
+                        <li>Uses Jackson for POJO serialization from/to JSON</li>
+                        <li>uses javax.ws.rs.client web service classes for HTTP</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Java API</h2>
+                    <h3>Links</h3>
+                    <ul>
+                        <li><a href="http://github.com/Eurospider/strusJavaAPI">http://github.com/Eurospider/strusJavaAPI</a></li>
+                        <li><a href="http://eurospider.github.io/strusJavaApi/apidocs/index.html">JavaDoc</a></li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Todos and future</h2>
+                    <ul>
+                        <li>support all functions from all strus APIs, not only small part of query and storage interface</li>
+                        <li>reimplementation (C++11, alternatives to cppcms?, HTTP/2.0 support? using new strusBindings)</li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			
+			
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', 
+
+				
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
+
+
