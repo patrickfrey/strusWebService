@@ -14,6 +14,6 @@ Currently only functionality from the [strus](https://github.com/patrickfrey/str
 is exposed, not from other parts of strus (e. g. strusAnalyzer).
 
 A small presentation of ideas is available
-[here](http://www.andreasbaumann.cc/presentations/struswebservice.html).
+[here](http://eurospider.github.io/strusWebService/doc/slides/strus-webservice.html).
 
 Roadmap is available [here](ROADMAP.md).
