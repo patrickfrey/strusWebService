@@ -2,7 +2,7 @@
 
 PACKAGE_NAME=struswebservice
 PACKAGE_VERSION=@STRUS_WEB_SERVICE_VERSION@
-OSC_HOME=$HOME/home:andreas_baumann/$PACKAGE_NAME
+OSC_HOME=$HOME/home:PatrickFrey/$PACKAGE_NAME
 
 TMPDIR=/tmp
 
