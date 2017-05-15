@@ -207,7 +207,7 @@ struct ParameterValue {
 		
 	ParameterValue( const int &i )
 		: type( PARAMETER_TYPE_NUMERIC ),
-		n( i ) { }
+		n( (int64_t)i ) { }
 	
 	ParameterValue( const float &f )
 		: type( PARAMETER_TYPE_NUMERIC ),
