@@ -216,7 +216,7 @@ struct traits<std::pair<std::string, strus::NumericVariant> > {
 		switch( val.type( ) ) {
 			case is_boolean:
 				// TODO: really? Do we allow this?
-				p.second = ( v.get<bool>( "value" ) ) ? 1L : 0L;
+				p.second = ( v.get<bool>( "value" ) ) ? (uint64_t)1 : (uint64_t)0;
 				break;
 			
 			case is_string:
