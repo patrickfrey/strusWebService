@@ -316,7 +316,7 @@ void index::config_cmd( const std::string name )
 	}
 	std::sort( config.metadata.begin( ), config.metadata.end( ), &metadata_definition_sorter );
 
-	std::vector<std::string> attrNames = attributeReader->getAttributeNames( );
+	std::vector<std::string> attrNames = attributeReader->getNames( );
 	std::sort( attrNames.begin( ), attrNames.end( ) );
 	config.attributes = attrNames;
 

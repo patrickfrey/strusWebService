@@ -545,7 +545,7 @@ void document::get_cmd( const std::string name, const std::string id, bool docid
 
 	// first fetch all possible attribute names which have been attached
 	// to all documents
-	std::vector<std::string> attrNames = attributeReader->getAttributeNames( );
+	std::vector<std::string> attrNames = attributeReader->getNames( );
 	std::sort( attrNames.begin( ), attrNames.end( ) );
 
 	// skip to document and iterate over all attribute names and add them if we find
