@@ -86,9 +86,11 @@ StrusContext::StrusContext( cppcms::service *srv, unsigned int nof_threads, cons
 		boost::filesystem::path path( moduleDir );
 		boost::filesystem::path fullPath = boost::filesystem::absolute( path ) /= *it;
 		BOOSTER_DEBUG( PACKAGE ) << "Loading module '" << fullPath.string( ) << "'";
-		
+
 		strus::ModuleEntryPoint::Status status;
-		const strus::ModuleEntryPoint *entrypoint = strus::loadModuleEntryPoint( fullPath.string( ).c_str( ), status, &matchModuleVersion );
+		strus::ModuleEntryPoint::Handle hnd;
+		const strus::ModuleEntryPoint *entrypoint = strus::loadModuleEntryPoint( fullPath.string( ).c_str( ), status, hnd, &matchModuleVersion );
+
 		if( !entrypoint ) {
 			BOOSTER_WARNING( PACKAGE ) << "failed loading extension module '" << fullPath.string( ) << "': " << status.errormsg;
 			continue;
