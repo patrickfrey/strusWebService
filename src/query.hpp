@@ -200,7 +200,6 @@ struct ParameterValue {
 	enum ParameterType type;
 	std::string s;
 	strus::NumericVariant n;
-	bool b;
 	
 	ParameterValue( )
 		: type( PARAMETER_TYPE_UNKNOWN ) { }
