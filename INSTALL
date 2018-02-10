@@ -1,3 +1,0 @@
-cmake -DCMAKE_INSTALL_PREFIX=/usr -DLIB_INSTALL_DIR=lib -DCMAKE_BUILD_TYPE=Debug .
-make
-make run

@@ -17,3 +17,11 @@ A small presentation of ideas is available
 [here](http://eurospider.github.io/strusWebService/doc/slides/strus-webservice.html).
 
 Roadmap is available [here](ROADMAP.md).
+
+
+# strusWebService based on strusBindings
+
+This clone of the project relies on a different API. It uses papuga to map XML/JSON requests to calls of the [strusBindings API (example Lua)](http://www.project-strus.net/luaBindingsDoc.htm) instead of doing the job based on the API of the projects strus and strusAnalyzer.
+
+
+

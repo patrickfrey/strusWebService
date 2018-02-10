@@ -2,515 +2,289 @@
  * Copyright (c) 2014 Patrick P. Frey
  * Copyright (c) 2015,2016 Andreas Baumann
  * Copyright (c) 2015,2016 Eurospider IT AG Zurich
+ * Copyright (c) 2017,2018 Patrick P. Frey, Andreas Baumann, Eurospider IT AG Zurich
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-
-#include "strusWebService.hpp"
-
+#include "strus/lib/error.hpp"
+#include "strus/lib/module.hpp"
+#include "strus/webRequestHandlerInterface.hpp"
+#include "strus/webRequestContextInterface.hpp"
+#include "strus/webRequestLoggerInterface.hpp"
+#include "strus/moduleLoaderInterface.hpp"
+#include "strus/errorCodes.hpp"
+#include "webRequestLogger.hpp"
+#include "defaultContants.hpp"
+#include "configUtils.hpp"
+#include "applicationImpl.hpp"
+#include "serviceClosure.hpp"
+#include "versionWebService.hpp"
+#include "strus/versionStorage.hpp"
+#include "strus/versionModule.hpp"
+#include "strus/versionRpc.hpp"
+#include "strus/versionTrace.hpp"
+#include "strus/versionAnalyzer.hpp"
+#include "strus/versionBase.hpp"
+#include "strus/base/local_ptr.hpp"
+#include "strus/base/programOptions.hpp"
+#include "strus/base/atomic.hpp"
+#include "strus/base/fileio.hpp"
+#include "strus/base/string_format.hpp"
 #include <booster/log.h>
-
-#include <cppcms/service.h>
-
-#include "strus/lib/database_leveldb.hpp"
-#include "strus/lib/storage.hpp"
-
-#include <booster/locale/format.h>
-
-#include <boost/filesystem.hpp>
-
-#include <sstream>
-
-#include "strus/lib/queryeval.hpp"
-#include "strus/lib/queryproc.hpp"
-#include "strus/storageTransactionInterface.hpp"
-
 #include <signal.h>
-#include <ctime>
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
 
-namespace apps {
+#undef STRUS_LOWLEVEL_DEBUG
 
-strusWebService::strusWebService( cppcms::service &_srv, StrusContext *_context, bool pretty_print )
-	: cppcms::application( _srv ), srv( _srv ), context( _context ),
-	storage_base_directory( settings( ).get<std::string>( "storage.basedir" ) ),
-	qpi( 0 ), qei( 0 ), log_requests( DEFAULT_DEBUG_LOG_REQUESTS ),
-	master( *this ),
-	other( *this ),
-	index( *this, settings( ).get<std::string>( "storage.basedir" ) ),
-	document( *this ),
-	query( *this ),
-	transaction( *this )
+// Global flags:
+static bool g_verbose = false;
+static strus::AtomicFlag g_terminate;
+static strus::AtomicFlag g_got_sighup;
+
+// Signal handler:
+static void signal_handler( int sig )
 {
-	BOOSTER_DEBUG( PACKAGE ) << "Starting strus web service";
-	
-	add( master );
-	add( other );
-	add( index );
-	add( document );
-	add( query );
-	add( transaction );
-			
-	if( settings( ).get<bool>( "democlient.enable" ) ) {
-		master.register_democlient_pages( );
+	if (g_verbose)
+	{
+		std::cerr << "got signal " << sig << std::endl;
 	}
-	master.register_common_pages( );
-	
-	if( !pretty_print ) {
-		pretty_print = settings( ).get<bool>( "debug.protocol.pretty_print", DEFAULT_DEBUG_PROTOCOL_PRETTY_PRINT );
-	}
-	master.set_pretty_printing( pretty_print );
-	other.set_pretty_printing( pretty_print );
-	index.set_pretty_printing( pretty_print );
-	document.set_pretty_printing( pretty_print );
-	query.set_pretty_printing( pretty_print );
-	transaction.set_pretty_printing( pretty_print );
-	
-	log_requests = settings( ).get<bool>( "debug.log_requests", DEFAULT_DEBUG_LOG_REQUESTS );
-	log_request_filename = settings( ).get<std::string>( "debug.request_file", DEFAULT_DEBUG_REQUEST_FILE );
-	
-	master.set_log_requests( log_requests );
-	other.set_log_requests( log_requests );
-	index.set_log_requests( log_requests );
-	document.set_log_requests( log_requests );
-	query.set_log_requests( log_requests );
-	transaction.set_log_requests( log_requests );
-	
-	bool allow_quit_command = settings( ).get<bool>( "debug.protocol.enable_quit_command", DEFAULT_DEBUG_PROTOCOL_ENABLE_QUIT_COMMAND );
-	other.set_allow_quit_command( allow_quit_command );
-}
-
-strusWebService::~strusWebService( )
-{
-	BOOSTER_DEBUG( PACKAGE ) << "Shutting down strus web service";
-
-	for( std::map<pthread_t, std::ofstream *>::iterator it = log_request_streams.begin( ); it != log_request_streams.end( ); it++ ) {
-		delete it->second;
+	switch( sig ) {
+		case SIGHUP:
+			g_got_sighup.set( true);
+			break;
+		default:
+			// unknown signal, ignore
+			break;
 	}
 }
 
-StrusIndexContext *strusWebService::getOrCreateStrusContext( const std::string &name )
+static void on_exit_handler( int ec, void*)
 {
-	StrusIndexContext *ctx = context->acquire( name );
-	if( ctx == 0 ) {
-		ctx = new StrusIndexContext( name, getStorageConfig( storage_base_directory, name ) );
-	}
-	context->release( name, ctx );
-	return ctx;
-}
-
-void strusWebService::registerStorageConfig( const std::string &name, const std::string &config )
-{
-	// TODO: actually we should rather throw here (why?)
-	StrusIndexContext *ctx = getOrCreateStrusContext( name );
-	ctx->config = config;
-	context->release( name, ctx );
-}
-
-strus::DatabaseInterface *strusWebService::getDataBaseInterface( const std::string &name )
-{
-	StrusIndexContext *ctx = getOrCreateStrusContext( name );
-	if( ctx->dbi == 0 ) {
-		strus::DatabaseInterface *dbi = strus::createDatabaseType_leveldb( context->errorhnd );
-		if( dbi == 0 ) {
-			context->release( name, ctx );
-			return 0;
+	if (ec)
+	{
+		const char* msg = NULL;
+		if (ec == 226)
+		{
+			msg = _TXT("already used");
 		}
-		ctx->dbi = dbi;
+		std::cerr << _TXT("exit called with http status code ") << ec;
+		if (msg) std::cerr << " (" << msg << ")";
+		std::cerr << std::endl;
 	}
-	context->release( name, ctx );
-	return ctx->dbi;	
 }
 
-strus::StorageInterface *strusWebService::getStorageInterface( const std::string &name )
+static void print3rdPartyLicenses( const cppcms::json::value& config, strus::ErrorBufferInterface* errorhnd)
 {
-	StrusIndexContext *ctx = getOrCreateStrusContext( name );
-	if( ctx->sti == 0 ) {
-		strus::StorageInterface *sti = strus::createStorageType_std( context->errorhnd );
-		if( sti == 0 ) {
-			context->release( name, ctx );
-			return 0;
+	strus::local_ptr<strus::ModuleLoaderInterface> moduleLoader( strus::createModuleLoader( errorhnd));
+	if (!moduleLoader.get()) throw strus::runtime_error( "%s", _TXT("failed to create module loader"));
+	std::string modpath = config.get( "extensions.directory", std::string());
+	if (!modpath.empty())
+	{
+		moduleLoader->addModulePath( modpath);
+		moduleLoader->addSystemModulePath();
+	}
+	std::vector<std::string> modules = getConfigArray( config, "extensions.modules");
+	std::vector<std::string>::const_iterator mi = modules.begin(), me = modules.end();
+	for (; mi != me; ++mi)
+	{
+		if (!moduleLoader->loadModule( *mi)) throw strus::runtime_error(_TXT("failed to load module %s"), mi->c_str());
+	}
+	if (errorhnd->hasError())
+	{
+		throw strus::runtime_error(_TXT("failed to load modules"));
+	}
+	std::vector<std::string> licenses_3rdParty = moduleLoader->get3rdPartyLicenseTexts();
+	std::vector<std::string>::const_iterator ti = licenses_3rdParty.begin(), te = licenses_3rdParty.end();
+	if (ti != te) std::cout << _TXT("3rd party licenses:") << std::endl;
+	for (; ti != te; ++ti)
+	{
+		std::cout << *ti << std::endl;
+	}
+	std::cout << std::endl;
+}
+
+static void printVersion()
+{
+	std::cout << DefaultConstants::PACKAGE() << std::endl;
+	std::cout << _TXT("Strus webservice version ") << STRUS_WEBSERVICE_VERSION_STRING << std::endl;
+	std::cout << _TXT("Strus module version ") << STRUS_MODULE_VERSION_STRING << std::endl;
+	std::cout << _TXT("Strus rpc version ") << STRUS_RPC_VERSION_STRING << std::endl;
+	std::cout << _TXT("Strus trace version ") << STRUS_TRACE_VERSION_STRING << std::endl;
+	std::cout << _TXT("Strus analyzer version ") << STRUS_ANALYZER_VERSION_STRING << std::endl;
+	std::cout << _TXT("Strus storage version ") << STRUS_STORAGE_VERSION_STRING << std::endl;
+	std::cout << _TXT("Strus base version ") << STRUS_BASE_VERSION_STRING << std::endl;
+}
+
+static void printUsage()
+{
+	std::cout << _TXT("usage:") << " strusWebservice [options]" << std::endl;
+	std::cout << _TXT("description: Run the strus web service.") << std::endl;
+	std::cout << _TXT("options:") << std::endl;
+	std::cout << "-h|--help" << std::endl;
+	std::cout << "    " << _TXT("Print this usage and do nothing else") << std::endl;
+	std::cout << "-v|--version" << std::endl;
+	std::cout << "    " << _TXT("Print the program version and do nothing else") << std::endl;
+	std::cout << "--license" << std::endl;
+	std::cout << "    " << _TXT("Print 3rd party licences requiring reference") << std::endl;
+	std::cout << "-c|--config <CONFIG>" << std::endl;
+	std::cout << "    " << _TXT("Define the web service configuration file as <CONFIG>") << std::endl;
+	std::cout << "-V|--verbose" << std::endl;
+	std::cout << "    " << _TXT("Do verbose logging and output") << std::endl;
+}
+
+int main( int argc_, const char *argv_[] )
+{
+	int rt = 0;
+	strus::local_ptr<strus::ErrorBufferInterface> errorhnd( strus::createErrorBuffer_standard( 0/*log file handle*/, 2/*nof threads*/));
+	if (!errorhnd.get())
+	{
+		std::cerr << _TXT("failed to create error handler") << std::endl;
+		return -1;
+	}
+	on_exit( on_exit_handler, NULL);
+	try
+	{
+		// Define configuration and usage:
+		strus::ProgramOptions opt(
+				errorhnd.get(), argc_, argv_, 5,
+				"h,help", "v,version", "c,config:", "V,verbose", "license");
+		if (errorhnd->hasError())
+		{
+			throw strus::runtime_error(_TXT("failed to parse program arguments"));
 		}
-		ctx->sti = sti;
-	}
-	context->release( name, ctx );
-	return ctx->sti;
-}
+		bool printUsageAndExit = opt("help");
 
-strus::StorageClientInterface *strusWebService::getStorageClientInterface( const std::string &name )
-{
-	StrusIndexContext *ctx = context->acquire( name );
-	if( ctx->stci == 0 ) {
-		strus::StorageClientInterface *stci = ctx->sti->createClient( ctx->config, ctx->dbi, 0 );
-		if( stci == 0 ) {
-			context->release( name, ctx );
-			return 0;
+		if (opt( "version"))
+		{
+			printVersion();
 		}
-		ctx->stci = stci;
-	}
-	context->release( name, ctx );
-	return ctx->stci;
-}
-
-strus::MetaDataReaderInterface *strusWebService::getMetaDataReaderInterface( const std::string &name )
-{
-	StrusIndexContext *ctx = context->acquire( name );
-	if( ctx->mdri == 0 ) {
-		strus::MetaDataReaderInterface *mdri = ctx->stci->createMetaDataReader( );
-		if( mdri == 0 ) {
-			context->release( name, ctx );
-			return 0;
+		if (!printUsageAndExit)
+		{
+			if (opt.nofargs() > 0)
+			{
+				std::cerr << _TXT("no arguments, only options expected") << std::endl;
+				printUsageAndExit = true;
+				rt = strus::ErrorCauseInvalidArgument;
+			}
 		}
-		ctx->mdri = mdri;
-	}
-	context->release( name, ctx );
-	return ctx->mdri;
-}
+		g_verbose = opt("verbose");
+		cppcms::json::value config = opt("config") ? configFromFile( opt[ "config"], rt) : configDefault();
 
-strus::AttributeReaderInterface *strusWebService::getAttributeReaderInterface( const std::string &name )
-{
-	StrusIndexContext *ctx = context->acquire( name );
-	if( ctx->atri == 0 ) {
-		strus::AttributeReaderInterface *atri = ctx->stci->createAttributeReader( );
-		if( atri == 0 ) {
-			context->release( name, ctx );
-			return 0;
+		if (opt("license"))
+		{
+			print3rdPartyLicenses( config, errorhnd.get());
 		}
-		ctx->atri = atri;
-	}
-	context->release( name, ctx );
-	return ctx->atri;
-}
-
-strus::StorageTransactionInterface *strusWebService::createStorageTransactionInterface( const std::string &name )
-{
-	StrusIndexContext *ctx = context->acquire( name );
-	strus::StorageTransactionInterface *stti = ctx->stci->createTransaction( );
-	context->release( name, ctx );
-	return stti;
-}
-
-strus::StorageTransactionInterface *strusWebService::createStorageTransactionInterface( const std::string &name, const std::string &id )
-{
-	StrusIndexContext *ctx = context->acquire( name );
-	std::map<std::string, StrusTransactionInfo>::iterator it;
-	it = ctx->trans_map.find( id );
-	strus::StorageTransactionInterface *stti;
-	if( it == ctx->trans_map.end( ) ) {
-		stti = ctx->stci->createTransaction( );
-		if( stti == 0 ) {
-			return 0;
+		if (printUsageAndExit)
+		{
+			printUsage();
+			return rt;
 		}
-		ctx->trans_map[id].stti = stti;
-		ctx->trans_map[id].last_used = time( 0 );
-	} else {
-		ctx->trans_map[id].last_used = time( 0 );
-		stti = ctx->trans_map[id].stti;
-	}
-	context->release( name, ctx );
-	return stti;
-}
 
-strus::StorageTransactionInterface *strusWebService::getStorageTransactionInterface( const std::string &name, const std::string &id )
-{
-	StrusIndexContext *ctx = context->acquire( name );
-	std::map<std::string, StrusTransactionInfo>::iterator it;
-	it = ctx->trans_map.find( id );
-	strus::StorageTransactionInterface *stti;
-	if( it == ctx->trans_map.end( ) ) {
-		return 0;
-	} else {
-		ctx->trans_map[id].last_used = time( 0 );
-		stti = ctx->trans_map[id].stti;
-	}
-	context->release( name, ctx );
-	return stti;
-}
+		// Install signal handlers
+		signal( SIGHUP, signal_handler );
 
-std::vector<TransactionData> strusWebService::getAllTransactionsDataOfIndex( const std::string &name )
-{
-	StrusIndexContext *ctx = context->acquire( name );
-	std::vector<TransactionData> v;
-	if( ctx == 0 ) {
-		return v;
-	}
-	std::map<std::string, StrusTransactionInfo>::iterator it;
-	for( it = ctx->trans_map.begin( ); it != ctx->trans_map.end( ); it++ ) {
-		TransactionData d;
-		d.id = (*it).first;
-		d.age = time( 0 ) - (*it).second.last_used;
-		v.push_back( d );
-	}
-	context->release( name, ctx );
-	return v;
-}
-
-strus::QueryEvalInterface *strusWebService::getQueryEvalInterface( )
-{
-	if( qei == 0 ) {
-		qei = strus::createQueryEval( context->errorhnd );
-	}
-	return qei;
-}
-
-strus::QueryProcessorInterface *strusWebService::getQueryProcessorInterface( )
-{
-	if( qpi == 0 ) {
-		qpi = strus::createQueryProcessor( context->errorhnd );
-		context->registerModules( qpi );
-	}
-	return qpi;
-}
-
-std::string strusWebService::getConfigString( const std::string &name )
-{
-	StrusIndexContext *ctx = context->acquire( name );
-	return ctx->config;
-}
-
-void strusWebService::deleteDataBaseInterface( const std::string &name )
-{
-	StrusIndexContext *ctx = context->acquire( name );
-	if( ctx == 0 ) {
-		return;
-	}
-	if( ctx->dbi != 0 ) {
-		delete ctx->dbi;
-		ctx->dbi = 0;
-	}
-	context->release( name, ctx );
-}
-
-void strusWebService::deleteStorageInterface( const std::string &name )
-{
-	StrusIndexContext *ctx = context->acquire( name );
-	if( ctx == 0 ) {
-		return;
-	}
-	if( ctx->sti != 0 ) {
-		delete ctx->sti;
-		ctx->sti = 0;
-	}
-	context->release( name, ctx );
-}
-
-void strusWebService::deleteStorageClientInterface( const std::string &name )
-{
-	StrusIndexContext *ctx = context->acquire( name );
-	if( ctx == 0 ) {
-		return;
-	}
-	if( ctx->stci != 0 ) {
-		delete ctx->stci;
-		ctx->stci = 0;
-	}
-	context->release( name, ctx );
-}
-
-void strusWebService::deleteMetaDataReaderInterface( const std::string &name )
-{
-	StrusIndexContext *ctx = context->acquire( name );
-	if( ctx == 0 ) {
-		return;
-	}
-	if( ctx->mdri != 0 ) {
-		delete ctx->mdri;
-		ctx->mdri = 0;
-	}
-	context->release( name, ctx );
-}
-
-void strusWebService::deleteAttributeReaderInterface( const std::string &name )
-{
-	StrusIndexContext *ctx = context->acquire( name );
-	if( ctx == 0 ) {
-		return;
-	}
-	if( ctx->atri != 0 ) {
-		delete ctx->atri;
-		ctx->atri = 0;
-	}
-	context->release( name, ctx );
-}
-
-void strusWebService::deleteStorageTransactionInterface( const std::string &name, const std::string &id )
-{
-	StrusIndexContext *ctx = context->acquire( name );
-	std::map<std::string, StrusTransactionInfo>::iterator it;
-	it = ctx->trans_map.find( id );
-	if( it != ctx->trans_map.end( ) ) {
-		delete it->second.stti;
-		ctx->trans_map.erase( it );
-	}
-}
-
-void strusWebService::deleteQueryEvalInterface(  )
-{
-	if( qei != 0 ) {
-		delete qei;
-		qei = 0;
-	}
-}
-
-void strusWebService::deleteQueryProcessorInterface( )
-{
-	if( qpi != 0 ) {
-		delete qpi;
-		qpi = 0;
-	}
-}
-
-bool strusWebService::hasError( ) const
-{
-	return context->errorhnd->hasError( );
-}
-
-std::string strusWebService::getLastStrusError( ) const
-{
-	return context->errorhnd->fetchError( );
-}
-
-std::string strusWebService::getStorageDirectory( const std::string &base_storage_dir, const std::string &name )
-{
-	std::ostringstream ss;
-	
-	ss << booster::locale::format( "{1}/{2}" ) % base_storage_dir % name;
-	std::string directory = ss.str( );
-
-	return directory;
-}
-
-std::string strusWebService::getStorageConfig( const std::string &base_storage_dir, const struct StorageCreateParameters params, const std::string &name )
-{
-	std::ostringstream ss;
-	std::ostringstream ss2;
-	bool first = true;
-	std::vector<struct MetadataDefiniton>::const_iterator it;
-	
-	for( it = params.metadata.begin( ); it != params.metadata.end( ); it++ ) {
-		if( !first ) {
-			ss2 << ", ";		
-		} else {
-			first = false;
+		ServiceClosure service( config, g_verbose);
+		int nofThreads = service.threads_no();
+		if (config.find( "context.rpc").is_undefined())
+		{
+			// Overwrite number of threads configured as it is defined by cppcms
+			config.set( "context.threads", nofThreads);
 		}
-		ss2 << it->name << " " << it->type;
-	}
-	
-	ss << booster::locale::format( "database={1}; path={2}; compression={3}; cache={4}; max_open_files={5}; write_buffer_size={6}; block_size={7}; metadata={8}" )
-		% params.database
-		% getStorageDirectory( base_storage_dir, name )
-		% ( params.compression ? "yes" : "no" )
-		% params.cache_size
-		% params.max_open_files
-		% params.write_buffer_size
-		% params.block_size
-		% ss2.str( );
-	std::string config = ss.str( );
-
-	BOOSTER_DEBUG( PACKAGE ) << "Storage config string: " << config;
-	
-	return config;
-}
-
-std::string strusWebService::getStorageConfig( const std::string &base_storage_dir, const std::string &name )
-{
-	std::ostringstream ss;
-	
-	ss << booster::locale::format( "path={1}" )
-		% getStorageDirectory( base_storage_dir, name );
-	std::string config = ss.str( );
-
-	BOOSTER_DEBUG( PACKAGE ) << "Simple storage config string: " << config;
-	
-	return config;	
-}
-
-void strusWebService::abortRunningTransactions( const std::string &name )
-{
-	std::vector<TransactionData> transactions = getAllTransactionsDataOfIndex( name );
-	for( std::vector<TransactionData>::const_iterator trans_data = transactions.begin( ); trans_data != transactions.end( ); trans_data++ ) {
-		strus::StorageTransactionInterface *transaction = getStorageTransactionInterface( name, trans_data->id );
-		if( transaction != 0 ) {
-			BOOSTER_INFO( PACKAGE ) << "forcing rollback on transaction '" << trans_data->id << "' in index '" << name << "'";
-			transaction->rollback( );
-			deleteStorageTransactionInterface( name, trans_data->id );
+		if (g_verbose)
+		{
+			config.set( "logging.level", "debug");
+			std::cerr << "service configuration:" << std::endl << "---" << config.save( cppcms::json::readable) << std::endl << "---" << std::endl;
 		}
-	}
-}
+		// Run the webservice:
+		while( !g_terminate.test()) try
+		{
+			booster::log::logger::instance( ).remove_all_sinks();
 
-void strusWebService::abortAllRunningTransactions( )
-{
-	std::vector<std::string> indexes = getAllIndexNames( );
+			service.init( config, g_verbose);
+			if (g_verbose && config.get( "logging.stderr", false) == false)
+			{
+				booster::shared_ptr<booster::log::sinks::standard_error> csink( new booster::log::sinks::standard_error());
+				booster::log::logger::instance().add_sink(csink);
+			}
+			BOOSTER_INFO( DefaultConstants::PACKAGE())
+					<< strus::string_format(
+							_TXT("starting strus web service (%d %s).."),
+							nofThreads, nofThreads==1?"thread":"threads");
+			service.mount_applications();
+
+			service.run();
+			if(g_got_sighup.test())
+			{
+				BOOSTER_INFO( DefaultConstants::PACKAGE() ) << _TXT("reloading configuration on SIGHUP..");
+				g_got_sighup.set( false);
+			} else {
+				BOOSTER_INFO( DefaultConstants::PACKAGE() ) << _TXT("received shutdown command..");
+				g_terminate.set( true);
+			}
+
+			try {
+				service.shutdown();
+			}
+			catch( const std::exception& err)
+			{
+				BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << _TXT("got exception on service shutdown: ") << err.what();
+				g_terminate.set( true);
+			}
 	
-	for( std::vector<std::string>::const_iterator index = indexes.begin( ); index != indexes.end( ); index++ ) {
-		abortRunningTransactions( *index );
-	}
-}
-
-std::vector<std::string> strusWebService::getAllIndexNames( )
-{
-	typedef std::vector<boost::filesystem::directory_entry> dirlist;
-	dirlist dirs;
-	
-	boost::filesystem::path dir( storage_base_directory );
-
-	std::vector<std::string> v;
-
-	if( !exists( dir ) ) {
-		return v;
-	}
-				  
-	std::copy( boost::filesystem::directory_iterator( storage_base_directory ),
-		boost::filesystem::directory_iterator( ), std::back_inserter( dirs ) );
-
-	for( dirlist::const_iterator it = dirs.begin( ); it != dirs.end( ); it++ ) {
-		std::string last;
-		for( boost::filesystem::path::iterator pit = it->path( ).begin( ); pit != it->path( ).end( ); pit++ ) {
-			last = pit->native( );
 		}
-		v.push_back( last );
+		catch (const std::exception& err)
+		{
+			BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << _TXT("got exception in service event loop: ") << err.what();
+			rt = strus::ErrorCauseUncaughtException;
+			g_terminate.set( true);
+		}
+		BOOSTER_INFO( DefaultConstants::PACKAGE() ) << _TXT("service terminated");
+		return rt;
 	}
-	
-	return v;
-}
-
-void strusWebService::raiseTerminationFlag( )
-{
-	srv.shutdown( );
-}
-
-std::ofstream *strusWebService::log_request_stream( )
-{
-// TODO: have booster::thread support for this (or am I missing something?)
-#ifndef _WIN32
-	pthread_t tid = pthread_self( );
-	
-	std::map<pthread_t, std::ofstream *>::iterator it;
-	it = log_request_streams.find( tid );
-	if( it == log_request_streams.end( ) ) {
-		// TODO: boost::filesystem::like paths needed
-		std::ostringstream ss;
-		ss << log_request_filename << "-" << tid;
-		std::ofstream *os = new std::ofstream( ss.str( ).c_str( ), std::ofstream::out | std::ofstream::app );
-		log_request_streams[tid] = os;
-		return os;
-	} else {
-		return it->second;
+	catch (const cppcms::json::bad_value_cast& e)
+	{
+		std::cerr << _TXT("ERROR bad value in configuration: ") << e.what() << std::endl;
+		if (!rt) rt = strus::ErrorCauseSyntax;
 	}
-#else
-#error We need pthread identifier on Windows
-#endif
+	catch (const std::bad_alloc&)
+	{
+		std::cerr << _TXT("ERROR ") << _TXT("out of memory") << std::endl;
+		if (!rt) rt = strus::ErrorCauseOutOfMem;
+	}
+	catch (const std::runtime_error& e)
+	{
+		const char* errormsg = errorhnd.get() ? errorhnd->fetchError() : NULL;
+		if (errormsg)
+		{
+			char const* erroritr = errormsg;
+			int ec = strus::errorCodeFromMessage( erroritr);
+			while (ec >= 0)
+			{
+				rt = ec;
+				ec = strus::errorCodeFromMessage( erroritr);
+			}
+			std::cerr << _TXT("ERROR ") << e.what() << ": " << errormsg << std::endl;
+		}
+		else
+		{
+			std::cerr << _TXT("ERROR ") << e.what() << std::endl;
+		}
+		if (!rt) rt = strus::ErrorCauseRuntimeError;
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << _TXT("EXCEPTION ") << e.what() << std::endl;
+		if (!rt) rt = strus::ErrorCauseUncaughtException;
+	}
+	catch (...)
+	{
+		std::cerr << _TXT("EXCEPTION unknown") << std::endl;
+		if (!rt) rt = strus::ErrorCauseUncaughtException;
+	}
+	return rt;
 }
 
-void strusWebService::lockIndex( const std::string &name, bool exclusive )
-{
-	context->lockIndex( name, exclusive );
-}
-
-void strusWebService::unlockIndex( const std::string &name )
-{
-	context->unlockIndex( name );
-}
-
-} // namespace apps

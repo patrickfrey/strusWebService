@@ -17,16 +17,12 @@ Makefile
 cmake_install.cmake
 install_manifest.txt
 CTestTestfile.cmake
-CMakeLists.txt.user
-CTestTestfile.cmake.user
 cmake/uninstall.cmake
 DartConfiguration.tcl
 Testing/
 CPackConfig.cmake
-CPackConfig.cmake.user
-CPackSourceConfig.cmake.user
+*.cmake.user
 CPackSourceConfig.cmake
-tests/cmake_install.cmake.user
 src/version.hpp
 dist/obs/deploy_to_obs.sh
 dist/archlinux/PKGBUILD
@@ -50,3 +46,11 @@ dist/redhat/strusWebService.conf-SUSE
 dist/archlinux/strusWebService.conf
 dist/debian/strusWebService.conf
 dist/obs/struswebservice-xUbuntu_14.04.dsc
+
+# Suggested build directories
+build
+build_clang
+
+# deploy to obs tar:
+strus-*.tar.gz
+

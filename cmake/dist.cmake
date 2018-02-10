@@ -2,7 +2,7 @@
 # adapted for various compressors
 
 string(TOLOWER ${CMAKE_PROJECT_NAME} PACKAGE_NAME)
-set(ARCHIVE_NAME ${PACKAGE_NAME}-${STRUS_WEB_SERVICE_VERSION})
+set(ARCHIVE_NAME ${PACKAGE_NAME}-${STRUS_VERSION})
 IF (NOT TARGET dist)
 add_custom_target(dist
     COMMAND ${CMAKE_SOURCE_DIR}/dist/helpers/git-archive-all.sh --prefix ${ARCHIVE_NAME}/ -t HEAD
