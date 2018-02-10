@@ -40,7 +40,7 @@
 #include <sstream>
 #include <iostream>
 
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 Application::Application( cppcms::service& service_, ServiceClosure* serviceClosure_)
 		:cppcms::application(service_),m_service(serviceClosure_)

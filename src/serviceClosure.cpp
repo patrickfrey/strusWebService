@@ -24,7 +24,7 @@
 #include <booster/log.h>
 #include <cppcms/applications_pool.h>
 
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 {

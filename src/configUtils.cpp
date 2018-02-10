@@ -17,6 +17,8 @@
 #include <string>
 #include <cstring>
 
+#undef STRUS_LOWLEVEL_DEBUG
+
 std::vector<std::string> getConfigArray( const cppcms::json::value& config, const std::string& path)
 {
 	std::vector<std::string> rt;
