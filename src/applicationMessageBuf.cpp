@@ -45,7 +45,7 @@ static void escJsonOutput( char* buf, std::size_t buflen)
 
 static void printBufErrorMessage( char* msgbuf, std::size_t msgbufsize, std::size_t& msgbufpos, strus::WebRequestContent::Type doctype, const char* charset, int httpstatus, int apperrorcode, const char* message)
 {
-	strus::ErrorCode apperr( apperrorcode);
+	strus::ErrorCode apperr( apperrorcode > 0 ? apperrorcode : 0);
 	switch (doctype)
 	{
 		case strus::WebRequestContent::Unknown:
