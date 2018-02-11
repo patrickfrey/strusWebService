@@ -80,7 +80,7 @@ void ServiceClosure::loadHandlerConfiguration( const cppcms::json::value& config
 {
 	std::string configstr( config.save());
 	strus::WebRequestAnswer status;
-	static const char* init_context = "init";
+	static const char* root_context = "context";
 	static const char* init_schema = "init";
 	static const char* config_doctype = "json";
 	static const char* config_charset = "utf-8";
@@ -89,7 +89,7 @@ void ServiceClosure::loadHandlerConfiguration( const cppcms::json::value& config
 
 	BOOSTER_DEBUG( DefaultConstants::PACKAGE()) << strus::string_format( _TXT( "loading request handler configuration (schema %s)"), init_schema);
 	if (!m_requestHandler->loadConfiguration(
-		init_context/*destContextName*/, init_context/*destContextPrefix*/, NULL/*srcContext*/, init_schema, content, status))
+		root_context/*destContextName*/, root_context/*destContextPrefix*/, NULL/*srcContext*/, init_schema, content, status))
 	{
 		throw configuration_error( status);
 	}
@@ -97,7 +97,7 @@ void ServiceClosure::loadHandlerConfiguration( const cppcms::json::value& config
 	for (; oi != oe; ++oi)
 	{
 		std::string sectionName = oi->first;
-		std::string schema = std::string(init_context) + "_" + sectionName;
+		std::string schema = std::string(root_context) + "_" + sectionName;
 
 		// Search subconfiguration schema with a name "init" as prefix concatenated with the title of the configuration section:
 		if (m_requestHandler->hasSchema( schema.c_str()))
@@ -114,9 +114,9 @@ void ServiceClosure::loadHandlerConfiguration( const cppcms::json::value& config
 
 			BOOSTER_DEBUG( DefaultConstants::PACKAGE()) 
 				<< strus::string_format( _TXT( "loading handler sub configuration for %s %s (schema %s, context %s)"),
-						destContextSchemaPrefix.c_str(), destContextName.c_str(), schema.c_str(), init_context);
+						destContextSchemaPrefix.c_str(), destContextName.c_str(), schema.c_str(), root_context);
 			if (!m_requestHandler->loadConfiguration(
-				destContextName.c_str(), destContextSchemaPrefix.c_str(), init_context, schema.c_str(), subcontent, status))
+				destContextName.c_str(), destContextSchemaPrefix.c_str(), root_context, schema.c_str(), subcontent, status))
 			{
 				throw configuration_error( status);
 			}

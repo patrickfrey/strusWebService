@@ -110,7 +110,7 @@ static void printBufInfoMessage( char* msgbuf, std::size_t msgbufsize, std::size
 
 		case strus::WebRequestContent::HTML:
 			msgbufpos = std::snprintf(
-				msgbuf, msgbufsize, "<html><head><title>strus request</title></head><body><p>done</p>\n<ul>\n<li>Status: %s</li>\n<li>Message: %s</li>\n</ul>\n</body>\n</html>\n", status, message);
+				msgbuf, msgbufsize, "<html><head><title>strus request</title></head><body><h1>Done</h1>\n<ul>\n<li>Status: %s</li>\n<li>Message: %s</li>\n</ul>\n</body>\n</html>\n", status, message);
 			break;
 	}
 	if (msgbufpos >= msgbufsize)
