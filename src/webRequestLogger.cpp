@@ -13,6 +13,7 @@
 #include "strus/base/thread.hpp"
 #include "strus/base/fileio.hpp"
 #include <cstdarg>
+#include <cstring>
 
 using namespace strus;
 
