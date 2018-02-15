@@ -13,7 +13,7 @@ Install packages with 'apt-get'/aptitude.
 
 ## Required packages
 	boost-all >= 1.57
-	snappy-dev leveldb-dev libuv-dev, cppcms
+	snappy-dev leveldb-dev libuv-dev, cppcms >= 1.0
 
 # Strus prerequisite packages to install before
 	strusBase strus strusAnalyzer strusTrace strusModule strusRpc strusBindings

@@ -78,7 +78,7 @@ void Application::report_fatal()
 
 void Application::report_error( int httpstatus, int apperrorcode, const char* message_)
 {
-	char const* message = message_?message_:"";
+	const char* message = message_?message_:"";
 	if (apperrorcode > 0)
 	{
 		BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << "(status " << httpstatus << ", apperr " << apperrorcode << ") " << message;
@@ -94,6 +94,16 @@ void Application::report_error( int httpstatus, int apperrorcode, const char* me
 
 	response_content( msgbuf.error( httpstatus, apperrorcode, message));
 	response().status( httpstatus);
+}
+
+void Application::report_error_fmt( int httpstatus, int apperrorcode, const char* fmt, ...)
+{
+	char buf[ 1024];
+	va_list ap;
+	va_start(ap, fmt);
+	std::vsnprintf( buf, sizeof(buf), fmt, ap);
+	report_error( httpstatus, apperrorcode, buf);
+	va_end (ap);
 }
 
 void Application::report_ok( const char* status, int httpstatus, const char* message)
@@ -141,7 +151,7 @@ void Application::not_found_404()
 	report_error( 404, -1, _TXT( "Not found"));
 }
 
-void Application::exec_post_config( const std::string& new_context, const std::string& from_context, const std::string& schema)
+void Application::exec_post_config( std::string new_context, std::string from_context, std::string schema)
 {
 	if( !handle_preflight_cors()) return;
 
@@ -149,22 +159,22 @@ void Application::exec_post_config( const std::string& new_context, const std::s
 	// TODO Implement, not implemented yet
 }
 
-void Application::exec_post2( const std::string& contextname, const std::string& schemaname)
+void Application::exec_post2( std::string contextname, std::string schemaname)
 {
 	exec_post_internal( contextname, schemaname, std::string()/*no argument*/);
 }
 
-void Application::exec_post3( const std::string& contextname, const std::string& schemaname, const std::string& argument)
+void Application::exec_post3( std::string contextname, std::string schemaname, std::string argument)
 {
 	exec_post_internal( contextname, schemaname, argument);
 }
 
-void Application::debug_post2( const std::string& contextname, const std::string& schemaname)
+void Application::debug_post2( std::string contextname, std::string schemaname)
 {
 	exec_post_internal( contextname, schemaname, std::string()/*no argument*/);
 }
 
-void Application::debug_post3( const std::string& contextname, const std::string& schemaname, const std::string& argument)
+void Application::debug_post3( std::string contextname, std::string schemaname, std::string argument)
 {
 	exec_post_internal( contextname, schemaname, argument);
 }
@@ -199,9 +209,24 @@ bool Application::handle_preflight_cors()
 	return false;
 }
 
+bool Application::check_request_method( const char* type)
+{
+	if (request().request_method() != type)
+	{
+		report_error_fmt( 405/*Method Not Allowed*/, 0, _TXT("expected HTTP method '%s'"), type);
+		return false;
+	}
+	return true;
+}
+
+bool Application::test_request_method( const char* type)
+{
+	return (request().request_method() == type);
+}
+
 void Application::exec_post_internal( const std::string& contextname, const std::string& schemaname, const std::string& argument)
 {
-	if( !handle_preflight_cors()) return;
+	if (!handle_preflight_cors() || !check_request_method("POST")) return;
 
 	ApplicationRequestBuf requestBuf(
 		m_service, contextname, schemaname, argument,
@@ -229,7 +254,7 @@ void Application::exec_post_internal( const std::string& contextname, const std:
 
 void Application::debug_post_internal( const std::string& contextname, const std::string& schemaname, const std::string& argument)
 {
-	if( !handle_preflight_cors()) return;
+	if (!handle_preflight_cors() || !check_request_method("POST")) return;
 
 	ApplicationRequestBuf requestBuf(
 		m_service, contextname, schemaname, argument,
@@ -291,21 +316,45 @@ void Application::exec_help()
 	// TODO Implement, not implemented yet
 }
 
+static std::string urlRegex( const char* id, int nn)
+{
+	std::string rt = id[0] ? strus::string_format( "/%s", id) : std::string();
+	for (; nn; --nn) rt.append( "/(\\w+)");
+	return rt;
+}
+
+void Application::urlmap( const char* dir, UrlHandlerMethod3 handler)
+{
+	dispatcher().assign( urlRegex( dir, 3), handler, this, 1, 2, 3);
+}
+void Application::urlmap( const char* dir, UrlHandlerMethod2 handler)
+{
+	dispatcher().assign( urlRegex( dir, 2), handler, this, 1, 2);
+}
+void Application::urlmap( const char* dir, UrlHandlerMethod1 handler)
+{
+	dispatcher().assign( urlRegex( dir, 1), handler, this, 1);
+}
+void Application::urlmap( const char* dir, UrlHandlerMethod0 handler)
+{
+	dispatcher().assign( urlRegex( dir, 0), handler, this);
+}
+
 void Application::init_dispatchers()
 {
-	dispatcher( ).assign( "/ping", &Application::exec_ping, this);
-	dispatcher( ).assign( "/version", &Application::exec_version, this);
-	dispatcher( ).assign( "/help", &Application::exec_help, this);
+	urlmap( "ping",		&Application::exec_ping);
+	urlmap( "version",	&Application::exec_version);
+	urlmap( "help",		&Application::exec_help);
 	if (m_service->quit_enabled())
 	{
-		dispatcher( ).assign( "/quit", &Application::exec_quit, this);
+		urlmap( "quit", &Application::exec_quit);
 	}
-	dispatcher().map( "POST", "/config/(\\w+)/(\\w+)/(\\w+)", &Application::exec_post_config, this, 1, 2, 3);
-	dispatcher().map( "POST", "/debug/(\\w+)/(\\w+)/(\\w+)", &Application::debug_post3, this, 1, 2, 3);
-	dispatcher().map( "POST", "/debug/(\\w+)/(\\w+)", &Application::debug_post2, this, 1, 2);
-	dispatcher().map( "POST", "/(\\w+)/(\\w+)/(\\w+)", &Application::exec_post3, this, 1, 2, 3);
-	dispatcher().map( "POST", "/(\\w+)/(\\w+)", &Application::exec_post2, this, 1, 2);
-	dispatcher().map( ".*", &Application::not_found_404, this);
+	urlmap( "config",	&Application::exec_post_config);
+	urlmap( "debug",	&Application::debug_post3);
+	urlmap( "debug",	&Application::debug_post2);
+	urlmap( "",		&Application::exec_post3);
+	urlmap( "",		&Application::exec_post2);
+	urlmap( ".*",		&Application::not_found_404);
 }
 
 

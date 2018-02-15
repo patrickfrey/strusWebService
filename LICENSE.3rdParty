@@ -1,0 +1,20 @@
+3rd party licenses of strusWebService
+=====================================
+
+Table of Contents
+----------------------
+	boost
+	cppcms
+
+boost
+-------
+	http://www.boost.org/LICENSE_1_0.txt
+
+cppcms 
+---------
+        Version < 1.2:   Dual license LGPLv3 (https://opensource.org/licenses/LGPL-3.0) or Commercial
+	Version >= 1.2: MIT (https://opensource.org/licenses/MIT)
+
+
+
+

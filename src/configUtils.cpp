@@ -16,6 +16,8 @@
 #include <vector>
 #include <string>
 #include <cstring>
+#include <iostream>
+#include <sstream>
 
 #undef STRUS_LOWLEVEL_DEBUG
 
@@ -58,12 +60,8 @@ cppcms::json::value configFromFile( const std::string& configfile, int& errcode)
 		throw strus::runtime_error(_TXT("failed to read configuration file %s (errno %u): %s"), configfile.c_str(), ec, std::strerror(ec));
 	}
 	int line_number = 0;
-	char const* configstr_begin = configstr.c_str();
-	char const* configstr_end = configstr.c_str() + configstr.size();
-#ifdef STRUS_LOWLEVEL_DEBUG
-	std::cerr << "load configuration:" << std::endl << std::string( configstr_begin, configstr_end - configstr_begin) << std::endl;
-#endif
-	if (!config.load( configstr_begin, configstr_end, false, &line_number))
+	std::istringstream configstream( configstr);
+	if (!config.load( configstream, false, &line_number))
 	{
 		errcode = strus::ErrorCauseSyntax;
 		throw strus::runtime_error(_TXT("failed to parse configuration file %s: syntax error on line %d"), configfile.c_str(), line_number);

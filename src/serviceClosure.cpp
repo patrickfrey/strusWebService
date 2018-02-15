@@ -89,34 +89,33 @@ void ServiceClosure::loadHandlerConfiguration( const cppcms::json::value& config
 
 	BOOSTER_DEBUG( DefaultConstants::PACKAGE()) << strus::string_format( _TXT( "loading request handler configuration (schema %s)"), init_schema);
 	if (!m_requestHandler->loadConfiguration(
-		root_context/*destContextName*/, root_context/*destContextPrefix*/, NULL/*srcContext*/, init_schema, content, status))
+		root_context/*destContextType*/, root_context/*destContextName*/, NULL/*srcContext*/, init_schema, content, status))
 	{
 		throw configuration_error( status);
 	}
 	cppcms::json::object::const_iterator oi = config.object().begin(), oe = config.object().end();
 	for (; oi != oe; ++oi)
 	{
-		std::string sectionName = oi->first;
-		std::string schema = std::string(root_context) + "_" + sectionName;
+		const std::string& sectionName = oi->first;
 
 		// Search subconfiguration schema with a name "init" as prefix concatenated with the title of the configuration section:
-		if (m_requestHandler->hasSchema( schema.c_str()))
+		if (m_requestHandler->hasSchema( root_context, sectionName.c_str()/*schema*/))
 		{
 			std::string destContextName = oi->second.get( "id", sectionName);
 			//... the name of the context created by the configuration is the name configured as "id" or the section name if not specified
-			const std::string& destContextSchemaPrefix = oi->first;
+			const std::string& destContextType = oi->first;
 			//... the prefix of all schemas working on the context created is the configuration section name
 			cppcms::json::value subconfig;
-			subconfig.set( oi->first, oi->second);
+			subconfig.set( sectionName, oi->second);
 			//... the subconfiguration is the configuration section with the section name as root
 			std::string subconfigstr( subconfig.save());
 			strus::WebRequestContent subcontent( config_charset, config_doctype, subconfigstr.c_str(), subconfigstr.size());
 
 			BOOSTER_DEBUG( DefaultConstants::PACKAGE()) 
 				<< strus::string_format( _TXT( "loading handler sub configuration for %s %s (schema %s, context %s)"),
-						destContextSchemaPrefix.c_str(), destContextName.c_str(), schema.c_str(), root_context);
+						destContextType.c_str(), destContextName.c_str(), sectionName.c_str()/*schema*/, root_context);
 			if (!m_requestHandler->loadConfiguration(
-				destContextName.c_str(), destContextSchemaPrefix.c_str(), root_context, schema.c_str(), subcontent, status))
+				destContextType.c_str(), destContextName.c_str(), root_context, sectionName.c_str()/*schema*/, subcontent, status))
 			{
 				throw configuration_error( status);
 			}

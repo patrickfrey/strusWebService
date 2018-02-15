@@ -18,6 +18,7 @@
 #include "webRequestLogger.hpp"
 #include <cppcms/application.h>
 #include <cppcms/http_response.h>
+#include <cppcms/url_dispatcher.h>
 #include <map>
 #include <string>
 
@@ -30,11 +31,11 @@ class Application
 public:
 	explicit Application( cppcms::service& service_, ServiceClosure* serviceImpl_);
 
-	void exec_post_config( std::string const& new_context, std::string const& from_context, std::string const& schema);
-	void exec_post2( std::string const& contextname, std::string const& schemaname);
-	void exec_post3( std::string const& contextname, std::string const& schemaname, std::string const& argument);
-	void debug_post2( std::string const& contextname, std::string const& schemaname);
-	void debug_post3( std::string const& contextname, std::string const& schemaname, std::string const& argument);
+	void exec_post_config( std::string new_context, std::string from_context, std::string schema);
+	void exec_post2( std::string contextname, std::string schemaname);
+	void exec_post3( std::string contextname, std::string schemaname, std::string argument);
+	void debug_post2( std::string contextname, std::string schemaname);
+	void debug_post3( std::string contextname, std::string schemaname, std::string argument);
 
 	void exec_quit();
 	void exec_ping();
@@ -42,6 +43,21 @@ public:
 	void exec_help();
 
 private:
+	// Handler method variants distinguished by number of arguments
+	typedef void(Application::*UrlHandlerMethod3)(std::string, std::string, std::string);
+	typedef void(Application::*UrlHandlerMethod2)(std::string, std::string);
+	typedef void(Application::*UrlHandlerMethod1)(std::string);
+	typedef void(Application::*UrlHandlerMethod0)();
+
+	/// \brief Map an URL with a main path dir and 3 string arguments as subdirectories
+	void urlmap( const char* dir, UrlHandlerMethod3 handler);
+	/// \brief Map an URL with a main path dir and 2 string arguments as subdirectories
+	void urlmap( const char* dir, UrlHandlerMethod2 handler);
+	/// \brief Map an URL with a main path dir and 1 string argument as subdirectory
+	void urlmap( const char* dir, UrlHandlerMethod1 handler);
+	/// \brief Map an URL with a main path dir and no string arguments as subdirectories
+	void urlmap( const char* dir, UrlHandlerMethod0 handler);
+
 	/// \brief Set response content
 	void response_content( const strus::WebRequestContent& content);
 	/// \brief Set response content
@@ -51,6 +67,8 @@ private:
 	void report_fatal();
 	/// \brief Report error reply
 	void report_error( int httpstatus, int apperror, const char* message);
+	/// \brief Report error reply
+	void report_error_fmt( int httpstatus, int apperror, const char* fmt, ...);
 	/// \brief Report successful protocol only command
 	void report_ok( const char* status, int httpstatus, const char* message);
 	/// \brief Report successful protocol only command with a map as argument
@@ -74,6 +92,11 @@ private:
 
 private:
 	bool handle_preflight_cors();
+
+	/// \brief check if the request is of a certain type and report an error if not
+	bool check_request_method( const char* type);
+	/// \brief test if the request is of a certain type without any reaction on it
+	bool test_request_method( const char* type);
 
 private:
 	ServiceClosure* m_service;
