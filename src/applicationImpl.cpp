@@ -308,7 +308,7 @@ void Application::exec_version()
 	report_ok( "ok", 200, "version", msg);
 }
 
-void Application::exec_help()
+void Application::exec_list( std::string path)
 {
 	if( !handle_preflight_cors()) return;
 
@@ -316,35 +316,50 @@ void Application::exec_help()
 	// TODO Implement, not implemented yet
 }
 
-static std::string urlRegex( const char* id, int nn)
+void Application::exec_view( std::string path)
 {
+	if( !handle_preflight_cors()) return;
+
+	report_error( 404, -1, _TXT( "Not found"));
+	// TODO Implement, not implemented yet
+}
+
+static std::string urlRegex( const char* id, int nn, bool more)
+{
+	if (more)
+	{
+		if (nn == 0) throw std::runtime_error(_TXT("bad URL map definition"));
+		--nn;
+	}
 	std::string rt = id[0] ? strus::string_format( "/%s", id) : std::string();
 	for (; nn; --nn) rt.append( "/(\\w+)");
+	if (more) rt.append( "/(.*)");
 	return rt;
 }
 
-void Application::urlmap( const char* dir, UrlHandlerMethod3 handler)
+void Application::urlmap( const char* dir, UrlHandlerMethod3 handler, bool more)
 {
-	dispatcher().assign( urlRegex( dir, 3), handler, this, 1, 2, 3);
+	dispatcher().assign( urlRegex( dir, 3, more), handler, this, 1, 2, 3);
 }
-void Application::urlmap( const char* dir, UrlHandlerMethod2 handler)
+void Application::urlmap( const char* dir, UrlHandlerMethod2 handler, bool more)
 {
-	dispatcher().assign( urlRegex( dir, 2), handler, this, 1, 2);
+	dispatcher().assign( urlRegex( dir, 2, more), handler, this, 1, 2);
 }
-void Application::urlmap( const char* dir, UrlHandlerMethod1 handler)
+void Application::urlmap( const char* dir, UrlHandlerMethod1 handler, bool more)
 {
-	dispatcher().assign( urlRegex( dir, 1), handler, this, 1);
+	dispatcher().assign( urlRegex( dir, 1, more), handler, this, 1);
 }
 void Application::urlmap( const char* dir, UrlHandlerMethod0 handler)
 {
-	dispatcher().assign( urlRegex( dir, 0), handler, this);
+	dispatcher().assign( urlRegex( dir, 0, false), handler, this);
 }
 
 void Application::init_dispatchers()
 {
 	urlmap( "ping",		&Application::exec_ping);
 	urlmap( "version",	&Application::exec_version);
-	urlmap( "help",		&Application::exec_help);
+	urlmap( "view",		&Application::exec_view, true);
+	urlmap( "list",		&Application::exec_list, true);
 	if (m_service->quit_enabled())
 	{
 		urlmap( "quit", &Application::exec_quit);

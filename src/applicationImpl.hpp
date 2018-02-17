@@ -40,7 +40,8 @@ public:
 	void exec_quit();
 	void exec_ping();
 	void exec_version();
-	void exec_help();
+	void exec_list( std::string path);
+	void exec_view( std::string path);
 
 private:
 	// Handler method variants distinguished by number of arguments
@@ -50,11 +51,11 @@ private:
 	typedef void(Application::*UrlHandlerMethod0)();
 
 	/// \brief Map an URL with a main path dir and 3 string arguments as subdirectories
-	void urlmap( const char* dir, UrlHandlerMethod3 handler);
+	void urlmap( const char* dir, UrlHandlerMethod3 handler, bool more=false);
 	/// \brief Map an URL with a main path dir and 2 string arguments as subdirectories
-	void urlmap( const char* dir, UrlHandlerMethod2 handler);
+	void urlmap( const char* dir, UrlHandlerMethod2 handler, bool more=false);
 	/// \brief Map an URL with a main path dir and 1 string argument as subdirectory
-	void urlmap( const char* dir, UrlHandlerMethod1 handler);
+	void urlmap( const char* dir, UrlHandlerMethod1 handler, bool more=false);
 	/// \brief Map an URL with a main path dir and no string arguments as subdirectories
 	void urlmap( const char* dir, UrlHandlerMethod0 handler);
 
