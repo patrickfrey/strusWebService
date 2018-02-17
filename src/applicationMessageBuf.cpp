@@ -165,6 +165,52 @@ static std::string dictMessage( strus::WebRequestContent::Type doctype, const ch
 	return out.str();
 }
 
+static std::string listMessage( strus::WebRequestContent::Type doctype, const char* charset, const char* rootelem, const char* listelem, const std::vector<std::string>& list)
+{
+	std::ostringstream out;
+	std::vector<std::string>::const_iterator li = list.begin(), le = list.end();
+	switch (doctype)
+	{
+		case strus::WebRequestContent::Unknown:
+			throw std::runtime_error(_TXT("Unknown content type for output"));
+
+		case strus::WebRequestContent::JSON:
+			out << "{\n\1" << rootelem << "\1:[";
+			for (; li != le; ++li)
+			{
+				out << "\n\t\1" << *li << "\1";
+			}
+			out << "\n]}\n";
+			break;
+
+		case strus::WebRequestContent::XML:
+			out << "<?xml version=\"1.0\" encoding=\"" << charset << "\"?>\n<" << rootelem << ">\n";
+			for (; li != le; ++li)
+			{
+				out << "\n\t<" << listelem << ">" << *li << "</" << listelem << ">";
+			}
+			out << "\n</" << rootelem << ">\n";
+			break;
+
+		case strus::WebRequestContent::TEXT:
+			for (; li != le; ++li)
+			{
+				out << *li << "\n";
+			}
+			break;
+
+		case strus::WebRequestContent::HTML:
+			out << "<html><head><title>" << rootelem << "</title></head><body><h1>" << rootelem << "</h1>\n<ul>";
+			for (; li != le; ++li)
+			{
+				out << "\n\t<li>" << *li << "</li>";
+			}
+			out << "\n</ul></body></html>\n";
+			break;
+	}
+	return out.str();
+}
+
 ApplicationMessageBuf::ApplicationMessageBuf( const std::string& accepted_charset_, const std::string& accepted_doctype_)
 	:m_accepted_charset(accepted_charset_),m_accepted_doctype(accepted_doctype_)
 {
@@ -198,6 +244,15 @@ strus::WebRequestContent ApplicationMessageBuf::info( const char* status, const 
 strus::WebRequestContent ApplicationMessageBuf::info( const char* rootelem, const std::map<std::string,std::string>& message)
 {
 	std::string msgstr = dictMessage( m_doctype, m_charset, rootelem, message);
+	std::size_t msglen_conv = 0;
+	const char* msg = strus::convertContentCharset( m_charset, m_msgbuf, sizeof(m_msgbuf) + sizeof(m_msgbuf_conv), msglen_conv, msgstr.c_str(), msgstr.size());
+
+	return strus::WebRequestContent( m_charset, m_doctypename, msg, msglen_conv);
+}
+
+strus::WebRequestContent ApplicationMessageBuf::info( const char* rootelem, const char* listelem, const std::vector<std::string>& message)
+{
+	std::string msgstr = listMessage( m_doctype, m_charset, rootelem, listelem, message);
 	std::size_t msglen_conv = 0;
 	const char* msg = strus::convertContentCharset( m_charset, m_msgbuf, sizeof(m_msgbuf) + sizeof(m_msgbuf_conv), msglen_conv, msgstr.c_str(), msgstr.size());
 

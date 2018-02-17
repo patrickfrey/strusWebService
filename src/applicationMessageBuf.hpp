@@ -14,6 +14,7 @@
 #include "strus/webRequestContent.hpp"
 #include <map>
 #include <string>
+#include <vector>
 
 /// \class ApplicationMessageBuf
 /// \brief Abstraction for a server to client message of a cppcms application for strus with its data
@@ -25,6 +26,7 @@ public:
 	strus::WebRequestContent error( int httpstatus, int apperrorcode, const char* message);
 	strus::WebRequestContent info( const char* status, const char* message);
 	strus::WebRequestContent info( const char* rootelem, const std::map<std::string,std::string>& message);
+	strus::WebRequestContent info( const char* rootelem, const char* listelem, const std::vector<std::string>& message);
 
 	const char* doctypename() const			{return m_doctypename;}
 	const char* charset() const			{return m_charset;}
