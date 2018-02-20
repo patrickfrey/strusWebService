@@ -49,7 +49,9 @@ static void printBufErrorMessage( char* msgbuf, std::size_t msgbufsize, std::siz
 	switch (doctype)
 	{
 		case strus::WebRequestContent::Unknown:
-			throw std::runtime_error(_TXT("unknown content type for output"));
+			msgbuf[0] = 0;
+			msgbufpos = 0;
+			break;
 
 		case strus::WebRequestContent::JSON:
 			msgbufpos = std::snprintf(

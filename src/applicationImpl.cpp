@@ -12,7 +12,6 @@
 #include "defaultContants.hpp"
 #include "applicationImpl.hpp"
 #include "applicationMessageBuf.hpp"
-#include "applicationRequestBuf.hpp"
 #include "serviceClosure.hpp"
 #include "strus/lib/webrequest.hpp"
 #include "strus/lib/error.hpp"
@@ -51,6 +50,20 @@ Application::Application( cppcms::service& service_, ServiceClosure* serviceClos
 	init_dispatchers();
 }
 
+#define CATCH_EXEC_ERROR(REQUEST_TYPE) \
+	catch (const std::runtime_error& err)\
+	{\
+		report_error_fmt( 500, -1, _TXT("error in %s request: %s"), REQUEST_TYPE, err.what());\
+	}\
+	catch (const std::bad_alloc& err)\
+	{\
+		report_error_fmt( 500, -1, _TXT("out of memory in %s request"), REQUEST_TYPE);\
+	}\
+	catch (...)\
+	{\
+		report_error_fmt( 500, -1, _TXT("uncaught error in %s request"), REQUEST_TYPE);\
+	}
+
 void Application::response_content( const char* charset, const char* doctype, const char* blob, std::size_t blobsize)
 {
 	char content_header[ 256];
@@ -88,11 +101,19 @@ void Application::report_error( int httpstatus, int apperrorcode, const char* me
 		BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << "(status " << httpstatus << ") " << message;
 	}
 	ApplicationMessageBuf msgbuf( request().http_accept_charset(), request().http_accept());
-	BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-		<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'; decide for content type '%s; charset=%s'"),
-						msgbuf.http_accept(), msgbuf.http_accept_charset(), msgbuf.doctypename(), msgbuf.charset());
-
-	response_content( msgbuf.error( httpstatus, apperrorcode, message));
+	if (msgbuf.doctype() == strus::WebRequestContent::Unknown)
+	{
+		BOOSTER_DEBUG( DefaultConstants::PACKAGE())
+			<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'; no content returned"),
+							msgbuf.http_accept(), msgbuf.http_accept_charset());
+	}
+	else
+	{
+		BOOSTER_DEBUG( DefaultConstants::PACKAGE())
+			<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'; decide for content type '%s; charset=%s'"),
+							msgbuf.http_accept(), msgbuf.http_accept_charset(), msgbuf.doctypename(), msgbuf.charset());
+		response_content( msgbuf.error( httpstatus, apperrorcode, message));
+	}
 	response().status( httpstatus);
 }
 
@@ -166,36 +187,91 @@ void Application::not_found_404()
 
 void Application::exec_post_config( std::string new_context, std::string from_context, std::string schema)
 {
-	if( !handle_preflight_cors()) return;
-
+	if (!handle_preflight_cors() || !check_request_method("POST")) return;
 	report_error( 404, -1, _TXT( "Not found"));
 	// TODO Implement, not implemented yet
 }
 
 void Application::exec_post2( std::string contextname, std::string schemaname)
 {
-	exec_post_internal( contextname, schemaname, std::string()/*no argument*/);
+	if (!handle_preflight_cors() || !check_request_method("POST")) return;
+	exec_content_internal( ContentExec, contextname, schemaname, std::string()/*no argument*/);
 }
 
 void Application::exec_post3( std::string contextname, std::string schemaname, std::string argument)
 {
-	exec_post_internal( contextname, schemaname, argument);
+	if (!handle_preflight_cors() || !check_request_method("POST")) return;
+	exec_content_internal( ContentExec, contextname, schemaname, argument);
 }
 
 void Application::exec_debug_post2( std::string contextname, std::string schemaname)
 {
-	exec_debug_post_internal( contextname, schemaname, std::string()/*no argument*/);
+	if (!handle_preflight_cors() || !check_request_method("POST")) return;
+	exec_content_internal( ContentDebug, contextname, schemaname, std::string()/*no argument*/);
 }
 
 void Application::exec_debug_post3( std::string contextname, std::string schemaname, std::string argument)
 {
-	exec_debug_post_internal( contextname, schemaname, argument);
+	if (!handle_preflight_cors() || !check_request_method("POST")) return;
+	exec_content_internal( ContentDebug, contextname, schemaname, argument);
 }
 
-std::string Application::request_role() const
+void Application::exec_quit()
 {
-	return "nobody";
+	try
+	{
+		if (!handle_preflight_cors() || !check_request_method("GET")) return;
+		report_ok( "ok", 200, _TXT("service to shutdown"));
+		m_service->shutdown();
+	}
+	CATCH_EXEC_ERROR("quit");
 }
+
+void Application::exec_ping()
+{
+	try
+	{
+		if (!handle_preflight_cors() || !check_request_method("GET")) return;	
+		report_ok( "ok", 200, _TXT("service is up and running"));
+	}
+	CATCH_EXEC_ERROR("ping");
+}
+
+void Application::exec_list( std::string path)
+{
+	if (!handle_preflight_cors() || !check_request_method("GET")) return;
+	exec_get_internal( GetList, path);
+}
+
+void Application::exec_list0()
+{
+	if (!handle_preflight_cors() || !check_request_method("GET")) return;
+	exec_get_internal( GetList, std::string());
+}
+
+void Application::exec_view( std::string path)
+{
+	if (!handle_preflight_cors() || !check_request_method("GET")) return;
+	exec_get_internal( GetView, std::string());
+}
+
+void Application::exec_version()
+{
+	try
+	{
+		std::map<std::string,std::string> msg;
+		msg[ "webservice"] = STRUS_WEBSERVICE_VERSION_STRING;
+		msg[ "module"] = STRUS_MODULE_VERSION_STRING;
+		msg[ "rpc"] = STRUS_RPC_VERSION_STRING;
+		msg[ "trace"] = STRUS_TRACE_VERSION_STRING;
+		msg[ "analyzer"] = STRUS_ANALYZER_VERSION_STRING;
+		msg[ "storage"] = STRUS_STORAGE_VERSION_STRING;
+		msg[ "base"] = STRUS_BASE_VERSION_STRING;
+		report_ok( "ok", 200, "version", msg);
+	}
+	CATCH_EXEC_ERROR("version");
+}
+
 
 bool Application::handle_preflight_cors()
 {
@@ -237,122 +313,47 @@ bool Application::test_request_method( const char* type)
 	return (request().request_method() == type);
 }
 
-#define CATCH_EXEC_ERROR(REQUEST_TYPE) \
-	catch (const std::runtime_error& err)\
-	{\
-		report_error_fmt( 500, -1, _TXT("error in %s request: %s"), REQUEST_TYPE, err.what());\
-	}\
-	catch (const std::bad_alloc& err)\
-	{\
-		report_error_fmt( 500, -1, _TXT("out of memory in %s request"), REQUEST_TYPE);\
-	}\
-	catch (...)\
-	{\
-		report_error_fmt( 500, -1, _TXT("uncaught error in %s request"), REQUEST_TYPE);\
-	}
-
-void Application::exec_post_internal( const std::string& contextname, const std::string& schemaname, const std::string& argument)
+void Application::exec_content_internal( ContentMethod method, const std::string& contextname, const std::string& schemaname, const std::string& argument)
 {
 	try
 	{
-		if (!handle_preflight_cors() || !check_request_method("POST")) return;
-	
-		ApplicationRequestBuf requestBuf(
-			m_service, contextname, schemaname, argument,
-			request().http_accept_charset(), request().http_accept(), request_role(),
-			context().request().content_type_parsed(),
-			context().request().raw_post_data());
-	
-		if (requestBuf.ok())
+		strus::WebRequestAnswer answer;
+		std::string http_accept_charset = request().http_accept_charset();
+		std::string http_accept = request().http_accept();
+		strus::unique_ptr<strus::WebRequestContextInterface> ctx(
+			m_service->requestHandler()->createContext( http_accept_charset.c_str(), http_accept.c_str(), answer));
+		if (!ctx.get())
 		{
-			requestBuf.execute();
+			report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
+			return;
 		}
-		if (requestBuf.ok())
+		cppcms::http::content_type content_type = request().content_type_parsed();
+		std::pair<void*,size_t> content_data = request().raw_post_data();
+		std::string doctype = content_type.media_type();
+		std::string charset = content_type.charset();
+
+		strus::WebRequestContent content( charset.c_str(), doctype.c_str(), (const char*)content_data.first, content_data.second);
+
+		bool rt = false;
+		switch (method)
+		{
+			case ContentDebug: rt = ctx->debugContent( contextname, schemaname, content, answer); break;
+			case ContentExec: rt = ctx->executeContent( contextname, schemaname, content, answer); break;
+		}
+		if (rt)
 		{
 			BOOSTER_DEBUG( DefaultConstants::PACKAGE())
 					<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'; decide for content type '%s; charset=%s'"),
-									requestBuf.http_accept(), requestBuf.http_accept_charset(),
-									requestBuf.answer().content().doctype(), requestBuf.answer().content().charset());
-			report_answer( requestBuf.answer());
+									http_accept.c_str(), http_accept_charset.c_str(), doctype.c_str(), charset.c_str());
+			report_answer( answer);
 		}
 		else
 		{
-			report_error( requestBuf.answer().httpstatus(), requestBuf.answer().apperror(), requestBuf.answer().errorstr());
+			report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
+			return;
 		}
 	}
 	CATCH_EXEC_ERROR("POST")
-}
-
-void Application::exec_debug_post_internal( const std::string& contextname, const std::string& schemaname, const std::string& argument)
-{
-	try
-	{
-		if (!handle_preflight_cors() || !check_request_method("POST")) return;
-	
-		ApplicationRequestBuf requestBuf(
-			m_service, contextname, schemaname, argument,
-			request().http_accept_charset(), request().http_accept(), request_role(),
-			context().request().content_type_parsed(),
-			context().request().raw_post_data());
-	
-		if (requestBuf.ok())
-		{
-			requestBuf.debug();
-		}
-		if (requestBuf.ok())
-		{
-			BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-					<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'; decide for content type '%s; charset=%s'"),
-									requestBuf.http_accept(), requestBuf.http_accept_charset(),
-									requestBuf.answer().content().doctype(), requestBuf.answer().content().charset());
-			report_answer( requestBuf.answer());
-		}
-		else
-		{
-			report_error( requestBuf.answer().httpstatus(), requestBuf.answer().apperror(), requestBuf.answer().errorstr());
-		}
-	}
-	CATCH_EXEC_ERROR("POST")
-}
-
-void Application::exec_quit()
-{
-	try
-	{
-		if( !handle_preflight_cors()) return;
-	
-		report_ok( "ok", 200, _TXT("service to shutdown"));
-		m_service->shutdown();
-	}
-	CATCH_EXEC_ERROR("quit")
-}
-
-void Application::exec_ping()
-{
-	try
-	{
-		if( !handle_preflight_cors()) return;
-	
-		report_ok( "ok", 200, _TXT("service is up and running"));
-	}
-	CATCH_EXEC_ERROR("ping")
-}
-
-void Application::exec_version()
-{
-	try
-	{
-		std::map<std::string,std::string> msg;
-		msg[ "webservice"] = STRUS_WEBSERVICE_VERSION_STRING;
-		msg[ "module"] = STRUS_MODULE_VERSION_STRING;
-		msg[ "rpc"] = STRUS_RPC_VERSION_STRING;
-		msg[ "trace"] = STRUS_TRACE_VERSION_STRING;
-		msg[ "analyzer"] = STRUS_ANALYZER_VERSION_STRING;
-		msg[ "storage"] = STRUS_STORAGE_VERSION_STRING;
-		msg[ "base"] = STRUS_BASE_VERSION_STRING;
-		report_ok( "ok", 200, "version", msg);
-	}
-	CATCH_EXEC_ERROR("version")
 }
 
 static std::vector<std::string> split_path( const std::string& path)
@@ -367,52 +368,46 @@ static std::vector<std::string> split_path( const std::string& path)
 	return rt;
 }
 
-void Application::exec_list( std::string path)
+void Application::exec_get_internal( GetMethod method, const std::string& path)
 {
 	try
 	{
 		if( !handle_preflight_cors()) return;
 
-		std::vector<std::string> pt = split_path( path);
-		std::string role = request_role();
-		std::vector<std::string> result;
 		strus::WebRequestAnswer answer;
-
-		if (m_service->requestHandler()->executeList( pt, role.c_str(), result, answer))
-		{
-			report_ok( "ok", 200/*http status*/, "list", "elem", result);
-		}
-		else
-		{
-			report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
-		}
-	}
-	CATCH_EXEC_ERROR("list")
-}
-
-void Application::exec_view( std::string path)
-{
-	try
-	{
-		if( !handle_preflight_cors()) return;
-
 		std::vector<std::string> pt = split_path( path);
-		std::string role = request_role();
+		std::vector<std::string> result;
 		std::string http_accept_charset = request().http_accept_charset();
 		std::string http_accept = request().http_accept();
-		std::vector<std::string> result;
-		strus::WebRequestAnswer answer;
-
-		if (m_service->requestHandler()->executeView( pt, role.c_str(), http_accept_charset.c_str(), http_accept.c_str(), answer))
+		strus::unique_ptr<strus::WebRequestContextInterface> ctx(
+			m_service->requestHandler()->createContext( http_accept_charset.c_str(), http_accept.c_str(), answer));
+		if (!ctx.get())
 		{
+			report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
+			return;
+		}
+
+		bool rt = false;
+		switch (method)
+		{
+			case GetList: rt = ctx->executeList( pt, answer); break;
+			case GetView: rt = ctx->executeView( pt, answer); break;
+		}
+		if (rt)
+		{
+			BOOSTER_DEBUG( DefaultConstants::PACKAGE())
+					<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'; decide for content type '%s; charset=%s'"),
+									http_accept.c_str(), http_accept_charset.c_str(),
+									answer.content().doctype(), answer.content().charset());
 			report_answer( answer);
 		}
 		else
 		{
 			report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
+			return;
 		}
 	}
-	CATCH_EXEC_ERROR("view")
+	CATCH_EXEC_ERROR( "GET")
 }
 
 static std::string urlRegex( const char* id, int nn, bool more)
@@ -451,6 +446,7 @@ void Application::init_dispatchers()
 	urlmap( "version",	&Application::exec_version);
 	urlmap( "view",		&Application::exec_view, true);
 	urlmap( "list",		&Application::exec_list, true);
+	urlmap( "list",		&Application::exec_list0);
 	if (m_service->quit_enabled())
 	{
 		urlmap( "quit", &Application::exec_quit);

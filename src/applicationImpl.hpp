@@ -41,6 +41,7 @@ public:
 	void exec_ping();
 	void exec_version();
 	void exec_list( std::string path);
+	void exec_list0();
 	void exec_view( std::string path);
 
 private:
@@ -85,13 +86,12 @@ private:
 	/// \brief Initialize all dispatchers (called from constructor)
 	void init_dispatchers();
 
-	/// \brief Get the user role from the request
-	std::string request_role() const;
-
-	/// \brief Common implementation of the exec_post_.. methods
-	void exec_post_internal( const std::string& contextname, const std::string& schemaname, const std::string& argument);
-	/// \brief Common implementation of the debug_post_.. methods
-	void exec_debug_post_internal( const std::string& contextname, const std::string& schemaname, const std::string& argument);
+	/// \brief Common implementation of the exec_post_.. and exec_debug_post_.. methods
+	enum ContentMethod {ContentDebug,ContentExec};
+	void exec_content_internal( ContentMethod method, const std::string& contextname, const std::string& schemaname, const std::string& argument);
+	/// \brief Common implementation of the exec_list_.. and exec_view_.. methods
+	enum GetMethod {GetList,GetView};
+	void exec_get_internal( GetMethod method, const std::string& path);
 
 private:
 	bool handle_preflight_cors();

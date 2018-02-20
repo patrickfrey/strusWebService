@@ -4,7 +4,6 @@ set( webserver_source_files
 	configUtils.cpp
 	applicationImpl.cpp
 	applicationMessageBuf.cpp
-	applicationRequestBuf.cpp
 	serviceClosure.cpp
 	${WEBSERVICE_GEN_SOURCE_DIR}/internationalization.cpp
 )

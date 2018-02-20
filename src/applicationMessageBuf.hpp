@@ -28,6 +28,7 @@ public:
 	strus::WebRequestContent info( const char* rootelem, const std::map<std::string,std::string>& message);
 	strus::WebRequestContent info( const char* rootelem, const char* listelem, const std::vector<std::string>& message);
 
+	strus::WebRequestContent::Type doctype() const	{return m_doctype;}
 	const char* doctypename() const			{return m_doctypename;}
 	const char* charset() const			{return m_charset;}
 	const char* http_accept() const			{return m_accepted_doctype.c_str();}
