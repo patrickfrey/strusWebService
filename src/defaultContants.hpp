@@ -24,6 +24,7 @@ struct DefaultConstants
 	static const int HOUSKEEPING_TIMER_INTERVAL() {return 10;}
 	static const int TRANSACTION_MAX_IDLE_TIME() {return 120;}
 	static const std::string CORS_AGE() {return "10";}
+	static const char* HTML_DEFAULT_STYLE() {return "div {\nfont-family: verdana,arial,courier;\n}";}
 };
 
 #endif

@@ -19,6 +19,7 @@
 #include "strus/webRequestContent.hpp"
 #include "strus/errorCodes.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/fileio.hpp"
 #include "internationalization.hpp"
 #include <cppcms/service.h>
 #include <booster/log.h>
@@ -30,6 +31,7 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 {
 	clear();
 	m_service = new cppcms::service( config);
+	loadHtmlConfiguration( config);
 
 	bool doLogRequests = config.get( "debug.log_requests", DefaultConstants::DO_LOG_REQUESTS());
 	int nofThreads = m_service->threads_no();
@@ -40,12 +42,57 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 	}
 	std::string requestLogFilename = config.get( "debug.request_file", DefaultConstants::REQUEST_LOG_FILE());
 	m_requestLogger = new strus::WebRequestLogger( requestLogFilename, verbose, doLogRequests, nofThreads+1, m_service->process_id(), nofProcs);
-	m_requestHandler = strus::createWebRequestHandler( m_requestLogger);
+	m_requestHandler = strus::createWebRequestHandler( m_requestLogger, m_html_head);
 	if (!m_requestHandler) throw std::bad_alloc();
 
 	loadCorsConfiguration( config);
 	loadHandlerConfiguration( config);
 	loadProtocolConfiguration( config);
+}
+
+void ServiceClosure::loadHtmlConfiguration( const cppcms::json::value& config)
+{
+	if (config.find( "html.css").is_undefined())
+	{
+		m_html_head = DefaultConstants::HTML_DEFAULT_STYLE();
+	}
+	else
+	{
+		int cnt = 0;
+		if (!config.find( "html.css.link").is_undefined())
+		{
+			std::string link = config.get( "html.css.link", "");
+			m_html_head = strus::string_format( "<link rel=\"stylesheet\" href=\"%s\">\n", link.c_str());
+			if (m_html_head.empty()) throw std::bad_alloc();
+			++cnt;
+		}
+		if (!config.find( "html.css.include").is_undefined())
+		{
+			m_html_head = std::string("<style>\n") + config.get( "html.css.include", DefaultConstants::HTML_DEFAULT_STYLE()) + "</style>\n";
+			++cnt;
+		}
+		if (!config.find( "html.css.file").is_undefined())
+		{
+			std::string filename = config.get( "html.css.file", "");
+			std::string content;
+			if (strus::isRelativePath( filename))
+			{
+				filename = strus::joinFilePath( m_configdir, filename);
+				if (filename.empty()) throw std::bad_alloc();
+			}
+			int ec = strus::readFile( filename, content);
+			if (ec) throw strus::runtime_error(_TXT("failed to read CSS file '%s': %s"), filename.c_str(), ::strerror(ec));
+			m_html_head = std::string("<style>\n") + content + "</style>\n";
+		}
+		if (cnt == 0)
+		{
+			throw std::runtime_error( _TXT("html.css is defined in configuration but neither html.css.link nor html.css.include nor html.css.file are"));
+		}
+		else if (cnt > 1)
+		{
+			throw std::runtime_error( _TXT("contradicting definitions of html.css.link or html.css.include or html.css.file"));
+		}
+	}
 }
 
 void ServiceClosure::loadProtocolConfiguration( const cppcms::json::value& config)

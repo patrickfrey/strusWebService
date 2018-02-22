@@ -77,7 +77,7 @@ static void printBufErrorMessage( char* msgbuf, std::size_t msgbufsize, std::siz
 
 		case strus::WebRequestContent::HTML:
 			msgbufpos = std::snprintf(
-				msgbuf, msgbufsize, "<html><head></head><body><h1>Error</h1>\n<ul>\n<li>Code: %d</li>\n<li>Status: %d</li>\n<li>Component: %s</li>\n<li>Operation: %d</li>\n<li>Number: %d</li>\n<li>Message: <i>%s</i></li>\n</ul>\n</body>\n</html>\n",
+				msgbuf, msgbufsize, "<html><head></head><body><h1>Error</h1>\n<ul>\n<li>Status: %d</li>\n<li>Apperr: %d</li>\n<li>Component: %s</li>\n<li>Operation: %d</li>\n<li>Number: %d</li>\n<li>Message: <i>%s</i></li>\n</ul>\n</body>\n</html>\n",
 				httpstatus, apperrorcode,
 				strus::errorComponentName( apperr.component()), (int)apperr.operation(), (int)apperr.cause(), message);
 			break;

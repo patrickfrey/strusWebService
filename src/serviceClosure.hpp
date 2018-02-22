@@ -27,8 +27,9 @@
 class ServiceClosure
 {
 public:
-	ServiceClosure( const cppcms::json::value& config, bool verbose)
-		:m_service(0),m_requestLogger(0),m_requestHandler(0)
+	ServiceClosure( const std::string& configdir_, const cppcms::json::value& config, bool verbose)
+		:m_service(0),m_requestLogger(0),m_requestHandler(0),m_configdir(configdir_)
+		,m_cors_hosts(),m_cors_age(),m_html_head()
 		,m_cors_enabled(true),m_quit_enabled(false),m_debug_enabled(false),m_pretty_print(false)
 	{
 		init( config, verbose);
@@ -93,6 +94,7 @@ private:
 	//\brief Destroy service, logging and command handler if initialized
 	void clear();
 
+	void loadHtmlConfiguration( const cppcms::json::value& config);
 	void loadHandlerConfiguration( const cppcms::json::value& config);
 	void loadCorsConfiguration( const cppcms::json::value& config);
 	void loadProtocolConfiguration( const cppcms::json::value& config);
@@ -101,8 +103,10 @@ private:
 	cppcms::service* m_service;
 	strus::WebRequestLogger* m_requestLogger;
 	strus::WebRequestHandlerInterface* m_requestHandler;
+	std::string m_configdir;
 	std::vector<std::string> m_cors_hosts;
 	std::string m_cors_age;
+	std::string m_html_head;
 	bool m_cors_enabled;
 	bool m_quit_enabled;
 	bool m_debug_enabled;

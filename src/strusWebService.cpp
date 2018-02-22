@@ -171,6 +171,12 @@ int main( int argc_, const char *argv_[] )
 				rt = strus::ErrorCauseInvalidArgument;
 			}
 		}
+		std::string configdir;
+		if (opt("config"))
+		{
+			int ec = strus::getParentPath( opt["config"], configdir);
+			if (ec) throw strus::runtime_error(_TXT("failed to get parent path of configuration: %s"), ::strerror(ec));
+		}
 		g_verbose = opt("verbose");
 		cppcms::json::value config = opt("config") ? configFromFile( opt[ "config"], rt) : configDefault();
 
@@ -187,7 +193,7 @@ int main( int argc_, const char *argv_[] )
 		// Install signal handlers
 		signal( SIGHUP, signal_handler );
 
-		ServiceClosure service( config, g_verbose);
+		ServiceClosure service( configdir, config, g_verbose);
 		int nofThreads = service.threads_no();
 		if (config.find( "context.rpc").is_undefined())
 		{
