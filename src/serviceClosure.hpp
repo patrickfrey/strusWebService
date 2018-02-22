@@ -89,6 +89,10 @@ public:
 	{
 		return m_pretty_print;
 	}
+	const char* html_head() const
+	{
+		return m_html_head.c_str();
+	}
 
 private:
 	//\brief Destroy service, logging and command handler if initialized

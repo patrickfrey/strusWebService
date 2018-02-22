@@ -21,12 +21,10 @@
 class ApplicationMessageBuf
 {
 public:
-	ApplicationMessageBuf( const std::string& accepted_charset_, const std::string& accepted_doctype_);
+	ApplicationMessageBuf( const std::string& accepted_charset_, const std::string& accepted_doctype_, const char* html_head_);
 
 	strus::WebRequestContent error( int httpstatus, int apperrorcode, const char* message);
 	strus::WebRequestContent info( const char* status, const char* message);
-	strus::WebRequestContent info( const char* rootelem, const std::map<std::string,std::string>& message);
-	strus::WebRequestContent info( const char* rootelem, const char* listelem, const std::vector<std::string>& message);
 
 	strus::WebRequestContent::Type doctype() const	{return m_doctype;}
 	const char* doctypename() const			{return m_doctypename;}
@@ -43,6 +41,7 @@ private:
 	strus::WebRequestContent::Type m_doctype;
 	const char* m_doctypename;
 	const char* m_charset;
+	const char* m_html_head;
 };
 
 #endif

@@ -16,6 +16,7 @@
 #include "strus/errorCodes.hpp"
 #include "strus/lib/webrequest.hpp"
 #include "strus/lib/error.hpp"
+#include "strus/base/string_format.hpp"
 #include "internationalization.hpp"
 #include <map>
 #include <string>
@@ -43,7 +44,13 @@ static void escJsonOutput( char* buf, std::size_t buflen)
 	}
 }
 
-static void printBufErrorMessage( char* msgbuf, std::size_t msgbufsize, std::size_t& msgbufpos, strus::WebRequestContent::Type doctype, const char* charset, int httpstatus, int apperrorcode, const char* message)
+static bool printHtmlHeader( char* msgbuf, std::size_t msgbufsize, std::size_t& msgbufpos, const char* charset, const char* html_head)
+{
+	msgbufpos = std::snprintf( msgbuf, msgbufsize, "<!DOCTYPE html>\n<head>\n<head>\n<body>\n<meta>\n<charset=\"%s\">\n</meta>\n%s</head>\n<body>", charset, html_head);
+	return msgbufpos+1 < msgbufsize;
+}
+
+static void printBufErrorMessage( char* msgbuf, std::size_t msgbufsize, std::size_t& msgbufpos, strus::WebRequestContent::Type doctype, const char* charset, int httpstatus, int apperrorcode, const char* message, const char* html_head)
 {
 	strus::ErrorCode apperr( apperrorcode > 0 ? apperrorcode : 0);
 	switch (doctype)
@@ -70,14 +77,16 @@ static void printBufErrorMessage( char* msgbuf, std::size_t msgbufsize, std::siz
 
 		case strus::WebRequestContent::TEXT:
 			msgbufpos = std::snprintf(
-				msgbuf, msgbufsize, "STATUS %d\nAPPERR %d\nCOMPONENT %s\nOP %d\nERRNO %d\nMESSAGE %s\n\n",
-				httpstatus, apperrorcode,
-				strus::errorComponentName( apperr.component()), (int)apperr.operation(), (int)apperr.cause(), message);
+				msgbuf, msgbufsize, "%d %d %s\n", httpstatus, apperrorcode, message);
 			break;
 
 		case strus::WebRequestContent::HTML:
-			msgbufpos = std::snprintf(
-				msgbuf, msgbufsize, "<html><head></head><body><h1>Error</h1>\n<ul>\n<li>Status: %d</li>\n<li>Apperr: %d</li>\n<li>Component: %s</li>\n<li>Operation: %d</li>\n<li>Number: %d</li>\n<li>Message: <i>%s</i></li>\n</ul>\n</body>\n</html>\n",
+			if (!printHtmlHeader( msgbuf, msgbufsize, msgbufpos, charset, html_head))
+			{
+				throw std::runtime_error(_TXT("buffer overflow"));
+			}
+			msgbufpos += std::snprintf(
+				msgbuf+msgbufpos, msgbufsize-msgbufpos, "<div class=\"error\">\n<div class=\"status\">Status: %d</div>\n<div class=\"apperr\">Application error code: %d</div>\n<div class=\"component\">Component: %s</div>\n<div class=\"operation\">Operation: %d</div>\n<div class=\"errno\">Errno: %d</div>\n<div class=\"message\">Message: %s</div>\n</div>\n</body>\n</html>\n",
 				httpstatus, apperrorcode,
 				strus::errorComponentName( apperr.component()), (int)apperr.operation(), (int)apperr.cause(), message);
 			break;
@@ -88,7 +97,7 @@ static void printBufErrorMessage( char* msgbuf, std::size_t msgbufsize, std::siz
 	}
 }
 
-static void printBufInfoMessage( char* msgbuf, std::size_t msgbufsize, std::size_t& msgbufpos, strus::WebRequestContent::Type doctype, const char* charset, const char* status, const char* message)
+static void printBufInfoMessage( char* msgbuf, std::size_t msgbufsize, std::size_t& msgbufpos, strus::WebRequestContent::Type doctype, const char* charset, const char* status, const char* message, const char* html_head)
 {
 	switch (doctype)
 	{
@@ -107,12 +116,17 @@ static void printBufInfoMessage( char* msgbuf, std::size_t msgbufsize, std::size
 
 		case strus::WebRequestContent::TEXT:
 			msgbufpos = std::snprintf(
-				msgbuf, msgbufsize, "STATUS %s\nMESSAGE %s\n\n", status, message);
+				msgbuf, msgbufsize, "%s %s\n", status, message);
 			break;
 
 		case strus::WebRequestContent::HTML:
-			msgbufpos = std::snprintf(
-				msgbuf, msgbufsize, "<html><head><title>strus request</title></head><body><h1>Done</h1>\n<ul>\n<li>Status: %s</li>\n<li>Message: %s</li>\n</ul>\n</body>\n</html>\n", status, message);
+			if (!printHtmlHeader( msgbuf, msgbufsize, msgbufpos, charset, html_head))
+			{
+				throw std::runtime_error(_TXT("buffer overflow"));
+			}
+			msgbufpos += std::snprintf(
+				msgbuf+msgbufpos, msgbufsize-msgbufpos, "<div class=\"info\">\n<div class=\"status\">Status: %s</div>\n<div class=\"message\">%s</div>\n</div>\n</body>\n</html>\n",
+				status, message);
 			break;
 	}
 	if (msgbufpos >= msgbufsize)
@@ -121,100 +135,8 @@ static void printBufInfoMessage( char* msgbuf, std::size_t msgbufsize, std::size
 	}
 }
 
-static std::string dictMessage( strus::WebRequestContent::Type doctype, const char* charset, const char* rootelem, const std::map<std::string,std::string>& dict)
-{
-	std::ostringstream out;
-	std::map<std::string,std::string>::const_iterator di = dict.begin(), de = dict.end();
-	switch (doctype)
-	{
-		case strus::WebRequestContent::Unknown:
-			throw std::runtime_error(_TXT("Unknown content type for output"));
-
-		case strus::WebRequestContent::JSON:
-			out << "{\n\1" << rootelem << "\1:{";
-			for (; di != de; ++di)
-			{
-				out << "\n\t\1" << di->first << "\1:\1" << di->second << "\1";
-			}
-			out << "\n}}\n";
-			break;
-
-		case strus::WebRequestContent::XML:
-			out << "<?xml version=\"1.0\" encoding=\"" << charset << "\"?>\n<" << rootelem << ">\n";
-			for (; di != de; ++di)
-			{
-				out << "\n\t<" << di->first << ">" << di->second << "</" << di->first << ">";
-			}
-			out << "\n</" << rootelem << ">\n";
-			break;
-
-		case strus::WebRequestContent::TEXT:
-			for (; di != de; ++di)
-			{
-				out << di->first << ": " << di->second << "\n";
-			}
-			break;
-
-		case strus::WebRequestContent::HTML:
-			out << "<html><head><title>" << rootelem << "</title></head><body><h1>" << rootelem << "</h1>\n<ul>";
-			for (; di != de; ++di)
-			{
-				out << "\n\t<li>" << di->first << ": " << di->second << "</li>";
-			}
-			out << "\n</ul></body></html>\n";
-			break;
-	}
-	return out.str();
-}
-
-static std::string listMessage( strus::WebRequestContent::Type doctype, const char* charset, const char* rootelem, const char* listelem, const std::vector<std::string>& list)
-{
-	std::ostringstream out;
-	std::vector<std::string>::const_iterator li = list.begin(), le = list.end();
-	switch (doctype)
-	{
-		case strus::WebRequestContent::Unknown:
-			throw std::runtime_error(_TXT("Unknown content type for output"));
-
-		case strus::WebRequestContent::JSON:
-			out << "{\n\1" << rootelem << "\1:[";
-			for (; li != le; ++li)
-			{
-				out << "\n\t\1" << *li << "\1";
-			}
-			out << "\n]}\n";
-			break;
-
-		case strus::WebRequestContent::XML:
-			out << "<?xml version=\"1.0\" encoding=\"" << charset << "\"?>\n<" << rootelem << ">\n";
-			for (; li != le; ++li)
-			{
-				out << "\n\t<" << listelem << ">" << *li << "</" << listelem << ">";
-			}
-			out << "\n</" << rootelem << ">\n";
-			break;
-
-		case strus::WebRequestContent::TEXT:
-			for (; li != le; ++li)
-			{
-				out << *li << "\n";
-			}
-			break;
-
-		case strus::WebRequestContent::HTML:
-			out << "<html><head><title>" << rootelem << "</title></head><body><h1>" << rootelem << "</h1>\n<ul>";
-			for (; li != le; ++li)
-			{
-				out << "\n\t<li>" << *li << "</li>";
-			}
-			out << "\n</ul></body></html>\n";
-			break;
-	}
-	return out.str();
-}
-
-ApplicationMessageBuf::ApplicationMessageBuf( const std::string& accepted_charset_, const std::string& accepted_doctype_)
-	:m_accepted_charset(accepted_charset_),m_accepted_doctype(accepted_doctype_)
+ApplicationMessageBuf::ApplicationMessageBuf( const std::string& accepted_charset_, const std::string& accepted_doctype_, const char* html_head_)
+	:m_accepted_charset(accepted_charset_),m_accepted_doctype(accepted_doctype_),m_html_head(html_head_)
 {
 	m_doctype = strus::selectAcceptedContentType( m_accepted_doctype.c_str());
 	m_doctypename = strus::WebRequestContent::typeName( m_doctype);
@@ -224,7 +146,7 @@ ApplicationMessageBuf::ApplicationMessageBuf( const std::string& accepted_charse
 strus::WebRequestContent ApplicationMessageBuf::error( int httpstatus, int apperrorcode, const char* message)
 {
 	std::size_t msgbufpos = 0;
-	printBufErrorMessage( m_msgbuf, sizeof(m_msgbuf), msgbufpos, m_doctype, m_charset, httpstatus, apperrorcode, message);
+	printBufErrorMessage( m_msgbuf, sizeof(m_msgbuf), msgbufpos, m_doctype, m_charset, httpstatus, apperrorcode, message, m_html_head);
 
 	std::size_t msglen_conv = 0;
 	const char* msg = strus::convertContentCharset( m_charset, m_msgbuf_conv, sizeof(m_msgbuf_conv), msglen_conv, m_msgbuf, msgbufpos);
@@ -235,28 +157,10 @@ strus::WebRequestContent ApplicationMessageBuf::error( int httpstatus, int apper
 strus::WebRequestContent ApplicationMessageBuf::info( const char* status, const char* message)
 {
 	std::size_t msgbufpos = 0;
-	printBufInfoMessage( m_msgbuf, sizeof(m_msgbuf), msgbufpos, m_doctype, m_charset, status, message);
+	printBufInfoMessage( m_msgbuf, sizeof(m_msgbuf), msgbufpos, m_doctype, m_charset, status, message, m_html_head);
 
 	std::size_t msglen_conv = 0;
 	const char* msg = strus::convertContentCharset( m_charset, m_msgbuf_conv, sizeof(m_msgbuf_conv), msglen_conv, m_msgbuf, msgbufpos);
-
-	return strus::WebRequestContent( m_charset, m_doctypename, msg, msglen_conv);
-}
-
-strus::WebRequestContent ApplicationMessageBuf::info( const char* rootelem, const std::map<std::string,std::string>& message)
-{
-	std::string msgstr = dictMessage( m_doctype, m_charset, rootelem, message);
-	std::size_t msglen_conv = 0;
-	const char* msg = strus::convertContentCharset( m_charset, m_msgbuf, sizeof(m_msgbuf) + sizeof(m_msgbuf_conv), msglen_conv, msgstr.c_str(), msgstr.size());
-
-	return strus::WebRequestContent( m_charset, m_doctypename, msg, msglen_conv);
-}
-
-strus::WebRequestContent ApplicationMessageBuf::info( const char* rootelem, const char* listelem, const std::vector<std::string>& message)
-{
-	std::string msgstr = listMessage( m_doctype, m_charset, rootelem, listelem, message);
-	std::size_t msglen_conv = 0;
-	const char* msg = strus::convertContentCharset( m_charset, m_msgbuf, sizeof(m_msgbuf) + sizeof(m_msgbuf_conv), msglen_conv, msgstr.c_str(), msgstr.size());
 
 	return strus::WebRequestContent( m_charset, m_doctypename, msg, msglen_conv);
 }

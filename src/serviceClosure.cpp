@@ -50,39 +50,56 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 	loadProtocolConfiguration( config);
 }
 
+static std::string css_style_include( const std::string& content)
+{
+	return std::string("<style>\n") + content + "</style>\n";
+}
+static std::string css_style_link( const std::string& link)
+{
+	return strus::string_format( "<link rel=\"stylesheet\" href=\"%s\">\n", link.c_str());
+}
+static std::string readIncludeContent( const std::string& cfgdir, const std::string& cfgfile)
+{
+	std::string content;
+	std::string filename;
+	if (strus::isRelativePath( cfgfile))
+	{
+		filename = strus::joinFilePath( cfgdir, cfgfile);
+		if (filename.empty()) throw std::bad_alloc();
+	}
+	else
+	{
+		filename = cfgfile;
+	}
+	int ec = strus::readFile( filename, content);
+	if (ec) throw strus::runtime_error(_TXT("failed to read CSS file '%s': %s"), filename.c_str(), ::strerror(ec));
+	return content;
+}
+
 void ServiceClosure::loadHtmlConfiguration( const cppcms::json::value& config)
 {
 	if (config.find( "html.css").is_undefined())
 	{
-		m_html_head = DefaultConstants::HTML_DEFAULT_STYLE();
+		m_html_head = css_style_include( DefaultConstants::HTML_DEFAULT_STYLE());
 	}
 	else
 	{
 		int cnt = 0;
 		if (!config.find( "html.css.link").is_undefined())
 		{
-			std::string link = config.get( "html.css.link", "");
-			m_html_head = strus::string_format( "<link rel=\"stylesheet\" href=\"%s\">\n", link.c_str());
+			m_html_head = css_style_link( config.get( "html.css.link", ""));
 			if (m_html_head.empty()) throw std::bad_alloc();
 			++cnt;
 		}
 		if (!config.find( "html.css.include").is_undefined())
 		{
-			m_html_head = std::string("<style>\n") + config.get( "html.css.include", DefaultConstants::HTML_DEFAULT_STYLE()) + "</style>\n";
+			m_html_head = css_style_include( config.get( "html.css.include", DefaultConstants::HTML_DEFAULT_STYLE()));
 			++cnt;
 		}
 		if (!config.find( "html.css.file").is_undefined())
 		{
-			std::string filename = config.get( "html.css.file", "");
-			std::string content;
-			if (strus::isRelativePath( filename))
-			{
-				filename = strus::joinFilePath( m_configdir, filename);
-				if (filename.empty()) throw std::bad_alloc();
-			}
-			int ec = strus::readFile( filename, content);
-			if (ec) throw strus::runtime_error(_TXT("failed to read CSS file '%s': %s"), filename.c_str(), ::strerror(ec));
-			m_html_head = std::string("<style>\n") + content + "</style>\n";
+			m_html_head = css_style_include( readIncludeContent( m_configdir, config.get( "html.css.file", ".css")));
+			++cnt;
 		}
 		if (cnt == 0)
 		{

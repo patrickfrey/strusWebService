@@ -39,7 +39,8 @@ public:
 
 	void exec_quit();
 	void exec_ping();
-	void exec_version();
+	void exec_version( std::string component);
+	void exec_version0();
 	void exec_list( std::string path);
 	void exec_list0();
 	void exec_view( std::string path);
@@ -73,10 +74,6 @@ private:
 	void report_error_fmt( int httpstatus, int apperror, const char* fmt, ...);
 	/// \brief Report successful protocol only command
 	void report_ok( const char* status, int httpstatus, const char* message);
-	/// \brief Report successful protocol only command with a map as argument
-	void report_ok( const char* status, int httpstatus, const char* rootelem, const std::map<std::string,std::string>& message);
-	/// \brief Report successful protocol only command with a vector as argument
-	void report_ok( const char* status, int httpstatus, const char* rootelem, const char* listelem, const std::vector<std::string>& message);
 	/// \brief Report content
 	void report_answer( const strus::WebRequestAnswer& answer);
 
