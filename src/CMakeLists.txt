@@ -1,4 +1,4 @@
-set( webserver_source_files
+set( source_files
 	webRequestLogger.cpp
 	strusWebService.cpp
 	configUtils.cpp
@@ -24,7 +24,9 @@ link_directories(
 	"${WEBSERVICE_LIBRARY_DIRS}"
 )
 
-add_executable(strusWebService ${webserver_source_files})
+add_cppcheck( strusWebService ${source_files} )
+
+add_executable( strusWebService ${source_files})
 target_link_libraries( strusWebService ${Boost_LIBRARIES} ${LIBCPPCMS_LIBRARY} ${LIBBOOSTER_LIBRARY} strus_webrequest strus_bindings strus_bindings_description strus_error strus_base strus_module ${Boost_LIBRARIES} )
 
 install( TARGETS strusWebService RUNTIME DESTINATION sbin )

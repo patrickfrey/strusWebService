@@ -22,6 +22,7 @@ include( cmake/link_rules.cmake )
 include( cmake/standard_targets.cmake )
 include( cmake/intl.cmake )
 include( cmake/report_build_settings.cmake )
+include( cmake/cppcheck.cmake )
 
 find_strus_package( base )
 find_strus_package( core )
