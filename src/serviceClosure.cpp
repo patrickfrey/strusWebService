@@ -153,7 +153,7 @@ void ServiceClosure::loadHandlerConfiguration( const cppcms::json::value& config
 
 	BOOSTER_DEBUG( DefaultConstants::PACKAGE()) << strus::string_format( _TXT( "loading request handler configuration (schema %s)"), init_schema);
 	if (!m_requestHandler->loadConfiguration(
-		root_context/*destContextType*/, root_context/*destContextName*/, NULL/*srcContext*/, init_schema, content, status))
+		root_context/*destContextType*/, root_context/*destContextName*/, NULL/*srcContextType*/, NULL/*srcContextName*/, init_schema, content, status))
 	{
 		throw configuration_error( status);
 	}
@@ -179,7 +179,7 @@ void ServiceClosure::loadHandlerConfiguration( const cppcms::json::value& config
 				<< strus::string_format( _TXT( "loading handler sub configuration for %s %s (schema %s, context %s)"),
 						destContextType.c_str(), destContextName.c_str(), sectionName.c_str()/*schema*/, root_context);
 			if (!m_requestHandler->loadConfiguration(
-				destContextType.c_str(), destContextName.c_str(), root_context, sectionName.c_str()/*schema*/, subcontent, status))
+				destContextType.c_str(), destContextName.c_str(), root_context/*type*/, root_context/*name*/, sectionName.c_str()/*schema*/, subcontent, status))
 			{
 				throw configuration_error( status);
 			}
