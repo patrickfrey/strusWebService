@@ -31,11 +31,11 @@ class Application
 public:
 	explicit Application( cppcms::service& service_, ServiceClosure* serviceImpl_);
 
-	void exec_post_config( std::string new_context, std::string from_context, std::string schema);
-	void exec_post2( std::string contextname, std::string schemaname);
-	void exec_post3( std::string contextname, std::string schemaname, std::string argument);
-	void exec_debug_post2( std::string contextname, std::string schemaname);
-	void exec_debug_post3( std::string contextname, std::string schemaname, std::string argument);
+	void exec_put_config( std::string contexttype, std::string contextname, std::string schema);
+	void exec_post3( std::string contexttype, std::string contextname, std::string schemaname);
+	void exec_post4( std::string contexttype, std::string contextname, std::string schemaname, std::string argument);
+	void exec_debug_post3( std::string contexttype, std::string contextname, std::string schemaname);
+	void exec_debug_post4( std::string contexttype, std::string contextname, std::string schemaname, std::string argument);
 
 	void exec_quit();
 	void exec_ping();
@@ -44,14 +44,18 @@ public:
 	void exec_list( std::string path);
 	void exec_list0();
 	void exec_view( std::string path);
+	void exec_view0();
 
 private:
 	// Handler method variants distinguished by number of arguments
+	typedef void(Application::*UrlHandlerMethod4)(std::string, std::string, std::string, std::string);
 	typedef void(Application::*UrlHandlerMethod3)(std::string, std::string, std::string);
 	typedef void(Application::*UrlHandlerMethod2)(std::string, std::string);
 	typedef void(Application::*UrlHandlerMethod1)(std::string);
 	typedef void(Application::*UrlHandlerMethod0)();
 
+	/// \brief Map an URL with a main path dir and 4 string arguments as subdirectories
+	void urlmap( const char* dir, UrlHandlerMethod4 handler, bool more=false);
 	/// \brief Map an URL with a main path dir and 3 string arguments as subdirectories
 	void urlmap( const char* dir, UrlHandlerMethod3 handler, bool more=false);
 	/// \brief Map an URL with a main path dir and 2 string arguments as subdirectories
@@ -83,9 +87,11 @@ private:
 	/// \brief Initialize all dispatchers (called from constructor)
 	void init_dispatchers();
 
+	/// \brief Common implementation of the put_config_.. methods
+	void put_config_internal( const std::string& contexttype, const std::string& contextname, const std::string& schemaname);
 	/// \brief Common implementation of the exec_post_.. and exec_debug_post_.. methods
 	enum ContentMethod {ContentDebug,ContentExec};
-	void exec_content_internal( ContentMethod method, const std::string& contextname, const std::string& schemaname, const std::string& argument);
+	void exec_content_internal( ContentMethod method, const std::string& contexttype, const std::string& contextname, const std::string& schemaname, const std::string& argument);
 	/// \brief Common implementation of the exec_list_.. and exec_view_.. methods
 	enum GetMethod {GetList,GetView};
 	void exec_get_internal( GetMethod method, const std::string& path);

@@ -21,6 +21,7 @@ struct DefaultConstants
 	static const bool DO_LOG_REQUESTS() {return false;}
 	static const std::string REQUEST_LOG_FILE() {return "request.log";}
 	static const std::string SERVICE_LOG_FILE() {return "strusWebService.log";}
+	static const std::string AUTOSAVE_CONFIG_DIR() {return "/srv/strus/config";}
 	static const int HOUSKEEPING_TIMER_INTERVAL() {return 10;}
 	static const int TRANSACTION_MAX_IDLE_TIME() {return 120;}
 	static const std::string CORS_AGE() {return "10";}

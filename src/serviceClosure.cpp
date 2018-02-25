@@ -40,9 +40,10 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 	{
 		throw strus::runtime_error(_TXT("it is currently not possible to configure more than one process (%d)"), nofProcs);
 	}
+	m_put_configdir = config.get( "data.configdir", DefaultConstants::DefaultConstants::AUTOSAVE_CONFIG_DIR());
 	std::string requestLogFilename = config.get( "debug.request_file", DefaultConstants::REQUEST_LOG_FILE());
 	m_requestLogger = new strus::WebRequestLogger( requestLogFilename, verbose, doLogRequests, nofThreads+1, m_service->process_id(), nofProcs);
-	m_requestHandler = strus::createWebRequestHandler( m_requestLogger, m_html_head);
+	m_requestHandler = strus::createWebRequestHandler( m_requestLogger, m_html_head, m_put_configdir);
 	if (!m_requestHandler) throw std::bad_alloc();
 
 	loadCorsConfiguration( config);
@@ -153,7 +154,7 @@ void ServiceClosure::loadHandlerConfiguration( const cppcms::json::value& config
 
 	BOOSTER_DEBUG( DefaultConstants::PACKAGE()) << strus::string_format( _TXT( "loading request handler configuration (schema %s)"), init_schema);
 	if (!m_requestHandler->loadConfiguration(
-		root_context/*destContextType*/, root_context/*destContextName*/, NULL/*srcContextType*/, NULL/*srcContextName*/, init_schema, content, status))
+		root_context/*destContextType*/, root_context/*destContextName*/, init_schema, content, status))
 	{
 		throw configuration_error( status);
 	}
@@ -176,14 +177,19 @@ void ServiceClosure::loadHandlerConfiguration( const cppcms::json::value& config
 			strus::WebRequestContent subcontent( config_charset, config_doctype, subconfigstr.c_str(), subconfigstr.size());
 
 			BOOSTER_DEBUG( DefaultConstants::PACKAGE()) 
-				<< strus::string_format( _TXT( "loading handler sub configuration for %s %s (schema %s, context %s)"),
-						destContextType.c_str(), destContextName.c_str(), sectionName.c_str()/*schema*/, root_context);
+				<< strus::string_format( _TXT( "loading handler sub configuration for %s %s, schema %s"),
+						destContextType.c_str(), destContextName.c_str(), sectionName.c_str()/*schema*/);
 			if (!m_requestHandler->loadConfiguration(
-				destContextType.c_str(), destContextName.c_str(), root_context/*type*/, root_context/*name*/, sectionName.c_str()/*schema*/, subcontent, status))
+				destContextType.c_str(), destContextName.c_str(), sectionName.c_str()/*schema*/, subcontent, status))
 			{
 				throw configuration_error( status);
 			}
 		}
+	}
+	BOOSTER_DEBUG( DefaultConstants::PACKAGE()) << strus::string_format( _TXT( "loading stored configurations"));
+	if (!m_requestHandler->loadStoredConfigurations( status))
+	{
+		throw configuration_error( status);
 	}
 }
 

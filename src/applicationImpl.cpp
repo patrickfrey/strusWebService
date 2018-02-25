@@ -159,35 +159,34 @@ void Application::not_found_404()
 	report_error( 404, -1, _TXT( "Not found"));
 }
 
-void Application::exec_post_config( std::string new_context, std::string from_context, std::string schema)
+void Application::exec_put_config( std::string contexttype, std::string contextname, std::string schema)
 {
 	if (!handle_preflight_cors() || !check_request_method("POST")) return;
-	report_error( 404, -1, _TXT( "Not found"));
-	// TODO Implement, not implemented yet
+	put_config_internal( contexttype, contextname, schema);
 }
 
-void Application::exec_post2( std::string contextname, std::string schemaname)
+void Application::exec_post3( std::string contexttype, std::string contextname, std::string schemaname)
 {
 	if (!handle_preflight_cors() || !check_request_method("POST")) return;
-	exec_content_internal( ContentExec, contextname, schemaname, std::string()/*no argument*/);
+	exec_content_internal( ContentExec, contexttype, contextname, schemaname, std::string()/*no argument*/);
 }
 
-void Application::exec_post3( std::string contextname, std::string schemaname, std::string argument)
+void Application::exec_post4( std::string contexttype, std::string contextname, std::string schemaname, std::string argument)
 {
 	if (!handle_preflight_cors() || !check_request_method("POST")) return;
-	exec_content_internal( ContentExec, contextname, schemaname, argument);
+	exec_content_internal( ContentExec, contexttype, contextname, schemaname, argument);
 }
 
-void Application::exec_debug_post2( std::string contextname, std::string schemaname)
+void Application::exec_debug_post3( std::string contexttype, std::string contextname, std::string schemaname)
 {
 	if (!handle_preflight_cors() || !check_request_method("POST")) return;
-	exec_content_internal( ContentDebug, contextname, schemaname, std::string()/*no argument*/);
+	exec_content_internal( ContentDebug, contexttype, contextname, schemaname, std::string()/*no argument*/);
 }
 
-void Application::exec_debug_post3( std::string contextname, std::string schemaname, std::string argument)
+void Application::exec_debug_post4( std::string contexttype, std::string contextname, std::string schemaname, std::string argument)
 {
 	if (!handle_preflight_cors() || !check_request_method("POST")) return;
-	exec_content_internal( ContentDebug, contextname, schemaname, argument);
+	exec_content_internal( ContentDebug, contexttype, contextname, schemaname, argument);
 }
 
 void Application::exec_quit()
@@ -224,6 +223,12 @@ void Application::exec_list0()
 }
 
 void Application::exec_view( std::string path)
+{
+	if (!handle_preflight_cors() || !check_request_method("GET")) return;
+	exec_get_internal( GetView, std::string());
+}
+
+void Application::exec_view0()
 {
 	if (!handle_preflight_cors() || !check_request_method("GET")) return;
 	exec_get_internal( GetView, std::string());
@@ -290,7 +295,47 @@ bool Application::test_request_method( const char* type)
 	return (request().request_method() == type);
 }
 
-void Application::exec_content_internal( ContentMethod method, const std::string& contextname, const std::string& schemaname, const std::string& argument)
+void Application::put_config_internal( const std::string& contexttype, const std::string& contextname, const std::string& schemaname)
+{
+	try
+	{
+		strus::WebRequestAnswer answer;
+		std::string http_accept_charset = request().http_accept_charset();
+		std::string http_accept = request().http_accept();
+		strus::unique_ptr<strus::WebRequestContextInterface> ctx(
+			m_service->requestHandler()->createContext( http_accept_charset.c_str(), http_accept.c_str(), answer));
+		if (!ctx.get())
+		{
+			report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
+			return;
+		}
+		cppcms::http::content_type content_type = request().content_type_parsed();
+		std::pair<void*,size_t> content_data = request().raw_post_data();
+		std::string doctype = content_type.media_type();
+		std::string charset = content_type.charset();
+	
+		strus::WebRequestContent content( charset.c_str(), doctype.c_str(), (const char*)content_data.first, content_data.second);
+	
+		BOOSTER_DEBUG( DefaultConstants::PACKAGE())
+			<< strus::string_format( _TXT( "loading configuration %s %s (schema %s)"),
+				contexttype.c_str(), contextname.c_str(), schemaname.c_str());
+	
+		if (!m_service->requestHandler()->loadConfiguration(
+			contexttype.c_str(), contextname.c_str(), schemaname.c_str(), content, answer))
+		{
+			report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
+		}
+		else if (!m_service->requestHandler()->storeConfiguration(
+			contexttype.c_str(), contextname.c_str(), schemaname.c_str(), content, answer))
+		{
+			report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
+		}
+		report_answer( answer);
+	}
+	CATCH_EXEC_ERROR("PUT")
+}
+
+void Application::exec_content_internal( ContentMethod method, const std::string& contexttype, const std::string& contextname, const std::string& schemaname, const std::string& argument)
 {
 	try
 	{
@@ -314,8 +359,8 @@ void Application::exec_content_internal( ContentMethod method, const std::string
 		bool rt = false;
 		switch (method)
 		{
-			case ContentDebug: rt = ctx->debugContent( contextname.c_str(), schemaname.c_str(), content, answer); break;
-			case ContentExec: rt = ctx->executeContent( contextname.c_str(), schemaname.c_str(), content, answer); break;
+			case ContentDebug: rt = ctx->debugContent( contexttype.c_str(), contextname.c_str(), schemaname.c_str(), content, answer); break;
+			case ContentExec: rt = ctx->executeContent( contexttype.c_str(), contextname.c_str(), schemaname.c_str(), content, answer); break;
 		}
 		if (rt)
 		{
@@ -387,21 +432,25 @@ static std::string urlRegex( const char* id, int nn, bool more)
 	return rt;
 }
 
-void Application::urlmap( const char* dir, UrlHandlerMethod3 handler, bool more)
+void Application::urlmap( const char* dir, UrlHandlerMethod0 handler0)
 {
-	dispatcher().assign( urlRegex( dir, 3, more), handler, this, 1, 2, 3);
+	dispatcher().assign( urlRegex( dir, 0, false), handler0, this);
 }
-void Application::urlmap( const char* dir, UrlHandlerMethod2 handler, bool more)
+void Application::urlmap( const char* dir, UrlHandlerMethod1 handler1, bool more)
 {
-	dispatcher().assign( urlRegex( dir, 2, more), handler, this, 1, 2);
+	dispatcher().assign( urlRegex( dir, 1, more), handler1, this, 1);
 }
-void Application::urlmap( const char* dir, UrlHandlerMethod1 handler, bool more)
+void Application::urlmap( const char* dir, UrlHandlerMethod2 handler2, bool more)
 {
-	dispatcher().assign( urlRegex( dir, 1, more), handler, this, 1);
+	dispatcher().assign( urlRegex( dir, 2, more), handler2, this, 1, 2);
 }
-void Application::urlmap( const char* dir, UrlHandlerMethod0 handler)
+void Application::urlmap( const char* dir, UrlHandlerMethod3 handler3, bool more)
 {
-	dispatcher().assign( urlRegex( dir, 0, false), handler, this);
+	dispatcher().assign( urlRegex( dir, 3, more), handler3, this, 1, 2, 3);
+}
+void Application::urlmap( const char* dir, UrlHandlerMethod4 handler4, bool more)
+{
+	dispatcher().assign( urlRegex( dir, 4, more), handler4, this, 1, 2, 3, 4);
 }
 
 void Application::init_dispatchers()
@@ -410,17 +459,18 @@ void Application::init_dispatchers()
 	urlmap( "version",	&Application::exec_version0);
 	urlmap( "version",	&Application::exec_version);
 	urlmap( "view",		&Application::exec_view, true);
+	urlmap( "view",		&Application::exec_view0);
 	urlmap( "list",		&Application::exec_list, true);
 	urlmap( "list",		&Application::exec_list0);
 	if (m_service->quit_enabled())
 	{
 		urlmap( "quit", &Application::exec_quit);
 	}
-	urlmap( "config",	&Application::exec_post_config);
+	urlmap( "config",	&Application::exec_put_config);
+	urlmap( "debug",	&Application::exec_debug_post4);
 	urlmap( "debug",	&Application::exec_debug_post3);
-	urlmap( "debug",	&Application::exec_debug_post2);
+	urlmap( "",		&Application::exec_post4);
 	urlmap( "",		&Application::exec_post3);
-	urlmap( "",		&Application::exec_post2);
 	urlmap( ".*",		&Application::not_found_404);
 }
 

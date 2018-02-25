@@ -2,6 +2,7 @@
 	"data" :
 	{
 		"workdir"   : "/srv/strus",
+		"configdir" : "/srv/strus",
 		"resources" : "/usr/share/strus"
 	},
 	"storage" : {
