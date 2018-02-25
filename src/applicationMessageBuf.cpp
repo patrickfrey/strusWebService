@@ -77,7 +77,7 @@ static void printBufErrorMessage( char* msgbuf, std::size_t msgbufsize, std::siz
 
 		case strus::WebRequestContent::TEXT:
 			msgbufpos = std::snprintf(
-				msgbuf, msgbufsize, "%d %d %s\n", httpstatus, apperrorcode, message);
+				msgbuf, msgbufsize, "err %d %s\n", apperrorcode>0?apperrorcode:0, message);
 			break;
 
 		case strus::WebRequestContent::HTML:
@@ -139,7 +139,7 @@ ApplicationMessageBuf::ApplicationMessageBuf( const std::string& accepted_charse
 	:m_accepted_charset(accepted_charset_),m_accepted_doctype(accepted_doctype_),m_html_head(html_head_)
 {
 	m_doctype = strus::selectAcceptedContentType( m_accepted_doctype.c_str());
-	m_doctypename = strus::WebRequestContent::typeName( m_doctype);
+	m_doctypename = strus::WebRequestContent::typeMime( m_doctype);
 	m_charset = strus::selectAcceptedCharset( m_accepted_charset.c_str());
 }
 
@@ -149,8 +149,16 @@ strus::WebRequestContent ApplicationMessageBuf::error( int httpstatus, int apper
 	printBufErrorMessage( m_msgbuf, sizeof(m_msgbuf), msgbufpos, m_doctype, m_charset, httpstatus, apperrorcode, message, m_html_head);
 
 	std::size_t msglen_conv = 0;
-	const char* msg = strus::convertContentCharset( m_charset, m_msgbuf_conv, sizeof(m_msgbuf_conv), msglen_conv, m_msgbuf, msgbufpos);
-
+	const char* msg;
+	if (0==std::strcmp( m_charset, "UTF-8"))
+	{
+		msg = m_msgbuf;
+		msglen_conv = msgbufpos;
+	}
+	else
+	{
+		msg = strus::convertContentCharset( m_charset, m_msgbuf_conv, sizeof(m_msgbuf_conv), msglen_conv, m_msgbuf, msgbufpos);
+	}
 	return strus::WebRequestContent( m_charset, m_doctypename, msg, msglen_conv);
 }
 
@@ -160,8 +168,16 @@ strus::WebRequestContent ApplicationMessageBuf::info( const char* status, const 
 	printBufInfoMessage( m_msgbuf, sizeof(m_msgbuf), msgbufpos, m_doctype, m_charset, status, message, m_html_head);
 
 	std::size_t msglen_conv = 0;
-	const char* msg = strus::convertContentCharset( m_charset, m_msgbuf_conv, sizeof(m_msgbuf_conv), msglen_conv, m_msgbuf, msgbufpos);
-
+	const char* msg;
+	if (0==std::strcmp( m_charset, "UTF-8"))
+	{
+		msg = m_msgbuf;
+		msglen_conv = msgbufpos;
+	}
+	else
+	{
+		msg = strus::convertContentCharset( m_charset, m_msgbuf_conv, sizeof(m_msgbuf_conv), msglen_conv, m_msgbuf, msgbufpos);
+	}
 	return strus::WebRequestContent( m_charset, m_doctypename, msg, msglen_conv);
 }
 

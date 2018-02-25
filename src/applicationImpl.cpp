@@ -44,9 +44,6 @@
 Application::Application( cppcms::service& service_, ServiceClosure* serviceClosure_)
 		:cppcms::application(service_),m_service(serviceClosure_)
 {
-#ifdef STRUS_LOWLEVEL_DEBUG
-	std::cerr << "CREATE cppcms::application" << std::endl;
-#endif
 	init_dispatchers();
 }
 
@@ -80,6 +77,8 @@ void Application::response_content( const char* charset, const char* doctype, co
 
 void Application::response_content( const strus::WebRequestContent& content)
 {
+	BOOSTER_DEBUG( DefaultConstants::PACKAGE())
+		<< strus::string_format( _TXT("responce content type '%s' charset '%s'"), content.doctype(), content.charset());
 	response_content( content.charset(), content.doctype(), content.str(), content.len());
 }
 
@@ -225,7 +224,7 @@ void Application::exec_list0()
 void Application::exec_view( std::string path)
 {
 	if (!handle_preflight_cors() || !check_request_method("GET")) return;
-	exec_get_internal( GetView, std::string());
+	exec_get_internal( GetView, path);
 }
 
 void Application::exec_view0()
@@ -353,6 +352,8 @@ void Application::exec_content_internal( ContentMethod method, const std::string
 		std::pair<void*,size_t> content_data = request().raw_post_data();
 		std::string doctype = content_type.media_type();
 		std::string charset = content_type.charset();
+		BOOSTER_DEBUG( DefaultConstants::PACKAGE())
+				<< strus::string_format( _TXT("Request POST content type '%s; charset=%s'"), doctype.c_str(), charset.c_str());
 
 		strus::WebRequestContent content( charset.c_str(), doctype.c_str(), (const char*)content_data.first, content_data.second);
 
