@@ -109,8 +109,7 @@ void Application::report_error( int httpstatus, int apperrorcode, const char* me
 	else
 	{
 		BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-			<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'; decide for content type '%s; charset=%s'"),
-							msgbuf.http_accept(), msgbuf.http_accept_charset(), msgbuf.doctypename(), msgbuf.charset());
+			<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), msgbuf.http_accept(), msgbuf.http_accept_charset());
 		response_content( msgbuf.error( httpstatus, apperrorcode, message));
 	}
 	response().status( httpstatus);
@@ -132,8 +131,7 @@ void Application::report_ok( const char* status, int httpstatus, const char* mes
 
 	ApplicationMessageBuf msgbuf( request().http_accept_charset(), request().http_accept(), m_service->html_head());
 	BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-		<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'; decide for content type '%s; charset=%s'"),
-						msgbuf.http_accept(), msgbuf.http_accept_charset(), msgbuf.doctypename(), msgbuf.charset());
+		<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), msgbuf.http_accept(), msgbuf.http_accept_charset());
 
 	response_content( msgbuf.info( "ok", message));
 	response().status( httpstatus);
@@ -366,8 +364,7 @@ void Application::exec_content_internal( ContentMethod method, const std::string
 		if (rt)
 		{
 			BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-					<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'; decide for content type '%s; charset=%s'"),
-									http_accept.c_str(), http_accept_charset.c_str(), doctype.c_str(), charset.c_str());
+				<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), http_accept.c_str(), http_accept_charset.c_str());
 			report_answer( answer);
 		}
 		else
@@ -406,9 +403,7 @@ void Application::exec_get_internal( GetMethod method, const std::string& path)
 		if (rt)
 		{
 			BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-					<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'; decide for content type '%s; charset=%s'"),
-									http_accept.c_str(), http_accept_charset.c_str(),
-									answer.content().doctype(), answer.content().charset());
+				<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), http_accept.c_str(), http_accept_charset.c_str());
 			report_answer( answer);
 		}
 		else

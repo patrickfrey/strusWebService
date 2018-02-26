@@ -25,7 +25,23 @@ struct DefaultConstants
 	static const int HOUSKEEPING_TIMER_INTERVAL() {return 10;}
 	static const int TRANSACTION_MAX_IDLE_TIME() {return 120;}
 	static const std::string CORS_AGE() {return "10";}
-	static const char* HTML_DEFAULT_STYLE() {return "div {\nfont-family: verdana,arial,courier;\n}\n.info {\ncolor: green;\n}\n.error {\ncolor: red;\nfont-weight: bold;\n}\n.table {\ndisplay: table;\n}\n.row {\ndisplay: table-row;\n}\n.col {\ndisplay: table-cell;\n}\n.list {\ndisplay: list;\n}\n.elem {\npadding: 0px 20px;\ndisplay: list-item;\n}\n";}
+	static const char* HTML_DEFAULT_STYLE()
+	{
+		return "div,span {\n\tfont-family: verdana,arial,courier;\n}"
+			"\n.info {\n\tcolor: green;\n}"
+			"\n.error {\n\tcolor: red;\n\tfont-weight: bold;\n}"
+			"\n.table {\n\tdisplay: table;\n}"
+			"\n.row {\n\tdisplay: table-row;\n}"
+			"\n.col {\n\tdisplay: table-cell;\n}"
+			"\n.list {\n\tdisplay: list;\n}"
+			"\n.elem {\n\tpadding: 0px 20px;\n\tdisplay: list-item;\n}"
+			"\nspan.title {\n\tfont-weight: bold;\n}"
+			"\nspan.name {\n\tdisplay: inline;\n\tfont-weight: bold;\n}"
+			"\nspan.name:after {\n\tcontent: \": \";\n}"
+			"\nspan.value {\n\tdisplay: inline;\n}"
+			"\nspan.value:after {\n\tcontent: '\\A';\n\twhite-space: pre\n}"
+			"\n";
+	}
 };
 
 #endif
