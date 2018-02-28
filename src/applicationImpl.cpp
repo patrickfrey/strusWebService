@@ -236,7 +236,7 @@ void Application::exec_version( std::string component)
 	if (!handle_preflight_cors() || !check_request_method("GET")) return;
 
 	const char* versionstr = 0;
-	if (component == "webservice")		{versionstr = STRUS_WEBSERVICE_VERSION_STRING; }
+	if (component == "webservice")		{versionstr = STRUS_WEBSERVICE_VERSION_STRING;}
 	else if (component == "module")		{versionstr = STRUS_MODULE_VERSION_STRING;}
 	else if (component == "rpc")		{versionstr = STRUS_RPC_VERSION_STRING;}
 	else if (component == "trace")		{versionstr = STRUS_TRACE_VERSION_STRING;}
