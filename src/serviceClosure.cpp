@@ -137,7 +137,8 @@ static std::runtime_error configuration_error( const strus::WebRequestAnswer& st
 	strus::ErrorCode errcode( status.apperror());
 	const char* componentname = errorComponentName( errcode.component());
 	int operation = errcode.operation();
-	int cause = errcode.cause();
+	int syserrno = errcode.syserrno();
+	int cause = syserrno ? syserrno : errcode.cause();
 	return strus::runtime_error( _TXT("error loading configuration (in %s op %d error code %d): %s"), componentname, operation, cause, status.errorstr());
 }
 

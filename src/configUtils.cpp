@@ -73,7 +73,7 @@ cppcms::json::value configDefault()
 {
 	cppcms::json::value config;
 	config.set( "service.api", "http");
-	config.set( "service.port", 80);
+	config.set( "service.port", 8080);
 	config.set( "logging.level", "info");
 	config.set( "logging.file.name", DefaultConstants::SERVICE_LOG_FILE());
 	config.set( "logging.file.append", true);

@@ -78,14 +78,14 @@ void Application::response_content( const char* charset, const char* doctype, co
 void Application::response_content( const strus::WebRequestContent& content)
 {
 	BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-		<< strus::string_format( _TXT("responce content type '%s' charset '%s'"), content.doctype(), content.charset());
+		<< strus::string_format( _TXT("response content type '%s' charset '%s'"), content.doctype(), content.charset());
 	response_content( content.charset(), content.doctype(), content.str(), content.len());
 }
 
 void Application::report_fatal()
 {
 	BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << "(status 500) FATAL";
-	response().status( 500/*application error*/);
+	response().status( 500/*application error*/, "ERR");
 }
 
 void Application::report_error( int httpstatus, int apperrorcode, const char* message_)
@@ -112,7 +112,8 @@ void Application::report_error( int httpstatus, int apperrorcode, const char* me
 			<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), msgbuf.http_accept(), msgbuf.http_accept_charset());
 		response_content( msgbuf.error( httpstatus, apperrorcode, message));
 	}
-	response().status( httpstatus);
+	response().status( httpstatus, "ERR");
+	response().finalize();
 }
 
 void Application::report_error_fmt( int httpstatus, int apperrorcode, const char* fmt, ...)
@@ -133,8 +134,9 @@ void Application::report_ok( const char* status, int httpstatus, const char* mes
 	BOOSTER_DEBUG( DefaultConstants::PACKAGE())
 		<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), msgbuf.http_accept(), msgbuf.http_accept_charset());
 
-	response_content( msgbuf.info( "ok", message));
-	response().status( httpstatus);
+	response_content( msgbuf.info( "OK", message));
+	response().status( httpstatus, "OK");
+	response().finalize();
 }
 
 void Application::report_answer( const strus::WebRequestAnswer& answer)
@@ -145,8 +147,8 @@ void Application::report_answer( const strus::WebRequestAnswer& answer)
 	}
 	else
 	{
-		BOOSTER_DEBUG( DefaultConstants::PACKAGE() ) << "(status " << answer.httpstatus() << ") ok";
-		response().status( answer.httpstatus());
+		BOOSTER_DEBUG( DefaultConstants::PACKAGE() ) << "(status " << answer.httpstatus() << ") OK";
+		response().status( answer.httpstatus(), "OK");
 		response_content( answer.content());
 	}
 }
@@ -191,7 +193,7 @@ void Application::exec_quit()
 	try
 	{
 		if (!handle_preflight_cors() || !check_request_method("GET")) return;
-		report_ok( "ok", 200, _TXT("service to shutdown"));
+		report_ok( "OK", 200, _TXT("service to shutdown"));
 		m_service->shutdown();
 	}
 	CATCH_EXEC_ERROR("quit");
