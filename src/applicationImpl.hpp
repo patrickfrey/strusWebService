@@ -96,6 +96,8 @@ private:
 	enum GetMethod {GetList,GetView};
 	void exec_get_internal( GetMethod method, const std::string& path);
 
+	std::string debug_request_description();
+
 private:
 	bool handle_preflight_cors();
 

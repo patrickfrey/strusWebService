@@ -78,7 +78,7 @@ void Application::response_content( const char* charset, const char* doctype, co
 void Application::response_content( const strus::WebRequestContent& content)
 {
 	BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-		<< strus::string_format( _TXT("response content type '%s' charset '%s'"), content.doctype(), content.charset());
+		<< strus::string_format( _TXT("response content type '%s', charset '%s'"), content.doctype(), content.charset());
 	response_content( content.charset(), content.doctype(), content.str(), content.len());
 }
 
@@ -279,6 +279,14 @@ bool Application::handle_preflight_cors()
 	return false;
 }
 
+std::string Application::debug_request_description()
+{
+	std::string remote_host = request().remote_host();
+	std::string method = request().request_method();
+	std::string path_info = request().path_info();
+	return strus::string_format(_TXT("Method %s path '%s' from '%s'"), method.c_str(), path_info.c_str(), remote_host.c_str());
+}
+
 bool Application::check_request_method( const char* type)
 {
 	if (request().request_method() != type)
@@ -338,6 +346,8 @@ void Application::exec_content_internal( ContentMethod method, const std::string
 {
 	try
 	{
+		BOOSTER_DEBUG( DefaultConstants::PACKAGE()) << debug_request_description();
+
 		strus::WebRequestAnswer answer;
 		std::string http_accept_charset = request().http_accept_charset();
 		std::string http_accept = request().http_accept();
@@ -353,7 +363,7 @@ void Application::exec_content_internal( ContentMethod method, const std::string
 		std::string doctype = content_type.media_type();
 		std::string charset = content_type.charset();
 		BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-				<< strus::string_format( _TXT("Request POST content type '%s; charset=%s'"), doctype.c_str(), charset.c_str());
+				<< strus::string_format( _TXT("Request content type '%s', charset '%s'"), doctype.c_str(), charset.c_str());
 
 		strus::WebRequestContent content( charset.c_str(), doctype.c_str(), (const char*)content_data.first, content_data.second);
 
@@ -383,6 +393,7 @@ void Application::exec_get_internal( GetMethod method, const std::string& path)
 	try
 	{
 		if( !handle_preflight_cors()) return;
+		BOOSTER_DEBUG( DefaultConstants::PACKAGE()) << debug_request_description();
 
 		strus::WebRequestAnswer answer;
 		std::vector<std::string> result;

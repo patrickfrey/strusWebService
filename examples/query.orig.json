@@ -1,0 +1,22 @@
+{
+    "query": {
+        "element": {
+            "type": "stem",
+            "field": "text",
+            "tokenizer": "word",
+            "normalizers": ["text","lc","stem(de)","convdia(de)"]
+        },
+        "group": {"-by":"all", "field":"text", "op":"sequence" },
+        "feature": [
+            {"term": {
+                "type": "text",
+                "value": "Valderrama"
+            }},
+            {"term": {
+                "type": "text",
+                "value": "Golfklub"
+            }}
+        ]
+    }
+}
+

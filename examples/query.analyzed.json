@@ -1,0 +1,15 @@
+{
+    "query": {
+        "feature": [
+            {"term": {
+                "type": "stem",
+                "value": "valderrama"
+            }},
+            {"term": {
+                "type": "stem",
+                "value": "golfklub"
+            }}
+        ]
+    }
+}
+

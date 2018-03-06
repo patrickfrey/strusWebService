@@ -147,15 +147,15 @@ void ServiceClosure::loadHandlerConfiguration( const cppcms::json::value& config
 	std::string configstr( config.save());
 	strus::WebRequestAnswer status;
 	static const char* root_context = "context";
-	static const char* init_schema = "init";
+	static const char* init_scheme = "init";
 	static const char* config_doctype = "json";
 	static const char* config_charset = "utf-8";
 
 	strus::WebRequestContent content( config_charset, config_doctype, configstr.c_str(), configstr.size());
 
-	BOOSTER_DEBUG( DefaultConstants::PACKAGE()) << strus::string_format( _TXT( "loading request handler configuration (schema %s)"), init_schema);
+	BOOSTER_DEBUG( DefaultConstants::PACKAGE()) << strus::string_format( _TXT( "loading request handler configuration (scheme %s)"), init_scheme);
 	if (!m_requestHandler->loadConfiguration(
-		root_context/*destContextType*/, root_context/*destContextName*/, init_schema, content, status))
+		root_context/*destContextType*/, root_context/*destContextName*/, init_scheme, content, status))
 	{
 		throw configuration_error( status);
 	}
@@ -164,13 +164,13 @@ void ServiceClosure::loadHandlerConfiguration( const cppcms::json::value& config
 	{
 		const std::string& sectionName = oi->first;
 
-		// Search subconfiguration schema with a name "init" as prefix concatenated with the title of the configuration section:
-		if (m_requestHandler->hasSchema( root_context, sectionName.c_str()/*schema*/))
+		// Search subconfiguration scheme with a name "init" as prefix concatenated with the title of the configuration section:
+		if (m_requestHandler->hasScheme( root_context, sectionName.c_str()/*scheme*/))
 		{
 			std::string destContextName = oi->second.get( "id", sectionName);
 			//... the name of the context created by the configuration is the name configured as "id" or the section name if not specified
 			const std::string& destContextType = oi->first;
-			//... the prefix of all schemas working on the context created is the configuration section name
+			//... the prefix of all schemes working on the context created is the configuration section name
 			cppcms::json::value subconfig;
 			subconfig.set( sectionName, oi->second);
 			//... the subconfiguration is the configuration section with the section name as root
@@ -178,10 +178,10 @@ void ServiceClosure::loadHandlerConfiguration( const cppcms::json::value& config
 			strus::WebRequestContent subcontent( config_charset, config_doctype, subconfigstr.c_str(), subconfigstr.size());
 
 			BOOSTER_DEBUG( DefaultConstants::PACKAGE()) 
-				<< strus::string_format( _TXT( "loading handler sub configuration for %s %s, schema %s"),
-						destContextType.c_str(), destContextName.c_str(), sectionName.c_str()/*schema*/);
+				<< strus::string_format( _TXT( "loading handler sub configuration for %s %s, scheme %s"),
+						destContextType.c_str(), destContextName.c_str(), sectionName.c_str()/*scheme*/);
 			if (!m_requestHandler->loadConfiguration(
-				destContextType.c_str(), destContextName.c_str(), sectionName.c_str()/*schema*/, subcontent, status))
+				destContextType.c_str(), destContextName.c_str(), sectionName.c_str()/*scheme*/, subcontent, status))
 			{
 				throw configuration_error( status);
 			}
