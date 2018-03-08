@@ -45,13 +45,15 @@ static std::string getLogFilename( const std::string& logfilename, int procid, i
 	}
 }
 
-WebRequestLogger::WebRequestLogger( const std::string& logfilename_, bool verbose, bool logRequests, int maxnofthreads, int procid_, int nofprocs_)
+WebRequestLogger::WebRequestLogger( const std::string& logfilename_, bool verbose, bool logRequests, int structDepth, int maxnofthreads, int procid_, int nofprocs_)
 	:m_slots(new Slot[ maxnofthreads])
 	,m_nofslots(maxnofthreads?maxnofthreads:1)
 	,m_nofslotspow(nofslotspow(maxnofthreads))
 	,m_logfilename(getLogFilename(logfilename_,procid_,nofprocs_))
 	,m_logfile()
 	,m_logout(0)
+	,m_verbose(verbose)
+	,m_structDepth(structDepth)
 	,m_mask(LogNothing)
 	,m_gotAlert(false)
 	,m_procid(procid_)
@@ -109,7 +111,7 @@ void WebRequestLogger::reset()
 	if (m_logout == &m_logfile)
 	{
 		m_logfile.close();
-		m_logfile.open ("test.txt", std::ofstream::out | std::ofstream::app);
+		m_logfile.open( m_logfilename, std::ofstream::out | std::ofstream::app);
 	}
 }
 
@@ -139,6 +141,10 @@ void WebRequestLogger::logMessage( const char* fmt, ...)
 	{
 		strus::unique_lock lock( m_mutex);
 		(*m_logout) << buf << std::endl;
+		if (m_verbose && m_logout != &std::cerr && m_logout != &std::cout)
+		{
+			std::cerr << buf << std::endl;
+		}
 	}
 	catch (const std::exception& err)
 	{

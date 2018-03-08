@@ -1,5 +1,23 @@
 {
     "query": {
+        "weighting": {
+            "name": "BM25",
+            "param": [{
+                "name": "k1",
+                "value": "1.2"
+            },{
+                "name": "b",
+                "value": "0.75"
+            },{
+                "name": "avgdoclen",
+                "value": "100"
+            }],
+            "feature": [{
+                "name": "match",
+                "value": "search"
+            }]
+        },
+        "selection": "search",
         "element": {
             "type": "stem",
             "field": "text",
@@ -8,14 +26,20 @@
         },
         "group": {"-by":"all", "field":"text", "op":"sequence" },
         "feature": [
-            {"term": {
-                "type": "text",
-                "value": "Valderrama"
-            }},
-            {"term": {
-                "type": "text",
-                "value": "Golfklub"
-            }}
+            {
+                "set": "search",
+                "term": {
+                    "type": "text",
+                    "value": "Valderrama"
+                }
+            },
+            {
+                "set": "search",
+                "term": {
+                    "type": "text",
+                    "value": "Golfklub"
+                }
+            }
         ]
     }
 }

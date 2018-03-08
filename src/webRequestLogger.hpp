@@ -24,11 +24,16 @@ class WebRequestLogger
 	:public strus::WebRequestLoggerInterface
 {
 public:
-	WebRequestLogger( const std::string& logfilename_, bool verbose, bool logRequests, int maxnofthreads, int procid, int nofprocs);
+	WebRequestLogger( const std::string& logfilename_, bool verbose, bool logRequests, int structDepth, int maxnofthreads, int procid, int nofprocs);
 
 	virtual ~WebRequestLogger();
 
 	virtual int logMask() const;
+
+	virtual int structDepth() const
+	{
+		return m_structDepth;
+	}
 
 	bool gotAlert() const
 	{
@@ -44,6 +49,10 @@ public:
 		if (methodname.empty())
 		{
 			logMessage( _TXT("new %s( %s)"), classname.c_str(), arguments.c_str());
+		}
+		else if (result.empty())
+		{
+			logMessage( _TXT("call %s::%s( %s)"), classname.c_str(), methodname.c_str(), arguments.c_str());
 		}
 		else
 		{
@@ -87,6 +96,8 @@ private:
 	std::string m_logfilename;
 	std::ofstream m_logfile;
 	std::ostream* m_logout;
+	bool m_verbose;
+	int m_structDepth;
 	Mask m_mask;
 	bool m_gotAlert;
 	int m_procid;

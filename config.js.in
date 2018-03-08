@@ -63,6 +63,7 @@
 
 	"debug" : {
 		"log_requests": true,
+		"struct_depth": 4,
 		"request_file": "./requests.log",
 		"protocol" : {
 			"pretty_print":		true,

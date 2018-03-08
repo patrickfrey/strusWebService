@@ -34,6 +34,7 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 	loadHtmlConfiguration( config);
 
 	bool doLogRequests = config.get( "debug.log_requests", DefaultConstants::DO_LOG_REQUESTS());
+	int logStructDepth = config.get( "debug.struct_depth", DefaultConstants::LOG_STRUCT_DEPTH());
 	int nofThreads = m_service->threads_no();
 	int nofProcs = m_service->procs_no();
 	if (nofProcs > 1)
@@ -42,7 +43,7 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 	}
 	m_put_configdir = config.get( "data.configdir", DefaultConstants::DefaultConstants::AUTOSAVE_CONFIG_DIR());
 	std::string requestLogFilename = config.get( "debug.request_file", DefaultConstants::REQUEST_LOG_FILE());
-	m_requestLogger = new strus::WebRequestLogger( requestLogFilename, verbose, doLogRequests, nofThreads+1, m_service->process_id(), nofProcs);
+	m_requestLogger = new strus::WebRequestLogger( requestLogFilename, verbose, doLogRequests, logStructDepth, nofThreads+1, m_service->process_id(), nofProcs);
 	m_requestHandler = strus::createWebRequestHandler( m_requestLogger, m_html_head, m_put_configdir);
 	if (!m_requestHandler) throw std::bad_alloc();
 
