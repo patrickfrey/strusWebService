@@ -1,0 +1,23 @@
+<?xml version="1.0" charset="UTF-8" standalone="yes"?>
+<query>
+<weighting>
+<name>BM25</name>
+<param><name>k1</name><value>1.2</value></param>
+<param><name>b</name><value>0.75</value></param>
+<param><name>avgdoclen</name><value>100</value></param>
+<feature><name>match</name><value>search</value></feature>
+</weighting>
+<selection>search</selection>
+<element>
+<type>stem</type>
+<field>text</field>
+<tokenizer><name>word</name></tokenizer>
+<normalizer><name>text</name></normalizer>
+<normalizer><name>lc</name></normalizer>
+<normalizer><name>stem</name><arg>de</arg></normalizer>
+<normalizer><name>convdia</name><arg>de</arg></normalizer>
+</element>
+<group by="all"><field>text</field><op>sequence</op></group>
+<feature><set>search</set><term><type>text</type><value>Valderrama</value></term></feature>
+<feature><set>search</set><term><type>text</type><value>Golfklub</value></term></feature>
+</query>

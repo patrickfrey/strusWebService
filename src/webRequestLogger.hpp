@@ -35,30 +35,13 @@ public:
 		return m_structDepth;
 	}
 
-	bool gotAlert() const
-	{
-		return m_gotAlert;
-	}
-
+	virtual void logRequest( const char* reqstr);
 	virtual void logMethodCall(
 			const std::string& classname,
 			const std::string& methodname,
 			const std::string& arguments,
-			const std::string& result)
-	{
-		if (methodname.empty())
-		{
-			logMessage( _TXT("new %s( %s)"), classname.c_str(), arguments.c_str());
-		}
-		else if (result.empty())
-		{
-			logMessage( _TXT("call %s::%s( %s)"), classname.c_str(), methodname.c_str(), arguments.c_str());
-		}
-		else
-		{
-			logMessage( _TXT("call %s::%s( %s) => %s"), classname.c_str(), methodname.c_str(), arguments.c_str(), result.c_str());
-		}
-	}
+			const std::string& result);
+	virtual void logLoggerError( const char* errmsg);
 
 	void reset();
 
@@ -72,6 +55,10 @@ private:
 	;
 	const char* getThreadId();
 	void alert( const char* msg);
+	bool gotAlert() const
+	{
+		return m_gotAlert;
+	}
 
 private:
 	strus::mutex m_mutex;

@@ -78,11 +78,11 @@ WebRequestLogger::WebRequestLogger( const std::string& logfilename_, bool verbos
 	}
 	else if (logRequests)
 	{
-		m_mask = WebRequestLoggerInterface::LogMethodCalls;
+		m_mask = WebRequestLoggerInterface::LogRequests;
 	}
 	for (std::size_t si=0; si<m_nofslots; ++si)
 	{
-		m_slots[ si].init_id( m_nofslots, si+1);
+		m_slots[ si].init_id( m_nofslotspow, si);
 	}
 	reset();
 }
@@ -94,6 +94,36 @@ WebRequestLogger::~WebRequestLogger()
 		m_logfile.close();
 	}
 	delete [] m_slots;
+}
+
+void WebRequestLogger::logRequest( const char* reqstr)
+{
+	logMessage( _TXT("request: {%s}"), reqstr);
+}
+
+void WebRequestLogger::logMethodCall(
+		const std::string& classname,
+		const std::string& methodname,
+		const std::string& arguments,
+		const std::string& result)
+{
+	if (methodname.empty())
+	{
+		logMessage( _TXT("new %s( %s)"), classname.c_str(), arguments.c_str());
+	}
+	else if (result.empty())
+	{
+		logMessage( _TXT("call %s::%s( %s)"), classname.c_str(), methodname.c_str(), arguments.c_str());
+	}
+	else
+	{
+		logMessage( _TXT("call %s::%s( %s) returns %s"), classname.c_str(), methodname.c_str(), arguments.c_str(), result.c_str());
+	}
+}
+
+void WebRequestLogger::logLoggerError( const char* errmsg)
+{
+	logMessage( _TXT("logging of method call failed: %s"), errmsg);
 }
 
 int WebRequestLogger::logMask() const
