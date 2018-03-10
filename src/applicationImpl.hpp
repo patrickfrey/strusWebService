@@ -19,8 +19,11 @@
 #include <cppcms/application.h>
 #include <cppcms/http_response.h>
 #include <cppcms/url_dispatcher.h>
-#include <map>
+#include <set>
 #include <string>
+
+namespace strus {
+namespace webservice {
 
 ///\brief Forward declaration
 class ServiceClosure;
@@ -31,11 +34,9 @@ class Application
 public:
 	explicit Application( cppcms::service& service_, ServiceClosure* serviceImpl_);
 
-	void exec_put_config( std::string contexttype, std::string contextname, std::string schema);
-	void exec_post3( std::string contexttype, std::string contextname, std::string schemaname);
-	void exec_post4( std::string contexttype, std::string contextname, std::string schemaname, std::string argument);
-	void exec_debug_post3( std::string contexttype, std::string contextname, std::string schemaname);
-	void exec_debug_post4( std::string contexttype, std::string contextname, std::string schemaname, std::string argument);
+	void exec_put_config( std::string path);
+	void exec_post( std::string path);
+	void exec_debug_post( std::string path);
 
 	void exec_quit();
 	void exec_ping();
@@ -48,18 +49,9 @@ public:
 
 private:
 	// Handler method variants distinguished by number of arguments
-	typedef void(Application::*UrlHandlerMethod4)(std::string, std::string, std::string, std::string);
-	typedef void(Application::*UrlHandlerMethod3)(std::string, std::string, std::string);
-	typedef void(Application::*UrlHandlerMethod2)(std::string, std::string);
 	typedef void(Application::*UrlHandlerMethod1)(std::string);
 	typedef void(Application::*UrlHandlerMethod0)();
 
-	/// \brief Map an URL with a main path dir and 4 string arguments as subdirectories
-	void urlmap( const char* dir, UrlHandlerMethod4 handler, bool more=false);
-	/// \brief Map an URL with a main path dir and 3 string arguments as subdirectories
-	void urlmap( const char* dir, UrlHandlerMethod3 handler, bool more=false);
-	/// \brief Map an URL with a main path dir and 2 string arguments as subdirectories
-	void urlmap( const char* dir, UrlHandlerMethod2 handler, bool more=false);
 	/// \brief Map an URL with a main path dir and 1 string argument as subdirectory
 	void urlmap( const char* dir, UrlHandlerMethod1 handler, bool more=false);
 	/// \brief Map an URL with a main path dir and no string arguments as subdirectories
@@ -80,9 +72,6 @@ private:
 	void report_ok( const char* status, int httpstatus, const char* message);
 	/// \brief Report content
 	void report_answer( const strus::WebRequestAnswer& answer);
-
-	/// \brief Report error for not found
-	void not_found_404();
 
 	/// \brief Initialize all dispatchers (called from constructor)
 	void init_dispatchers();
@@ -108,8 +97,10 @@ private:
 
 private:
 	ServiceClosure* m_service;
+	std::set<std::string> m_schemeset;
 };
 
+}}//namespace strus::webservice
 #endif
 
 

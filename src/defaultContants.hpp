@@ -12,8 +12,13 @@
 #define _STRUS_WEBSERVICE_DEFAULT_CONSTANTS_HPP_INCLUDED
 #include <string>
 
+namespace strus {
+namespace webservice {
+
 struct DefaultConstants
 {
+	enum {MaxUrlLength=2048};
+
 	static const char* PACKAGE() {return "strusWebService";}
 	static bool DEBUG_PROTOCOL_PRETTY_PRINT() {return false;}
 	static bool DEBUG_PROTOCOL_DEBUG_ENABLED() {return false;}
@@ -46,5 +51,6 @@ struct DefaultConstants
 	}
 };
 
+}}//namespace strus::webservice
 #endif
 

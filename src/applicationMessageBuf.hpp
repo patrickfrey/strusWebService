@@ -16,6 +16,9 @@
 #include <string>
 #include <vector>
 
+namespace strus {
+namespace webservice {
+
 /// \class ApplicationMessageBuf
 /// \brief Abstraction for a server to client message of a cppcms application for strus with its data
 class ApplicationMessageBuf
@@ -44,4 +47,5 @@ private:
 	const char* m_html_head;
 };
 
+}}//namespace strus::webservice
 #endif

@@ -27,6 +27,8 @@
 
 #undef STRUS_LOWLEVEL_DEBUG
 
+using namespace strus::webservice;
+
 void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 {
 	clear();

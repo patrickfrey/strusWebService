@@ -23,6 +23,8 @@
 #include <sstream>
 #include <iostream>
 
+using namespace strus::webservice;
+
 static void escJsonOutput( char* buf, std::size_t buflen)
 {
 	char* si = buf;

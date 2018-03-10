@@ -22,6 +22,9 @@
 #include <string>
 #include <algorithm>
 
+namespace strus {
+namespace webservice {
+
 /// \class ServiceClosure
 /// \brief Closure with all objects used by the cppcms service class for the strus webservice 
 class ServiceClosure
@@ -121,6 +124,7 @@ private:
 	bool m_pretty_print;
 };
 
+}}//namespace strus::webservice
 #endif
 
 

@@ -39,6 +39,7 @@
 #include <cstdlib>
 
 #undef STRUS_LOWLEVEL_DEBUG
+using namespace strus::webservice;
 
 // Global flags:
 static bool g_verbose = false;

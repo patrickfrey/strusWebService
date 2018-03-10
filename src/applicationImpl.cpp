@@ -13,6 +13,7 @@
 #include "applicationImpl.hpp"
 #include "applicationMessageBuf.hpp"
 #include "serviceClosure.hpp"
+#include "pathIter.hpp"
 #include "strus/lib/webrequest.hpp"
 #include "strus/lib/error.hpp"
 #include "strus/webRequestAnswer.hpp"
@@ -40,6 +41,7 @@
 #include <iostream>
 
 #undef STRUS_LOWLEVEL_DEBUG
+using namespace strus::webservice;
 
 Application::Application( cppcms::service& service_, ServiceClosure* serviceClosure_)
 		:cppcms::application(service_),m_service(serviceClosure_)
@@ -153,39 +155,75 @@ void Application::report_answer( const strus::WebRequestAnswer& answer)
 	}
 }
 
-void Application::not_found_404()
+struct RequestAddress
 {
-	report_error( 404, -1, _TXT( "Not found"));
+	bool found;
+	std::string schemeName;
+	std::string contextType;
+	std::string contextName;
+	std::string restPath;
+
+	RequestAddress( const std::string& path, const std::set<std::string>& schemeset)
+		:found(false)
+	{
+		PathIter pi( path.c_str());
+		const char* schemeNamePtr = pi.getNext();
+		if (!schemeNamePtr) return;
+		schemeName = schemeNamePtr;
+		if (schemeset.find( schemeName) == schemeset.end()) return;
+
+		const char* contextTypePtr = pi.getNext();
+		const char* contextNamePtr = pi.getNext();
+		const char* restPtr = pi.getRest();
+		if (!contextNamePtr) return;
+		contextType = contextTypePtr;
+		contextName = contextNamePtr;
+		if (restPtr) restPath.append( restPtr);
+		found = true;
+	}
+};
+
+void Application::exec_put_config( std::string path)
+{
+	RequestAddress pt( path, m_schemeset);
+	if (pt.found && pt.restPath.empty())
+	{
+		if (!handle_preflight_cors() || !check_request_method("POST")) return;
+		put_config_internal( pt.contextType, pt.contextName, pt.schemeName);
+	}
+	else
+	{
+		report_error( 404, -1, _TXT( "Not found"));
+	}
 }
 
-void Application::exec_put_config( std::string contexttype, std::string contextname, std::string schema)
+void Application::exec_post( std::string path)
 {
-	if (!handle_preflight_cors() || !check_request_method("POST")) return;
-	put_config_internal( contexttype, contextname, schema);
+	RequestAddress pt( path, m_schemeset);
+	if (pt.found)
+	{
+		if (!handle_preflight_cors() || !check_request_method("POST")) return;
+		exec_content_internal( ContentExec, pt.contextType, pt.contextName, pt.schemeName, pt.restPath);
+	}
+	else
+	{
+		report_error( 404, -1, _TXT( "Not found"));
+	}
 }
 
-void Application::exec_post3( std::string contexttype, std::string contextname, std::string schemaname)
+void Application::exec_debug_post( std::string path)
 {
-	if (!handle_preflight_cors() || !check_request_method("POST")) return;
-	exec_content_internal( ContentExec, contexttype, contextname, schemaname, std::string()/*no argument*/);
-}
+	RequestAddress pt( path, m_schemeset);
+	if (pt.found)
+	{
+		if (!handle_preflight_cors() || !check_request_method("POST")) return;
+		exec_content_internal( ContentDebug, pt.contextType, pt.contextName, pt.schemeName, pt.restPath);
+	}
+	else
+	{
+		report_error( 404, -1, _TXT( "Not found"));
+	}
 
-void Application::exec_post4( std::string contexttype, std::string contextname, std::string schemaname, std::string argument)
-{
-	if (!handle_preflight_cors() || !check_request_method("POST")) return;
-	exec_content_internal( ContentExec, contexttype, contextname, schemaname, argument);
-}
-
-void Application::exec_debug_post3( std::string contexttype, std::string contextname, std::string schemaname)
-{
-	if (!handle_preflight_cors() || !check_request_method("POST")) return;
-	exec_content_internal( ContentDebug, contexttype, contextname, schemaname, std::string()/*no argument*/);
-}
-
-void Application::exec_debug_post4( std::string contexttype, std::string contextname, std::string schemaname, std::string argument)
-{
-	if (!handle_preflight_cors() || !check_request_method("POST")) return;
-	exec_content_internal( ContentDebug, contexttype, contextname, schemaname, argument);
 }
 
 void Application::exec_quit()
@@ -449,21 +487,12 @@ void Application::urlmap( const char* dir, UrlHandlerMethod1 handler1, bool more
 {
 	dispatcher().assign( urlRegex( dir, 1, more), handler1, this, 1);
 }
-void Application::urlmap( const char* dir, UrlHandlerMethod2 handler2, bool more)
-{
-	dispatcher().assign( urlRegex( dir, 2, more), handler2, this, 1, 2);
-}
-void Application::urlmap( const char* dir, UrlHandlerMethod3 handler3, bool more)
-{
-	dispatcher().assign( urlRegex( dir, 3, more), handler3, this, 1, 2, 3);
-}
-void Application::urlmap( const char* dir, UrlHandlerMethod4 handler4, bool more)
-{
-	dispatcher().assign( urlRegex( dir, 4, more), handler4, this, 1, 2, 3, 4);
-}
 
 void Application::init_dispatchers()
 {
+	char const** schemes = m_service->requestHandler()->schemes();
+	for (char const** si = schemes; *si; ++si) m_schemeset.insert( *si);
+
 	urlmap( "ping",		&Application::exec_ping);
 	urlmap( "version",	&Application::exec_version0);
 	urlmap( "version",	&Application::exec_version);
@@ -475,12 +504,9 @@ void Application::init_dispatchers()
 	{
 		urlmap( "quit", &Application::exec_quit);
 	}
-	urlmap( "config",	&Application::exec_put_config);
-	urlmap( "debug",	&Application::exec_debug_post4);
-	urlmap( "debug",	&Application::exec_debug_post3);
-	urlmap( "",		&Application::exec_post4);
-	urlmap( "",		&Application::exec_post3);
-	urlmap( ".*",		&Application::not_found_404);
+	urlmap( "config",	&Application::exec_put_config, true);
+	urlmap( "debug",	&Application::exec_debug_post, true);
+	urlmap( "",		&Application::exec_post, true);
 }
 
 

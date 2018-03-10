@@ -20,8 +20,10 @@
 #include <sstream>
 
 #undef STRUS_LOWLEVEL_DEBUG
+using namespace strus;
+using namespace strus::webservice;
 
-std::vector<std::string> getConfigArray( const cppcms::json::value& config, const std::string& path)
+std::vector<std::string> webservice::getConfigArray( const cppcms::json::value& config, const std::string& path)
 {
 	std::vector<std::string> rt;
 	const cppcms::json::value& configval = config.find( path);
@@ -49,7 +51,7 @@ std::vector<std::string> getConfigArray( const cppcms::json::value& config, cons
 	return rt;
 }
 
-cppcms::json::value configFromFile( const std::string& configfile, int& errcode)
+cppcms::json::value webservice::configFromFile( const std::string& configfile, int& errcode)
 {
 	cppcms::json::value config;
 	std::string configstr;
@@ -69,7 +71,7 @@ cppcms::json::value configFromFile( const std::string& configfile, int& errcode)
 	return config;
 }
 
-cppcms::json::value configDefault()
+cppcms::json::value webservice::configDefault()
 {
 	cppcms::json::value config;
 	config.set( "service.api", "http");
