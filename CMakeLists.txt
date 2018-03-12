@@ -69,5 +69,6 @@ set( WEBSERVICE_GEN_SOURCE_DIR   "${CMAKE_CURRENT_BINARY_DIR}/src" )
 add_subdirectory( 3rdParty/curlpp )
 enable_testing( )
 add_subdirectory( src )
+add_subdirectory( client_curl )
 add_subdirectory( tests )
 
