@@ -136,6 +136,7 @@ int main( int argc, char const* argv[])
 		set_curl_opt( curl, CURLOPT_HTTPHEADER, headers);
 		set_curl_opt( curl, CURLOPT_FAILONERROR, 1);
 		set_curl_opt( curl, CURLOPT_ERRORBUFFER, curl_errbuf);
+		if (g_verbose) set_curl_opt( curl, CURLOPT_VERBOSE, 1);
 
 		if (request.method == "GET")
 		{
@@ -178,7 +179,7 @@ int main( int argc, char const* argv[])
 		{
 			long http_code = 0;
 			curl_easy_getinfo( curl, CURLINFO_RESPONSE_CODE, &http_code);
-			if (g_verbose) std::cerr << "Response code: " << http_code << std::endl;
+			if (g_verbose) std::cerr << "\nResponse code: " << http_code << std::endl;
 		}
 	}
 	catch (const std::bad_alloc&)

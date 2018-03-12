@@ -86,8 +86,10 @@ void Application::response_content( const strus::WebRequestContent& content)
 
 void Application::report_fatal()
 {
-	BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << "(status 500) FATAL";
-	response().status( 500/*application error*/, "ERR");
+	int httpstatus = 500/*application error*/;
+	BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << "(status " << httpstatus << ") FATAL";
+	response().status( httpstatus);
+	response().finalize();
 }
 
 void Application::report_error( int httpstatus, int apperrorcode, const char* message_)
@@ -101,20 +103,14 @@ void Application::report_error( int httpstatus, int apperrorcode, const char* me
 	{
 		BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << "(status " << httpstatus << ") " << message;
 	}
-	ApplicationMessageBuf msgbuf( request().http_accept_charset(), request().http_accept(), m_service->html_head());
-	if (msgbuf.doctype() == strus::WebRequestContent::Unknown)
+	if (message_)
 	{
-		BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-			<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'; no content returned"),
-							msgbuf.http_accept(), msgbuf.http_accept_charset());
+		response().status( httpstatus, message);
 	}
 	else
 	{
-		BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-			<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), msgbuf.http_accept(), msgbuf.http_accept_charset());
-		response_content( msgbuf.error( httpstatus, apperrorcode, message));
+		response().status( httpstatus);
 	}
-	response().status( httpstatus, "ERR");
 	response().finalize();
 }
 
@@ -137,7 +133,6 @@ void Application::report_ok( const char* status, int httpstatus, const char* mes
 		<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), msgbuf.http_accept(), msgbuf.http_accept_charset());
 
 	response_content( msgbuf.info( "OK", message));
-	response().status( httpstatus, "OK");
 	response().finalize();
 }
 
