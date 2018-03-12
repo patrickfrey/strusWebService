@@ -43,6 +43,7 @@ using namespace strus::webservice;
 
 // Global flags:
 static bool g_verbose = false;
+static bool g_exit_silent = false;
 static strus::AtomicFlag g_terminate;
 static strus::AtomicFlag g_got_sighup;
 
@@ -65,14 +66,14 @@ static void signal_handler( int sig )
 
 static void on_exit_handler( int ec, void*)
 {
-	if (ec)
+	if (ec && !g_exit_silent)
 	{
 		const char* msg = NULL;
 		if (ec == 226)
 		{
 			msg = _TXT("already used");
 		}
-		std::cerr << _TXT("exit called with http status code ") << ec;
+		std::cerr << _TXT("exit called with code ") << ec;
 		if (msg) std::cerr << " (" << msg << ")";
 		std::cerr << std::endl;
 	}
@@ -135,6 +136,58 @@ static void printUsage()
 	std::cout << "    " << _TXT("Define the web service configuration file as <CONFIG>") << std::endl;
 	std::cout << "-V|--verbose" << std::endl;
 	std::cout << "    " << _TXT("Do verbose logging and output") << std::endl;
+}
+
+static std::string beautifyErrorMessage( const std::string& msg)
+{
+	std::string rt;
+	char const* si = msg.c_str();
+	char const* start;
+	char eb;
+	int cnt;
+	while (*si)
+	{
+		switch (*si)
+		{
+			case '"':
+			case '\'':
+				for (eb=*si,start=si++; *si && *si != eb; ++si) if (*si == '\\' && si[1]) ++si;
+				if (*si) ++si;
+				rt.append( start, si - start);
+				break;
+			case ':':
+				rt.push_back(*si++);
+				if (*si == ' ')
+				{
+					rt.push_back('\n');
+					rt.push_back(' ');
+					while (*si == ' ') ++si;
+				}
+				break;
+			case '(':
+				for (cnt=0,eb=')',start=si++; *si && *si != eb; ++si) if (*si == '[' || *si == '{') cnt++;
+				if (*si == eb)
+				{
+					if (cnt)
+					{
+						rt.push_back('\n');
+						rt.push_back('\n');
+					}
+					++si;
+					rt.append( start, si - start);
+				}
+				else
+				{
+					si = start;
+					rt.push_back(*si++);
+				}
+				break;
+			default:
+				rt.push_back(*si++);
+				break;
+		 }
+	}
+	return rt;
 }
 
 int main( int argc_, const char *argv_[] )
@@ -271,20 +324,20 @@ int main( int argc_, const char *argv_[] )
 			int ec = strus::errorCodeFromMessage( erroritr);
 			while (ec >= 0)
 			{
-				rt = ec;
+				if (ec) rt = ec;
 				ec = strus::errorCodeFromMessage( erroritr);
 			}
-			std::cerr << _TXT("ERROR ") << e.what() << ": " << errormsg << std::endl;
+			std::cerr << _TXT("ERROR\n") << beautifyErrorMessage( e.what()) + ":\n " << errormsg << std::endl;
 		}
 		else
 		{
-			std::cerr << _TXT("ERROR ") << e.what() << std::endl;
+			std::cerr << _TXT("ERROR\n") << beautifyErrorMessage( e.what()) << std::endl;
 		}
 		if (!rt) rt = strus::ErrorCauseRuntimeError;
 	}
 	catch (const std::exception& e)
 	{
-		std::cerr << _TXT("EXCEPTION ") << e.what() << std::endl;
+		std::cerr << _TXT("EXCEPTION\n") << beautifyErrorMessage( e.what()) << std::endl;
 		if (!rt) rt = strus::ErrorCauseUncaughtException;
 	}
 	catch (...)
@@ -292,6 +345,7 @@ int main( int argc_, const char *argv_[] )
 		std::cerr << _TXT("EXCEPTION unknown") << std::endl;
 		if (!rt) rt = strus::ErrorCauseUncaughtException;
 	}
+	g_exit_silent = true;
 	return rt;
 }
 

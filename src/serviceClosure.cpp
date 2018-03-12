@@ -137,12 +137,7 @@ void ServiceClosure::loadCorsConfiguration( const cppcms::json::value& config)
 
 static std::runtime_error configuration_error( const strus::WebRequestAnswer& status)
 {
-	strus::ErrorCode errcode( status.apperror());
-	const char* componentname = errorComponentName( errcode.component());
-	int operation = errcode.operation();
-	int syserrno = errcode.syserrno();
-	int cause = syserrno ? syserrno : errcode.cause();
-	return strus::runtime_error( _TXT("error loading configuration (in %s op %d error code %d): %s"), componentname, operation, cause, status.errorstr());
+	return strus::runtime_error( _TXT("error loading configuration: %s"), status.errorstr());
 }
 
 void ServiceClosure::loadHandlerConfiguration( const cppcms::json::value& config)
