@@ -65,7 +65,7 @@ cppcms::json::value webservice::configFromFile( const std::string& configfile, i
 	std::istringstream configstream( configstr);
 	if (!config.load( configstream, false, &line_number))
 	{
-		errcode = strus::ErrorCauseSyntax;
+		errcode = strus::ErrorCodeSyntax;
 		throw strus::runtime_error(_TXT("failed to parse configuration file %s: syntax error on line %d"), configfile.c_str(), line_number);
 	}
 	return config;

@@ -222,7 +222,7 @@ int main( int argc_, const char *argv_[] )
 			{
 				std::cerr << _TXT("no arguments, only options expected") << std::endl;
 				printUsageAndExit = true;
-				rt = strus::ErrorCauseInvalidArgument;
+				rt = strus::ErrorCodeInvalidArgument;
 			}
 		}
 		std::string configdir;
@@ -299,7 +299,7 @@ int main( int argc_, const char *argv_[] )
 		catch (const std::exception& err)
 		{
 			BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << _TXT("got exception in service event loop: ") << err.what();
-			rt = strus::ErrorCauseUncaughtException;
+			rt = strus::ErrorCodeUncaughtException;
 			g_terminate.set( true);
 		}
 		BOOSTER_INFO( DefaultConstants::PACKAGE() ) << _TXT("service terminated");
@@ -308,12 +308,12 @@ int main( int argc_, const char *argv_[] )
 	catch (const cppcms::json::bad_value_cast& e)
 	{
 		std::cerr << _TXT("ERROR bad value in configuration: ") << e.what() << std::endl;
-		if (!rt) rt = strus::ErrorCauseSyntax;
+		if (!rt) rt = strus::ErrorCodeSyntax;
 	}
 	catch (const std::bad_alloc&)
 	{
 		std::cerr << _TXT("ERROR ") << _TXT("out of memory") << std::endl;
-		if (!rt) rt = strus::ErrorCauseOutOfMem;
+		if (!rt) rt = strus::ErrorCodeOutOfMem;
 	}
 	catch (const std::runtime_error& e)
 	{
@@ -333,17 +333,17 @@ int main( int argc_, const char *argv_[] )
 		{
 			std::cerr << _TXT("ERROR\n") << beautifyErrorMessage( e.what()) << std::endl;
 		}
-		if (!rt) rt = strus::ErrorCauseRuntimeError;
+		if (!rt) rt = strus::ErrorCodeRuntimeError;
 	}
 	catch (const std::exception& e)
 	{
 		std::cerr << _TXT("EXCEPTION\n") << beautifyErrorMessage( e.what()) << std::endl;
-		if (!rt) rt = strus::ErrorCauseUncaughtException;
+		if (!rt) rt = strus::ErrorCodeUncaughtException;
 	}
 	catch (...)
 	{
 		std::cerr << _TXT("EXCEPTION unknown") << std::endl;
-		if (!rt) rt = strus::ErrorCauseUncaughtException;
+		if (!rt) rt = strus::ErrorCodeUncaughtException;
 	}
 	g_exit_silent = true;
 	return rt;

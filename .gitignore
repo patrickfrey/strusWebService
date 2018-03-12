@@ -23,7 +23,6 @@ Testing/
 CPackConfig.cmake
 *.cmake.user
 CPackSourceConfig.cmake
-src/version.hpp
 dist/obs/deploy_to_obs.sh
 dist/archlinux/PKGBUILD
 dist/obs/struswebservice.dsc

@@ -54,7 +54,7 @@ static bool printHtmlHeader( char* msgbuf, std::size_t msgbufsize, std::size_t& 
 
 static void printBufErrorMessage( char* msgbuf, std::size_t msgbufsize, std::size_t& msgbufpos, strus::WebRequestContent::Type doctype, const char* charset, int httpstatus, int apperrorcode, const char* message, const char* html_head)
 {
-	strus::ErrorCode apperr( apperrorcode > 0 ? apperrorcode : 0);
+	strus::ErrorCode apperr = (strus::ErrorCode)(apperrorcode > 0 ? apperrorcode : 0);
 	switch (doctype)
 	{
 		case strus::WebRequestContent::Unknown:
@@ -64,17 +64,15 @@ static void printBufErrorMessage( char* msgbuf, std::size_t msgbufsize, std::siz
 
 		case strus::WebRequestContent::JSON:
 			msgbufpos = std::snprintf(
-				msgbuf, msgbufsize, "{\n\t\1status\1:%d,\n\t\1error\1: {\n\t\1code\1:%d,\n\t\1component\1:%s,\n\t\1op\1:%d,\n\t\1no\1:%d,\n\t\1msg\1:\1%s\1\n}}\n",
-				httpstatus, apperrorcode,
-				strus::errorComponentName( apperr.component()), (int)apperr.operation(), (int)apperr.cause(), message);
+				msgbuf, msgbufsize, "{\n\t\1status\1:%d,\n\t\1error\1: {\n\t\1errno\1:%d,\n\t\1msg\1:\1%s\1\n}}\n",
+				httpstatus, (int)apperr, message);
 			escJsonOutput( msgbuf, (msgbufpos >= msgbufsize) ? (msgbufsize-1) : msgbufpos);
 			break;
 
 		case strus::WebRequestContent::XML:
 			msgbufpos = std::snprintf(
-				msgbuf, msgbufsize, "<?xml version=\"1.0\" encoding=\"%s\"?>\n<error><status>%d</status><code>%d<code><component>%s</component><op>%d</op><errno>%d</errno><msg>%s</msg></error>\n",
-				charset, httpstatus, apperrorcode,
-				strus::errorComponentName( apperr.component()), (int)apperr.operation(), (int)apperr.cause(), message);
+				msgbuf, msgbufsize, "<?xml version=\"1.0\" encoding=\"%s\"?>\n<error><status>%d</status><errno>%d</errno><msg>%s</msg></error>\n",
+				charset, httpstatus, apperrorcode, message);
 			break;
 
 		case strus::WebRequestContent::TEXT:
@@ -88,9 +86,8 @@ static void printBufErrorMessage( char* msgbuf, std::size_t msgbufsize, std::siz
 				throw std::runtime_error(_TXT("buffer overflow"));
 			}
 			msgbufpos += std::snprintf(
-				msgbuf+msgbufpos, msgbufsize-msgbufpos, "<div class=\"error\">\n<div class=\"status\">Status: %d</div>\n<div class=\"apperr\">Application error code: %d</div>\n<div class=\"component\">Component: %s</div>\n<div class=\"operation\">Operation: %d</div>\n<div class=\"errno\">Errno: %d</div>\n<div class=\"message\">Message: %s</div>\n</div>\n</body>\n</html>\n",
-				httpstatus, apperrorcode,
-				strus::errorComponentName( apperr.component()), (int)apperr.operation(), (int)apperr.cause(), message);
+				msgbuf+msgbufpos, msgbufsize-msgbufpos, "<div class=\"error\">\n<div class=\"status\">Status: %d</div>\n<div class=\"errno\">Errno: %d</div>\n<div class=\"message\">Message: %s</div>\n</div>\n</body>\n</html>\n",
+				httpstatus, apperrorcode, message);
 			break;
 	}
 	if (msgbufpos >= msgbufsize)
