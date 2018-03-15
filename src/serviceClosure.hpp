@@ -105,7 +105,6 @@ private:
 	void clear();
 
 	void loadHtmlConfiguration( const cppcms::json::value& config);
-	void loadHandlerConfiguration( const cppcms::json::value& config);
 	void loadCorsConfiguration( const cppcms::json::value& config);
 	void loadProtocolConfiguration( const cppcms::json::value& config);
 

@@ -31,6 +31,7 @@ using namespace strus::webservice;
 
 void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 {
+	std::string configstr( config.save());
 	clear();
 	m_service = new cppcms::service( config);
 	loadHtmlConfiguration( config);
@@ -46,11 +47,10 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 	m_put_configdir = config.get( "data.configdir", DefaultConstants::DefaultConstants::AUTOSAVE_CONFIG_DIR());
 	std::string requestLogFilename = config.get( "debug.request_file", DefaultConstants::REQUEST_LOG_FILE());
 	m_requestLogger = new strus::WebRequestLogger( requestLogFilename, verbose, doLogRequests, logStructDepth, nofThreads+1, m_service->process_id(), nofProcs);
-	m_requestHandler = strus::createWebRequestHandler( m_requestLogger, m_html_head, m_put_configdir);
+	m_requestHandler = strus::createWebRequestHandler( m_requestLogger, m_html_head, m_put_configdir, configstr);
 	if (!m_requestHandler) throw std::bad_alloc();
 
 	loadCorsConfiguration( config);
-	loadHandlerConfiguration( config);
 	loadProtocolConfiguration( config);
 }
 
@@ -135,63 +135,6 @@ void ServiceClosure::loadCorsConfiguration( const cppcms::json::value& config)
 	m_cors_age = config.get( "security.cors.age", DefaultConstants::CORS_AGE());
 }
 
-static std::runtime_error configuration_error( const strus::WebRequestAnswer& status)
-{
-	return strus::runtime_error( _TXT("error loading configuration: %s"), status.errorstr());
-}
-
-void ServiceClosure::loadHandlerConfiguration( const cppcms::json::value& config)
-{
-	std::string configstr( config.save());
-	strus::WebRequestAnswer status;
-	static const char* root_context = "context";
-	static const char* init_scheme = "init";
-	static const char* config_doctype = "json";
-	static const char* config_charset = "utf-8";
-
-	strus::WebRequestContent content( config_charset, config_doctype, configstr.c_str(), configstr.size());
-
-	BOOSTER_DEBUG( DefaultConstants::PACKAGE()) << strus::string_format( _TXT( "loading request handler configuration (scheme %s)"), init_scheme);
-	if (!m_requestHandler->loadConfiguration(
-		root_context/*destContextType*/, root_context/*destContextName*/, init_scheme, content, status))
-	{
-		throw configuration_error( status);
-	}
-	cppcms::json::object::const_iterator oi = config.object().begin(), oe = config.object().end();
-	for (; oi != oe; ++oi)
-	{
-		const std::string& sectionName = oi->first;
-
-		// Search subconfiguration scheme with a name "init" as prefix concatenated with the title of the configuration section:
-		if (m_requestHandler->hasScheme( root_context, sectionName.c_str()/*scheme*/))
-		{
-			std::string destContextName = oi->second.get( "id", sectionName);
-			//... the name of the context created by the configuration is the name configured as "id" or the section name if not specified
-			const std::string& destContextType = oi->first;
-			//... the prefix of all schemes working on the context created is the configuration section name
-			cppcms::json::value subconfig;
-			subconfig.set( sectionName, oi->second);
-			//... the subconfiguration is the configuration section with the section name as root
-			std::string subconfigstr( subconfig.save());
-			strus::WebRequestContent subcontent( config_charset, config_doctype, subconfigstr.c_str(), subconfigstr.size());
-
-			BOOSTER_DEBUG( DefaultConstants::PACKAGE()) 
-				<< strus::string_format( _TXT( "loading handler sub configuration for %s %s, scheme %s"),
-						destContextType.c_str(), destContextName.c_str(), sectionName.c_str()/*scheme*/);
-			if (!m_requestHandler->loadConfiguration(
-				destContextType.c_str(), destContextName.c_str(), sectionName.c_str()/*scheme*/, subcontent, status))
-			{
-				throw configuration_error( status);
-			}
-		}
-	}
-	BOOSTER_DEBUG( DefaultConstants::PACKAGE()) << strus::string_format( _TXT( "loading stored configurations"));
-	if (!m_requestHandler->loadStoredConfigurations( status))
-	{
-		throw configuration_error( status);
-	}
-}
-
 void ServiceClosure::mount_applications()
 {
 	if (m_service) m_service->applications_pool().mount( cppcms::applications_factory<Application>( this));
@@ -199,8 +142,8 @@ void ServiceClosure::mount_applications()
 
 void ServiceClosure::clear()
 {
-	if (m_service) delete m_service; m_service = 0;
-	if (m_requestLogger) delete m_requestLogger; m_requestLogger = 0;
-	if (m_requestHandler) delete m_requestHandler; m_requestHandler = 0;
+	if (m_service) {delete m_service; m_service = 0;}
+	if (m_requestLogger) {delete m_requestLogger; m_requestLogger = 0;}
+	if (m_requestHandler) {delete m_requestHandler; m_requestHandler = 0;}
 }
 

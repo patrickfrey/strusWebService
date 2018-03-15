@@ -19,7 +19,6 @@
 #include <cppcms/application.h>
 #include <cppcms/http_response.h>
 #include <cppcms/url_dispatcher.h>
-#include <set>
 #include <string>
 
 namespace strus {
@@ -34,21 +33,15 @@ class Application
 public:
 	explicit Application( cppcms::service& service_, ServiceClosure* serviceImpl_);
 
-	void exec_put_config( std::string path);
-	void exec_post( std::string path);
-	void exec_debug_post( std::string path);
-
+private:/*Methods called by dispatcher:*/
 	void exec_quit();
 	void exec_ping();
 	void exec_version( std::string component);
 	void exec_version0();
-	void exec_list( std::string path);
-	void exec_list0();
-	void exec_view( std::string path);
-	void exec_view0();
+	void exec_request( std::string path);
 
 private:
-	// Handler method variants distinguished by number of arguments
+	// Handler method variants distinguished by number of arguments:
 	typedef void(Application::*UrlHandlerMethod1)(std::string);
 	typedef void(Application::*UrlHandlerMethod0)();
 
@@ -76,15 +69,6 @@ private:
 	/// \brief Initialize all dispatchers (called from constructor)
 	void init_dispatchers();
 
-	/// \brief Common implementation of the put_config_.. methods
-	void put_config_internal( const std::string& contexttype, const std::string& contextname, const std::string& schemaname);
-	/// \brief Common implementation of the exec_post_.. and exec_debug_post_.. methods
-	enum ContentMethod {ContentDebug,ContentExec};
-	void exec_content_internal( ContentMethod method, const std::string& contexttype, const std::string& contextname, const std::string& schemaname, const std::string& argument);
-	/// \brief Common implementation of the exec_list_.. and exec_view_.. methods
-	enum GetMethod {GetList,GetView};
-	void exec_get_internal( GetMethod method, const std::string& path);
-
 	std::string debug_request_description();
 
 private:
@@ -97,7 +81,6 @@ private:
 
 private:
 	ServiceClosure* m_service;
-	std::set<std::string> m_schemeset;
 };
 
 }}//namespace strus::webservice

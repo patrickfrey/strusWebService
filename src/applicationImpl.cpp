@@ -49,18 +49,18 @@ Application::Application( cppcms::service& service_, ServiceClosure* serviceClos
 	init_dispatchers();
 }
 
-#define CATCH_EXEC_ERROR(REQUEST_TYPE) \
+#define CATCH_EXEC_ERROR() \
 	catch (const std::runtime_error& err)\
 	{\
-		report_error_fmt( 500, -1, _TXT("error in %s request: %s"), REQUEST_TYPE, err.what());\
+		report_error_fmt( 500, -1, _TXT("error in request: %s"), err.what());\
 	}\
 	catch (const std::bad_alloc& err)\
 	{\
-		report_error_fmt( 500, -1, _TXT("out of memory in %s request"), REQUEST_TYPE);\
+		report_error_fmt( 500, -1, _TXT("out of memory in request"));\
 	}\
 	catch (...)\
 	{\
-		report_error_fmt( 500, -1, _TXT("uncaught error in %s request"), REQUEST_TYPE);\
+		report_error_fmt( 500, -1, _TXT("uncaught error in request"));\
 	}
 
 void Application::response_content( const char* charset, const char* doctype, const char* blob, std::size_t blobsize)
@@ -150,77 +150,6 @@ void Application::report_answer( const strus::WebRequestAnswer& answer)
 	}
 }
 
-struct RequestAddress
-{
-	bool found;
-	std::string schemeName;
-	std::string contextType;
-	std::string contextName;
-	std::string restPath;
-
-	RequestAddress( const std::string& path, const std::set<std::string>& schemeset)
-		:found(false)
-	{
-		PathIter pi( path.c_str());
-		const char* schemeNamePtr = pi.getNext();
-		if (!schemeNamePtr) return;
-		schemeName = schemeNamePtr;
-		if (schemeset.find( schemeName) == schemeset.end()) return;
-
-		const char* contextTypePtr = pi.getNext();
-		const char* contextNamePtr = pi.getNext();
-		const char* restPtr = pi.getRest();
-		if (!contextNamePtr) return;
-		contextType = contextTypePtr;
-		contextName = contextNamePtr;
-		if (restPtr) restPath.append( restPtr);
-		found = true;
-	}
-};
-
-void Application::exec_put_config( std::string path)
-{
-	RequestAddress pt( path, m_schemeset);
-	if (pt.found && pt.restPath.empty())
-	{
-		if (!handle_preflight_cors() || !check_request_method("POST")) return;
-		put_config_internal( pt.contextType, pt.contextName, pt.schemeName);
-	}
-	else
-	{
-		report_error( 404, -1, _TXT( "Not found"));
-	}
-}
-
-void Application::exec_post( std::string path)
-{
-	RequestAddress pt( path, m_schemeset);
-	if (pt.found)
-	{
-		if (!handle_preflight_cors() || !check_request_method("POST")) return;
-		exec_content_internal( ContentExec, pt.contextType, pt.contextName, pt.schemeName, pt.restPath);
-	}
-	else
-	{
-		report_error( 404, -1, _TXT( "Not found"));
-	}
-}
-
-void Application::exec_debug_post( std::string path)
-{
-	RequestAddress pt( path, m_schemeset);
-	if (pt.found)
-	{
-		if (!handle_preflight_cors() || !check_request_method("POST")) return;
-		exec_content_internal( ContentDebug, pt.contextType, pt.contextName, pt.schemeName, pt.restPath);
-	}
-	else
-	{
-		report_error( 404, -1, _TXT( "Not found"));
-	}
-
-}
-
 void Application::exec_quit()
 {
 	try
@@ -229,7 +158,7 @@ void Application::exec_quit()
 		report_ok( "OK", 200, _TXT("service to shutdown"));
 		m_service->shutdown();
 	}
-	CATCH_EXEC_ERROR("quit");
+	CATCH_EXEC_ERROR();
 }
 
 void Application::exec_ping()
@@ -239,31 +168,7 @@ void Application::exec_ping()
 		if (!handle_preflight_cors() || !check_request_method("GET")) return;	
 		report_ok( "ok", 200, _TXT("service is up and running"));
 	}
-	CATCH_EXEC_ERROR("ping");
-}
-
-void Application::exec_list( std::string path)
-{
-	if (!handle_preflight_cors() || !check_request_method("GET")) return;
-	exec_get_internal( GetList, path);
-}
-
-void Application::exec_list0()
-{
-	if (!handle_preflight_cors() || !check_request_method("GET")) return;
-	exec_get_internal( GetList, std::string());
-}
-
-void Application::exec_view( std::string path)
-{
-	if (!handle_preflight_cors() || !check_request_method("GET")) return;
-	exec_get_internal( GetView, path);
-}
-
-void Application::exec_view0()
-{
-	if (!handle_preflight_cors() || !check_request_method("GET")) return;
-	exec_get_internal( GetView, std::string());
+	CATCH_EXEC_ERROR();
 }
 
 void Application::exec_version( std::string component)
@@ -335,47 +240,7 @@ bool Application::test_request_method( const char* type)
 	return (request().request_method() == type);
 }
 
-void Application::put_config_internal( const std::string& contexttype, const std::string& contextname, const std::string& schemaname)
-{
-	try
-	{
-		strus::WebRequestAnswer answer;
-		std::string http_accept_charset = request().http_accept_charset();
-		std::string http_accept = request().http_accept();
-		strus::unique_ptr<strus::WebRequestContextInterface> ctx(
-			m_service->requestHandler()->createContext( http_accept_charset.c_str(), http_accept.c_str(), answer));
-		if (!ctx.get())
-		{
-			report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
-			return;
-		}
-		cppcms::http::content_type content_type = request().content_type_parsed();
-		std::pair<void*,size_t> content_data = request().raw_post_data();
-		std::string doctype = content_type.media_type();
-		std::string charset = content_type.charset();
-	
-		strus::WebRequestContent content( charset.c_str(), doctype.c_str(), (const char*)content_data.first, content_data.second);
-	
-		BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-			<< strus::string_format( _TXT( "loading configuration %s %s (schema %s)"),
-				contexttype.c_str(), contextname.c_str(), schemaname.c_str());
-	
-		if (!m_service->requestHandler()->loadConfiguration(
-			contexttype.c_str(), contextname.c_str(), schemaname.c_str(), content, answer))
-		{
-			report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
-		}
-		else if (!m_service->requestHandler()->storeConfiguration(
-			contexttype.c_str(), contextname.c_str(), schemaname.c_str(), content, answer))
-		{
-			report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
-		}
-		report_answer( answer);
-	}
-	CATCH_EXEC_ERROR("PUT")
-}
-
-void Application::exec_content_internal( ContentMethod method, const std::string& contexttype, const std::string& contextname, const std::string& schemaname, const std::string& argument)
+void Application::exec_request( std::string path)
 {
 	try
 	{
@@ -384,6 +249,8 @@ void Application::exec_content_internal( ContentMethod method, const std::string
 		strus::WebRequestAnswer answer;
 		std::string http_accept_charset = request().http_accept_charset();
 		std::string http_accept = request().http_accept();
+		std::string request_method = request().request_method();
+
 		strus::unique_ptr<strus::WebRequestContextInterface> ctx(
 			m_service->requestHandler()->createContext( http_accept_charset.c_str(), http_accept.c_str(), answer));
 		if (!ctx.get())
@@ -400,13 +267,7 @@ void Application::exec_content_internal( ContentMethod method, const std::string
 
 		strus::WebRequestContent content( charset.c_str(), doctype.c_str(), (const char*)content_data.first, content_data.second);
 
-		bool rt = false;
-		switch (method)
-		{
-			case ContentDebug: rt = ctx->debugContent( contexttype.c_str(), contextname.c_str(), schemaname.c_str(), content, answer); break;
-			case ContentExec: rt = ctx->executeContent( contexttype.c_str(), contextname.c_str(), schemaname.c_str(), content, answer); break;
-		}
-		if (rt)
+		if (ctx->executeRequest( request_method.c_str(), path.c_str(), content, answer))
 		{
 			BOOSTER_DEBUG( DefaultConstants::PACKAGE())
 				<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), http_accept.c_str(), http_accept_charset.c_str());
@@ -418,47 +279,7 @@ void Application::exec_content_internal( ContentMethod method, const std::string
 			return;
 		}
 	}
-	CATCH_EXEC_ERROR("POST")
-}
-
-void Application::exec_get_internal( GetMethod method, const std::string& path)
-{
-	try
-	{
-		if( !handle_preflight_cors()) return;
-		BOOSTER_DEBUG( DefaultConstants::PACKAGE()) << debug_request_description();
-
-		strus::WebRequestAnswer answer;
-		std::vector<std::string> result;
-		std::string http_accept_charset = request().http_accept_charset();
-		std::string http_accept = request().http_accept();
-		strus::unique_ptr<strus::WebRequestContextInterface> ctx(
-			m_service->requestHandler()->createContext( http_accept_charset.c_str(), http_accept.c_str(), answer));
-		if (!ctx.get())
-		{
-			report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
-			return;
-		}
-
-		bool rt = false;
-		switch (method)
-		{
-			case GetList: rt = ctx->executeList( path.c_str(), answer); break;
-			case GetView: rt = ctx->executeView( path.c_str(), answer); break;
-		}
-		if (rt)
-		{
-			BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-				<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), http_accept.c_str(), http_accept_charset.c_str());
-			report_answer( answer);
-		}
-		else
-		{
-			report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
-			return;
-		}
-	}
-	CATCH_EXEC_ERROR( "GET")
+	CATCH_EXEC_ERROR()
 }
 
 static std::string urlRegex( const char* id, int nn, bool more)
@@ -485,23 +306,14 @@ void Application::urlmap( const char* dir, UrlHandlerMethod1 handler1, bool more
 
 void Application::init_dispatchers()
 {
-	char const** schemes = m_service->requestHandler()->schemes();
-	for (char const** si = schemes; *si; ++si) m_schemeset.insert( *si);
-
 	urlmap( "ping",		&Application::exec_ping);
 	urlmap( "version",	&Application::exec_version0);
 	urlmap( "version",	&Application::exec_version);
-	urlmap( "view",		&Application::exec_view, true);
-	urlmap( "view",		&Application::exec_view0);
-	urlmap( "list",		&Application::exec_list, true);
-	urlmap( "list",		&Application::exec_list0);
 	if (m_service->quit_enabled())
 	{
 		urlmap( "quit", &Application::exec_quit);
 	}
-	urlmap( "config",	&Application::exec_put_config, true);
-	urlmap( "debug",	&Application::exec_debug_post, true);
-	urlmap( "",		&Application::exec_post, true);
+	urlmap( "",		&Application::exec_request, true);
 }
 
 

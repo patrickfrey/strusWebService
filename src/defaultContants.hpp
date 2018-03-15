@@ -41,7 +41,7 @@ struct DefaultConstants
 			"\n.row {\n\tdisplay: table-row;\n}"
 			"\n.col {\n\tdisplay: table-cell;\n}"
 			"\n.list {\n\tdisplay: list;\n}"
-			"\n.elem {\n\tdisplay: list-item;\n}"
+			"\n.elem {\n\tdisplay: list-item;\n\tlist-style: none;\n}"
 			"\nspan.title {\n\tcolor: #6666ff;\ntext-decoration: underline;\n}"
 			"\nspan.name {\n\tdisplay: inline;\n\tcolor: #669999;\n}"
 			"\nspan.name:after {\n\tcontent: \": \";\n}"
