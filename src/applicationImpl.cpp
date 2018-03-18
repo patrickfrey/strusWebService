@@ -240,6 +240,79 @@ bool Application::test_request_method( const char* type)
 	return (request().request_method() == type);
 }
 
+static std::string json_value_encode( const std::string& value)
+{
+	std::string rt;
+	char const* vi = value.c_str();
+	const char* ve = vi+value.size();
+	char const* entity = 0;
+	while (vi != ve)
+	{
+		char const* start = vi;
+		for (; vi != ve; ++vi)
+		{
+			switch (*vi)
+			{
+				case '\n': entity = "n"; break;
+				case '\r': entity = "r"; break;
+				case '\b': entity = "b"; break;
+				case '\f': entity = "f"; break;
+				case '\t': entity = "t"; break;
+				case '"': entity = "\\\""; break;
+				case '\\': entity = "\\\\"; break;
+				default: continue;
+			}
+			break;
+		}
+		rt.append( vi, vi-start);
+		if (entity)
+		{
+			rt.append( vi, entity);
+			entity = 0;
+			++vi;
+		}
+	}
+	return rt;
+}
+
+static std::string form_tojson( const cppcms::http::request::form_type& form)
+{
+	std::string content = "{\n\"get\":{";
+	cppcms::http::request::form_type::const_iterator fi = form.begin(), fe = form.end();
+	for (int fidx=0; fi != fe; ++fi,++fidx)
+	{
+		if (fidx) content.push_back(',');
+		content.append("\n\t\"");
+		content.append( fi->first);
+		content.append("\":");
+
+		cppcms::http::request::form_type::const_iterator fn = fi;
+		++fn;
+		if (fn != fe && fn->first == fi->first)
+		{
+			for (; fn != fe && fn->first == fi->first; ++fn){}
+			content.append(" [");
+			for (int eidx=0; fi != fn; ++fi,++eidx)
+			{
+				if (eidx) content.push_back(',');
+				content.push_back('\"');
+				content.append( json_value_encode( fi->second));
+				content.push_back('\"');
+			}
+			content.append("]");
+			--fi;//... compensate outer loop iterator increment in this case where we already are on the next element
+		}
+		else
+		{
+			content.push_back('\"');
+			content.append( json_value_encode( fi->second));
+			content.push_back('\"');
+		}
+	}
+	content.append( "\n}}\n");
+	return content;
+}
+
 void Application::exec_request( std::string path)
 {
 	try
@@ -258,14 +331,32 @@ void Application::exec_request( std::string path)
 			report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
 			return;
 		}
-		cppcms::http::content_type content_type = request().content_type_parsed();
-		std::pair<void*,size_t> content_data = request().raw_post_data();
-		std::string doctype = content_type.media_type();
-		std::string charset = content_type.charset();
-		BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-				<< strus::string_format( _TXT("Request content type '%s', charset '%s'"), doctype.c_str(), charset.c_str());
+		cppcms::http::content_type content_type;
+		std::pair<void*,size_t> content_data;
+		std::string doctype;
+		std::string charset;
+		strus::WebRequestContent content;
+		std::string contentstr;
 
-		strus::WebRequestContent content( charset.c_str(), doctype.c_str(), (const char*)content_data.first, content_data.second);
+		if (request_method == "GET" && !request().get().empty())
+		{
+			contentstr = form_tojson( request().get());
+			content.setDoctype( "application/json");
+			content.setCharset( "UTF-8");
+			content.setContent( contentstr.c_str(), contentstr.size());
+		}
+		else
+		{
+			content_type = request().content_type_parsed();
+			content_data = request().raw_post_data();
+			doctype = content_type.media_type();
+			charset = content_type.charset();
+			content.setDoctype( doctype.c_str());
+			content.setCharset( charset.c_str());
+			content.setContent( (const char*)content_data.first, content_data.second);
+		}
+		BOOSTER_DEBUG( DefaultConstants::PACKAGE())
+				<< strus::string_format( _TXT("%s Request content type '%s', charset '%s'"), request_method.c_str(), content.doctype(), content.charset());
 
 		if (ctx->executeRequest( request_method.c_str(), path.c_str(), content, answer))
 		{

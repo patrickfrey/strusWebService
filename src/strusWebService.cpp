@@ -15,6 +15,8 @@
 #include "strus/webRequestLoggerInterface.hpp"
 #include "strus/moduleLoaderInterface.hpp"
 #include "strus/errorCodes.hpp"
+#include "strus/errorBufferInterface.hpp"
+#include "strus/debugTraceInterface.hpp"
 #include "webRequestLogger.hpp"
 #include "defaultContants.hpp"
 #include "configUtils.hpp"
@@ -193,7 +195,14 @@ static std::string beautifyErrorMessage( const std::string& msg)
 int main( int argc_, const char *argv_[] )
 {
 	int rt = 0;
-	strus::local_ptr<strus::ErrorBufferInterface> errorhnd( strus::createErrorBuffer_standard( 0/*log file handle*/, 2/*nof threads*/));
+	// Select configured debug traces:
+	strus::DebugTraceInterface* dbgtrace = dbgtrace = strus::createDebugTrace_standard( 2/*threads*/);
+	if (!dbgtrace)
+	{
+		std::cerr << _TXT("failed to create debug trace handler") << std::endl;
+		return -1;
+	}
+	strus::local_ptr<strus::ErrorBufferInterface> errorhnd( strus::createErrorBuffer_standard( 0/*log file handle*/, 2/*nof threads*/, dbgtrace));
 	if (!errorhnd.get())
 	{
 		std::cerr << _TXT("failed to create error handler") << std::endl;
