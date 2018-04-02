@@ -51,7 +51,10 @@ private:
 	void urlmap( const char* dir, UrlHandlerMethod0 handler);
 
 	/// \brief Set response content
-	void response_content( const strus::WebRequestContent& content);
+	void response_content( const strus::WebRequestContent& content, bool with_content);
+
+	/// \brief Set response content header
+	void response_content_header( const char* charset, const char* doctype, std::size_t blobsize);
 	/// \brief Set response content
 	void response_content( const char* charset, const char* doctype, const char* blob, std::size_t blobsize);
 
@@ -64,7 +67,7 @@ private:
 	/// \brief Report successful protocol only command
 	void report_ok( const char* status, int httpstatus, const char* message);
 	/// \brief Report content
-	void report_answer( const strus::WebRequestAnswer& answer);
+	void report_answer( const strus::WebRequestAnswer& answer, bool with_content);
 
 	/// \brief Initialize all dispatchers (called from constructor)
 	void init_dispatchers();

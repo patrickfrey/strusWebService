@@ -19,7 +19,6 @@
 #include <iostream>
 #include <sstream>
 
-#undef STRUS_LOWLEVEL_DEBUG
 using namespace strus;
 using namespace strus::webservice;
 

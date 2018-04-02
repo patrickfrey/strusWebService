@@ -40,7 +40,6 @@
 #include <sstream>
 #include <iostream>
 
-#undef STRUS_LOWLEVEL_DEBUG
 using namespace strus::webservice;
 
 Application::Application( cppcms::service& service_, ServiceClosure* serviceClosure_)
@@ -63,7 +62,7 @@ Application::Application( cppcms::service& service_, ServiceClosure* serviceClos
 		report_error_fmt( 500, -1, _TXT("uncaught error in request"));\
 	}
 
-void Application::response_content( const char* charset, const char* doctype, const char* blob, std::size_t blobsize)
+void Application::response_content_header( const char* charset, const char* doctype, std::size_t blobsize)
 {
 	char content_header[ 256];
 	if ((int)sizeof(content_header)-1 <= std::snprintf( content_header, sizeof(content_header), "%s; charset=%s", doctype, charset))
@@ -72,16 +71,29 @@ void Application::response_content( const char* charset, const char* doctype, co
 	}
 	else
 	{
+		response().content_length( blobsize);
 		response().set_content_header( content_header);
-		response().out().write( blob, blobsize);
 	}
 }
 
-void Application::response_content( const strus::WebRequestContent& content)
+void Application::response_content( const char* charset, const char* doctype, const char* blob, std::size_t blobsize)
+{
+	response_content_header( charset, doctype, blobsize);
+	response().out().write( blob, blobsize);
+}
+
+void Application::response_content( const strus::WebRequestContent& content, bool with_content)
 {
 	BOOSTER_DEBUG( DefaultConstants::PACKAGE())
 		<< strus::string_format( _TXT("response content type '%s', charset '%s'"), content.doctype(), content.charset());
-	response_content( content.charset(), content.doctype(), content.str(), content.len());
+	if (with_content)
+	{
+		response_content( content.charset(), content.doctype(), content.str(), content.len());
+	}
+	else
+	{
+		response_content_header( content.charset(), content.doctype(), content.len());
+	}
 }
 
 void Application::report_fatal()
@@ -132,11 +144,11 @@ void Application::report_ok( const char* status, int httpstatus, const char* mes
 	BOOSTER_DEBUG( DefaultConstants::PACKAGE())
 		<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), msgbuf.http_accept(), msgbuf.http_accept_charset());
 
-	response_content( msgbuf.info( "OK", message));
+	response_content( msgbuf.info( "OK", message), true);
 	response().finalize();
 }
 
-void Application::report_answer( const strus::WebRequestAnswer& answer)
+void Application::report_answer( const strus::WebRequestAnswer& answer, bool with_content)
 {
 	if (answer.errorstr() || answer.apperror())
 	{
@@ -146,7 +158,7 @@ void Application::report_answer( const strus::WebRequestAnswer& answer)
 	{
 		BOOSTER_DEBUG( DefaultConstants::PACKAGE() ) << "(status " << answer.httpstatus() << ") OK";
 		response().status( answer.httpstatus(), "OK");
-		response_content( answer.content());
+		response_content( answer.content(), with_content);
 	}
 }
 
@@ -317,12 +329,18 @@ void Application::exec_request( std::string path)
 {
 	try
 	{
+		bool do_reply_content = true;
+		std::string request_method = request().request_method();
+		if (request_method == "HEAD")
+		{
+			do_reply_content = false;
+			request_method = "GET";
+		}
 		BOOSTER_DEBUG( DefaultConstants::PACKAGE()) << debug_request_description();
 
 		strus::WebRequestAnswer answer;
 		std::string http_accept_charset = request().http_accept_charset();
 		std::string http_accept = request().http_accept();
-		std::string request_method = request().request_method();
 
 		strus::unique_ptr<strus::WebRequestContextInterface> ctx(
 			m_service->requestHandler()->createContext( http_accept_charset.c_str(), http_accept.c_str(), answer));
@@ -338,17 +356,25 @@ void Application::exec_request( std::string path)
 		strus::WebRequestContent content;
 		std::string contentstr;
 
-		if (request_method == "GET" && !request().get().empty())
+		content_data = request().raw_post_data();
+		if (content_data.second == 0/*empty content*/)
 		{
-			contentstr = form_tojson( request().get());
-			content.setDoctype( "application/json");
-			content.setCharset( "UTF-8");
-			content.setContent( contentstr.c_str(), contentstr.size());
+			if (!request().get().empty())
+			{
+				contentstr = form_tojson( request().get());
+				content.setDoctype( "application/json");
+				content.setCharset( "UTF-8");
+				content.setContent( contentstr.c_str(), contentstr.size());
+			}
 		}
 		else
 		{
+			if (!request().get().empty())
+			{
+				report_error( 400/*bad request*/, strus::ErrorCodeInvalidArgument, _TXT("mixing URL parameters passed with non empty request content"));
+				return;
+			}
 			content_type = request().content_type_parsed();
-			content_data = request().raw_post_data();
 			doctype = content_type.media_type();
 			charset = content_type.charset();
 			content.setDoctype( doctype.c_str());
@@ -362,7 +388,7 @@ void Application::exec_request( std::string path)
 		{
 			BOOSTER_DEBUG( DefaultConstants::PACKAGE())
 				<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), http_accept.c_str(), http_accept_charset.c_str());
-			report_answer( answer);
+			report_answer( answer, do_reply_content);
 		}
 		else
 		{

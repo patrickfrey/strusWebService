@@ -40,7 +40,6 @@
 #include <cstdio>
 #include <cstdlib>
 
-#undef STRUS_LOWLEVEL_DEBUG
 using namespace strus::webservice;
 
 // Global flags:
