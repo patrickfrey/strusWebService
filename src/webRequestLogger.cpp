@@ -101,6 +101,16 @@ void WebRequestLogger::logRequest( const char* reqstr)
 	logMessage( _TXT("request: {%s}"), reqstr);
 }
 
+void WebRequestLogger::logPutConfiguration( const char* type, const char* name, const std::string& configstr)
+{
+	logMessage( _TXT("configuration %s '%s': {%s}"), type, name, configstr.c_str());
+}
+
+void WebRequestLogger::logAction( const char* type, const char* name, const char* action)
+{
+	logMessage( _TXT("do %s %s '%s'"), action, type, name);
+}
+
 void WebRequestLogger::logMethodCall(
 		const std::string& classname,
 		const std::string& methodname,
