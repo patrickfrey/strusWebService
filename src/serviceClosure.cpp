@@ -15,6 +15,8 @@
 #include "applicationImpl.hpp"
 #include "defaultContants.hpp"
 #include "strus/webRequestHandlerInterface.hpp"
+#include "strus/errorBufferInterface.hpp"
+#include "strus/debugTraceInterface.hpp"
 #include "strus/webRequestAnswer.hpp"
 #include "strus/webRequestContent.hpp"
 #include "strus/errorCodes.hpp"
@@ -24,32 +26,49 @@
 #include <cppcms/service.h>
 #include <booster/log.h>
 #include <cppcms/applications_pool.h>
+#include <stdexcept>
 
 using namespace strus::webservice;
 
 void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 {
-	std::string configstr( config.save());
-	clear();
-	m_service = new cppcms::service( config);
-	loadHtmlConfiguration( config);
-
-	bool doLogRequests = config.get( "debug.log_requests", DefaultConstants::DO_LOG_REQUESTS());
-	int logStructDepth = config.get( "debug.struct_depth", DefaultConstants::LOG_STRUCT_DEPTH());
-	int nofThreads = m_service->threads_no();
-	int nofProcs = m_service->procs_no();
-	if (nofProcs > 1)
+	try
 	{
-		throw strus::runtime_error(_TXT("it is currently not possible to configure more than one process (%d)"), nofProcs);
+		std::string configstr( config.save());
+		clear();
+		m_service = new cppcms::service( config);
+		loadHtmlConfiguration( config);
+	
+		bool doLogRequests = config.get( "debug.log_requests", DefaultConstants::DO_LOG_REQUESTS());
+		int logStructDepth = config.get( "debug.struct_depth", DefaultConstants::LOG_STRUCT_DEPTH());
+		int nofThreads = m_service->threads_no();
+		int nofProcs = m_service->procs_no();
+		if (nofProcs > 1)
+		{
+			throw strus::runtime_error(_TXT("it is currently not possible to configure more than one process (%d)"), nofProcs);
+		}
+		DebugTraceInterface* dbgtrace = strus::createDebugTrace_standard( nofThreads+1);
+		m_errorhnd = strus::createErrorBuffer_standard( NULL, nofThreads+1, dbgtrace);
+		m_put_configdir = config.get( "data.configdir", DefaultConstants::DefaultConstants::AUTOSAVE_CONFIG_DIR());
+		std::string requestLogFilename = config.get( "debug.request_file", DefaultConstants::REQUEST_LOG_FILE());
+		m_requestLogger = new strus::WebRequestLogger( requestLogFilename, verbose, doLogRequests, logStructDepth, nofThreads+1, m_service->process_id(), nofProcs);
+		m_requestHandler = strus::createWebRequestHandler( m_requestLogger, m_html_head, m_put_configdir, configstr, m_errorhnd);
+		if (!m_requestHandler) throw std::runtime_error( m_errorhnd->fetchError());
+		loadCorsConfiguration( config);
+		loadProtocolConfiguration( config);
 	}
-	m_put_configdir = config.get( "data.configdir", DefaultConstants::DefaultConstants::AUTOSAVE_CONFIG_DIR());
-	std::string requestLogFilename = config.get( "debug.request_file", DefaultConstants::REQUEST_LOG_FILE());
-	m_requestLogger = new strus::WebRequestLogger( requestLogFilename, verbose, doLogRequests, logStructDepth, nofThreads+1, m_service->process_id(), nofProcs);
-	m_requestHandler = strus::createWebRequestHandler( m_requestLogger, m_html_head, m_put_configdir, configstr);
-	if (!m_requestHandler) throw std::bad_alloc();
-
-	loadCorsConfiguration( config);
-	loadProtocolConfiguration( config);
+	catch (const std::bad_alloc& err)
+	{
+		clear();
+		throw err;
+	}
+	catch (const std::runtime_error& err)
+	{
+		const char* msg = m_errorhnd->fetchError();
+		BOOSTER_ERROR( DefaultConstants::PACKAGE()) << msg;
+		clear();
+		throw strus::runtime_error(_TXT("error initialising service closure: %s"), err.what());
+	}
 }
 
 static std::string css_style_include( const std::string& content)
@@ -143,5 +162,6 @@ void ServiceClosure::clear()
 	if (m_service) {delete m_service; m_service = 0;}
 	if (m_requestLogger) {delete m_requestLogger; m_requestLogger = 0;}
 	if (m_requestHandler) {delete m_requestHandler; m_requestHandler = 0;}
+	if (m_errorhnd) {delete m_errorhnd; m_errorhnd = 0;}
 }
 

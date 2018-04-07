@@ -11,6 +11,7 @@
 #include "configUtils.hpp"
 #include "defaultContants.hpp"
 #include "strus/base/fileio.hpp"
+#include "strus/base/platform.hpp"
 #include "strus/errorCodes.hpp"
 #include "internationalization.hpp"
 #include <vector>
@@ -72,10 +73,12 @@ cppcms::json::value webservice::configFromFile( const std::string& configfile, i
 
 cppcms::json::value webservice::configDefault()
 {
+	int nofCores = strus::platform::cores();
 	cppcms::json::value config;
 	config.set( "service.api", "http");
 	config.set( "service.port", 8080);
-	config.set( "logging.level", "info");
+	config.set( "service.worker_threads", nofCores > 0 ? nofCores : 4 );
+	config.set( "logging.level", "debug");
 	config.set( "logging.file.name", DefaultConstants::SERVICE_LOG_FILE());
 	config.set( "logging.file.append", true);
 	config.set( "debug.log_requests", DefaultConstants::DO_LOG_REQUESTS());

@@ -14,6 +14,7 @@
 #include "webRequestLogger.hpp"
 #include "defaultContants.hpp"
 #include "strus/webRequestHandlerInterface.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "internationalization.hpp"
 #include <cppcms/service.h>
 #include <booster/log.h>
@@ -31,7 +32,7 @@ class ServiceClosure
 {
 public:
 	ServiceClosure( const std::string& configdir_, const cppcms::json::value& config, bool verbose)
-		:m_service(0),m_requestLogger(0),m_requestHandler(0),m_configdir(configdir_)
+		:m_service(0),m_requestLogger(0),m_requestHandler(0),m_errorhnd(0),m_configdir(configdir_)
 		,m_cors_hosts(),m_cors_age(),m_html_head(),m_put_configdir()
 		,m_cors_enabled(true),m_quit_enabled(false),m_debug_enabled(false),m_pretty_print(false)
 	{
@@ -112,6 +113,7 @@ private:
 	cppcms::service* m_service;
 	strus::WebRequestLogger* m_requestLogger;
 	strus::WebRequestHandlerInterface* m_requestHandler;
+	strus::ErrorBufferInterface* m_errorhnd;
 	std::string m_configdir;
 	std::vector<std::string> m_cors_hosts;
 	std::string m_cors_age;

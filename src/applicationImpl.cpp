@@ -381,9 +381,18 @@ void Application::exec_request( std::string path)
 			content.setCharset( charset.c_str());
 			content.setContent( (const char*)content_data.first, content_data.second);
 		}
-		BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-				<< strus::string_format( _TXT("%s Request content type '%s', charset '%s'"), request_method.c_str(), content.doctype(), content.charset());
-
+		if (content.empty())
+		{
+			BOOSTER_DEBUG( DefaultConstants::PACKAGE())
+				<< strus::string_format( _TXT("%s Request without content"), request_method.c_str());
+		}
+		else
+		{
+			BOOSTER_DEBUG( DefaultConstants::PACKAGE())
+				<< strus::string_format(
+					_TXT("%s Request content type '%s', charset '%s'"),
+					request_method.c_str(), content.doctype(), content.charset());
+		}
 		if (ctx->executeRequest( request_method.c_str(), path.c_str(), content, answer))
 		{
 			BOOSTER_DEBUG( DefaultConstants::PACKAGE())

@@ -271,13 +271,13 @@ int main( int argc_, const char *argv_[] )
 		while( !g_terminate.test()) try
 		{
 			booster::log::logger::instance( ).remove_all_sinks();
-
-			service.init( config, g_verbose);
 			if (g_verbose && config.get( "logging.stderr", false) == false)
 			{
 				booster::shared_ptr<booster::log::sinks::standard_error> csink( new booster::log::sinks::standard_error());
 				booster::log::logger::instance().add_sink(csink);
 			}
+
+			service.init( config, g_verbose);
 			BOOSTER_INFO( DefaultConstants::PACKAGE())
 					<< strus::string_format(
 							_TXT("starting strus web service (%d %s).."),
