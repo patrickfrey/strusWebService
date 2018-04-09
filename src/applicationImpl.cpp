@@ -341,9 +341,18 @@ void Application::exec_request( std::string path)
 		strus::WebRequestAnswer answer;
 		std::string http_accept_charset = request().http_accept_charset();
 		std::string http_accept = request().http_accept();
-
+		std::string html_base_href;
+		std::string http_host = request().http_host();
+		if (path.empty())
+		{
+			html_base_href = strus::string_format( "http://%s/", http_host.c_str());
+		}
+		else
+		{
+			html_base_href = strus::string_format( "http://%s/%s/", http_host.c_str(), path.c_str());
+		}
 		strus::unique_ptr<strus::WebRequestContextInterface> ctx(
-			m_service->requestHandler()->createContext( http_accept_charset.c_str(), http_accept.c_str(), answer));
+			m_service->requestHandler()->createContext( http_accept_charset.c_str(), http_accept.c_str(), html_base_href.c_str(), answer));
 		if (!ctx.get())
 		{
 			report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());

@@ -83,7 +83,7 @@ static void on_exit_handler( int ec, void*)
 static void print3rdPartyLicenses( const cppcms::json::value& config, strus::ErrorBufferInterface* errorhnd)
 {
 	strus::local_ptr<strus::ModuleLoaderInterface> moduleLoader( strus::createModuleLoader( errorhnd));
-	if (!moduleLoader.get()) throw strus::runtime_error( "%s", _TXT("failed to create module loader"));
+	if (!moduleLoader.get()) throw std::runtime_error( _TXT("failed to create module loader"));
 	std::string modpath = config.get( "extensions.directory", std::string());
 	if (!modpath.empty())
 	{
