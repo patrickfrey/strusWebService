@@ -23,7 +23,9 @@ struct DefaultConstants
 	static bool DEBUG_PROTOCOL_PRETTY_PRINT() {return false;}
 	static bool DEBUG_PROTOCOL_DEBUG_ENABLED() {return false;}
 	static bool DEBUG_PROTOCOL_QUIT_ENABLED() {return false;}
+	static const bool DO_LOG_CALLS() {return false;}
 	static const bool DO_LOG_REQUESTS() {return false;}
+	static const bool DO_LOG_ACTIONS() {return false;}
 	static const int LOG_STRUCT_DEPTH() {return 4;}
 	static const std::string REQUEST_LOG_FILE() {return "request.log";}
 	static const std::string SERVICE_LOG_FILE() {return "strusWebService.log";}

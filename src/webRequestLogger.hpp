@@ -24,7 +24,7 @@ class WebRequestLogger
 	:public strus::WebRequestLoggerInterface
 {
 public:
-	WebRequestLogger( const std::string& logfilename_, bool verbose, bool logRequests, int structDepth, int maxnofthreads, int procid, int nofprocs);
+	WebRequestLogger( const std::string& logfilename_, bool verbose, int mask_, int structDepth, int maxnofthreads, int procid, int nofprocs);
 
 	virtual ~WebRequestLogger();
 
