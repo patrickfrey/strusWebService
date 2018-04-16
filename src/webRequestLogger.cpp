@@ -158,7 +158,25 @@ void WebRequestLogger::logMessageBuf( char* buf, size_t bufsize, const char* fmt
 	if (bufsize-4 <= buflen)
 	{
 		std::memcpy( buf+bufsize-4, "...", 4);
+		buflen = bufsize-1;
 	}
+	char* bi = buf;
+	char* ci = buf;
+	for (; *bi; ++bi,++ci)
+	{
+		if ((unsigned char)*bi <= 32)
+		{
+			for (; *bi && (unsigned char)*bi <= 32; ++bi){}
+			if (!*bi) break;
+			*ci++ = ' ';
+			*ci = *bi;
+		}
+		else
+		{
+			*ci = *bi;
+		}
+	}
+	*ci = '\0';
 }
 
 void WebRequestLogger::alert( const char* msg)
