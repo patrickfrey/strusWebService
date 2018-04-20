@@ -80,6 +80,7 @@ void Application::response_content( const char* charset, const char* doctype, co
 {
 	response_content_header( charset, doctype, blobsize);
 	response().out().write( blob, blobsize);
+	response().out() << std::endl;
 }
 
 void Application::response_content( const strus::WebRequestContent& content, bool with_content)
@@ -96,16 +97,29 @@ void Application::response_content( const strus::WebRequestContent& content, boo
 	}
 }
 
+void Application::response_message( const char* messagetype, const char* messagestr)
+{
+	if (messagetype)
+	{
+		response().erase_header( messagetype);
+		if (messagestr)
+		{
+			response().set_header( messagetype, messagestr);
+		}
+	}
+}
+
 void Application::report_fatal()
 {
 	int httpstatus = 500/*application error*/;
 	BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << "(status " << httpstatus << ") FATAL";
 	response().status( httpstatus);
-	response().finalize();
+	response().out() << std::endl;
 }
 
 void Application::report_error( int httpstatus, int apperrorcode, const char* message_)
 {
+	response().status( httpstatus);
 	const char* message = message_?message_:"";
 	if (apperrorcode > 0)
 	{
@@ -115,15 +129,10 @@ void Application::report_error( int httpstatus, int apperrorcode, const char* me
 	{
 		BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << "(status " << httpstatus << ") " << message;
 	}
-	if (message_)
-	{
-		response().status( httpstatus, message);
-	}
-	else
-	{
-		response().status( httpstatus);
-	}
-	response().finalize();
+	std::size_t messagelen = std::strlen(message);
+	response_content_header( "UTF-8", "text/plain", messagelen);
+	response().out().write( message, messagelen);
+	response().out() << std::endl;
 }
 
 void Application::report_error_fmt( int httpstatus, int apperrorcode, const char* fmt, ...)
@@ -144,6 +153,7 @@ void Application::report_ok( const char* status, int httpstatus, const char* mes
 	BOOSTER_DEBUG( DefaultConstants::PACKAGE())
 		<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), msgbuf.http_accept(), msgbuf.http_accept_charset());
 
+	response().status( httpstatus);
 	response_content( msgbuf.info( "OK", message), true);
 	response().finalize();
 }
@@ -154,10 +164,16 @@ void Application::report_answer( const strus::WebRequestAnswer& answer, bool wit
 	{
 		report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
 	}
+	else if (answer.messagetype() && answer.messagestr())
+	{
+		BOOSTER_DEBUG( DefaultConstants::PACKAGE() ) << answer.messagetype() << "=\"" << answer.messagestr() << "\" (status " << answer.httpstatus() << ") OK";
+		response().status( answer.httpstatus());
+		response_message( answer.messagetype(), answer.messagestr());
+	}
 	else
 	{
 		BOOSTER_DEBUG( DefaultConstants::PACKAGE() ) << "(status " << answer.httpstatus() << ") OK";
-		response().status( answer.httpstatus(), "OK");
+		response().status( answer.httpstatus());
 		response_content( answer.content(), with_content);
 	}
 }
@@ -371,6 +387,7 @@ void Application::exec_request( std::string path)
 			if (!request().get().empty())
 			{
 				contentstr = form_tojson( request().get());
+
 				content.setDoctype( "application/json");
 				content.setCharset( "UTF-8");
 				content.setContent( contentstr.c_str(), contentstr.size());
@@ -386,8 +403,9 @@ void Application::exec_request( std::string path)
 			content_type = request().content_type_parsed();
 			doctype = content_type.media_type();
 			charset = content_type.charset();
+
 			content.setDoctype( doctype.c_str());
-			content.setCharset( charset.c_str());
+			content.setCharset( charset.empty() ? "UTF-8" : charset.c_str());
 			content.setContent( (const char*)content_data.first, content_data.second);
 		}
 		if (content.empty())

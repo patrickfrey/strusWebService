@@ -13,7 +13,7 @@ static bool g_verbose = false;
 
 static void printUsage()
 {
-	std::cerr << "strusWebServiceClient [-V] [-h] <method> <url> <parameter>" << std::endl;
+	std::cerr << "strusWebServiceClient [-V] [-h] [-A <http-accept>] <method> <url> <parameter>" << std::endl;
 }
 
 struct Request
@@ -26,7 +26,7 @@ struct Request
 	std::string accept;
 	std::string accept_charset;
 
-	Request( const char* method_, const char* arg)
+	Request( const char* method_, const char* arg, const char* http_accept)
 		:errcode(0),method(method_),content(),content_type(),user_agent(),accept(),accept_charset()
 	{
 		user_agent = strus::string_format( "libcurl/%s",curl_version_info(CURLVERSION_NOW)->version);
@@ -39,7 +39,7 @@ struct Request
 				const char* encoding = strus::guessCharsetEncoding( content.c_str(), content.size());
 				const char* doctype = strus::guessContentType( content.c_str(), content.size());
 				content_type = strus::string_format( "%s; charset=%s", doctype, encoding);
-				accept = content_type;
+				accept = http_accept ? http_accept : content_type;
 				accept_charset = encoding;
 				if (content_type.empty()) throw std::bad_alloc();
 				if (!encoding || !doctype) errcode = 22/*EINVAL*/;
@@ -47,7 +47,7 @@ struct Request
 		}
 		else
 		{
-			accept = "text/plain";
+			accept = http_accept ? http_accept : "text/plain";
 			accept_charset = "UTF-8";
 			content = arg;
 		}
@@ -94,6 +94,31 @@ static void set_curl_opt( CURL *curl, CURLoption opt, const DATA& data)
 	if (res != CURLE_OK) throw res;
 }
 
+struct ContentBuf
+{
+	const char* ptr;
+	std::size_t pos;
+	std::size_t size;
+
+	ContentBuf( const char* ptr_, std::size_t size_)
+		:ptr(ptr_),pos(0),size(size_){}
+};
+
+static std::size_t read_callback( char *buffer, std::size_t size, std::size_t nitems, void *instream)
+{
+	ContentBuf& cbuf = *(ContentBuf*)instream;
+	if (cbuf.pos == cbuf.size) return 0;
+	std::size_t mm = size * nitems;
+	std::size_t nn = cbuf.size - cbuf.pos;
+	if (mm < (size|nitems) || mm > nn)
+	{
+		mm = nn;
+	}
+	std::memcpy( buffer, cbuf.ptr + cbuf.pos, mm);
+	cbuf.pos += mm;
+	return mm;
+}
+
 int main( int argc, char const* argv[])
 {
 	int rt = 0;
@@ -102,23 +127,29 @@ int main( int argc, char const* argv[])
 	struct curl_slist* headers = 0;
 	char curl_errbuf[ CURL_ERROR_SIZE] = "";
 	int argi = 1;
+	const char* http_accept = 0;
 	
 	for (; argi < argc && argv[argi][0] == '-'; ++argi)
 	{
-		if (argv[argi][1] == '-') {++argi; break;}
-		char const* ai = argv[argi]+1;
-		for (; *ai; ++ai)
-		{
-			if (*ai == 'V') g_verbose = true;
-			else if (*ai == 'h') {printUsage(); exit(0);}
-		}
+		char const* arg = argv[argi];
+		if (std::strcmp( arg, "--")) {++argi; break;}
+		else if (0==std::strcmp( arg, "-h") || 0==std::strcmp( arg, "--help")) {printUsage(); exit(0);}
+		else if (0==std::strcmp( arg, "-A") || 0==std::strcmp( arg, "--accept")) {++argi; http_accept=argv[argi]; if (!http_accept) throw std::runtime_error("option -A expects argument");}
+		else if (0==std::strcmp( arg, "-V") || 0==std::strcmp( arg, "--verbose")) {g_verbose = true;}
+		else throw std::runtime_error("unknown option");
 	}
 	if (argc-argi < 2)
 	{
 		printUsage();
 		exit(-1);
 	}
-	Request request( argv[argi]/*method*/, argc-argi < 3 ? "" : argv[argi+2]/*arg*/);
+	Request request( argv[argi]/*method*/, argc-argi < 3 ? "" : argv[argi+2]/*arg*/, http_accept);
+	if (request.errcode)
+	{
+		std::cerr << std::strerror( request.errcode) << std::endl;
+		return request.errcode;
+	}
+	ContentBuf cbuf( request.content.c_str(), request.content.size());
 	std::string url = getUrl( argv[argi+1]);
 	int port = getPort( argv[argi+1]);
 
@@ -150,8 +181,9 @@ int main( int argc, char const* argv[])
 		else if (request.method == "PUT")
 		{
 			set_curl_opt( curl, CURLOPT_PUT, 1);
-			set_curl_opt( curl, CURLOPT_READDATA, request.content.c_str());
+			set_curl_opt( curl, CURLOPT_READDATA, &cbuf);
 			set_curl_opt( curl, CURLOPT_INFILESIZE, request.content.size());
+			set_curl_opt( curl, CURLOPT_READFUNCTION, read_callback);
 		}
 		else if (request.method == "POST")
 		{

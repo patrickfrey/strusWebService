@@ -57,6 +57,8 @@ private:
 	void response_content_header( const char* charset, const char* doctype, std::size_t blobsize);
 	/// \brief Set response content
 	void response_content( const char* charset, const char* doctype, const char* blob, std::size_t blobsize);
+	/// \brief Set response message
+	void response_message( const char* messagetype, const char* messagestr);
 
 	/// \brief Report error reply
 	void report_fatal();

@@ -1,0 +1,34 @@
+{
+    "docanalyzer": {
+        "class": {
+            "mimetype":"XML"
+        },
+        "subdoc": {
+            "name":"doc",
+            "select":"/LEWIS/REUTERS"
+        },
+        "feature": {
+            "attribute": [
+                {"type":"title", "tokenizer": {"name":"content"}, "normalizer": {"name": "text"}, "select": "/LEWIS/REUTERS/TEXT/TITLE()"},
+                {"type":"docid", "tokenizer": {"name":"content"}, "normalizer": {"name": "regex", "arg":[".*", "reuters-$0"]}, "select": "/LEWIS/REUTERS@NEWID"},
+                {"type":"date", "tokenizer": {"name":"content"}, "normalizer": {"name": "text"}, "select": "/LEWIS/REUTERS/DATE()"}
+            ],
+            "search": [
+                {"type":"topic", "tokenizer": {"name":"content"}, "normalizer": {"name": "lc"}, "select": "/LEWIS/REUTERS/TOPICS//()"},
+                {"type":"para", "tokenizer": {"name":"word"}, "normalizer": {"name": "orig"}, "select": "/LEWIS/REUTERS/TEXT/BODY"},
+                {"type":"stem", "tokenizer": {"name":"word"}, "normalizer":  [{"name": "text"},{"name": "lc"},{"name":"stem", "arg":"en"},{"name":"convdia", "arg":"en"}], "select": "/LEWIS/REUTERS/TEXT/TITLE()"},
+                {"type":"stem", "tokenizer": {"name":"word"}, "normalizer":  [{"name": "text"},{"name": "lc"},{"name":"stem", "arg":"en"},{"name":"convdia", "arg":"en"}], "select": "/LEWIS/REUTERS/TEXT/BODY()"},
+                {"type":"punctuation", "tokenizer": {"name":"punctuation","arg":"en"}, "normalizer": {"name":"orig"}, "select": "/LEWIS/REUTERS/TEXT/BODY()"}
+            ],
+            "forward": [
+                {"type":"orig", "tokenizer": {"name":"word"}, "normalizer": {"name": "text"}, "select": "/LEWIS/REUTERS/TEXT/TITLE()"},
+                {"type":"orig", "tokenizer": {"name":"word"}, "normalizer": {"name": "text"}, "select": "/LEWIS/REUTERS/TEXT/BODY()"}
+            ],
+            "aggregate": [
+                {"type":"doclen", "function": {"name":"count", "arg":"stem"}}
+            ]
+        }
+    }
+}
+
+
