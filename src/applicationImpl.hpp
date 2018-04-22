@@ -61,8 +61,6 @@ private:
 	void response_message( const char* messagetype, const char* messagestr);
 
 	/// \brief Report error reply
-	void report_fatal();
-	/// \brief Report error reply
 	void report_error( int httpstatus, int apperror, const char* message);
 	/// \brief Report error reply
 	void report_error_fmt( int httpstatus, int apperror, const char* fmt, ...);

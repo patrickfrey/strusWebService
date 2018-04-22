@@ -119,6 +119,14 @@ static std::size_t read_callback( char *buffer, std::size_t size, std::size_t ni
 	return mm;
 }
 
+static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
+{
+	size_t nn = size*nmemb;
+	std::string* output = (std::string*)userdata;
+	output->append( (char*)ptr, nn);
+	return nn;
+}
+
 int main( int argc, char const* argv[])
 {
 	int rt = 0;
@@ -134,7 +142,7 @@ int main( int argc, char const* argv[])
 		char const* arg = argv[argi];
 		if (std::strcmp( arg, "--")) {++argi; break;}
 		else if (0==std::strcmp( arg, "-h") || 0==std::strcmp( arg, "--help")) {printUsage(); exit(0);}
-		else if (0==std::strcmp( arg, "-A") || 0==std::strcmp( arg, "--accept")) {++argi; http_accept=argv[argi]; if (!http_accept) throw std::runtime_error("option -A expects argument");}
+		else if (0==std::strcmp( arg, "-A") || 0==std::strcmp( arg, "--accept")) {http_accept=argv[++argi]; if (!http_accept) throw std::runtime_error("option -A expects argument");}
 		else if (0==std::strcmp( arg, "-V") || 0==std::strcmp( arg, "--verbose")) {g_verbose = true;}
 		else throw std::runtime_error("unknown option");
 	}
@@ -163,42 +171,23 @@ int main( int argc, char const* argv[])
 		set_http_header( headers, "Content-Type", request.content_type);
 		set_http_header( headers, "Accept", request.accept);
 		set_http_header( headers, "Accept-Charset", request.accept_charset);
-
+		set_curl_opt( curl, CURLOPT_POST, 1);
 		set_curl_opt( curl, CURLOPT_HTTPHEADER, headers);
+		set_curl_opt( curl, CURLOPT_POSTFIELDSIZE, request.content.size());
+		set_curl_opt( curl, CURLOPT_POSTFIELDS, request.content.c_str());
+		std::string output;
+		set_curl_opt( curl, CURLOPT_WRITEDATA, &output);
+		set_curl_opt( curl, CURLOPT_WRITEFUNCTION, write_callback); 
+		//set_curl_opt( curl, CURLOPT_READDATA, &cbuf);
+		//set_curl_opt( curl, CURLOPT_READFUNCTION, read_callback);
 		set_curl_opt( curl, CURLOPT_FAILONERROR, 1);
 		set_curl_opt( curl, CURLOPT_ERRORBUFFER, curl_errbuf);
-		if (g_verbose) set_curl_opt( curl, CURLOPT_VERBOSE, 1);
+		set_curl_opt( curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
 
-		if (request.method == "GET")
-		{
-			if (!request.content.empty())
-			{
-				url.append( "?");
-				url.append( request.content);
-			}
-			set_curl_opt( curl, CURLOPT_HTTPGET, 1);
-		}
-		else if (request.method == "PUT")
-		{
-			set_curl_opt( curl, CURLOPT_PUT, 1);
-			set_curl_opt( curl, CURLOPT_READDATA, &cbuf);
-			set_curl_opt( curl, CURLOPT_INFILESIZE, request.content.size());
-			set_curl_opt( curl, CURLOPT_READFUNCTION, read_callback);
-		}
-		else if (request.method == "POST")
-		{
-			set_curl_opt( curl, CURLOPT_POSTFIELDS, request.content.c_str());
-			set_curl_opt( curl, CURLOPT_POSTFIELDSIZE, request.content.size());
-		}
-		else
-		{
-			// not implemented
-			int ec = 38/*ENOSYS*/;
-			std::cerr << std::strerror( ec) << std::endl;
-			rt = ec;
-		}
 		set_curl_opt( curl, CURLOPT_URL, url.c_str());
+		set_curl_opt( curl, CURLOPT_CUSTOMREQUEST, request.method.c_str());
 		if (port) set_curl_opt( curl, CURLOPT_PORT, port);
+		if (g_verbose) set_curl_opt( curl, CURLOPT_VERBOSE, 1);
 
 		res = curl_easy_perform( curl);
 		if (res != CURLE_OK)
@@ -212,6 +201,7 @@ int main( int argc, char const* argv[])
 			long http_code = 0;
 			curl_easy_getinfo( curl, CURLINFO_RESPONSE_CODE, &http_code);
 			if (g_verbose) std::cerr << "\nResponse code: " << http_code << std::endl;
+			std::cout << output << std::endl << std::endl;
 		}
 	}
 	catch (const std::bad_alloc&)

@@ -78,9 +78,9 @@ void Application::response_content_header( const char* charset, const char* doct
 
 void Application::response_content( const char* charset, const char* doctype, const char* blob, std::size_t blobsize)
 {
-	response_content_header( charset, doctype, blobsize);
+	response_content_header( charset, doctype, blobsize + 1/*'\n'*/);
 	response().out().write( blob, blobsize);
-	response().out() << std::endl;
+	response().out() << "\n" << std::flush;
 }
 
 void Application::response_content( const strus::WebRequestContent& content, bool with_content)
@@ -109,30 +109,33 @@ void Application::response_message( const char* messagetype, const char* message
 	}
 }
 
-void Application::report_fatal()
+void Application::report_error( int httpstatus, int apperrorcode, const char* message)
 {
-	int httpstatus = 500/*application error*/;
-	BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << "(status " << httpstatus << ") FATAL";
-	response().status( httpstatus);
-	response().out() << std::endl;
-}
-
-void Application::report_error( int httpstatus, int apperrorcode, const char* message_)
-{
-	response().status( httpstatus);
-	const char* message = message_?message_:"";
-	if (apperrorcode > 0)
+	if (message)
 	{
-		BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << "(status " << httpstatus << ", apperr " << apperrorcode << ") " << message;
+		response().status( httpstatus, message);
+		if (apperrorcode > 0)
+		{
+			BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << "(status " << httpstatus << ", apperr " << apperrorcode << ") " << message;
+		}
+		else
+		{
+			BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << "(status " << httpstatus << ") " << message;
+		}
 	}
 	else
 	{
-		BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << "(status " << httpstatus << ") " << message;
+		response().status( httpstatus);
+		if (apperrorcode > 0)
+		{
+			BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << "(status " << httpstatus << ", apperr " << apperrorcode << ")";
+		}
+		else
+		{
+			BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << "(status " << httpstatus << ")";
+		}
 	}
-	std::size_t messagelen = std::strlen(message);
-	response_content_header( "UTF-8", "text/plain", messagelen);
-	response().out().write( message, messagelen);
-	response().out() << std::endl;
+	response().finalize();
 }
 
 void Application::report_error_fmt( int httpstatus, int apperrorcode, const char* fmt, ...)
@@ -143,6 +146,7 @@ void Application::report_error_fmt( int httpstatus, int apperrorcode, const char
 	std::vsnprintf( buf, sizeof(buf), fmt, ap);
 	report_error( httpstatus, apperrorcode, buf);
 	va_end (ap);
+	response().finalize();
 }
 
 void Application::report_ok( const char* status, int httpstatus, const char* message)
@@ -176,6 +180,7 @@ void Application::report_answer( const strus::WebRequestAnswer& answer, bool wit
 		response().status( answer.httpstatus());
 		response_content( answer.content(), with_content);
 	}
+	response().finalize();
 }
 
 void Application::exec_quit()
