@@ -20,7 +20,6 @@ namespace webservice {
 std::vector<std::string> getConfigArray( const cppcms::json::value& config, const std::string& path);
 cppcms::json::value configFromFile( const std::string& configfile, int& errcode);
 cppcms::json::value configDefault();
-void rewriteConfigNumbers( cppcms::json::value& config);
 
 }}//namespace strus::webservice
 #endif

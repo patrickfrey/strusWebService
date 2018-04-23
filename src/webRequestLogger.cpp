@@ -127,9 +127,14 @@ void WebRequestLogger::logMethodCall(
 	}
 }
 
-void WebRequestLogger::logLoggerError( const char* errmsg)
+void WebRequestLogger::logError( const char* errmsg)
 {
-	logMessage( _TXT("logging of method call failed: %s"), errmsg);
+	logMessage( _TXT("error: %s"), errmsg);
+}
+
+void WebRequestLogger::logWarning( const char* errmsg)
+{
+	logMessage( _TXT("warning: %s"), errmsg);
 }
 
 int WebRequestLogger::logMask() const

@@ -88,21 +88,3 @@ cppcms::json::value webservice::configDefault()
 	return config;
 }
 
-static void rewriteConfigNumber( cppcms::json::value& config, const char* key)
-{
-	std::string value = config.get( key, std::string());
-	if (!value.empty())
-	{
-		uint64_t numvalue = numstring_conv::touint( value.c_str(), value.size(), (uint64_t)std::numeric_limits<int64_t>::max());
-		std::ostringstream convbuf;
-		convbuf << numvalue;
-		value = convbuf.str();
-		config.set( key, value);
-	}
-}
-
-void webservice::rewriteConfigNumbers( cppcms::json::value& config)
-{
-	//rewriteConfigNumber( config, "security.content_length_limit");
-}
-

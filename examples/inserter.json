@@ -1,0 +1,7 @@
+{
+    "inserter" : {
+        "docanalyzer" : "reuters",
+        "storage" : "reuters"
+    }
+}
+

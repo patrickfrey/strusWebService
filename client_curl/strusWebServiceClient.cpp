@@ -104,21 +104,6 @@ struct ContentBuf
 		:ptr(ptr_),pos(0),size(size_){}
 };
 
-static std::size_t read_callback( char *buffer, std::size_t size, std::size_t nitems, void *instream)
-{
-	ContentBuf& cbuf = *(ContentBuf*)instream;
-	if (cbuf.pos == cbuf.size) return 0;
-	std::size_t mm = size * nitems;
-	std::size_t nn = cbuf.size - cbuf.pos;
-	if (mm < (size|nitems) || mm > nn)
-	{
-		mm = nn;
-	}
-	std::memcpy( buffer, cbuf.ptr + cbuf.pos, mm);
-	cbuf.pos += mm;
-	return mm;
-}
-
 static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
 	size_t nn = size*nmemb;
@@ -140,7 +125,7 @@ int main( int argc, char const* argv[])
 	for (; argi < argc && argv[argi][0] == '-'; ++argi)
 	{
 		char const* arg = argv[argi];
-		if (std::strcmp( arg, "--")) {++argi; break;}
+		if (0==std::strcmp( arg, "--")) {++argi; break;}
 		else if (0==std::strcmp( arg, "-h") || 0==std::strcmp( arg, "--help")) {printUsage(); exit(0);}
 		else if (0==std::strcmp( arg, "-A") || 0==std::strcmp( arg, "--accept")) {http_accept=argv[++argi]; if (!http_accept) throw std::runtime_error("option -A expects argument");}
 		else if (0==std::strcmp( arg, "-V") || 0==std::strcmp( arg, "--verbose")) {g_verbose = true;}

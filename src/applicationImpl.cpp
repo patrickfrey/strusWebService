@@ -11,7 +11,6 @@
 /// \brief Implementation of the cppcms application class for the strus webservice 
 #include "defaultContants.hpp"
 #include "applicationImpl.hpp"
-#include "applicationMessageBuf.hpp"
 #include "serviceClosure.hpp"
 #include "pathIter.hpp"
 #include "strus/lib/webrequest.hpp"
@@ -85,15 +84,15 @@ void Application::response_content( const char* charset, const char* doctype, co
 
 void Application::response_content( const strus::WebRequestContent& content, bool with_content)
 {
-	BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-		<< strus::string_format( _TXT("response content type '%s', charset '%s'"), content.doctype(), content.charset());
-	if (with_content)
+	if (with_content && !content.empty())
 	{
+		BOOSTER_DEBUG( DefaultConstants::PACKAGE())
+			<< strus::string_format( _TXT("response content type '%s', charset '%s'"), content.doctype(), content.charset());
 		response_content( content.charset(), content.doctype(), content.str(), content.len());
 	}
 	else
 	{
-		response_content_header( content.charset(), content.doctype(), content.len());
+		BOOSTER_DEBUG( DefaultConstants::PACKAGE()) << _TXT("no response content");
 	}
 }
 
@@ -153,12 +152,7 @@ void Application::report_ok( const char* status, int httpstatus, const char* mes
 {
 	BOOSTER_DEBUG( DefaultConstants::PACKAGE() ) << "(status " << status << " " << httpstatus << ") " << message;
 
-	ApplicationMessageBuf msgbuf( request().http_accept_charset(), request().http_accept(), m_service->html_head());
-	BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-		<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), msgbuf.http_accept(), msgbuf.http_accept_charset());
-
-	response().status( httpstatus);
-	response_content( msgbuf.info( "OK", message), true);
+	response().status( httpstatus, message);
 	response().finalize();
 }
 

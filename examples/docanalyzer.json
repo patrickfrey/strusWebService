@@ -14,7 +14,7 @@
                 {"type":"date", "tokenizer": {"name":"content"}, "normalizer": {"name": "text"}, "select": "/LEWIS/REUTERS/DATE()"}
             ],
             "search": [
-                {"type":"topic", "tokenizer": {"name":"content"}, "normalizer": {"name": "lc"}, "select": "/LEWIS/REUTERS/TOPICS//()"},
+                {"type":"topic", "tokenizer": {"name":"content"}, "normalizer": [{"name": "lc"},{"name": "trim"}], "select": "/LEWIS/REUTERS/TOPICS//()"},
                 {"type":"para", "tokenizer": {"name":"word"}, "normalizer": {"name": "orig"}, "select": "/LEWIS/REUTERS/TEXT/BODY"},
                 {"type":"stem", "tokenizer": {"name":"word"}, "normalizer":  [{"name": "text"},{"name": "lc"},{"name":"stem", "arg":"en"},{"name":"convdia", "arg":"en"}], "select": "/LEWIS/REUTERS/TEXT/TITLE()"},
                 {"type":"stem", "tokenizer": {"name":"word"}, "normalizer":  [{"name": "text"},{"name": "lc"},{"name":"stem", "arg":"en"},{"name":"convdia", "arg":"en"}], "select": "/LEWIS/REUTERS/TEXT/BODY()"},

@@ -44,7 +44,10 @@ public:
 			const std::string& methodname,
 			const std::string& arguments,
 			const std::string& result);
-	virtual void logLoggerError( const char* errmsg);
+
+	virtual void logWarning( const char* errmsg);
+
+	virtual void logError( const char* errmsg);
 
 	void reset();
 

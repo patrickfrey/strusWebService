@@ -241,7 +241,6 @@ int main( int argc_, const char *argv_[] )
 		}
 		g_verbose = opt("verbose");
 		cppcms::json::value config = opt("config") ? configFromFile( opt[ "config"], rt) : configDefault();
-		strus::webservice::rewriteConfigNumbers( config);
 
 		if (opt("license"))
 		{
