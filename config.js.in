@@ -19,7 +19,7 @@
 	},
 
 	"transactions" : {
-		"max_idle_time" : 120
+		"max_idle_time" : 600
 	},
 
 	"extensions" : {
