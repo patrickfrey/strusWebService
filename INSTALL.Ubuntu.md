@@ -3,7 +3,7 @@ Ubuntu 16.04 on x86_64, i686
 
 # Build system
 Cmake with gcc or clang. Here in this description we build with 
-gcc >= 4.9 (has C++11 support). Build with C++98 is possible.
+gcc >= 4.9 (has C++11 support). Unlike other strus projeccts,  strusWebService needs C++11.
 
 # Prerequisites
 Install packages with 'apt-get'/aptitude.
@@ -13,7 +13,7 @@ Install packages with 'apt-get'/aptitude.
 
 ## Required packages
 	boost-all >= 1.57
-	snappy-dev leveldb-dev libuv-dev, cppcms >= 1.0
+	snappy-dev leveldb-dev libuv-dev, cppcms >= 1.0, curl (e.g. libcurl4-openssl-dev)
 
 # Strus prerequisite packages to install before
 	strusBase strus strusAnalyzer strusTrace strusModule strusRpc strusBindings
