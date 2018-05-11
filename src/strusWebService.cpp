@@ -276,6 +276,7 @@ int main( int argc_, const char *argv_[] )
 				booster::shared_ptr<booster::log::sinks::standard_error> csink( new booster::log::sinks::standard_error());
 				booster::log::logger::instance().add_sink(csink);
 			}
+			int port = config.get( "service.port", 80);
 
 			service.init( config, g_verbose);
 			BOOSTER_INFO( DefaultConstants::PACKAGE())
@@ -283,7 +284,7 @@ int main( int argc_, const char *argv_[] )
 							_TXT("starting strus web service (%d %s).."),
 							nofThreads, nofThreads==1?"thread":"threads");
 			service.mount_applications();
-
+			BOOSTER_NOTICE( DefaultConstants::PACKAGE()) << strus::string_format( _TXT("service ready and listening on %d"), port);
 			service.run();
 			if(g_got_sighup.test())
 			{
