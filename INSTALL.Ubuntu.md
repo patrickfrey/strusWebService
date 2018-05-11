@@ -15,6 +15,18 @@ Install packages with 'apt-get'/aptitude.
 	boost-all >= 1.57
 	snappy-dev leveldb-dev libuv-dev, cppcms >= 1.0, curl (e.g. libcurl4-openssl-dev)
 
+### Packages required by cppcms
+	zlib1g-dev
+	libpcre3-dev
+
+### Download and install cppcms
+	wget https://sourceforge.net/projects/cppcms/files/cppcms/1.0.5/cppcms-1.0.5.tar.bz2
+	bzip2 -d cppcms-1.0.5.tar.bz2
+	tar -xvf cppcms-1.0.5.tar
+	cd cppcms-1.0.5
+	cmake .
+	make install
+
 # Strus prerequisite packages to install before
 	strusBase strus strusAnalyzer strusTrace strusModule strusRpc strusBindings
 

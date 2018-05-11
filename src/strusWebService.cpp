@@ -195,7 +195,7 @@ int main( int argc_, const char *argv_[] )
 {
 	int rt = 0;
 	// Select configured debug traces:
-	strus::DebugTraceInterface* dbgtrace = dbgtrace = strus::createDebugTrace_standard( 2/*threads*/);
+	strus::DebugTraceInterface* dbgtrace = strus::createDebugTrace_standard( 2/*threads*/);
 	if (!dbgtrace)
 	{
 		std::cerr << _TXT("failed to create debug trace handler") << std::endl;
