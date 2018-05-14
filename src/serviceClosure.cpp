@@ -184,5 +184,17 @@ void ServiceClosure::clear()
 	if (m_requestLogger) {delete m_requestLogger; m_requestLogger = 0;}
 	if (m_requestHandler) {delete m_requestHandler; m_requestHandler = 0;}
 	if (m_errorhnd) {delete m_errorhnd; m_errorhnd = 0;}
+
+	m_cors_hosts.clear();
+	m_cors_age.clear();
+	m_html_head.clear();
+	m_http_server_name.clear();
+	m_http_script_name.clear();
+	m_http_server_url.clear();
+	m_put_configdir.clear();
+	m_cors_enabled = true;
+	m_quit_enabled = false;
+	m_debug_enabled = false;
+	m_pretty_print = false;
 }
 
