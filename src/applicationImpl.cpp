@@ -79,7 +79,7 @@ void Application::response_content( const char* charset, const char* doctype, co
 {
 	response_content_header( charset, doctype, blobsize + 1/*'\n'*/);
 	response().out().write( blob, blobsize);
-	response().out() << "\n" << std::flush;
+	response().out() << "\n";
 }
 
 void Application::response_content( const strus::WebRequestContent& content, bool with_content)
