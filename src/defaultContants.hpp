@@ -31,6 +31,7 @@ struct DefaultConstants
 	static const std::string SERVICE_LOG_FILE() {return "strusWebService.log";}
 	static const std::string AUTOSAVE_CONFIG_DIR() {return "/srv/strus/config";}
 	static const std::string HTTP_SERVER_NAME() {return "";}
+	static const std::string HTTP_SCRIPT_NAME() {return "";}
 	static const int HOUSKEEPING_TIMER_INTERVAL() {return 10;}
 	static const int TRANSACTION_MAX_IDLE_TIME() {return 120;}
 	static const int TRANSACTION_MAP_SLOT_SIZE() {return 100;}
