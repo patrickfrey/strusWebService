@@ -60,7 +60,7 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 		m_errorhnd = strus::createErrorBuffer_standard( NULL, nofThreads+1, dbgtrace);
 		m_put_configdir = config.get( "data.configdir", DefaultConstants::DefaultConstants::AUTOSAVE_CONFIG_DIR());
 		m_http_server_name = config.get( "http.server", DefaultConstants::DefaultConstants::HTTP_SERVER_NAME());
-		m_http_script_name = config.get( "http.script", DefaultConstants::DefaultConstants::HTTP_SERVER_NAME());
+		m_http_script_name = config.get( "http.script", DefaultConstants::DefaultConstants::HTTP_SCRIPT_NAME());
 		if (!m_http_server_name.empty())
 		{
 			m_http_server_url.append( m_http_server_name);
