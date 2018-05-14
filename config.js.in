@@ -5,18 +5,6 @@
 		"configdir" : "/srv/strus/config",
 		"resources" : "/usr/share/strus"
 	},
-	"storage" : {
-		"path" : "storage",
-		"database" : "leveldb",
-		"cache_size" : 8388608,
-		"max_open_files" : 512,
-		"write_buffer_size" : 8192,
-		"block_size" : 4096,
-		"compression" : true,
-		"metadata" : [
-				{ "name" : "doclen", "type" : "UInt16" }
-		]
-	},
 
 	"transactions" : {
 		"max_idle_time" : 600
