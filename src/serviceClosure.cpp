@@ -90,8 +90,8 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 				else
 				{
 					m_http_server_url.append( m_http_script_name);
-					m_http_server_url.push_back('/');
 				}
+				m_http_server_url.push_back('/');
 			}
 		}
 		std::string requestLogFilename = config.get( "debug.request_file", DefaultConstants::REQUEST_LOG_FILE());
