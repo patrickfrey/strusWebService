@@ -33,7 +33,7 @@ class ServiceClosure
 public:
 	ServiceClosure( const std::string& configdir_, const cppcms::json::value& config, bool verbose)
 		:m_service(0),m_requestLogger(0),m_requestHandler(0),m_errorhnd(0),m_configdir(configdir_)
-		,m_cors_hosts(),m_cors_age(),m_html_head(),m_put_configdir()
+		,m_cors_hosts(),m_cors_age(),m_html_head(),m_http_server_name(),m_http_script_name(),m_http_server_url(),m_put_configdir()
 		,m_cors_enabled(true),m_quit_enabled(false),m_debug_enabled(false),m_pretty_print(false)
 	{
 		init( config, verbose);
@@ -100,6 +100,18 @@ public:
 	{
 		return m_html_head.c_str();
 	}
+	const std::string& http_server_name() const
+	{
+		return m_http_server_name;
+	}
+	const std::string& http_script_name() const
+	{
+		return m_http_script_name;
+	}
+	const std::string& http_server_url() const
+	{
+		return m_http_server_url;
+	}
 
 private:
 	//\brief Destroy service, logging and command handler if initialized
@@ -118,6 +130,9 @@ private:
 	std::vector<std::string> m_cors_hosts;
 	std::string m_cors_age;
 	std::string m_html_head;
+	std::string m_http_server_name;
+	std::string m_http_script_name;
+	std::string m_http_server_url;
 	std::string m_put_configdir;
 	bool m_cors_enabled;
 	bool m_quit_enabled;

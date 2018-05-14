@@ -59,6 +59,18 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 		DebugTraceInterface* dbgtrace = strus::createDebugTrace_standard( nofThreads+1);
 		m_errorhnd = strus::createErrorBuffer_standard( NULL, nofThreads+1, dbgtrace);
 		m_put_configdir = config.get( "data.configdir", DefaultConstants::DefaultConstants::AUTOSAVE_CONFIG_DIR());
+		m_http_server_name = config.get( "http.server", DefaultConstants::DefaultConstants::HTTP_SERVER_NAME());
+		m_http_script_name = config.get( "http.script", DefaultConstants::DefaultConstants::HTTP_SERVER_NAME());
+		if (!m_http_server_name.empty())
+		{
+			m_http_server_url.append( m_http_server_name);
+			m_http_server_url.push_back('/');
+			if (!m_http_script_name.empty())
+			{
+				m_http_server_url.append( m_http_script_name);
+				m_http_server_url.push_back('/');
+			}
+		}
 		std::string requestLogFilename = config.get( "debug.request_file", DefaultConstants::REQUEST_LOG_FILE());
 		m_requestLogger = new strus::WebRequestLogger( requestLogFilename, verbose, logMask, logStructDepth, nofThreads+1, m_service->process_id(), nofProcs);
 		m_requestHandler = strus::createWebRequestHandler( m_requestLogger, m_html_head, m_put_configdir, configstr, max_idle_time, transactionmap_slot_size, m_errorhnd);
