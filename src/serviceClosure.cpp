@@ -30,6 +30,18 @@
 
 using namespace strus::webservice;
 
+static bool isAlpha( unsigned char ch)
+{
+	return ((ch|32) >= 'a' && (ch|32) <= 'z');
+}
+
+static bool url_has_protocol_prefix( const std::string& url)
+{
+	char const* si = url.c_str();
+	while (isAlpha(*si)) ++si;
+	return *si == ':';
+}
+
 void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 {
 	try
@@ -63,12 +75,23 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 		m_http_script_name = config.get( "http.script", DefaultConstants::DefaultConstants::HTTP_SCRIPT_NAME());
 		if (!m_http_server_name.empty())
 		{
+			if (!url_has_protocol_prefix( m_http_server_name))
+			{
+				m_http_server_url.append( "http://");
+			}
 			m_http_server_url.append( m_http_server_name);
 			m_http_server_url.push_back('/');
 			if (!m_http_script_name.empty())
 			{
-				m_http_server_url.append( m_http_script_name);
-				m_http_server_url.push_back('/');
+				if (m_http_script_name[0] == '/')
+				{
+					m_http_server_url.append( m_http_script_name.c_str()+1);
+				}
+				else
+				{
+					m_http_server_url.append( m_http_script_name);
+					m_http_server_url.push_back('/');
+				}
 			}
 		}
 		std::string requestLogFilename = config.get( "debug.request_file", DefaultConstants::REQUEST_LOG_FILE());
