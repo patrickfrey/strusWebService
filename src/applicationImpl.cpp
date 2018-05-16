@@ -368,7 +368,10 @@ void Application::exec_request( std::string path)
 		if (!path.empty())
 		{
 			html_base_href.append( path);
-			html_base_href.push_back( '/');
+			if (path[ path.size()-1] != '/')
+			{
+				html_base_href.push_back( '/');
+			}
 		}
 		strus::unique_ptr<strus::WebRequestContextInterface> ctx(
 			m_service->requestHandler()->createContext( http_accept_charset.c_str(), http_accept.c_str(), html_base_href.c_str(), answer));
