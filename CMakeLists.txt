@@ -21,6 +21,7 @@ include( cmake/find_strus_package.cmake )
 include( cmake/link_rules.cmake )
 include( cmake/standard_targets.cmake )
 include( cmake/intl.cmake )
+include( cmake/libdl.cmake )
 include( cmake/report_build_settings.cmake )
 include( cmake/cppcheck.cmake )
 
