@@ -1,51 +1,62 @@
 {
     "query": {
-        "weighting": {
-            "name": "BM25",
-            "param": [{
-                "name": "k1",
-                "value": "1.2"
-            },{
-                "name": "b",
-                "value": "0.75"
-            },{
-                "name": "avgdoclen",
-                "value": "100"
-            }],
-            "feature": [{
-                "name": "match",
-                "value": "search"
-            }]
+        "eval": {
+            "weighting": {
+                "name": "BM25",
+                "param": [{
+                    "name": "k1",
+                    "value": "1.2"
+                },{
+                    "name": "b",
+                    "value": "0.75"
+                },{
+                    "name": "avgdoclen",
+                    "value": "100"
+                }],
+                    "feature": [{
+                    "name": "match",
+                    "value": "search"
+                }]
+            },
+            "summarizer": {
+                "name": "attribute",
+                "param": [{
+                    "name": "name",
+                    "value": "title"
+                }]
+            },
+            "selection": "search"
         },
-        "selection": "search",
-        "element": {
-            "type": "stem",
-            "field": "text",
-            "tokenizer": {"name": "word"},
-            "normalizer": [
-                    {"name":"text"},
-                    {"name":"lc"},
-                    {"name":"stem", "arg": ["de"]},
-                    {"name":"convdia", "arg": ["de"]}
-            ]
-        },
-        "group": {"-by":"all", "field":"text", "op":"sequence" },
         "feature": [
             {
                 "set": "search",
                 "term": {
                     "type": "text",
-                    "value": "Valderrama"
+                    "value": "New"
                 }
             },
             {
                 "set": "search",
                 "term": {
                     "type": "text",
-                    "value": "Golfklub"
+                    "value": "York"
                 }
             }
-        ]
+        ],
+        "analyzer": {
+            "element": {
+                "type": "stem",
+                "field": "text",
+                "tokenizer": {"name": "word"},
+                "normalizer": [
+                    {"name":"text"},
+                    {"name":"lc"},
+                    {"name":"stem", "arg": ["de"]},
+                    {"name":"convdia", "arg": ["de"]}
+                ]
+            },
+            "group": {"-by":"all", "field":"text", "op":"sequence" }
+        }
     }
 }
 
