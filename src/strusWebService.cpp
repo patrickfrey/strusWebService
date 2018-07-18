@@ -220,10 +220,6 @@ int main( int argc_, const char *argv_[] )
 		}
 		bool printUsageAndExit = opt("help");
 
-		if (opt( "version"))
-		{
-			printVersion();
-		}
 		if (!printUsageAndExit)
 		{
 			if (opt.nofargs() > 0)
@@ -245,6 +241,11 @@ int main( int argc_, const char *argv_[] )
 		if (opt("license"))
 		{
 			print3rdPartyLicenses( config, errorhnd.get());
+		}
+		if (opt( "version"))
+		{
+			printVersion();
+			return rt;
 		}
 		if (printUsageAndExit)
 		{
