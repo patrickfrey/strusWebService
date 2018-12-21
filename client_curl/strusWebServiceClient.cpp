@@ -1,15 +1,18 @@
 #include "strus/lib/webrequest.hpp"
 #include "strus/base/fileio.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/numstring.hpp"
 #include <string>
 #include <iostream>
 #include <cstdio>
 #include <cstring>
 #include <algorithm>
 #include <stdexcept>
+#include <limits>
 #include <curl/curl.h>
 
 static bool g_verbose = false;
+static int g_errorsAccepted = -1;
 
 static void printUsage()
 {
@@ -222,6 +225,8 @@ struct RequestInput
 			std::vector<std::string>::const_iterator fi = filelist.begin(), fe = filelist.end();
 			for (; fi != fe; ++fi)
 			{
+				if (nofRequestsFailed > g_errorsAccepted) return false;
+
 				std::string filecontent;
 				int ec = strus::readFile( *fi, filecontent);
 				if (ec)
@@ -287,7 +292,7 @@ int main( int argc, char const* argv[])
 		int rt = 0;
 		int argi = 1;
 		const char* http_accept = 0;
-		
+
 		for (; argi < argc && argv[argi][0] == '-'; ++argi)
 		{
 			char const* arg = argv[argi];
@@ -295,6 +300,7 @@ int main( int argc, char const* argv[])
 			else if (0==std::strcmp( arg, "-h") || 0==std::strcmp( arg, "--help")) {printUsage(); exit(0);}
 			else if (0==std::strcmp( arg, "-A") || 0==std::strcmp( arg, "--accept")) {http_accept=argv[++argi]; if (!http_accept) throw std::runtime_error("option -A expects argument");}
 			else if (0==std::strcmp( arg, "-V") || 0==std::strcmp( arg, "--verbose")) {g_verbose = true;}
+			else if (0==std::strcmp( arg, "-E") || 0==std::strcmp( arg, "--errors")) {g_errorsAccepted=strus::numstring_conv::touint( argv[++argi], std::numeric_limits<int>::max());}
 			else throw std::runtime_error("unknown option");
 		}
 		if (argc-argi < 2)
