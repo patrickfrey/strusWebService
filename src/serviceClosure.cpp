@@ -108,8 +108,11 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 	}
 	catch (const std::runtime_error& err)
 	{
-		const char* msg = m_errorhnd->fetchError();
-		BOOSTER_ERROR( DefaultConstants::PACKAGE()) << msg;
+		if (m_errorhnd)
+		{
+			const char* msg = m_errorhnd->fetchError();
+			BOOSTER_ERROR( DefaultConstants::PACKAGE()) << msg;
+		}
 		clear();
 		throw strus::runtime_error(_TXT("error initialising service closure: %s"), err.what());
 	}
