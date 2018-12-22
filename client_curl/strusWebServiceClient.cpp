@@ -225,7 +225,7 @@ struct RequestInput
 			std::vector<std::string>::const_iterator fi = filelist.begin(), fe = filelist.end();
 			for (; fi != fe; ++fi)
 			{
-				if (nofRequestsFailed > g_errorsAccepted) return false;
+				if (g_errorsAccepted >= 0 && nofRequestsFailed > g_errorsAccepted) return false;
 
 				std::string filecontent;
 				int ec = strus::readFile( *fi, filecontent);
