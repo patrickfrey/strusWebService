@@ -251,6 +251,7 @@ struct RequestInput
 				}
 				else
 				{
+					errout << "failed request content file '" << *fi << "'" << std::endl;
 					nofRequestsFailed += 1;
 					rt = false;
 				}
