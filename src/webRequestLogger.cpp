@@ -14,6 +14,7 @@
 #include "strus/base/fileio.hpp"
 #include <cstdarg>
 #include <cstring>
+#include <fstream>
 
 using namespace strus;
 
@@ -152,7 +153,7 @@ void WebRequestLogger::reset()
 	if (m_logout == &m_logfile)
 	{
 		m_logfile.close();
-		m_logfile.open( m_logfilename, std::ofstream::out | std::ofstream::app);
+		m_logfile.open( m_logfilename.c_str(), std::ofstream::out | std::ofstream::app);
 	}
 }
 

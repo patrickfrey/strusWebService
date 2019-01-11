@@ -102,7 +102,7 @@ struct Request
 			set_curl_opt( curl, CURLOPT_WRITEFUNCTION, write_callback); 
 			set_curl_opt( curl, CURLOPT_FAILONERROR, 1);
 			set_curl_opt( curl, CURLOPT_ERRORBUFFER, response.errbuf);
-			set_curl_opt( curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+			set_curl_opt( curl, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_1_1);
 	
 			set_curl_opt( curl, CURLOPT_URL, url.c_str());
 			set_curl_opt( curl, CURLOPT_CUSTOMREQUEST, method.c_str());
