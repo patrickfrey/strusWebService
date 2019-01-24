@@ -1,3 +1,7 @@
+struswebservice (0.17.0-1) unstable; urgency=low
+  * version synchronized with other strus projects
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 24 Jan 2019 07:30:00 +0100
+
 struswebservice (0.0.5-1) unstable; urgency=low
   * bugfix and stabilisation release, mainly concurrency issues
   * transaction garbage collection and close at shutdown

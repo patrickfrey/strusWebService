@@ -504,6 +504,10 @@ fi
 %endif
 
 %changelog
+* Thu Jan 24 2019 Patrick Frey <patrickpfrey@yahoo.com> 0.17.0-0.1
+- software completely rewritten
+- version number synchronized with other strus projects
+
 * Fri Dec 30 2016 Andreas Baumann <mail@andreasbaumann.cc> 0.0.5-0.1
 - bugfix and stabilisation release, mainly concurrency issues
 - transaction garbage collection and close at shutdown
