@@ -14,10 +14,11 @@ case $OS in
 			cmake \
 			libboost-all-dev \
 			libleveldb-dev \
-			libcppcms-dev \
-			libcurl4-openssl-dev
+			libcurl4-openssl-dev \
+			zlib1g-dev \
+			libpcre3-dev
 		;;
-		
+
 	Darwin)
 		brew update
 		if test "X$CC" = "Xgcc"; then

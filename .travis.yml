@@ -1,19 +1,22 @@
 language: cpp
-os:
-- linux
-- osx
-dist: trusty
-compiler:
-- clang
-- gcc
 matrix:
-  exclude:
-  - os: osx
-    compiler: gcc
+  include:
+    - os: linux
+      dist: trusty
+      compiler: gcc
+      env: STRUS_WITH_VECTOR=NO STRUS_WITH_PATTERN=NO STRUS_WITH_WEBSERVICE=YES
+    - os: linux
+      dist: trusty
+      compiler: clang
+      env: STRUS_WITH_VECTOR=NO STRUS_WITH_PATTERN=NO STRUS_WITH_WEBSERVICE=YES
+    - os: osx
+      compiler: clang
+      env: STRUS_WITH_VECTOR=NO STRUS_WITH_PATTERN=NO STRUS_WITH_WEBSERVICE=YES
+
 sudo: required
 branches:
   only:
-    - travis
+    - master
 before_install:
 - chmod +x dist/travis/*.sh
 - dist/travis/before_script.sh
