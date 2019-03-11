@@ -81,7 +81,6 @@ build_strus_project() {
 }
 
 # build pre-requisites
-
 cd ..
 wget https://sourceforge.net/projects/cppcms/files/cppcms/1.0.5/cppcms-1.0.5.tar.bz2
 bzip2 -d cppcms-1.0.5.tar.bz2
@@ -89,6 +88,7 @@ tar -xvf cppcms-1.0.5.tar
 cd cppcms-1.0.5
 cmake .
 sudo make install
+cd ..
 cd $PROJECT
 
 DEPS="strusBase strus strusAnalyzer strusTrace strusModule"
