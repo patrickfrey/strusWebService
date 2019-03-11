@@ -37,7 +37,6 @@ case $OS in
 			gettext \
 			snappy \
 			leveldb \
-			cppcms \
 			curl \
 			|| true
 		# make sure cmake finds the brew version of gettext
