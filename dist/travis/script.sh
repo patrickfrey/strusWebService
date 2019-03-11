@@ -29,12 +29,14 @@ case $OS in
 esac
 
 # build cppcms
+cd ..
 wget https://sourceforge.net/projects/cppcms/files/cppcms/1.0.5/cppcms-1.0.5.tar.bz2
 bzip2 -d cppcms-1.0.5.tar.bz2
 tar -xvf cppcms-1.0.5.tar
 cd cppcms-1.0.5
 cmake .
-make install
+sudo make install
+cd $PROJECT
 
 # build pre-requisites
 DEPS="strusBase strus strusAnalyzer strusTrace strusModule"
