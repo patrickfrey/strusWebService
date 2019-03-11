@@ -16,7 +16,6 @@ case $OS in
 			libcurl4-openssl-dev \
 			zlib1g-dev \
 			libpcre3-dev
-		;;
 		# Boost 1.58
 		sudo add-apt-repository -y ppa:kojoley/boost
 		sudo apt-get -q update
@@ -28,6 +27,7 @@ case $OS in
 		if test "x$STRUS_WITH_PATTERN" = "xYES"; then
 			sudo apt-get install -y libtre-dev ragel
 		fi
+		;;
 
 	Darwin)
 		brew update
