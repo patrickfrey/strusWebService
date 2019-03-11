@@ -3,6 +3,7 @@
  * Copyright (c) 2015,2016 Andreas Baumann
  * Copyright (c) 2015,2016 Eurospider IT AG Zurich
  * Copyright (c) 2017,2018 Patrick P. Frey, Andreas Baumann, Eurospider IT AG Zurich
+ * Copyright (c) 2019 Patrick P. Frey
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -42,9 +43,12 @@
 
 using namespace strus::webservice;
 
+#define WEBSERVICE_LIBRARY "cppcms"
+
 // Global flags:
 static bool g_verbose = false;
-static bool g_exit_silent = false;
+static bool g_normal_termination = false;
+
 static strus::AtomicFlag g_terminate;
 static strus::AtomicFlag g_got_sighup;
 
@@ -65,18 +69,12 @@ static void signal_handler( int sig )
 	}
 }
 
-static void on_exit_handler( int ec, void*)
+static void exit_handler()
 {
-	if (ec && !g_exit_silent)
+	if (!g_normal_termination)
 	{
-		const char* msg = NULL;
-		if (ec == 226)
-		{
-			msg = _TXT("already used");
-		}
-		std::cerr << _TXT("exit called with code ") << ec;
-		if (msg) std::cerr << " (" << msg << ")";
-		std::cerr << std::endl;
+		std::cerr << strus::string_format( _TXT("exit called by %s (abrupt termination"), WEBSERVICE_LIBRARY) << std::endl;
+		BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << _TXT("abrupt service termination, call of exit()");
 	}
 }
 
@@ -207,9 +205,11 @@ int main( int argc_, const char *argv_[] )
 		std::cerr << _TXT("failed to create error handler") << std::endl;
 		return -1;
 	}
-	on_exit( on_exit_handler, NULL);
 	try
 	{
+		// Install exit handler to catch and report abrupt termination by cppcms
+		int ec = std::atexit( exit_handler);
+
 		// Define configuration and usage:
 		strus::ProgramOptions opt(
 				errorhnd.get(), argc_, argv_, 5,
@@ -232,7 +232,7 @@ int main( int argc_, const char *argv_[] )
 		std::string configdir;
 		if (opt("config"))
 		{
-			int ec = strus::getParentPath( opt["config"], configdir);
+			ec = strus::getParentPath( opt["config"], configdir);
 			if (ec) throw strus::runtime_error(_TXT("failed to get parent path of configuration: %s"), ::strerror(ec));
 		}
 		g_verbose = opt("verbose");
@@ -313,7 +313,6 @@ int main( int argc_, const char *argv_[] )
 			g_terminate.set( true);
 		}
 		BOOSTER_INFO( DefaultConstants::PACKAGE() ) << _TXT("service terminated");
-		return rt;
 	}
 	catch (const cppcms::json::bad_value_cast& e)
 	{
@@ -355,7 +354,7 @@ int main( int argc_, const char *argv_[] )
 		std::cerr << _TXT("EXCEPTION unknown") << std::endl;
 		if (!rt) rt = strus::ErrorCodeUncaughtException;
 	}
-	g_exit_silent = true;
+	g_normal_termination = true;
 	return rt;
 }
 
