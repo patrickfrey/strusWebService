@@ -91,7 +91,7 @@ sudo make install
 cd ..
 cd $PROJECT
 
-DEPS="strusBase strus strusAnalyzer strusTrace strusModule"
+DEPS="strusBase strus strusAnalyzer strusTrace strusModule strusRpc strusBindings"
 if test "x$STRUS_WITH_PATTERN" = "xYES"; then
 	DEPS="$DEPS strusPattern"
 fi
