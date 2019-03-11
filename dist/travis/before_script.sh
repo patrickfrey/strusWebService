@@ -12,19 +12,25 @@ case $OS in
 		sudo apt-get update -qq
 		sudo apt-get install -y --force-yes \
 			cmake \
-			libboost-all-dev \
 			libleveldb-dev \
 			libcurl4-openssl-dev \
 			zlib1g-dev \
 			libpcre3-dev
 		;;
+		# Boost 1.58
+		sudo add-apt-repository -y ppa:kojoley/boost
+		sudo apt-get -q update
+		sudo apt-get install libboost-atomic1.58-dev libboost-thread1.58-dev libboost-system1.58-dev libboost-filesystem1.58-dev libboost-regex1.58-dev
+
+		if test "x$STRUS_WITH_VECTOR" = "xYES"; then
+			sudo apt-get install -y libatlas-dev liblapack-dev libblas-dev libarmadillo-dev
+		fi
+		if test "x$STRUS_WITH_PATTERN" = "xYES"; then
+			sudo apt-get install -y libtre-dev ragel
+		fi
 
 	Darwin)
 		brew update
-		if test "X$CC" = "Xgcc"; then
-			brew install gcc48 --enable-all-languages || true
-			brew link --force gcc48 || true
-		fi
 		brew install \
 			cmake \
 			boost \
@@ -38,15 +44,13 @@ case $OS in
 		brew link --force gettext || true
 		brew link leveldb || true
 		brew link snappy || true
-		# rebuild leveldb to use gcc-4.8 ABI on OSX (libstc++ differs
-		# from stdc++, leveldb uses std::string in API functions, C
-		# libraries like gettext and snappy and even boost do not 
-		# have this problem)
-		if test "X$CC" = "Xgcc"; then
-			brew reinstall leveldb --cc=gcc-4.8
+		if test "x$STRUS_WITH_VECTOR" = "xYES"; then
+			brew install lapack openblas armadillo || true
+		fi
+		if test "x$STRUS_WITH_PATTERN" = "xYES"; then
+			brew install tre ragel
 		fi
 		;;
-	
 	*)
 		echo "ERROR: unknown operating system '$OS'."
 		;;
