@@ -26,7 +26,13 @@ link_directories(
 add_cppcheck( strusWebService ${source_files} )
 
 add_executable( strusWebService ${source_files})
-target_link_libraries( strusWebService ${Boost_LIBRARIES} ${LIBCPPCMS_LIBRARY} ${LIBBOOSTER_LIBRARY} strus_webrequest strus_bindings strus_bindings_description strus_error strus_base strus_module ${Boost_LIBRARIES} )
+target_link_libraries( strusWebService ${Boost_LIBRARIES} ${LIBCPPCMS_LIBRARY} ${LIBBOOSTER_LIBRARY} strus_webrequest strus_bindings strus_bindings_description strus_error strus_base strus_module ${Boost_LIBRARIES} ${Intl_LIBRARIES} )
+
+# FreeBSD needs kernel data access library for libuv (-libkvm)
+find_library( LIBKVM_LIBRARIES kvm )
+if(LIBKVM_LIBRARIES)
+	target_link_libraries( strusWebService ${LIBKVM_LIBRARIES} )
+endif()
 
 install( TARGETS strusWebService RUNTIME DESTINATION sbin )
 
