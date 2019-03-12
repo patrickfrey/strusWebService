@@ -9,7 +9,10 @@ set( source_files
 
 include_directories(
 	"${Boost_INCLUDE_DIRS}"
+	"${strusbase_INCLUDE_DIRS}"
 	"${strus_INCLUDE_DIRS}"
+	"${strusmodule_INCLUDE_DIRS}"
+	"${strusbindings_INCLUDE_DIRS}"
 	"${WEBSERVICE_SOURCE_DIRS}"
 	"${LIBBOOSTER_INCLUDE_DIR}"
 	"${LIBCPPCMS_INCLUDE_DIR}"
@@ -17,9 +20,9 @@ include_directories(
 
 link_directories(
 	"${Boost_LIBRARY_DIRS}"
-	"${strusbindings_LIBRARY_DIRS}"
-	"${strusmodule_LIBRARY_DIRS}"
 	"${strusbase_LIBRARY_DIRS}"
+	"${strusmodule_LIBRARY_DIRS}"
+	"${strusbindings_LIBRARY_DIRS}"
 	"${WEBSERVICE_LIBRARY_DIRS}"
 )
 
