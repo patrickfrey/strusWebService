@@ -9,7 +9,7 @@ OSX
 
 # 2.1) Install required packages:
 
-brew install cmake boost snappy leveldb cppcms
+brew install cmake boost snappy leveldb
 
 # 2.2) Install packages required if strus vector is used:
 
@@ -26,7 +26,9 @@ ln -s /usr/local/opt/gettext/lib/* /usr/local/lib/.
 ln -s /usr/local/opt/gettext/include/* /usr/local/include/.
 ln -s /usr/local/opt/gettext/bin/* /usr/local/bin/.
 
-# 4) Build dependent strus packages
+# 4.1) Build and install cppcms version 1.0.5 from source
+
+# 4.2) Build dependent strus packages
 # See installation of projects strusBase,strusAnalyzer,strusPattern,strusVector,strusRpc,strusTrace,strusModule,strusBindings
 
 # 5) Then build the strusWebservice as follows
