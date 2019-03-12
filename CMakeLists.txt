@@ -26,6 +26,7 @@ include( cmake/libdl.cmake )
 include( cmake/report_build_settings.cmake )
 include( cmake/cppcheck.cmake )
 include( cmake/find_strus_package.cmake )
+include( cmake/destination.cmake )
 endif(NOT STRUS_ALL)
 
 find_strus_package( base )
@@ -52,6 +53,8 @@ set( STRUS_GETTEXT_PACKAGE "strus-dom" )	#... 1st parameter of bindtextdomain(..
 set( STRUS_GETTEXT_LOCALEDIR "" )			#... 2nd parameter of bindtextdomain(...)
 
 configure_file( "${PROJECT_SOURCE_DIR}/config.js.in"  "${CMAKE_CURRENT_BINARY_DIR}/config.js"  @ONLY )
+install( FILES "${CMAKE_CURRENT_BINARY_DIR}/config.js" DESTINATION "${STRUS_DESTINATION_CONFIG}" COMPONENT config )
+
 configure_file( "${PROJECT_SOURCE_DIR}/src/versionWebService.hpp.in"  "${CMAKE_CURRENT_BINARY_DIR}/src/versionWebService.hpp"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/src/internationalization.cpp.in"  "${CMAKE_CURRENT_BINARY_DIR}/src/internationalization.cpp"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/dist/obs/deploy_to_obs.sh.in"  "${PROJECT_SOURCE_DIR}/dist/obs/deploy_to_obs.sh"  @ONLY )
