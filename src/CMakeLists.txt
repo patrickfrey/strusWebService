@@ -19,6 +19,7 @@ include_directories(
 	"${WEBSERVICE_SOURCE_DIRS}"
 	"${LIBBOOSTER_INCLUDE_DIR}"
 	"${LIBCPPCMS_INCLUDE_DIR}"
+	"${Intl_INCLUDE_DIRS}"
 )
 
 link_directories(

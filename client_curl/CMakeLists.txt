@@ -10,6 +10,7 @@ include_directories(
 	"${strusbindings_INCLUDE_DIRS}"
 	"${WEBSERVICE_SOURCE_DIRS}"
 	"${CURL_INCLUDE_DIRS}"
+	"${Intl_INCLUDE_DIRS}"
 )
 
 link_directories(
