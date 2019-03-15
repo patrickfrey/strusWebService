@@ -112,7 +112,7 @@ void Application::report_error( int httpstatus, int apperrorcode, const char* me
 {
 	if (message)
 	{
-		response().status( httpstatus, message);
+		response().status( httpstatus);
 		if (apperrorcode > 0)
 		{
 			BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << "(status " << httpstatus << ", apperr " << apperrorcode << ") " << message;
@@ -121,6 +121,7 @@ void Application::report_error( int httpstatus, int apperrorcode, const char* me
 		{
 			BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << "(status " << httpstatus << ") " << message;
 		}
+		response().out() << message << std::endl << std::flush;
 	}
 	else
 	{
@@ -133,6 +134,7 @@ void Application::report_error( int httpstatus, int apperrorcode, const char* me
 		{
 			BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << "(status " << httpstatus << ")";
 		}
+		response().out() << response().status_to_string( httpstatus) << std::endl << std::flush;
 	}
 	response().finalize();
 }
@@ -226,7 +228,7 @@ bool Application::handle_preflight_cors()
 		// no CORS configured
 		return true;
 	}
-	std::string origin = request( ).getenv( "HTTP_ORIGIN" );
+	std::string origin = request().getenv( "HTTP_ORIGIN" );
 	if (origin.empty()) return true; // ... no Origin header, let's assume we can continue
 
 	if (m_service->has_preflight_cors_origin( origin))
@@ -234,11 +236,11 @@ bool Application::handle_preflight_cors()
 		// though Access-Control-Allow-Origin should allow a
 		// list of space separated hosts, in practive only
 		// echoing the origin Origin host works
-		response( ).content_type( "application/json" );
-		response( ).set_header( "Access-Control-Allow-Method", "GET, POST" );
-		response( ).set_header( "Access-Control-Allow-Origin", origin );
-		response( ).set_header( "Access-Control-Allow-Headers", "content-type" );
-		response( ).set_header( "Access-Control-Max-Age", m_service->cors_age());
+		response().content_type( "application/json" );
+		response().set_header( "Access-Control-Allow-Method", "GET, POST" );
+		response().set_header( "Access-Control-Allow-Origin", origin );
+		response().set_header( "Access-Control-Allow-Headers", "content-type" );
+		response().set_header( "Access-Control-Max-Age", m_service->cors_age());
 		return true;
 	}
 	return false;

@@ -100,7 +100,7 @@ struct Request
 			std::string output;
 			set_curl_opt( curl, CURLOPT_WRITEDATA, &response.content);
 			set_curl_opt( curl, CURLOPT_WRITEFUNCTION, write_callback); 
-			set_curl_opt( curl, CURLOPT_FAILONERROR, 1);
+			set_curl_opt( curl, CURLOPT_FAILONERROR, 0);
 			set_curl_opt( curl, CURLOPT_ERRORBUFFER, response.errbuf);
 			set_curl_opt( curl, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_1_1);
 	
@@ -183,12 +183,12 @@ struct RequestInput
 			}
 			if (!response.content.empty())
 			{
-				resout << response.content << std::endl << std::endl;
+				resout << response.content << "\n" << std::endl;
 			}
 		}
 		else
 		{
-			errout << "failed to issue request: " << curl_easy_strerror(res) << std::endl;
+			errout << "failed to issue request: " << curl_easy_strerror(res) << "\n" << response.content << std::endl;
 		}
 		return rt;
 	}

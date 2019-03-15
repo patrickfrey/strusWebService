@@ -35,7 +35,6 @@
 		"cors" : {
 			"enable" : true,
 			"allowed_origins" : [
-				"http://eeepc.lan:1313",
 				"http://localhost:1313"
 			],
 			"age" : 10

@@ -1,0 +1,24 @@
+[Document]
+	doc = /LEWIS/REUTERS;
+
+[Attribute]
+	title = text content /LEWIS/REUTERS/TEXT/TITLE();
+	docid = regex(".*","reuters-$0") content /LEWIS/REUTERS@NEWID;
+	date = text content /LEWIS/REUTERS/DATE();
+
+[SearchIndex]
+	topic = lc content /LEWIS/REUTERS/TOPICS//();
+	para = orig word /LEWIS/REUTERS/TEXT/BODY;
+	stem = convdia("en"):stem("en"):lc:text word /LEWIS/REUTERS/TEXT/TITLE();
+	stem = convdia("en"):stem("en"):lc:text word /LEWIS/REUTERS/TEXT/BODY();
+	punctuation = orig punctuation("en") /LEWIS/REUTERS/TEXT/BODY();
+
+[ForwardIndex]
+	orig = text word /LEWIS/REUTERS/TEXT/TITLE();
+	orig = text word /LEWIS/REUTERS/TEXT/BODY();
+
+[Aggregator]
+	doclen = count( stem);
+
+
+
