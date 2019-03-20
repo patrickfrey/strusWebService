@@ -23,13 +23,13 @@ for dd in `find tests/data/reuters/doc/ -name "*.xml"`; do
 	echo "--- Collect statistics $dd ---"
 	curl -d "@$dd" -i -H "Accept: text/plain" -H "Content-Type: application/xml; charset=UTF-8" -X PUT "$TRANSACTION"
 done
-echo $TRANSACTION
+echo "transaction identifier: $TRANSACTION"
 
 echo "--- Create analyzer ---"
 curl -d "@examples/docanalyzer.json" -i -H "Accept: text/plain" -H "Content-Type: application/json; charset=UTF-8" -X PUT "$SERVER/docanalyzer/reuters"
 
 echo "--- Create storage ---"
-curl -d "@examples/storage.json" -i -H "Accept: text/plain" -H "Content-Type: application/json; charset=UTF-8" -X PUT "$SERVER/storage/reuters"
+curl -d "@examples/storage.json" -i -H "Accept: text/plain" -H "Content-Type: application/json; charset=UTF-8" -X POST "$SERVER/storage/reuters"
 
 echo "--- Create inserter ---"
 curl -d "@examples/inserter.json" -i -H "Accept: text/plain" -H "Content-Type: application/json; charset=UTF-8" -X PUT "$SERVER/inserter/reuters"
