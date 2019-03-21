@@ -43,6 +43,8 @@ public:
 		clear();
 	}
 
+	static bool storeSchemaDescriptions( const cppcms::json::value& config, const std::string& dir, const std::string& doctype);
+
 	//\brief Create service, logging and command handler
 	void init( const cppcms::json::value& config, bool verbose);
 

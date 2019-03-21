@@ -41,21 +41,37 @@ if(LIBKVM_LIBRARIES)
 	target_link_libraries( strusWebService ${LIBKVM_LIBRARIES} )
 endif()
 
-install( TARGETS strusWebService RUNTIME DESTINATION sbin )
 
-ADD_CUSTOM_TARGET(run @echo runs the web service)
+# Custom targets and post build declarations:
+ADD_CUSTOM_TARGET( run )
 ADD_CUSTOM_COMMAND(
 	COMMENT "run"
 	COMMAND strusWebService
-	ARGS -v -c ${PROJECT_SOURCE_DIR}/config.js
+	ARGS -V -c ${WEBSERVICE_CONFIG_DIR}/config.js
 	TARGET run
 )
 
-ADD_CUSTOM_TARGET(debugrun @echo runs the web service in debugger)
+ADD_CUSTOM_TARGET( debugrun )
 ADD_CUSTOM_COMMAND(
 	COMMENT "debugrun"
 	COMMAND gdb
-	ARGS --args strusWebService -v -c ${PROJECT_SOURCE_DIR}/config.js
+	ARGS --args strusWebService -V -c ${WEBSERVICE_CONFIG_DIR}/config.js
 	TARGET debugrun
 )
+
+ADD_CUSTOM_COMMAND( 
+	 TARGET strusWebService POST_BUILD  
+	 COMMAND strusWebService
+	 ARGS  -M "XML:schema"
+	 COMMENT "webrequest schemas" VERBATIM )
+
+
+# Installation:
+install( TARGETS strusWebService
+           RUNTIME DESTINATION sbin )
+
+install( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/schema
+           DESTINATION share/strus/webservice/schema
+           FILES_MATCHING PATTERN "*.xsd")
+
 

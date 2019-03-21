@@ -52,6 +52,14 @@ MESSAGE( STATUS  "Strus module path: ${STRUS_MODULE_PATH}" )
 set( STRUS_GETTEXT_PACKAGE "strus-dom" )	#... 1st parameter of bindtextdomain(...)
 set( STRUS_GETTEXT_LOCALEDIR "" )			#... 2nd parameter of bindtextdomain(...)
 
+# Path declarations
+set( WEBSERVICE_SOURCE_DIRS                 "${CMAKE_CURRENT_BINARY_DIR}/src"  "${PROJECT_SOURCE_DIR}/src" )
+set( WEBSERVICE_LIBRARY_DIRS                 "${CMAKE_CURRENT_BINARY_DIR}/src" )
+set( WEBSERVICE_GEN_SOURCE_DIR          "${CMAKE_CURRENT_BINARY_DIR}/src" )
+set( WEBSERVICE_CONFIG_DIR                    "${CMAKE_CURRENT_BINARY_DIR}" )
+
+
+# Configure files
 configure_file( "${PROJECT_SOURCE_DIR}/config.js.in"  "${CMAKE_CURRENT_BINARY_DIR}/config.js"  @ONLY )
 install( FILES "${CMAKE_CURRENT_BINARY_DIR}/config.js" DESTINATION "${STRUS_DESTINATION_CONFIG}" COMPONENT config )
 
@@ -67,11 +75,6 @@ configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-RHEL.in"
 configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-SUSE.in"  "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-SUSE"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-SLES11.in"  "${PROJECT_SOURCE_DIR}/dist/redhat/strusWebService.conf-SLES11"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/dist/debian/strusWebService.conf.in"  "${PROJECT_SOURCE_DIR}/dist/debian/strusWebService.conf"  @ONLY )
-
-# Path declarations
-set( WEBSERVICE_SOURCE_DIRS          "${CMAKE_CURRENT_BINARY_DIR}/src"  "${PROJECT_SOURCE_DIR}/src" )
-set( WEBSERVICE_LIBRARY_DIRS          "${CMAKE_CURRENT_BINARY_DIR}/src" )
-set( WEBSERVICE_GEN_SOURCE_DIR   "${CMAKE_CURRENT_BINARY_DIR}/src" )
 
 add_subdirectory( 3rdParty/curlpp )
 enable_testing( )

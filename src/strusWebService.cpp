@@ -47,7 +47,7 @@ using namespace strus::webservice;
 
 // Global flags:
 static bool g_verbose = false;
-static bool g_normal_termination = false;
+static bool g_normal_termination = true;
 
 static strus::AtomicFlag g_terminate;
 static strus::AtomicFlag g_got_sighup;
@@ -135,6 +135,9 @@ static void printUsage()
 	std::cout << "    " << _TXT("Define the web service configuration file as <CONFIG>") << std::endl;
 	std::cout << "-V|--verbose" << std::endl;
 	std::cout << "    " << _TXT("Do verbose logging and output") << std::endl;
+	std::cout << "-M|--schema <TYPE>:<DIR>" << std::endl;
+	std::cout << "    " << _TXT("Do nothing but write the schemas of type <TYPE> ('xml' or 'json')") << std::endl;
+	std::cout << "    " << _TXT("to the directory specified by <DIR>") << std::endl;
 }
 
 static std::string beautifyErrorMessage( const std::string& msg)
@@ -212,8 +215,8 @@ int main( int argc_, const char *argv_[] )
 
 		// Define configuration and usage:
 		strus::ProgramOptions opt(
-				errorhnd.get(), argc_, argv_, 5,
-				"h,help", "v,version", "c,config:", "V,verbose", "license");
+				errorhnd.get(), argc_, argv_, 6,
+				"h,help", "v,version", "M,schema:" ,"c,config:", "V,verbose", "license");
 		if (errorhnd->hasError())
 		{
 			throw strus::runtime_error(_TXT("failed to parse program arguments"));
@@ -247,12 +250,36 @@ int main( int argc_, const char *argv_[] )
 			printVersion();
 			return rt;
 		}
+		if (opt("schema"))
+		{
+			std::string schemadef = opt["schema"];
+			char const* dirstart = std::strchr( schemadef.c_str(), ':');
+			std::string doctype;
+			if (!dirstart)
+			{
+				dirstart = schemadef.c_str();
+				doctype = "XML";
+			}
+			else
+			{
+				doctype = std::string( schemadef.c_str(), dirstart - schemadef.c_str());
+				++dirstart;
+			}
+			std::string dir( dirstart);
+
+			if (!ServiceClosure::storeSchemaDescriptions( config, dir, doctype))
+			{
+				rt = -1;
+			}
+			return rt;
+		}
 		if (printUsageAndExit)
 		{
 			printUsage();
 			return rt;
 		}
-
+		g_normal_termination = false;
+		
 		// Install signal handlers
 		signal( SIGHUP, signal_handler );
 

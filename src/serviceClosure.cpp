@@ -42,6 +42,29 @@ static bool url_has_protocol_prefix( const std::string& url)
 	return *si == ':';
 }
 
+bool ServiceClosure::storeSchemaDescriptions( const cppcms::json::value& config, const std::string& dir, const std::string& doctype)
+{
+	ErrorBufferInterface* errorhnd = 0;
+	bool rt = false;
+	try
+	{
+		errorhnd = strus::createErrorBuffer_standard( NULL, 1, NULL);
+		if (!errorhnd) throw std::runtime_error( _TXT( "error creating error handler"));
+		std::string configstr( config.save());
+		rt = storeWebRequestSchemaDescriptions( configstr, dir, doctype, errorhnd);
+	}
+	catch (const std::bad_alloc& err)
+	{
+		std::cerr << _TXT("out of memory to writing schema descriptions") << std::endl;
+	}
+	catch (const std::runtime_error& err)
+	{
+		std::cerr << _TXT("failed to write schema descriptions: ") << err.what() << std::endl;
+	}
+	if (errorhnd) delete errorhnd;
+	return rt;
+}
+		
 void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 {
 	try
@@ -70,6 +93,7 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 		}
 		DebugTraceInterface* dbgtrace = strus::createDebugTrace_standard( nofThreads+1);
 		m_errorhnd = strus::createErrorBuffer_standard( NULL, nofThreads+1, dbgtrace);
+		if (!m_errorhnd) throw std::runtime_error( _TXT( "error creating error handler"));
 		m_put_configdir = config.get( "data.configdir", DefaultConstants::DefaultConstants::AUTOSAVE_CONFIG_DIR());
 		m_http_server_name = config.get( "http.server", DefaultConstants::DefaultConstants::HTTP_SERVER_NAME());
 		m_http_script_name = config.get( "http.script", DefaultConstants::DefaultConstants::HTTP_SCRIPT_NAME());
