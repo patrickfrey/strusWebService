@@ -71,7 +71,7 @@ install( TARGETS strusWebService
            RUNTIME DESTINATION sbin )
 
 install( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/schema
-           DESTINATION share/strus/webservice/schema
+           DESTINATION share/strus/webservice
            FILES_MATCHING PATTERN "*.xsd")
 
 
