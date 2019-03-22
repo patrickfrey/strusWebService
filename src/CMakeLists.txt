@@ -63,8 +63,13 @@ ADD_CUSTOM_COMMAND(
 	 TARGET strusWebService POST_BUILD  
 	 COMMAND strusWebService
 	 ARGS  -M "XML:schema"
-	 COMMENT "webrequest schemas" VERBATIM )
+	 COMMENT "webrequest XML schemas" VERBATIM )
 
+ADD_CUSTOM_COMMAND( 
+	 TARGET strusWebService POST_BUILD  
+	 COMMAND strusWebService
+	 ARGS  -M "JSON:schema"
+	 COMMENT "webrequest JSON schemas" VERBATIM )
 
 # Installation:
 install( TARGETS strusWebService
@@ -73,5 +78,8 @@ install( TARGETS strusWebService
 install( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/schema
            DESTINATION share/strus/webservice
            FILES_MATCHING PATTERN "*.xsd")
+install( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/schema
+           DESTINATION share/strus/webservice
+           FILES_MATCHING PATTERN "*.jsd")
 
 
