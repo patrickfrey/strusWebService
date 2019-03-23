@@ -1,0 +1,70 @@
+{
+  "extensions": {
+    "type":"object",
+    "required":"true",
+    "properties": {
+        "directory": {
+          "type":"string",
+          "required":"true"
+        },
+        "modules": {
+          "type":"string",
+          "required":"true"
+        }
+    }
+  },
+  "data": {
+    "type":"object",
+    "required":"true",
+    "properties": {
+        "workdir": {
+          "type":"string",
+          "required":"true"
+        },
+        "resources": {
+          "type":"string",
+          "required":"true"
+        }
+    }
+  },
+  "context": {
+    "type":"object",
+    "required":"true",
+    "properties": {
+        "trace": {
+          "type":"object",
+          "required":"false",
+          "properties": {
+              "log": {
+                "type":"string",
+                "required":"true"
+              },
+              "file": {
+                "type":"string",
+                "required":"true"
+              },
+              "groupby": {
+                "type":"string",
+                "required":"false"
+              },
+              "call": {
+                "type":"string",
+                "required":"false"
+              },
+              "count": {
+                "type":"string",
+                "required":"false"
+              }
+          }
+        },
+        "rpc": {
+          "type":"string",
+          "required":"true"
+        },
+        "threads": {
+          "type":"number",
+          "required":"false"
+        }
+    }
+  }
+}

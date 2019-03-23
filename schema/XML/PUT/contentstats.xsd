@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:element name="library" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="attribute" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="select" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="element" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="type" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="regex" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="priority" type="xs:integer minOccurs="1" maxOccurs="1""/>
+<xs:element name="minlen" type="xs:integer minOccurs="1" maxOccurs="1""/>
+<xs:element name="maxlen" type="xs:integer minOccurs="1" maxOccurs="1""/>
+<xs:element name="tokenizer" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="arg" type="xs:unknown minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="normalizer" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="arg" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+</xs:any>
+</xs:complexType>
+</xs:element>
+</xs:any>
+</xs:complexType>
+</xs:element>
+</xs:schema>

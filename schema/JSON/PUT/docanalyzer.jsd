@@ -1,0 +1,572 @@
+{
+  "docanalyzer": {
+    "type":"object",
+    "required":"true",
+    "properties": {
+        "class": {
+          "type":"object",
+          "required":"true",
+          "properties": {
+              "segmenter": {
+                "type":"string",
+                "required":"true"
+              },
+              "mimetype": {
+                "type":"string",
+                "required":"false"
+              },
+              "encoding": {
+                "type":"string",
+                "required":"false"
+              },
+              "schema": {
+                "type":"string",
+                "required":"false"
+              }
+          }
+        },
+        "feature": {
+          "type":"object",
+          "required":"true",
+          "properties": {
+              "search": {
+                "type":"object",
+                "required":"true",
+                "properties": {
+                    "type": {
+                      "type":"string",
+                      "required":"true"
+                    },
+                    "select": {
+                      "type":"string",
+                      "required":"true"
+                    },
+                    "tokenizer": {
+                      "type":"object",
+                      "required":"true",
+                      "properties": {
+                          "name": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "arg": {
+                            "type":"string",
+                            "required":"true"
+                          }
+                      }
+                    },
+                    "normalizer": {
+                      "type":"object",
+                      "required":"true",
+                      "properties": {
+                          "name": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "arg": {
+                            "type":"string",
+                            "required":"true"
+                          }
+                      }
+                    },
+                    "option": {
+                      "type":"object",
+                      "required":"true",
+                      "properties": {
+                          "position": {
+                            "type":"string",
+                            "required":"true"
+                          }
+                      }
+                    }
+                }
+              },
+              "forward": {
+                "type":"object",
+                "required":"true",
+                "properties": {
+                    "type": {
+                      "type":"string",
+                      "required":"true"
+                    },
+                    "select": {
+                      "type":"string",
+                      "required":"true"
+                    },
+                    "tokenizer": {
+                      "type":"object",
+                      "required":"true",
+                      "properties": {
+                          "name": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "arg": {
+                            "type":"string",
+                            "required":"true"
+                          }
+                      }
+                    },
+                    "normalizer": {
+                      "type":"object",
+                      "required":"true",
+                      "properties": {
+                          "name": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "arg": {
+                            "type":"string",
+                            "required":"true"
+                          }
+                      }
+                    },
+                    "option": {
+                      "type":"object",
+                      "required":"true",
+                      "properties": {
+                          "position": {
+                            "type":"string",
+                            "required":"true"
+                          }
+                      }
+                    }
+                }
+              },
+              "metadata": {
+                "type":"object",
+                "required":"true",
+                "properties": {
+                    "type": {
+                      "type":"string",
+                      "required":"true"
+                    },
+                    "select": {
+                      "type":"string",
+                      "required":"true"
+                    },
+                    "tokenizer": {
+                      "type":"object",
+                      "required":"true",
+                      "properties": {
+                          "name": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "arg": {
+                            "type":"string",
+                            "required":"true"
+                          }
+                      }
+                    },
+                    "normalizer": {
+                      "type":"object",
+                      "required":"true",
+                      "properties": {
+                          "name": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "arg": {
+                            "type":"string",
+                            "required":"true"
+                          }
+                      }
+                    }
+                }
+              },
+              "attribute": {
+                "type":"object",
+                "required":"true",
+                "properties": {
+                    "type": {
+                      "type":"string",
+                      "required":"true"
+                    },
+                    "select": {
+                      "type":"string",
+                      "required":"true"
+                    },
+                    "tokenizer": {
+                      "type":"object",
+                      "required":"true",
+                      "properties": {
+                          "name": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "arg": {
+                            "type":"string",
+                            "required":"true"
+                          }
+                      }
+                    },
+                    "normalizer": {
+                      "type":"object",
+                      "required":"true",
+                      "properties": {
+                          "name": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "arg": {
+                            "type":"string",
+                            "required":"true"
+                          }
+                      }
+                    }
+                }
+              },
+              "lexem": {
+                "type":"object",
+                "required":"true",
+                "properties": {
+                    "type": {
+                      "type":"string",
+                      "required":"true"
+                    },
+                    "select": {
+                      "type":"string",
+                      "required":"true"
+                    },
+                    "tokenizer": {
+                      "type":"object",
+                      "required":"true",
+                      "properties": {
+                          "name": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "arg": {
+                            "type":"string",
+                            "required":"true"
+                          }
+                      }
+                    },
+                    "normalizer": {
+                      "type":"object",
+                      "required":"true",
+                      "properties": {
+                          "name": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "arg": {
+                            "type":"string",
+                            "required":"true"
+                          }
+                      }
+                    }
+                }
+              },
+              "aggregate": {
+                "type":"object",
+                "required":"true",
+                "properties": {
+                    "type": {
+                      "type":"string",
+                      "required":"true"
+                    },
+                    "function": {
+                      "type":"object",
+                      "required":"true",
+                      "properties": {
+                          "name": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "arg": {
+                            "type":"string",
+                            "required":"true"
+                          }
+                      }
+                    }
+                }
+              },
+              "pattern": {
+                "type":"object",
+                "required":"true",
+                "properties": {
+                    "search": {
+                      "type":"object",
+                      "required":"true",
+                      "properties": {
+                          "type": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "pattern": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "normalizer": {
+                            "type":"object",
+                            "required":"true",
+                            "properties": {
+                                "name": {
+                                  "type":"string",
+                                  "required":"true"
+                                },
+                                "arg": {
+                                  "type":"string",
+                                  "required":"true"
+                                }
+                            }
+                          },
+                          "option": {
+                            "type":"object",
+                            "required":"true",
+                            "properties": {
+                                "position": {
+                                  "type":"string",
+                                  "required":"true"
+                                }
+                            }
+                          }
+                      }
+                    },
+                    "forward": {
+                      "type":"object",
+                      "required":"true",
+                      "properties": {
+                          "type": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "pattern": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "normalizer": {
+                            "type":"object",
+                            "required":"true",
+                            "properties": {
+                                "name": {
+                                  "type":"string",
+                                  "required":"true"
+                                },
+                                "arg": {
+                                  "type":"string",
+                                  "required":"true"
+                                }
+                            }
+                          },
+                          "option": {
+                            "type":"object",
+                            "required":"true",
+                            "properties": {
+                                "position": {
+                                  "type":"string",
+                                  "required":"true"
+                                }
+                            }
+                          }
+                      }
+                    },
+                    "metadata": {
+                      "type":"object",
+                      "required":"true",
+                      "properties": {
+                          "type": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "pattern": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "normalizer": {
+                            "type":"object",
+                            "required":"true",
+                            "properties": {
+                                "name": {
+                                  "type":"string",
+                                  "required":"true"
+                                },
+                                "arg": {
+                                  "type":"string",
+                                  "required":"true"
+                                }
+                            }
+                          }
+                      }
+                    },
+                    "attribute": {
+                      "type":"object",
+                      "required":"true",
+                      "properties": {
+                          "type": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "pattern": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "normalizer": {
+                            "type":"object",
+                            "required":"true",
+                            "properties": {
+                                "name": {
+                                  "type":"string",
+                                  "required":"true"
+                                },
+                                "arg": {
+                                  "type":"string",
+                                  "required":"true"
+                                }
+                            }
+                          }
+                      }
+                    }
+                }
+              }
+          }
+        },
+        "postmatcher": {
+          "type":"object",
+          "required":"true",
+          "properties": {
+              "name": {
+                "type":"string",
+                "required":"true"
+              },
+              "module": {
+                "type":"string",
+                "required":"true"
+              },
+              "lexem": {
+                "type":"string",
+                "required":"true"
+              },
+              "pattern": {
+                "type":"object",
+                "required":"true",
+                "properties": {
+                    "name": {
+                      "type":"string",
+                      "required":"true"
+                    },
+                    "visible": {
+                      "type":"boolean",
+                      "required":"true"
+                    }
+                }
+              }
+          }
+        },
+        "subdoc": {
+          "type":"object",
+          "required":"true",
+          "properties": {
+              "name": {
+                "type":"string",
+                "required":"true"
+              },
+              "select": {
+                "type":"string",
+                "required":"true"
+              }
+          }
+        },
+        "subcontent": {
+          "type":"object",
+          "required":"true",
+          "properties": {
+              "select": {
+                "type":"string",
+                "required":"true"
+              },
+              "class": {
+                "type":"object",
+                "required":"true",
+                "properties": {
+                    "segmenter": {
+                      "type":"string",
+                      "required":"true"
+                    },
+                    "mime": {
+                      "type":"string",
+                      "required":"false"
+                    },
+                    "encoding": {
+                      "type":"string",
+                      "required":"false"
+                    }
+                }
+              }
+          }
+        }
+    }
+  },
+  "term": {
+    "type":"object",
+    "required":"true",
+    "properties": {
+        "variable": {
+          "type":"string",
+          "required":"true"
+        },
+        "type": {
+          "type":"string",
+          "required":"false"
+        },
+        "value": {
+          "type":"string",
+          "required":"true"
+        }
+    }
+  },
+  "expr": {
+    "type":"object",
+    "required":"true",
+    "properties": {
+        "variable": {
+          "type":"string",
+          "required":"true"
+        },
+        "op": {
+          "type":"string",
+          "required":"false"
+        },
+        "range": {
+          "type":"number",
+          "required":"true"
+        },
+        "cardinality": {
+          "type":"array",
+          "items": {
+            "type":"number"
+          }
+        },
+        "arg": {
+          "type":"object",
+          "required":"false",
+          "properties": {
+            "anyOf": [
+                "expr": {
+                  "$ref":"#/expr",
+                  "required":"true"
+                },
+                "term": {
+                  "$ref":"#/term",
+                  "required":"true"
+                }
+            ]
+          }
+        },
+        "expr": {
+          "type":"array",
+          "items": {
+            "$ref":"#/expr"
+        }
+        },
+        "term": {
+          "type":"array",
+          "items": {
+            "$ref":"#/term"
+        }
+        }
+    }
+  }
+}

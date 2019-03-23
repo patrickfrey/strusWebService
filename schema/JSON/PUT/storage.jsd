@@ -1,0 +1,32 @@
+{
+  "storage": {
+    "type":"object",
+    "required":"true",
+    "properties": {
+        "path": {
+          "type":"string",
+          "required":"true"
+        },
+        "cachedterms": {
+          "type":"string",
+          "required":"true"
+        },
+        "cache": {
+          "type":"string",
+          "required":"false"
+        },
+        "max_open_files": {
+          "type":"number",
+          "required":"false"
+        },
+        "write_buffer_size": {
+          "type":"string",
+          "required":"false"
+        },
+        "block_size": {
+          "type":"string",
+          "required":"false"
+        }
+    }
+  }
+}

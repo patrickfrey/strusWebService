@@ -1,0 +1,70 @@
+{
+  "library": {
+    "type":"object",
+    "required":"true",
+    "properties": {
+        "attribute": {
+          "type":"string",
+          "required":"true"
+        },
+        "select": {
+          "type":"string",
+          "required":"true"
+        },
+        "element": {
+          "type":"object",
+          "required":"true",
+          "properties": {
+              "type": {
+                "type":"string",
+                "required":"true"
+              },
+              "regex": {
+                "type":"string",
+                "required":"true"
+              },
+              "priority": {
+                "type":"number",
+                "required":"true"
+              },
+              "minlen": {
+                "type":"number",
+                "required":"true"
+              },
+              "maxlen": {
+                "type":"number",
+                "required":"true"
+              },
+              "tokenizer": {
+                "type":"object",
+                "required":"true",
+                "properties": {
+                    "name": {
+                      "type":"string",
+                      "required":"true"
+                    },
+                    "arg": {
+                      "type":"xs:unknown",
+                      "required":"true"
+                    }
+                }
+              },
+              "normalizer": {
+                "type":"object",
+                "required":"true",
+                "properties": {
+                    "name": {
+                      "type":"string",
+                      "required":"true"
+                    },
+                    "arg": {
+                      "type":"string",
+                      "required":"true"
+                    }
+                }
+              }
+          }
+        }
+    }
+  }
+}
