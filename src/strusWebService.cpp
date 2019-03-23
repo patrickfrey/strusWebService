@@ -267,6 +267,7 @@ int main( int argc_, const char *argv_[] )
 			}
 			std::string dir( dirstart);
 
+			std::cerr << "storing schema descriptions to " << dir << std::endl;
 			if (!ServiceClosure::storeSchemaDescriptions( config, dir, doctype))
 			{
 				rt = -1;
