@@ -8,24 +8,24 @@
           "required":"true"
         },
         "metadata": {
-          "type":"object",
-          "required":"false",
-          "properties": {
-              "name": {
-                "type":"string",
-                "required":"true"
-              },
-              "type": {
-                "type":"string",
-                "required":"true"
-              }
+          "type":"array",
+          "items": {
+            "type":"object",
+            "properties": {
+                "name": {
+                  "type":"string",
+                  "required":"true"
+                },
+                "type": {
+                  "type":"string",
+                  "required":"true"
+                }
+            }
           }
         },
         "acl": {
-          "type":"array",
-          "items": {
-            "type":"boolean"
-          }
+          "type":"boolean",
+          "required":"false"
         },
         "compression": {
           "type":"boolean",
@@ -33,7 +33,7 @@
         },
         "cachedterms": {
           "type":"string",
-          "required":"true"
+          "required":"false"
         },
         "cache": {
           "type":"string",

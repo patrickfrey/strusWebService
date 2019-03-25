@@ -320,8 +320,6 @@
 </xs:union>
 </xs:complexType>
 </xs:element>
-<xs:element ref="expression" minOccurs="0" maxOccurs="unbounded"/>
-<xs:element ref="term" minOccurs="0" maxOccurs="unbounded"/>
 </xs:any>
 </xs:complexType>
 </xs:element>

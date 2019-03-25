@@ -84,8 +84,10 @@
                             "required":"true"
                           },
                           "arg": {
-                            "type":"string",
-                            "required":"true"
+                            "type":"array",
+                            "items": {
+                              "type":"string"
+                            }
                           }
                       }
                     },
@@ -98,8 +100,10 @@
                             "required":"true"
                           },
                           "arg": {
-                            "type":"string",
-                            "required":"true"
+                            "type":"array",
+                            "items": {
+                              "type":"string"
+                            }
                           }
                       }
                     }
@@ -152,22 +156,18 @@
           "required":"true",
           "properties": {
               "union": {
-                "type":"object",
-                "required":"true",
-                "properties": {
-                    "condition": {
-                      "type":"array",
-                      "items": {
-                        "$ref":"#/condition"
-                    }
-                    }
-                }
-              },
-              "condition": {
                 "type":"array",
                 "items": {
-                  "$ref":"#/condition"
-              }
+                  "type":"object",
+                  "properties": {
+                      "condition": {
+                        "type":"array",
+                        "items": {
+                          "$ref":"#/condition"
+                      }
+                      }
+                  }
+                }
               }
           }
         },
@@ -201,11 +201,11 @@
     "properties": {
         "variable": {
           "type":"string",
-          "required":"true"
+          "required":"false"
         },
         "type": {
           "type":"string",
-          "required":"false"
+          "required":"true"
         },
         "value": {
           "type":"string",
@@ -213,55 +213,43 @@
         }
     }
   },
-  "expr": {
+  "expression": {
     "type":"object",
     "required":"true",
     "properties": {
         "variable": {
           "type":"string",
-          "required":"true"
+          "required":"false"
         },
         "op": {
           "type":"string",
-          "required":"false"
+          "required":"true"
         },
         "range": {
           "type":"number",
-          "required":"true"
+          "required":"false"
         },
         "cardinality": {
-          "type":"array",
-          "items": {
-            "type":"number"
-          }
+          "type":"number",
+          "required":"true"
         },
         "arg": {
-          "type":"object",
-          "required":"false",
-          "properties": {
-            "anyOf": [
-                "expr": {
-                  "$ref":"#/expr",
-                  "required":"true"
-                },
-                "term": {
-                  "$ref":"#/term",
-                  "required":"true"
-                }
-            ]
+          "type":"array",
+          "items": {
+            "type":"object",
+            "properties": {
+              "anyOf": [
+                  "expression": {
+                    "$ref":"#/expression",
+                    "required":"true"
+                  },
+                  "term": {
+                    "$ref":"#/term",
+                    "required":"true"
+                  }
+              ]
+            }
           }
-        },
-        "expr": {
-          "type":"array",
-          "items": {
-            "$ref":"#/expr"
-        }
-        },
-        "term": {
-          "type":"array",
-          "items": {
-            "$ref":"#/term"
-        }
         }
     }
   },
@@ -271,7 +259,7 @@
     "properties": {
         "from": {
           "type":"string",
-          "required":"true"
+          "required":"false"
         },
         "to": {
           "type":"string",
@@ -322,21 +310,23 @@
     }
   },
   "condition": {
-    "type":"object",
-    "required":"true",
-    "properties": {
-        "op": {
-          "type":"string",
-          "required":"true"
-        },
-        "name": {
-          "type":"string",
-          "required":"true"
-        },
-        "value": {
-          "type":"string",
-          "required":"true"
-        }
+    "type":"array",
+    "items": {
+      "type":"object",
+      "properties": {
+          "op": {
+            "type":"string",
+            "required":"true"
+          },
+          "name": {
+            "type":"string",
+            "required":"true"
+          },
+          "value": {
+            "type":"string",
+            "required":"true"
+          }
+      }
     }
   }
 }

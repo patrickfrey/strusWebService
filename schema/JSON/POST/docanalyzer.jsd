@@ -9,7 +9,7 @@
           "properties": {
               "segmenter": {
                 "type":"string",
-                "required":"true"
+                "required":"false"
               },
               "mimetype": {
                 "type":"string",
@@ -50,8 +50,10 @@
                             "required":"true"
                           },
                           "arg": {
-                            "type":"string",
-                            "required":"true"
+                            "type":"array",
+                            "items": {
+                              "type":"string"
+                            }
                           }
                       }
                     },
@@ -64,8 +66,10 @@
                             "required":"true"
                           },
                           "arg": {
-                            "type":"string",
-                            "required":"true"
+                            "type":"array",
+                            "items": {
+                              "type":"string"
+                            }
                           }
                       }
                     },
@@ -75,7 +79,7 @@
                       "properties": {
                           "position": {
                             "type":"string",
-                            "required":"true"
+                            "required":"false"
                           }
                       }
                     }
@@ -102,8 +106,10 @@
                             "required":"true"
                           },
                           "arg": {
-                            "type":"string",
-                            "required":"true"
+                            "type":"array",
+                            "items": {
+                              "type":"string"
+                            }
                           }
                       }
                     },
@@ -116,8 +122,10 @@
                             "required":"true"
                           },
                           "arg": {
-                            "type":"string",
-                            "required":"true"
+                            "type":"array",
+                            "items": {
+                              "type":"string"
+                            }
                           }
                       }
                     },
@@ -127,7 +135,7 @@
                       "properties": {
                           "position": {
                             "type":"string",
-                            "required":"true"
+                            "required":"false"
                           }
                       }
                     }
@@ -154,8 +162,10 @@
                             "required":"true"
                           },
                           "arg": {
-                            "type":"string",
-                            "required":"true"
+                            "type":"array",
+                            "items": {
+                              "type":"string"
+                            }
                           }
                       }
                     },
@@ -168,8 +178,10 @@
                             "required":"true"
                           },
                           "arg": {
-                            "type":"string",
-                            "required":"true"
+                            "type":"array",
+                            "items": {
+                              "type":"string"
+                            }
                           }
                       }
                     }
@@ -196,8 +208,10 @@
                             "required":"true"
                           },
                           "arg": {
-                            "type":"string",
-                            "required":"true"
+                            "type":"array",
+                            "items": {
+                              "type":"string"
+                            }
                           }
                       }
                     },
@@ -210,8 +224,10 @@
                             "required":"true"
                           },
                           "arg": {
-                            "type":"string",
-                            "required":"true"
+                            "type":"array",
+                            "items": {
+                              "type":"string"
+                            }
                           }
                       }
                     }
@@ -238,8 +254,10 @@
                             "required":"true"
                           },
                           "arg": {
-                            "type":"string",
-                            "required":"true"
+                            "type":"array",
+                            "items": {
+                              "type":"string"
+                            }
                           }
                       }
                     },
@@ -252,8 +270,10 @@
                             "required":"true"
                           },
                           "arg": {
-                            "type":"string",
-                            "required":"true"
+                            "type":"array",
+                            "items": {
+                              "type":"string"
+                            }
                           }
                       }
                     }
@@ -276,8 +296,10 @@
                             "required":"true"
                           },
                           "arg": {
-                            "type":"string",
-                            "required":"true"
+                            "type":"array",
+                            "items": {
+                              "type":"string"
+                            }
                           }
                       }
                     }
@@ -308,8 +330,10 @@
                                   "required":"true"
                                 },
                                 "arg": {
-                                  "type":"string",
-                                  "required":"true"
+                                  "type":"array",
+                                  "items": {
+                                    "type":"string"
+                                  }
                                 }
                             }
                           },
@@ -319,7 +343,7 @@
                             "properties": {
                                 "position": {
                                   "type":"string",
-                                  "required":"true"
+                                  "required":"false"
                                 }
                             }
                           }
@@ -346,8 +370,10 @@
                                   "required":"true"
                                 },
                                 "arg": {
-                                  "type":"string",
-                                  "required":"true"
+                                  "type":"array",
+                                  "items": {
+                                    "type":"string"
+                                  }
                                 }
                             }
                           },
@@ -357,7 +383,7 @@
                             "properties": {
                                 "position": {
                                   "type":"string",
-                                  "required":"true"
+                                  "required":"false"
                                 }
                             }
                           }
@@ -384,8 +410,10 @@
                                   "required":"true"
                                 },
                                 "arg": {
-                                  "type":"string",
-                                  "required":"true"
+                                  "type":"array",
+                                  "items": {
+                                    "type":"string"
+                                  }
                                 }
                             }
                           }
@@ -412,8 +440,10 @@
                                   "required":"true"
                                 },
                                 "arg": {
-                                  "type":"string",
-                                  "required":"true"
+                                  "type":"array",
+                                  "items": {
+                                    "type":"string"
+                                  }
                                 }
                             }
                           }
@@ -449,7 +479,7 @@
                     },
                     "visible": {
                       "type":"boolean",
-                      "required":"true"
+                      "required":"false"
                     }
                 }
               }
@@ -483,7 +513,7 @@
                 "properties": {
                     "segmenter": {
                       "type":"string",
-                      "required":"true"
+                      "required":"false"
                     },
                     "mime": {
                       "type":"string",
@@ -505,11 +535,11 @@
     "properties": {
         "variable": {
           "type":"string",
-          "required":"true"
+          "required":"false"
         },
         "type": {
           "type":"string",
-          "required":"false"
+          "required":"true"
         },
         "value": {
           "type":"string",
@@ -523,49 +553,37 @@
     "properties": {
         "variable": {
           "type":"string",
-          "required":"true"
+          "required":"false"
         },
         "op": {
           "type":"string",
-          "required":"false"
+          "required":"true"
         },
         "range": {
           "type":"number",
-          "required":"true"
+          "required":"false"
         },
         "cardinality": {
-          "type":"array",
-          "items": {
-            "type":"number"
-          }
+          "type":"number",
+          "required":"true"
         },
         "arg": {
-          "type":"object",
-          "required":"false",
-          "properties": {
-            "anyOf": [
-                "expression": {
-                  "$ref":"#/expr",
-                  "required":"true"
-                },
-                "term": {
-                  "$ref":"#/term",
-                  "required":"true"
-                }
-            ]
+          "type":"array",
+          "items": {
+            "type":"object",
+            "properties": {
+              "anyOf": [
+                  "expression": {
+                    "$ref":"#/expression",
+                    "required":"true"
+                  },
+                  "term": {
+                    "$ref":"#/term",
+                    "required":"true"
+                  }
+              ]
+            }
           }
-        },
-        "expression": {
-          "type":"array",
-          "items": {
-            "$ref":"#/expr"
-        }
-        },
-        "term": {
-          "type":"array",
-          "items": {
-            "$ref":"#/term"
-        }
         }
     }
   }

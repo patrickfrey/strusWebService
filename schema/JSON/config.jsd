@@ -41,7 +41,7 @@
               },
               "file": {
                 "type":"string",
-                "required":"true"
+                "required":"false"
               },
               "groupby": {
                 "type":"string",
@@ -59,7 +59,7 @@
         },
         "rpc": {
           "type":"string",
-          "required":"true"
+          "required":"false"
         },
         "threads": {
           "type":"number",
