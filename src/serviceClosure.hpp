@@ -54,6 +54,7 @@ public:
 	}
 	void shutdown()
 	{
+		m_requestHandler->stop();
 		if (m_service) m_service->shutdown();
 	}
 	int threads_no()

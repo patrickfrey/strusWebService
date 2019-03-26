@@ -124,6 +124,11 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 		if (!m_requestHandler) throw std::runtime_error( m_errorhnd->fetchError());
 		loadCorsConfiguration( config);
 		loadProtocolConfiguration( config);
+
+		if (!m_requestHandler->start())
+		{
+			throw std::runtime_error( _TXT("failed to start background process for garbage collector"));
+		}
 	}
 	catch (const std::bad_alloc& err)
 	{
