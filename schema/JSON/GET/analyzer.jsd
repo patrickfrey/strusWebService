@@ -3,119 +3,6 @@
     "type":"object",
     "required":"true",
     "properties": {
-        "eval": {
-          "type":"object",
-          "required":"true",
-          "properties": {
-              "cterm": {
-                "type":"object",
-                "required":"true",
-                "properties": {
-                    "set": {
-                      "type":"string",
-                      "required":"true"
-                    },
-                    "type": {
-                      "type":"string",
-                      "required":"true"
-                    },
-                    "name": {
-                      "type":"string",
-                      "required":"true"
-                    }
-                }
-              },
-              "restriction": {
-                "type":"string",
-                "required":"true"
-              },
-              "selection": {
-                "type":"string",
-                "required":"true"
-              },
-              "exclusion": {
-                "type":"string",
-                "required":"true"
-              },
-              "summarizer": {
-                "type":"object",
-                "required":"true",
-                "properties": {
-                    "name": {
-                      "type":"string",
-                      "required":"true"
-                    },
-                    "feature": {
-                      "type":"array",
-                      "items": {
-                        "$ref":"#/feature"
-                    }
-                    },
-                    "param": {
-                      "type":"array",
-                      "items": {
-                        "$ref":"#/param"
-                    }
-                    },
-                    "result": {
-                      "type":"array",
-                      "items": {
-                        "$ref":"#/result"
-                    }
-                    }
-                }
-              },
-              "weighting": {
-                "type":"object",
-                "required":"true",
-                "properties": {
-                    "name": {
-                      "type":"string",
-                      "required":"true"
-                    },
-                    "feature": {
-                      "type":"array",
-                      "items": {
-                        "$ref":"#/feature"
-                    }
-                    },
-                    "param": {
-                      "type":"array",
-                      "items": {
-                        "$ref":"#/param"
-                    }
-                    }
-                }
-              },
-              "formula": {
-                "type":"object",
-                "required":"true",
-                "properties": {
-                    "source": {
-                      "type":"string",
-                      "required":"true"
-                    },
-                    "param": {
-                      "type":"array",
-                      "required":"false",
-                      "items": {
-                        "type":"object",
-                        "properties": {
-                            "name": {
-                              "type":"string",
-                              "required":"true"
-                            },
-                            "value": {
-                              "type":"string",
-                              "required":"true"
-                            }
-                        }
-                      }
-                    }
-                }
-              }
-          }
-        },
         "analyzer": {
           "type":"object",
           "required":"true",
@@ -209,7 +96,7 @@
               },
               "weight": {
                 "type":"number",
-                "required":"false"
+                "required":"true"
               },
               "anyOf": [
                   "expression": {
@@ -279,31 +166,6 @@
                 }
               }
           }
-        },
-        "evalset": {
-          "type":"object",
-          "required":"false",
-          "properties": {
-              "docno": {
-                "type":"array",
-                "required":"false"
-                "items": {
-                  "type":"number"
-                }
-              }
-          }
-        },
-        "nofranks": {
-          "type":"number",
-          "required":"true"
-        },
-        "minrank": {
-          "type":"number",
-          "required":"true"
-        },
-        "access": {
-          "type":"string",
-          "required":"true"
         }
     }
   },
@@ -377,48 +239,6 @@
         "to": {
           "type":"string",
           "required":"false"
-        }
-    }
-  },
-  "result": {
-    "type":"object",
-    "required":"true",
-    "properties": {
-        "name": {
-          "type":"string",
-          "required":"true"
-        },
-        "value": {
-          "type":"string",
-          "required":"true"
-        }
-    }
-  },
-  "param": {
-    "type":"object",
-    "required":"true",
-    "properties": {
-        "name": {
-          "type":"string",
-          "required":"true"
-        },
-        "value": {
-          "type":"string",
-          "required":"true"
-        }
-    }
-  },
-  "feature": {
-    "type":"object",
-    "required":"true",
-    "properties": {
-        "name": {
-          "type":"string",
-          "required":"true"
-        },
-        "value": {
-          "type":"string",
-          "required":"true"
         }
     }
   }

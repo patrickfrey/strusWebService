@@ -3,58 +3,6 @@
 <xs:element name="query" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
-<xs:element name="eval" minOccurs="1" maxOccurs="1">
-<xs:complexType>
-<xs:any>
-<xs:element name="cterm" minOccurs="1" maxOccurs="1">
-<xs:complexType>
-<xs:any>
-<xs:element name="set" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="type" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
-</xs:any>
-</xs:complexType>
-</xs:element>
-<xs:element name="restriction" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="selection" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="exclusion" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="summarizer" minOccurs="1" maxOccurs="1">
-<xs:complexType>
-<xs:any>
-<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element ref="feature" minOccurs="0" maxOccurs="unbounded"/>
-<xs:element ref="param" minOccurs="0" maxOccurs="unbounded"/>
-<xs:element ref="result" minOccurs="0" maxOccurs="unbounded"/>
-</xs:any>
-</xs:complexType>
-</xs:element>
-<xs:element name="weighting" minOccurs="1" maxOccurs="1">
-<xs:complexType>
-<xs:any>
-<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element ref="feature" minOccurs="0" maxOccurs="unbounded"/>
-<xs:element ref="param" minOccurs="0" maxOccurs="unbounded"/>
-</xs:any>
-</xs:complexType>
-</xs:element>
-<xs:element name="formula" minOccurs="1" maxOccurs="1">
-<xs:complexType>
-<xs:any>
-<xs:element name="source" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="param" minOccurs="0" maxOccurs="unbounded">
-<xs:complexType>
-<xs:any>
-<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
-</xs:any>
-</xs:complexType>
-</xs:element>
-</xs:any>
-</xs:complexType>
-</xs:element>
-</xs:any>
-</xs:complexType>
-</xs:element>
 <xs:element name="analyzer" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
@@ -100,7 +48,7 @@
 <xs:complexType>
 <xs:any>
 <xs:element name="set" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="weight" type="xs:decimal minOccurs="0" maxOccurs="1""/>
+<xs:element name="weight" type="xs:decimal minOccurs="1" maxOccurs="1""/>
 <xs:union>
 <xs:element ref="expression" minOccurs="1" maxOccurs="1"/>
 <xs:element ref="term" minOccurs="1" maxOccurs="1"/>
@@ -138,16 +86,6 @@
 </xs:any>
 </xs:complexType>
 </xs:element>
-<xs:element name="evalset" minOccurs="0" maxOccurs="1">
-<xs:complexType>
-<xs:any>
-<xs:element name="docno" type="xs:integer minOccurs="0" maxOccurs="unbounded""/>
-</xs:any>
-</xs:complexType>
-</xs:element>
-<xs:element name="nofranks" type="xs:integer minOccurs="1" maxOccurs="1""/>
-<xs:element name="minrank" type="xs:integer minOccurs="1" maxOccurs="1""/>
-<xs:element name="access" type="xs:string minOccurs="1" maxOccurs="1""/>
 </xs:any>
 </xs:complexType>
 </xs:element>
@@ -183,30 +121,6 @@
 <xs:any>
 <xs:element name="from" type="xs:string minOccurs="0" maxOccurs="1""/>
 <xs:element name="to" type="xs:string minOccurs="0" maxOccurs="1""/>
-</xs:any>
-</xs:complexType>
-</xs:element>
-<xs:element name="result" minOccurs="1" maxOccurs="1">
-<xs:complexType>
-<xs:any>
-<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
-</xs:any>
-</xs:complexType>
-</xs:element>
-<xs:element name="param" minOccurs="1" maxOccurs="1">
-<xs:complexType>
-<xs:any>
-<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
-</xs:any>
-</xs:complexType>
-</xs:element>
-<xs:element name="feature" minOccurs="1" maxOccurs="1">
-<xs:complexType>
-<xs:any>
-<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
 </xs:any>
 </xs:complexType>
 </xs:element>
