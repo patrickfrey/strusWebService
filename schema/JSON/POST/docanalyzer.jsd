@@ -539,7 +539,17 @@
                       "visible": {
                         "type":"boolean",
                         "required":"false"
-                      }
+                      },
+                      "anyOf": [
+                          "expression": {
+                            "$ref":"#/expression",
+                            "required":"true"
+                          },
+                          "term": {
+                            "$ref":"#/term",
+                            "required":"true"
+                          }
+                        ]
                   }
                 }
               }

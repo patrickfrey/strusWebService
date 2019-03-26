@@ -22,6 +22,9 @@
 <xs:complexType>
 <xs:any>
 <xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element ref="feature" minOccurs="0" maxOccurs="unbounded"/>
+<xs:element ref="param" minOccurs="0" maxOccurs="unbounded"/>
+<xs:element ref="result" minOccurs="0" maxOccurs="unbounded"/>
 </xs:any>
 </xs:complexType>
 </xs:element>
@@ -29,6 +32,8 @@
 <xs:complexType>
 <xs:any>
 <xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element ref="feature" minOccurs="0" maxOccurs="unbounded"/>
+<xs:element ref="param" minOccurs="0" maxOccurs="unbounded"/>
 </xs:any>
 </xs:complexType>
 </xs:element>
@@ -36,6 +41,14 @@
 <xs:complexType>
 <xs:any>
 <xs:element name="source" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="param" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:any>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
 </xs:any>
 </xs:complexType>
 </xs:element>
@@ -88,6 +101,10 @@
 <xs:any>
 <xs:element name="set" type="xs:string minOccurs="1" maxOccurs="1""/>
 <xs:element name="weight" type="xs:decimal minOccurs="0" maxOccurs="1""/>
+<xs:union>
+<xs:element ref="expression" minOccurs="1" maxOccurs="1"/>
+<xs:element ref="term" minOccurs="1" maxOccurs="1"/>
+</xs:union>
 </xs:any>
 </xs:complexType>
 </xs:element>
