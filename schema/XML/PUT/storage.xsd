@@ -4,7 +4,7 @@
 <xs:complexType>
 <xs:any>
 <xs:element name="path" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="cachedterms" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="cachedterms" type="xs:string minOccurs="0" maxOccurs="1""/>
 <xs:element name="cache" type="xs:string minOccurs="0" maxOccurs="1""/>
 <xs:element name="max_open_files" type="xs:integer minOccurs="0" maxOccurs="1""/>
 <xs:element name="write_buffer_size" type="xs:string minOccurs="0" maxOccurs="1""/>

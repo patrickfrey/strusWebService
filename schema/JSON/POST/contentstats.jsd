@@ -25,15 +25,15 @@
               },
               "priority": {
                 "type":"number",
-                "required":"true"
+                "required":"false"
               },
               "minlen": {
                 "type":"number",
-                "required":"true"
+                "required":"false"
               },
               "maxlen": {
                 "type":"number",
-                "required":"true"
+                "required":"false"
               },
               "tokenizer": {
                 "type":"object",
@@ -45,6 +45,7 @@
                     },
                     "arg": {
                       "type":"array",
+                      "required":"false"
                       "items": {
                         "type":"xs:unknown"
                       }
@@ -52,19 +53,23 @@
                 }
               },
               "normalizer": {
-                "type":"object",
-                "required":"true",
-                "properties": {
-                    "name": {
-                      "type":"string",
-                      "required":"true"
-                    },
-                    "arg": {
-                      "type":"array",
-                      "items": {
-                        "type":"string"
+                "type":"array",
+                "minItems":1,
+                "items": {
+                  "type":"object",
+                  "properties": {
+                      "name": {
+                        "type":"string",
+                        "required":"true"
+                      },
+                      "arg": {
+                        "type":"array",
+                        "required":"false"
+                        "items": {
+                          "type":"string"
+                        }
                       }
-                    }
+                  }
                 }
               }
           }

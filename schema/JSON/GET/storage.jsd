@@ -56,6 +56,16 @@
                       "required":"true"
                     }
                 }
+              },
+              "formula": {
+                "type":"object",
+                "required":"true",
+                "properties": {
+                    "source": {
+                      "type":"string",
+                      "required":"true"
+                    }
+                }
               }
           }
         },
@@ -85,6 +95,7 @@
                           },
                           "arg": {
                             "type":"array",
+                            "required":"false"
                             "items": {
                               "type":"string"
                             }
@@ -92,19 +103,23 @@
                       }
                     },
                     "normalizer": {
-                      "type":"object",
-                      "required":"true",
-                      "properties": {
-                          "name": {
-                            "type":"string",
-                            "required":"true"
-                          },
-                          "arg": {
-                            "type":"array",
-                            "items": {
-                              "type":"string"
+                      "type":"array",
+                      "minItems":1,
+                      "items": {
+                        "type":"object",
+                        "properties": {
+                            "name": {
+                              "type":"string",
+                              "required":"true"
+                            },
+                            "arg": {
+                              "type":"array",
+                              "required":"false"
+                              "items": {
+                                "type":"string"
+                              }
                             }
-                          }
+                        }
                       }
                     }
                 }
@@ -127,11 +142,11 @@
                     },
                     "range": {
                       "type":"number",
-                      "required":"true"
+                      "required":"false"
                     },
                     "cardinality": {
                       "type":"number",
-                      "required":"true"
+                      "required":"false"
                     },
                 }
               }
@@ -147,16 +162,17 @@
               },
               "weight": {
                 "type":"number",
-                "required":"true"
+                "required":"false"
               }
           }
         },
         "restriction": {
           "type":"object",
-          "required":"true",
+          "required":"false",
           "properties": {
               "union": {
                 "type":"array",
+                "required":"false",
                 "items": {
                   "type":"object",
                   "properties": {
@@ -173,11 +189,14 @@
         },
         "evalset": {
           "type":"object",
-          "required":"true",
+          "required":"false",
           "properties": {
               "docno": {
-                "type":"number",
-                "required":"true"
+                "type":"array",
+                "required":"false"
+                "items": {
+                  "type":"number"
+                }
               }
           }
         },
@@ -231,10 +250,11 @@
         },
         "cardinality": {
           "type":"number",
-          "required":"true"
+          "required":"false"
         },
         "arg": {
           "type":"array",
+          "required":"false",
           "items": {
             "type":"object",
             "properties": {
@@ -255,7 +275,7 @@
   },
   "meta": {
     "type":"object",
-    "required":"true",
+    "required":"false",
     "properties": {
         "from": {
           "type":"string",
@@ -311,6 +331,7 @@
   },
   "condition": {
     "type":"array",
+    "required":"false",
     "items": {
       "type":"object",
       "properties": {

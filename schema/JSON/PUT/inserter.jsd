@@ -1,2 +1,16 @@
 {
+  "inserter": {
+    "type":"object",
+    "required":"true",
+    "properties": {
+        "docanalyzer": {
+          "type":"string",
+          "required":"true"
+        },
+        "storage": {
+          "type":"string",
+          "required":"true"
+        }
+    }
+  }
 }

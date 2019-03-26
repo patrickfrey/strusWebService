@@ -9,6 +9,7 @@
         },
         "metadata": {
           "type":"array",
+          "required":"false",
           "items": {
             "type":"object",
             "properties": {

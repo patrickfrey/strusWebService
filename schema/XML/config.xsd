@@ -16,21 +16,21 @@
 </xs:any>
 </xs:complexType>
 </xs:element>
-<xs:element name="context" minOccurs="1" maxOccurs="1">
+<xs:element name="context" minOccurs="0" maxOccurs="1">
 <xs:complexType>
 <xs:any>
 <xs:element name="trace" minOccurs="0" maxOccurs="1">
 <xs:complexType>
 <xs:any>
 <xs:element name="log" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="file" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="file" type="xs:string minOccurs="0" maxOccurs="1""/>
 <xs:element name="groupby" type="xs:string minOccurs="0" maxOccurs="1""/>
 <xs:element name="call" type="xs:string minOccurs="0" maxOccurs="1""/>
 <xs:element name="count" type="xs:string minOccurs="0" maxOccurs="1""/>
 </xs:any>
 </xs:complexType>
 </xs:element>
-<xs:element name="rpc" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="rpc" type="xs:string minOccurs="0" maxOccurs="1""/>
 <xs:element name="threads" type="xs:integer minOccurs="0" maxOccurs="1""/>
 </xs:any>
 </xs:complexType>

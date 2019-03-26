@@ -52,6 +52,7 @@ bool ServiceClosure::storeSchemaDescriptions( const cppcms::json::value& config,
 		if (!errorhnd) throw std::runtime_error( _TXT( "error creating error handler"));
 		std::string configstr( config.save());
 		rt = storeWebRequestSchemaDescriptions( configstr, dir, doctype, errorhnd);
+		if (errorhnd->hasError()) throw std::runtime_error( errorhnd->fetchError());
 	}
 	catch (const std::bad_alloc& err)
 	{

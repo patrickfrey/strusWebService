@@ -10,22 +10,22 @@
 <xs:any>
 <xs:element name="type" type="xs:string minOccurs="1" maxOccurs="1""/>
 <xs:element name="regex" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="priority" type="xs:integer minOccurs="1" maxOccurs="1""/>
-<xs:element name="minlen" type="xs:integer minOccurs="1" maxOccurs="1""/>
-<xs:element name="maxlen" type="xs:integer minOccurs="1" maxOccurs="1""/>
+<xs:element name="priority" type="xs:integer minOccurs="0" maxOccurs="1""/>
+<xs:element name="minlen" type="xs:integer minOccurs="0" maxOccurs="1""/>
+<xs:element name="maxlen" type="xs:integer minOccurs="0" maxOccurs="1""/>
 <xs:element name="tokenizer" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
 <xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="arg" type="xs:unknown minOccurs="1" maxOccurs="1""/>
+<xs:element name="arg" type="xs:unknown minOccurs="0" maxOccurs="unbounded""/>
 </xs:any>
 </xs:complexType>
 </xs:element>
-<xs:element name="normalizer" minOccurs="1" maxOccurs="1">
+<xs:element name="normalizer" minOccurs="1" maxOccurs="unbounded">
 <xs:complexType>
 <xs:any>
 <xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="arg" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="arg" type="xs:string minOccurs="0" maxOccurs="unbounded""/>
 </xs:any>
 </xs:complexType>
 </xs:element>
