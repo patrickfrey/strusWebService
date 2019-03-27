@@ -31,10 +31,12 @@
 #include "strus/versionAnalyzer.hpp"
 #include "strus/versionBase.hpp"
 #include "strus/base/local_ptr.hpp"
+#include "strus/base/unique_ptr.hpp"
 #include "strus/base/programOptions.hpp"
 #include "strus/base/atomic.hpp"
 #include "strus/base/fileio.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/platform.hpp"
 #include <booster/log.h>
 #include <signal.h>
 #include <cstring>
@@ -48,6 +50,7 @@ using namespace strus::webservice;
 // Global flags:
 static bool g_verbose = false;
 static bool g_normal_termination = true;
+strus::unique_ptr<ServiceClosure> g_serviceClosure;
 
 static strus::AtomicFlag g_terminate;
 static strus::AtomicFlag g_got_sighup;
@@ -62,6 +65,10 @@ static void signal_handler( int sig )
 	switch( sig ) {
 		case SIGHUP:
 			g_got_sighup.set( true);
+			if (g_serviceClosure.get())
+			{
+				g_serviceClosure->shutdown();
+			}
 			break;
 		default:
 			// unknown signal, ignore
@@ -284,12 +291,18 @@ int main( int argc_, const char *argv_[] )
 		// Install signal handlers
 		signal( SIGHUP, signal_handler );
 
-		ServiceClosure service( configdir, config, g_verbose);
-		int nofThreads = service.threads_no();
+		int nofCores = strus::platform::cores();
+		if (nofCores <= 0) nofCores = 4;
+		int nofThreads = config.get( "service.worker_threads", nofCores);
 		if (config.find( "context.rpc").is_undefined())
 		{
 			// Overwrite number of threads configured as it is defined by cppcms
 			config.set( "context.threads", nofThreads);
+			config.set( "service.worker_threads", nofThreads);
+			if (config.find( "service.applications_pool_size").is_undefined())
+			{
+				config.set( "service.applications_pool_size", nofThreads);
+			}
 		}
 		if (g_verbose)
 		{
@@ -307,14 +320,15 @@ int main( int argc_, const char *argv_[] )
 			}
 			int port = config.get( "service.port", 80);
 
-			service.init( config, g_verbose);
+			g_serviceClosure.reset();
+			g_serviceClosure.reset( new ServiceClosure( configdir, config, g_verbose));
 			BOOSTER_INFO( DefaultConstants::PACKAGE())
 					<< strus::string_format(
 							_TXT("starting strus web service (%d %s).."),
 							nofThreads, nofThreads==1?"thread":"threads");
-			service.mount_applications();
+			g_serviceClosure->mount_applications();
 			BOOSTER_NOTICE( DefaultConstants::PACKAGE()) << strus::string_format( _TXT("service ready and listening on %d"), port);
-			service.run();
+			g_serviceClosure->run();
 			if(g_got_sighup.test())
 			{
 				BOOSTER_INFO( DefaultConstants::PACKAGE() ) << _TXT("reloading configuration on SIGHUP..");
@@ -325,14 +339,13 @@ int main( int argc_, const char *argv_[] )
 			}
 
 			try {
-				service.shutdown();
+				g_serviceClosure->shutdown();
 			}
 			catch( const std::exception& err)
 			{
 				BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << _TXT("got exception on service shutdown: ") << err.what();
 				g_terminate.set( true);
 			}
-	
 		}
 		catch (const std::exception& err)
 		{
@@ -383,6 +396,7 @@ int main( int argc_, const char *argv_[] )
 		if (!rt) rt = strus::ErrorCodeUncaughtException;
 	}
 	g_normal_termination = true;
+	g_serviceClosure.reset();
 	return rt;
 }
 

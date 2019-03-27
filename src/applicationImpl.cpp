@@ -45,6 +45,9 @@ Application::Application( cppcms::service& service_, ServiceClosure* serviceClos
 		:cppcms::application(service_),m_service(serviceClosure_)
 {
 	init_dispatchers();
+
+	// Set default locale:
+	context().locale( "en_US.UTF-8"); 
 }
 
 #define CATCH_EXEC_ERROR() \
@@ -144,7 +147,8 @@ void Application::report_error_fmt( int httpstatus, int apperrorcode, const char
 	char buf[ 1024];
 	va_list ap;
 	va_start(ap, fmt);
-	std::vsnprintf( buf, sizeof(buf), fmt, ap);
+	std::size_t len = std::vsnprintf( buf, sizeof(buf), fmt, ap);
+	if (len >= sizeof(buf)) buf[ sizeof(buf)-1] = 0;
 	report_error( httpstatus, apperrorcode, buf);
 	va_end (ap);
 	response().finalize();
@@ -467,6 +471,7 @@ void Application::urlmap( const char* dir, UrlHandlerMethod1 handler1, bool more
 
 void Application::init_dispatchers()
 {
+	// Define request URL map:
 	urlmap( "ping",		&Application::exec_ping);
 	urlmap( "version",	&Application::exec_version0);
 	urlmap( "version",	&Application::exec_version);

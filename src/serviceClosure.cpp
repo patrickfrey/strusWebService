@@ -71,8 +71,8 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 	try
 	{
 		std::string configstr( config.save());
-		clear();
-		m_service = new cppcms::service( config);
+		std::memset( &m_service_mem, 0, sizeof(m_service_mem)); //... use private nulled mem to supress valgrind UMR message
+		m_service = new (&m_service_mem) cppcms::service( config);
 		loadHtmlConfiguration( config);
 
 		bool doLogCalls = config.get( "debug.log_calls", DefaultConstants::DO_LOG_CALLS());
@@ -236,7 +236,7 @@ void ServiceClosure::mount_applications()
 
 void ServiceClosure::clear()
 {
-	if (m_service) {delete m_service; m_service = 0;}
+	if (m_service) {m_service->~service(); m_service = 0;}
 	if (m_requestLogger) {delete m_requestLogger; m_requestLogger = 0;}
 	if (m_requestHandler) {delete m_requestHandler; m_requestHandler = 0;}
 	if (m_errorhnd) {delete m_errorhnd; m_errorhnd = 0;}

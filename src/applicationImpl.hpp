@@ -72,6 +72,7 @@ private:
 	/// \brief Initialize all dispatchers (called from constructor)
 	void init_dispatchers();
 
+	/// \brief Get a description of the current request for the log
 	std::string debug_request_description();
 
 private:

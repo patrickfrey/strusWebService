@@ -80,6 +80,7 @@ cppcms::json::value webservice::configDefault()
 	config.set( "service.api", "http");
 	config.set( "service.port", 8080);
 	config.set( "service.worker_threads", nofCores > 0 ? nofCores : 4 );
+	config.set( "service.applications_pool_size", nofCores > 0 ? nofCores : 4 );
 	config.set( "logging.level", "debug");
 	config.set( "logging.file.name", DefaultConstants::SERVICE_LOG_FILE());
 	config.set( "logging.file.append", true);
