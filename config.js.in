@@ -25,8 +25,6 @@
 		"api" : "http",
 		"ip" : "0.0.0.0",
 		"port" : 8080,
-		"worker_threads" : 4,
-		"applications_pool_size" : 4
 	},
 
 	"security" : {
