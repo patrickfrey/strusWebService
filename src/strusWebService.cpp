@@ -31,7 +31,7 @@
 #include "strus/versionAnalyzer.hpp"
 #include "strus/versionBase.hpp"
 #include "strus/base/local_ptr.hpp"
-#include "strus/base/unique_ptr.hpp"
+#include "strus/base/shared_ptr.hpp"
 #include "strus/base/programOptions.hpp"
 #include "strus/base/atomic.hpp"
 #include "strus/base/fileio.hpp"
@@ -50,10 +50,30 @@ using namespace strus::webservice;
 // Global flags:
 static bool g_verbose = false;
 static bool g_normal_termination = true;
-strus::unique_ptr<ServiceClosure> g_serviceClosure;
+strus::shared_ptr<ServiceClosure> g_serviceClosure;
 
 static strus::AtomicFlag g_terminate;
 static strus::AtomicFlag g_got_sighup;
+
+static void callService( const char* methodname, void (ServiceClosure::*method)())
+{
+	strus::shared_ptr<ServiceClosure> sc( g_serviceClosure);
+	if (sc.get())
+	{
+		try
+		{
+			((*sc).*method)();
+		}
+		catch( const std::exception& err)
+		{
+			BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << _TXT("got exception on service shutdown: ") << err.what();
+			std::cerr << _TXT("service method call terminated with exception") << " (" << methodname << "): " << err.what();
+			g_terminate.set( true);
+		}
+	}
+}
+
+#define CALL_SERVICE( MT) callService( #MT, &ServiceClosure::MT);
 
 // Signal handler:
 static void signal_handler( int sig )
@@ -64,12 +84,13 @@ static void signal_handler( int sig )
 	}
 	switch( sig ) {
 		case SIGHUP:
-			g_got_sighup.set( true);
-			if (g_serviceClosure.get())
+		{
+			if (g_got_sighup.set( true))
 			{
-				g_serviceClosure->shutdown();
+				CALL_SERVICE( shutdown)
 			}
 			break;
+		}
 		default:
 			// unknown signal, ignore
 			break;
@@ -320,31 +341,25 @@ int main( int argc_, const char *argv_[] )
 			}
 			int port = config.get( "service.port", 80);
 
-			g_serviceClosure.reset();
+			g_serviceClosure.reset(); //... free old instance before creating new one
 			g_serviceClosure.reset( new ServiceClosure( configdir, config, g_verbose));
+
 			BOOSTER_INFO( DefaultConstants::PACKAGE())
 					<< strus::string_format(
 							_TXT("starting strus web service (%d %s).."),
 							nofThreads, nofThreads==1?"thread":"threads");
-			g_serviceClosure->mount_applications();
+			CALL_SERVICE( mount_applications)
 			BOOSTER_NOTICE( DefaultConstants::PACKAGE()) << strus::string_format( _TXT("service ready and listening on %d"), port);
-			g_serviceClosure->run();
-			if(g_got_sighup.test())
+
+			g_got_sighup.set( false);
+			CALL_SERVICE( run);
+
+			if (g_got_sighup.test())
 			{
 				BOOSTER_INFO( DefaultConstants::PACKAGE() ) << _TXT("reloading configuration on SIGHUP..");
-				g_got_sighup.set( false);
-			} else {
+			} else if (g_terminate.set( true)) {
 				BOOSTER_INFO( DefaultConstants::PACKAGE() ) << _TXT("received shutdown command..");
-				g_terminate.set( true);
-			}
-
-			try {
-				g_serviceClosure->shutdown();
-			}
-			catch( const std::exception& err)
-			{
-				BOOSTER_ERROR( DefaultConstants::PACKAGE() ) << _TXT("got exception on service shutdown: ") << err.what();
-				g_terminate.set( true);
+				CALL_SERVICE( shutdown);
 			}
 		}
 		catch (const std::exception& err)
