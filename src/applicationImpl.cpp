@@ -45,9 +45,6 @@ Application::Application( cppcms::service& service_, ServiceClosure* serviceClos
 		:cppcms::application(service_),m_service(serviceClosure_)
 {
 	init_dispatchers();
-
-	// Set default locale:
-	context().locale( "en_US.UTF-8"); 
 }
 
 #define CATCH_EXEC_ERROR() \
@@ -350,6 +347,10 @@ void Application::exec_request( std::string path)
 {
 	try
 	{
+		// Set default locale:
+		context().locale( "en_US.UTF-8"); 
+
+		// Interpret request and create request context data:
 		bool do_reply_content = true;
 		std::string request_method = request().request_method();
 		if (request_method == "HEAD")
@@ -432,6 +433,7 @@ void Application::exec_request( std::string path)
 					_TXT("%s Request content type '%s', charset '%s'"),
 					request_method.c_str(), content.doctype(), content.charset());
 		}
+		// Execute request:
 		if (ctx->executeRequest( request_method.c_str(), path.c_str(), content, answer))
 		{
 			BOOSTER_DEBUG( DefaultConstants::PACKAGE())
