@@ -15,6 +15,14 @@
           "type":"string",
           "required":"false"
         },
+        "autocompact": {
+          "type":"boolean",
+          "required":"false"
+        },
+        "compression": {
+          "type":"boolean",
+          "required":"false"
+        },
         "max_open_files": {
           "type":"number",
           "required":"false"

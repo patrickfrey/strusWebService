@@ -1,5 +1,5 @@
 {
-  "storage": {
+  "vstorage": {
     "type":"object",
     "required":"true",
     "properties": {
@@ -7,33 +7,23 @@
           "type":"string",
           "required":"true"
         },
-        "metadata": {
+        "memtypes": {
           "type":"array",
-          "required":"false",
+          "required":"false"
           "items": {
-            "type":"object",
-            "properties": {
-                "name": {
-                  "type":"string",
-                  "required":"true"
-                },
-                "type": {
-                  "type":"string",
-                  "required":"true"
-                }
-            }
+            "type":"string"
           }
         },
-        "acl": {
+        "lexprun": {
           "type":"boolean",
-          "required":"false"
-        },
-        "cachedterms": {
-          "type":"string",
           "required":"false"
         },
         "cache": {
           "type":"string",
+          "required":"false"
+        },
+        "autocompact": {
+          "type":"boolean",
           "required":"false"
         },
         "compression": {

@@ -13,9 +13,9 @@
 </xs:complexType>
 </xs:element>
 <xs:element name="acl" type="xs:boolean minOccurs="0" maxOccurs="1""/>
-<xs:element name="compression" type="xs:boolean minOccurs="0" maxOccurs="1""/>
 <xs:element name="cachedterms" type="xs:string minOccurs="0" maxOccurs="1""/>
 <xs:element name="cache" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="compression" type="xs:boolean minOccurs="0" maxOccurs="1""/>
 <xs:element name="max_open_files" type="xs:integer minOccurs="0" maxOccurs="1""/>
 <xs:element name="write_buffer_size" type="xs:string minOccurs="0" maxOccurs="1""/>
 <xs:element name="block_size" type="xs:string minOccurs="0" maxOccurs="1""/>

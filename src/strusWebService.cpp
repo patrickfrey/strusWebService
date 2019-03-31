@@ -244,7 +244,7 @@ int main( int argc_, const char *argv_[] )
 		// Define configuration and usage:
 		strus::ProgramOptions opt(
 				errorhnd.get(), argc_, argv_, 6,
-				"h,help", "v,version", "M,schema:" ,"c,config:", "V,verbose", "license");
+				"h,help", "v,version", "X,schema:" ,"c,config:", "V,verbose", "license");
 		if (errorhnd->hasError())
 		{
 			throw strus::runtime_error(_TXT("failed to parse program arguments"));

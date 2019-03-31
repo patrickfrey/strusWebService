@@ -30,6 +30,29 @@
 </xs:any>
 </xs:complexType>
 </xs:element>
+<xs:element name="sentence" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="field" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="tokenizer" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="arg" type="xs:string minOccurs="0" maxOccurs="unbounded""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="normalizer" minOccurs="1" maxOccurs="unbounded">
+<xs:complexType>
+<xs:any>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="arg" type="xs:string minOccurs="0" maxOccurs="unbounded""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+</xs:any>
+</xs:complexType>
+</xs:element>
 <xs:element name="group" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>

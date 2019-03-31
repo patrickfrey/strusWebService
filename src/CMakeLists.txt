@@ -62,13 +62,13 @@ ADD_CUSTOM_COMMAND(
 ADD_CUSTOM_COMMAND( 
 	 TARGET strusWebService POST_BUILD  
 	 COMMAND strusWebService
-	 ARGS  -M "XML:schema"
+	 ARGS  -X "XML:schema"
 	 COMMENT "webrequest XML schemas" VERBATIM )
 
 ADD_CUSTOM_COMMAND( 
 	 TARGET strusWebService POST_BUILD  
 	 COMMAND strusWebService
-	 ARGS  -M "JSON:schema"
+	 ARGS  -X "JSON:schema"
 	 COMMENT "webrequest JSON schemas" VERBATIM )
 
 # Installation:

@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:element name="storage" minOccurs="0" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="document" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:any>
+<xs:element name="id" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="doctype" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="attribute" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:any>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="metadata" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:any>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="forwardindex" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:any>
+<xs:element name="type" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="pos" type="xs:integer minOccurs="1" maxOccurs="1""/>
+<xs:element name="len" type="xs:integer minOccurs="0" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="searchindex" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:any>
+<xs:element name="type" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="pos" type="xs:integer minOccurs="1" maxOccurs="1""/>
+<xs:element name="len" type="xs:integer minOccurs="0" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="access" type="xs:string minOccurs="0" maxOccurs="unbounded""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+</xs:any>
+</xs:complexType>
+</xs:element>
+</xs:schema>

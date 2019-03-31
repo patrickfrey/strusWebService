@@ -1,0 +1,116 @@
+{
+  "storage": {
+    "type":"object",
+    "required":"false",
+    "properties": {
+        "document": {
+          "type":"array",
+          "required":"false",
+          "items": {
+            "type":"object",
+            "properties": {
+                "id": {
+                  "type":"string",
+                  "required":"true"
+                },
+                "doctype": {
+                  "type":"string",
+                  "required":"false"
+                },
+                "attribute": {
+                  "type":"array",
+                  "required":"false",
+                  "items": {
+                    "type":"object",
+                    "properties": {
+                        "name": {
+                          "type":"string",
+                          "required":"true"
+                        },
+                        "value": {
+                          "type":"string",
+                          "required":"true"
+                        }
+                    }
+                  }
+                },
+                "metadata": {
+                  "type":"array",
+                  "required":"false",
+                  "items": {
+                    "type":"object",
+                    "properties": {
+                        "name": {
+                          "type":"string",
+                          "required":"true"
+                        },
+                        "value": {
+                          "type":"string",
+                          "required":"true"
+                        }
+                    }
+                  }
+                },
+                "forwardindex": {
+                  "type":"array",
+                  "required":"false",
+                  "items": {
+                    "type":"object",
+                    "properties": {
+                        "type": {
+                          "type":"string",
+                          "required":"true"
+                        },
+                        "value": {
+                          "type":"string",
+                          "required":"true"
+                        },
+                        "pos": {
+                          "type":"number",
+                          "required":"true"
+                        },
+                        "len": {
+                          "type":"number",
+                          "required":"false"
+                        }
+                    }
+                  }
+                },
+                "searchindex": {
+                  "type":"array",
+                  "required":"false",
+                  "items": {
+                    "type":"object",
+                    "properties": {
+                        "type": {
+                          "type":"string",
+                          "required":"true"
+                        },
+                        "value": {
+                          "type":"string",
+                          "required":"true"
+                        },
+                        "pos": {
+                          "type":"number",
+                          "required":"true"
+                        },
+                        "len": {
+                          "type":"number",
+                          "required":"false"
+                        }
+                    }
+                  }
+                },
+                "access": {
+                  "type":"array",
+                  "required":"false"
+                  "items": {
+                    "type":"string"
+                  }
+                }
+            }
+          }
+        }
+    }
+  }
+}

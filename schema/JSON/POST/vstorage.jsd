@@ -1,5 +1,5 @@
 {
-  "storage": {
+  "vstorage": {
     "type":"object",
     "required":"true",
     "properties": {
@@ -7,37 +7,24 @@
           "type":"string",
           "required":"true"
         },
-        "metadata": {
-          "type":"array",
-          "required":"false",
-          "items": {
-            "type":"object",
-            "properties": {
-                "name": {
-                  "type":"string",
-                  "required":"true"
-                },
-                "type": {
-                  "type":"string",
-                  "required":"true"
-                }
-            }
-          }
+        "vecdim": {
+          "type":"number",
+          "required":"true"
         },
-        "acl": {
-          "type":"boolean",
+        "bits": {
+          "type":"number",
           "required":"false"
         },
-        "cachedterms": {
-          "type":"string",
-          "required":"false"
-        },
-        "cache": {
-          "type":"string",
+        "variations": {
+          "type":"number",
           "required":"false"
         },
         "compression": {
           "type":"boolean",
+          "required":"false"
+        },
+        "cache": {
+          "type":"string",
           "required":"false"
         },
         "max_open_files": {

@@ -171,6 +171,53 @@
                     }
                 }
               },
+              "sentence": {
+                "type":"object",
+                "required":"true",
+                "properties": {
+                    "field": {
+                      "type":"string",
+                      "required":"true"
+                    },
+                    "tokenizer": {
+                      "type":"object",
+                      "required":"true",
+                      "properties": {
+                          "name": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "arg": {
+                            "type":"array",
+                            "required":"false"
+                            "items": {
+                              "type":"string"
+                            }
+                          }
+                      }
+                    },
+                    "normalizer": {
+                      "type":"array",
+                      "minItems":1,
+                      "items": {
+                        "type":"object",
+                        "properties": {
+                            "name": {
+                              "type":"string",
+                              "required":"true"
+                            },
+                            "arg": {
+                              "type":"array",
+                              "required":"false"
+                              "items": {
+                                "type":"string"
+                              }
+                            }
+                        }
+                      }
+                    }
+                }
+              },
               "group": {
                 "type":"object",
                 "required":"true",

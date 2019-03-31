@@ -1,0 +1,13 @@
+{
+"vstorage" : {
+    "path" : "vectors",
+    "database" : "leveldb",
+    "cache_size" : "4G",
+    "max_open_files" : 512,
+    "write_buffer_size" : "8K",
+    "block_size" : "4K",
+    "compression" : true,
+    "vecdim" : 32
+}}
+
+

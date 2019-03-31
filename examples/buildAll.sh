@@ -33,3 +33,12 @@ curl -i -H "Accept: text/plain" -H "Content-Type: application/xml; charset=UTF-8
 echo "--- Query ---"
 curl -d "@examples/query.orig.json" -i -H "Accept: application/json" -H "Content-Type: application/json; charset=UTF-8" -X GET  "$SERVER/storage/reuters"
 
+
+echo "--- Create vector storage ---"
+curl -d "@examples/vstorage.json" -i -H "Accept: text/plain" -H "Content-Type: application/json; charset=UTF-8" -X PUT "$SERVER/vstorage/vectors"
+
+echo "--- Insert vectors ---"
+TRANSACTION=`curl -H "Accept: text/plain" -X POST "$SERVER/vstorage/vectors/transaction"`
+curl -d "@examples/vectors.json" -i -H "Accept: text/plain" -H "Content-Type: application/json; charset=UTF-8" -X PUT "$TRANSACTION"
+curl -i -H "Accept: text/plain" -H "Content-Type: application/json; charset=UTF-8" -X PUT "$TRANSACTION"
+

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:element name="vstorage" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="feature" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="type" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="vector" type="xs:decimal minOccurs="0" maxOccurs="unbounded""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+</xs:any>
+</xs:complexType>
+</xs:element>
+</xs:schema>

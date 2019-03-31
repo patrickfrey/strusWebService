@@ -1,0 +1,12 @@
+{
+  "vstorage": {
+    "type":"object",
+    "required":"true",
+    "properties": {
+        "path": {
+          "type":"string",
+          "required":"true"
+        }
+    }
+  }
+}
