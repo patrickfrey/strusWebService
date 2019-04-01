@@ -250,6 +250,20 @@
           "type":"object",
           "required":"true",
           "properties": {
+              "meta": {
+                "type":"object",
+                "required":"false",
+                "properties": {
+                    "from": {
+                      "type":"string",
+                      "required":"false"
+                    },
+                    "to": {
+                      "type":"string",
+                      "required":"false"
+                    }
+                }
+              },
               "set": {
                 "type":"string",
                 "required":"true"
@@ -257,17 +271,7 @@
               "weight": {
                 "type":"number",
                 "required":"false"
-              },
-              "anyOf": [
-                  "expression": {
-                    "$ref":"#/expression",
-                    "required":"true"
-                  },
-                  "term": {
-                    "$ref":"#/term",
-                    "required":"true"
-                  }
-                ]
+              }
           }
         },
         "restriction": {
@@ -354,6 +358,48 @@
         }
     }
   },
+  "result": {
+    "type":"object",
+    "required":"true",
+    "properties": {
+        "name": {
+          "type":"string",
+          "required":"true"
+        },
+        "value": {
+          "type":"string",
+          "required":"true"
+        }
+    }
+  },
+  "param": {
+    "type":"object",
+    "required":"true",
+    "properties": {
+        "name": {
+          "type":"string",
+          "required":"true"
+        },
+        "value": {
+          "type":"string",
+          "required":"true"
+        }
+    }
+  },
+  "feature": {
+    "type":"object",
+    "required":"true",
+    "properties": {
+        "name": {
+          "type":"string",
+          "required":"true"
+        },
+        "value": {
+          "type":"string",
+          "required":"true"
+        }
+    }
+  },
   "term": {
     "type":"object",
     "required":"true",
@@ -410,62 +456,6 @@
               ]
             }
           }
-        }
-    }
-  },
-  "meta": {
-    "type":"object",
-    "required":"false",
-    "properties": {
-        "from": {
-          "type":"string",
-          "required":"false"
-        },
-        "to": {
-          "type":"string",
-          "required":"false"
-        }
-    }
-  },
-  "result": {
-    "type":"object",
-    "required":"true",
-    "properties": {
-        "name": {
-          "type":"string",
-          "required":"true"
-        },
-        "value": {
-          "type":"string",
-          "required":"true"
-        }
-    }
-  },
-  "param": {
-    "type":"object",
-    "required":"true",
-    "properties": {
-        "name": {
-          "type":"string",
-          "required":"true"
-        },
-        "value": {
-          "type":"string",
-          "required":"true"
-        }
-    }
-  },
-  "feature": {
-    "type":"object",
-    "required":"true",
-    "properties": {
-        "name": {
-          "type":"string",
-          "required":"true"
-        },
-        "value": {
-          "type":"string",
-          "required":"true"
         }
     }
   }

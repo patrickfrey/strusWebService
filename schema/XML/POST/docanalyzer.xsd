@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
-<xs:element name="docanalyzer" minOccurs="1" maxOccurs="1">
+<xs:element name="analyzer" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="doc" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
 <xs:element name="class" minOccurs="0" maxOccurs="1">
@@ -291,6 +294,9 @@
 <xs:element name="segmenter" type="xs:string minOccurs="0" maxOccurs="1""/>
 <xs:element name="mime" type="xs:string minOccurs="0" maxOccurs="1""/>
 <xs:element name="encoding" type="xs:string minOccurs="0" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
 </xs:any>
 </xs:complexType>
 </xs:element>

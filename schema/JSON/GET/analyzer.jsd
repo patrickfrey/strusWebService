@@ -137,6 +137,20 @@
           "type":"object",
           "required":"true",
           "properties": {
+              "meta": {
+                "type":"object",
+                "required":"false",
+                "properties": {
+                    "from": {
+                      "type":"string",
+                      "required":"false"
+                    },
+                    "to": {
+                      "type":"string",
+                      "required":"false"
+                    }
+                }
+              },
               "set": {
                 "type":"string",
                 "required":"true"
@@ -144,17 +158,7 @@
               "weight": {
                 "type":"number",
                 "required":"true"
-              },
-              "anyOf": [
-                  "expression": {
-                    "$ref":"#/expression",
-                    "required":"true"
-                  },
-                  "term": {
-                    "$ref":"#/term",
-                    "required":"true"
-                  }
-                ]
+              }
           }
         },
         "restriction": {
@@ -272,20 +276,6 @@
               ]
             }
           }
-        }
-    }
-  },
-  "meta": {
-    "type":"object",
-    "required":"false",
-    "properties": {
-        "from": {
-          "type":"string",
-          "required":"false"
-        },
-        "to": {
-          "type":"string",
-          "required":"false"
         }
     }
   }

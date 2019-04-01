@@ -122,12 +122,16 @@
 <xs:element name="feature" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
+<xs:element name="meta" minOccurs="0" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="from" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="to" type="xs:string minOccurs="0" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
 <xs:element name="set" type="xs:string minOccurs="1" maxOccurs="1""/>
 <xs:element name="weight" type="xs:decimal minOccurs="0" maxOccurs="1""/>
-<xs:union>
-<xs:element ref="expression" minOccurs="1" maxOccurs="1"/>
-<xs:element ref="term" minOccurs="1" maxOccurs="1"/>
-</xs:union>
 </xs:any>
 </xs:complexType>
 </xs:element>
@@ -174,6 +178,30 @@
 </xs:any>
 </xs:complexType>
 </xs:element>
+<xs:element name="result" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="param" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="feature" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
 <xs:element name="term" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
@@ -198,38 +226,6 @@
 </xs:union>
 </xs:complexType>
 </xs:element>
-</xs:any>
-</xs:complexType>
-</xs:element>
-<xs:element name="meta" minOccurs="0" maxOccurs="1">
-<xs:complexType>
-<xs:any>
-<xs:element name="from" type="xs:string minOccurs="0" maxOccurs="1""/>
-<xs:element name="to" type="xs:string minOccurs="0" maxOccurs="1""/>
-</xs:any>
-</xs:complexType>
-</xs:element>
-<xs:element name="result" minOccurs="1" maxOccurs="1">
-<xs:complexType>
-<xs:any>
-<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
-</xs:any>
-</xs:complexType>
-</xs:element>
-<xs:element name="param" minOccurs="1" maxOccurs="1">
-<xs:complexType>
-<xs:any>
-<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
-</xs:any>
-</xs:complexType>
-</xs:element>
-<xs:element name="feature" minOccurs="1" maxOccurs="1">
-<xs:complexType>
-<xs:any>
-<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
 </xs:any>
 </xs:complexType>
 </xs:element>

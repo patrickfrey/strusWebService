@@ -1,5 +1,6 @@
 {
-    "docanalyzer": {
+"analyzer": {
+    "doc": {
         "class": {
             "mimetype":"XML"
         },
@@ -29,6 +30,7 @@
             ]
         }
     }
-}
+}}
+
 
 
