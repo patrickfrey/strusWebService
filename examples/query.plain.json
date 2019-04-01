@@ -1,0 +1,16 @@
+{
+    "query": {
+        "feature": {
+            "set": "search",
+            "term": {
+                "type": "text",
+                "value": "Valderrama"
+            },
+            "term": {
+                "type": "text",
+                "value": "Golfklub"
+            }
+        }
+    }
+}
+

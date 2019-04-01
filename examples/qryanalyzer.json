@@ -1,0 +1,28 @@
+{
+    "query": {
+         "element": {
+            "type": "stem",
+            "field": "text",
+            "tokenizer": {
+                "name": "word"
+            },
+            "normalizer": [{
+                "name":"text"
+            },{
+                "name":"lc"
+            },{
+                "name":"stem",
+                "arg": "de"
+            },{
+                "name":"convdia",
+                "arg": "de"
+            }]
+        },
+        "group": {
+            "-by": "all",
+            "field": "text",
+            "op": "sequence"
+        }
+    }
+}
+

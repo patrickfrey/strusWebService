@@ -13,8 +13,11 @@ for dd in `find tests/data/reuters/doc/ -name "reut2-000.xml"`; do
 done
 echo "transaction identifier: $TRANSACTION"
 
-echo "--- Create analyzer ---"
+echo "--- Create document analyzer ---"
 curl -d "@examples/docanalyzer.json" -i -H "Accept: text/plain" -H "Content-Type: application/json; charset=UTF-8" -X PUT "$SERVER/docanalyzer/reuters"
+
+echo "--- Create query analyzer ---"
+curl -d "@examples/qryanalyzer.json" -i -H "Accept: text/plain" -H "Content-Type: application/json; charset=UTF-8" -X PUT "$SERVER/qryanalyzer/reuters"
 
 echo "--- Create storage ---"
 curl -d "@examples/storage.json" -i -H "Accept: text/plain" -H "Content-Type: application/json; charset=UTF-8" -X POST "$SERVER/storage/reuters"
