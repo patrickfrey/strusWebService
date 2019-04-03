@@ -1,16 +1,22 @@
 {
     "query": {
-        "feature": {
-            "set": "search",
-            "term": {
-                "type": "text",
-                "value": "Valderrama"
+        "analyzerid": "qryanalyzer",
+        "feature": [
+            {
+                "set": "search",
+                "term": {
+                    "type": "text",
+                    "value": "Valderrama"
+                 }
             },
-            "term": {
-                "type": "text",
-                "value": "Golfklub"
+            {
+                "set": "search",
+                "term": {
+                    "type": "text",
+                    "value": "Golfklub"
+                }
             }
-        }
+        ]
     }
 }
 
