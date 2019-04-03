@@ -3,13 +3,9 @@
     "type":"object",
     "required":"true",
     "properties": {
-        "analyzerid": {
-          "type":"string",
-          "required":"false"
-        },
         "analyzer": {
           "type":"object",
-          "required":"true",
+          "required":"false",
           "properties": {
               "element": {
                 "type":"object",

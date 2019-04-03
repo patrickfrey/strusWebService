@@ -3,8 +3,7 @@
 <xs:element name="query" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
-<xs:element name="analyzerid" type="xs:string minOccurs="0" maxOccurs="1""/>
-<xs:element name="analyzer" minOccurs="1" maxOccurs="1">
+<xs:element name="analyzer" minOccurs="0" maxOccurs="1">
 <xs:complexType>
 <xs:any>
 <xs:element name="element" minOccurs="1" maxOccurs="1">
