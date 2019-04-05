@@ -1,13 +1,12 @@
 {
     "query": {
-        "analyzerid": "qryanalyzer",
         "feature": [
             {
                 "set": "search",
                 "term": {
                     "type": "text",
-                    "value": "Valderrama"
-                 }
+                    "value": "Valderrama goes shopping"
+                }
             },
             {
                 "set": "search",
