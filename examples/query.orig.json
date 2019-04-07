@@ -3,27 +3,40 @@
         "eval": {
             "weighting": {
                 "name": "BM25",
-                "param": [{
-                    "name": "k1",
-                    "value": "1.2"
-                },{
-                    "name": "b",
-                    "value": "0.75"
-                },{
-                    "name": "avgdoclen",
-                    "value": "100"
-                }],
-                    "feature": [{
-                    "name": "match",
-                    "value": "search"
-                }]
+                "arg": [
+                    {
+                        "param": {
+                            "name": "k1",
+                            "value": "1.2"
+                        }
+                    },{
+                        "param": {
+                            "name": "b",
+                            "value": "0.75"
+                        }
+                    },{
+                        "param": {
+                            "name": "avgdoclen",
+                            "value": "100"
+                        }
+                    },{
+                        "feature": {
+                            "name": "match",
+                            "value": "search"
+                        }
+                    }
+                ]
             },
             "summarizer": {
                 "name": "attribute",
-                "param": [{
-                    "name": "name",
-                    "value": "title"
-                }]
+                "arg": [
+                    {
+                        "param": {
+                            "name": "name",
+                            "value": "title"
+                        }
+                    }
+                ]
             },
             "selection": "search"
         },

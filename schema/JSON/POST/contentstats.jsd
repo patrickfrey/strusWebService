@@ -47,7 +47,7 @@
                       "type":"array",
                       "required":"false"
                       "items": {
-                        "type":"xs:unknown"
+                        "type":"string"
                       }
                     }
                 }

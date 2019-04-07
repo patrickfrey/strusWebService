@@ -70,12 +70,13 @@
 <xs:element name="feature" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
-<xs:element name="meta" minOccurs="0" maxOccurs="1">
+<xs:element name="content" minOccurs="1" maxOccurs="1">
 <xs:complexType>
-<xs:any>
-<xs:element name="from" type="xs:string minOccurs="0" maxOccurs="1""/>
-<xs:element name="to" type="xs:string minOccurs="0" maxOccurs="1""/>
-</xs:any>
+<xs:union>
+<xs:element ref="expression" minOccurs="1" maxOccurs="1"/>
+<xs:element ref="meta" minOccurs="1" maxOccurs="1"/>
+<xs:element ref="term" minOccurs="1" maxOccurs="1"/>
+</xs:union>
 </xs:complexType>
 </xs:element>
 <xs:element name="set" type="xs:string minOccurs="1" maxOccurs="1""/>
@@ -146,10 +147,19 @@
 <xs:complexType>
 <xs:union>
 <xs:element ref="expression" minOccurs="1" maxOccurs="1"/>
+<xs:element ref="meta" minOccurs="1" maxOccurs="1"/>
 <xs:element ref="term" minOccurs="1" maxOccurs="1"/>
 </xs:union>
 </xs:complexType>
 </xs:element>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="meta" minOccurs="0" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="from" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="to" type="xs:string minOccurs="0" maxOccurs="1""/>
 </xs:any>
 </xs:complexType>
 </xs:element>

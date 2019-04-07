@@ -45,23 +45,39 @@
                       "type":"string",
                       "required":"true"
                     },
-                    "feature": {
+                    "arg": {
                       "type":"array",
+                      "required":"false",
                       "items": {
-                        "$ref":"#/feature"
-                    }
-                    },
-                    "param": {
-                      "type":"array",
-                      "items": {
-                        "$ref":"#/param"
-                    }
+                        "type":"object",
+                        "properties": {
+                          "anyOf": [
+                              "feature": {
+                                "$ref":"#/feature",
+                                "required":"true"
+                              },
+                              "param": {
+                                "$ref":"#/param",
+                                "required":"true"
+                              }
+                          ]
+                        }
+                      }
                     },
                     "result": {
                       "type":"array",
+                      "required":"false",
                       "items": {
-                        "$ref":"#/result"
-                    }
+                        "type":"object",
+                        "properties": {
+                          "anyOf": [
+                              "result": {
+                                "$ref":"#/result",
+                                "required":"true"
+                              }
+                          ]
+                        }
+                      }
                     }
                 }
               },
@@ -73,17 +89,24 @@
                       "type":"string",
                       "required":"true"
                     },
-                    "feature": {
+                    "arg": {
                       "type":"array",
+                      "required":"false",
                       "items": {
-                        "$ref":"#/feature"
-                    }
-                    },
-                    "param": {
-                      "type":"array",
-                      "items": {
-                        "$ref":"#/param"
-                    }
+                        "type":"object",
+                        "properties": {
+                          "anyOf": [
+                              "feature": {
+                                "$ref":"#/feature",
+                                "required":"true"
+                              },
+                              "param": {
+                                "$ref":"#/param",
+                                "required":"true"
+                              }
+                          ]
+                        }
+                      }
                     }
                 }
               },
@@ -250,18 +273,24 @@
           "type":"object",
           "required":"true",
           "properties": {
-              "meta": {
+              "content": {
                 "type":"object",
-                "required":"false",
+                "required":"true",
                 "properties": {
-                    "from": {
-                      "type":"string",
-                      "required":"false"
-                    },
-                    "to": {
-                      "type":"string",
-                      "required":"false"
-                    }
+                  "anyOf": [
+                      "expression": {
+                        "$ref":"#/expression",
+                        "required":"true"
+                      },
+                      "meta": {
+                        "$ref":"#/meta",
+                        "required":"true"
+                      },
+                      "term": {
+                        "$ref":"#/term",
+                        "required":"true"
+                      }
+                  ]
                 }
               },
               "set": {
@@ -449,6 +478,10 @@
                     "$ref":"#/expression",
                     "required":"true"
                   },
+                  "meta": {
+                    "$ref":"#/meta",
+                    "required":"true"
+                  },
                   "term": {
                     "$ref":"#/term",
                     "required":"true"
@@ -456,6 +489,20 @@
               ]
             }
           }
+        }
+    }
+  },
+  "meta": {
+    "type":"object",
+    "required":"false",
+    "properties": {
+        "from": {
+          "type":"string",
+          "required":"false"
+        },
+        "to": {
+          "type":"string",
+          "required":"false"
         }
     }
   }

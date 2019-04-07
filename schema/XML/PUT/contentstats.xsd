@@ -17,7 +17,7 @@
 <xs:complexType>
 <xs:any>
 <xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="arg" type="xs:unknown minOccurs="0" maxOccurs="unbounded""/>
+<xs:element name="arg" type="xs:string minOccurs="0" maxOccurs="unbounded""/>
 </xs:any>
 </xs:complexType>
 </xs:element>
