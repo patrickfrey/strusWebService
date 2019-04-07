@@ -7,7 +7,7 @@ curl -d "@examples/contentstats.json" -i -H "Accept: text/plain" -H "Content-Typ
 
 echo "--- Analyze documents ---"
 TRANSACTION=`curl -H "Accept: text/plain" -X POST "$SERVER/contentstats/reuters/transaction"`
-for dd in `find tests/data/reuters/doc/ -name "reut2-000.xml"`; do
+for dd in `find tests/data/reuters/doc/ -name "*.xml"`; do
 	echo "--- Collect statistics $dd ---"
 	curl -d "@$dd" -i -H "Accept: text/plain" -H "Content-Type: application/xml; charset=UTF-8" -X PUT "$TRANSACTION"
 done

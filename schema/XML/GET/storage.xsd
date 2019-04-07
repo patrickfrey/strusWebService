@@ -30,13 +30,7 @@
 </xs:union>
 </xs:complexType>
 </xs:element>
-<xs:element name="result" minOccurs="0" maxOccurs="unbounded">
-<xs:complexType>
-<xs:union>
-<xs:element ref="result" minOccurs="1" maxOccurs="1"/>
-</xs:union>
-</xs:complexType>
-</xs:element>
+<xs:element ref="result" minOccurs="0" maxOccurs="unbounded"/>
 </xs:any>
 </xs:complexType>
 </xs:element>

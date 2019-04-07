@@ -43,16 +43,20 @@
         "feature": [
             {
                 "set": "search",
-                "term": {
-                    "type": "text",
-                    "value": "New"
-                }
+                "content": {
+                    "term": {
+                        "type": "text",
+                        "value": "New"
+                    }
+                 }
             },
             {
                 "set": "search",
-                "term": {
-                    "type": "text",
-                    "value": "York"
+                "content": {
+                    "term": {
+                        "type": "text",
+                        "value": "York"
+                    }
                 }
             }
         ],

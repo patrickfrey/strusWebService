@@ -66,18 +66,9 @@
                     },
                     "result": {
                       "type":"array",
-                      "required":"false",
                       "items": {
-                        "type":"object",
-                        "properties": {
-                          "anyOf": [
-                              "result": {
-                                "$ref":"#/result",
-                                "required":"true"
-                              }
-                          ]
-                        }
-                      }
+                        "$ref":"#/result"
+                    }
                     }
                 }
               },
