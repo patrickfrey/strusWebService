@@ -33,6 +33,9 @@ for dd in `find tests/data/reuters/doc/ -name "*.xml"`; do
 done
 curl -i -H "Accept: text/plain" -H "Content-Type: application/xml; charset=UTF-8" -X PUT "$TRANSACTION"
 
+echo "--- Analyze query ---"
+curl -d "@examples/query.plain.json" -i -H "Accept: application/json" -H "Content-Type: application/json; charset=UTF-8" -X GET  "$SERVER/qryanalyzer/reuters"
+
 echo "--- Query ---"
 curl -d "@examples/query.orig.json" -i -H "Accept: application/json" -H "Content-Type: application/json; charset=UTF-8" -X GET  "$SERVER/storage/reuters"
 

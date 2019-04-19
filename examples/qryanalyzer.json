@@ -1,24 +1,36 @@
 {
     "analyzer": {
         "query": {
-             "element": {
-                "type": "stem",
-                "field": "text",
-                "tokenizer": {
-                    "name": "word"
-                },
-                "normalizer": [{
-                    "name":"text"
+             "element": [
+                {
+                    "type": "stem",
+                    "field": "text",
+                    "tokenizer": {
+                        "name": "word"
+                    },
+                    "normalizer": [{
+                        "name":"text"
+                    },{
+                        "name":"lc"
+                    },{
+                        "name":"stem",
+                        "arg": "de"
+                    },{
+                        "name":"convdia",
+                        "arg": "de"
+                    }]
                 },{
-                    "name":"lc"
-                },{
-                    "name":"stem",
-                    "arg": "de"
-                },{
-                    "name":"convdia",
-                    "arg": "de"
-                }]
-            },
+                    "type": "date",
+                    "field": "date",
+                    "tokenizer": {
+                        "name": "regex",
+                        "arg" : "[0-9.]+" 
+                    },
+                    "normalizer": [{
+                        "name": "date2int"
+                    }]
+                }
+            ],
             "group": {
                 "-by": "all",
                 "field": "text",

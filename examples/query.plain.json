@@ -3,16 +3,43 @@
         "feature": [
             {
                 "set": "search",
-                "term": {
-                    "type": "text",
-                    "value": "Valderrama goes shopping"
-                }
+                "content": {
+                    "term": {
+                        "type": "text",
+                        "value": "Valderrama goes shopping"
+                    }
+                 }
             },
             {
                 "set": "search",
-                "term": {
-                    "type": "text",
-                    "value": "Golfklub"
+                "content": {
+                    "term": {
+                        "type": "text",
+                        "value": "Golfklub"
+                    }
+                }
+            }
+        ],
+        "restriction": [
+            {
+                "union": {
+                    "condition": [
+                        {
+                            "op": "eq",
+                            "name": "date",
+                            "value": "12.07.2013"
+                        },{
+                            "op": "eq",
+                            "name": "date",
+                            "value": "12.07.2012"
+                        }
+                    ]
+                }
+            },{
+                "condition": {
+                    "op": "le",
+                    "name": "date",
+                    "value": "12.07.2010"
                 }
             }
         ]
