@@ -19,27 +19,36 @@ push( @result, ":vstorage","(",":feature","(");
 
 foreach my $featurevalue( @featurevalues) {
 	my $url = "$storageurl/feature/$featurevalue";
-	print "URL $url\n";
-	my @featuretypes = Strus::Client::readResult( 
-					Strus::Client::selectResult( 
-						Strus::Client::issueRequest( "GET", $url, undef), ("vstorage","link")), '@');
-	foreach my $featuretype( @featuretypes)
+	my @valresult = Strus::Client::issueRequest( "GET", $url, undef);
+	if (!defined $valresult[1])
 	{
-		print "STEP 1 $featuretype\n";
-		my $vecurl = "$url/$featuretype";
-		my @vector = Strus::Client::readResult( 
-					Strus::Client::selectResult( 
-						Strus::Client::issueRequest( "GET", $vecurl, undef), ("vstorage","value")), '@');
-		push( @result, "(", ":name", "=$featurevalue", ":type", "=$featuretype", ":vector", "(" );
-		foreach my $scalar (@vector) {
-			push( @result, "=$scalar" );
+		print STDERR "ERR $valresult[0] feature value '$featurevalue'\n";
+	}
+	else
+	{
+		my @featuretypes = Strus::Client::readResult( Strus::Client::selectResult( $valresult[1], ("vstorage","link")), '@');
+		foreach my $featuretype( @featuretypes)
+		{
+			my $vecurl = "$url/$featuretype";
+			my @vecresult = Strus::Client::issueRequest( "GET", $vecurl, undef);
+			if (!defined $vecresult[1])
+			{
+				print STDERR "ERR $vecresult[0] feature vector $featuretype '$featurevalue'\n";
+			}
+			else
+			{
+				my @vector = Strus::Client::readResult( Strus::Client::selectResult( $vecresult[1], ("vstorage","value")), '@');
+				push( @result, "(", ":name", "=$featurevalue", ":type", "=$featuretype", ":vector", "(" );
+				foreach my $scalar (@vector) {
+					push( @result, "=$scalar" );
+				}
+				push( @result, ")", ")" );
+			}
 		}
-		push( @result, ")", ")" );
 	}
 }
 
 push( @result, ")",")" );
 
-print "STEP 2 @result\n";
 print( Strus::Client::serializationToJson( @result));
 

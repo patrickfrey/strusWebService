@@ -38,6 +38,15 @@ sub readInput {
 	{
 		return  split /\n/, $content;
 	}
+	elsif ($type eq '%' or $type eq "HASH")
+	{
+		my %rt = {};
+		for my $line (split /\n/, $content) {
+			my ($key, $value) = split /\t/, $line, 2;
+			$rt{ $key} = $value;
+		}
+		return %rt;
+	}
 	else
 	{
 		print "undefined input type: $type\n";
@@ -74,11 +83,40 @@ sub readResult {
 		}
 		elsif (ref($content) eq "LVALUE")
 		{
-			return split /\n/, $content;
+			return split /\n/, $$content;
 		}
 		else
 		{
 			return split /\n/, $content;
+		}
+	}
+	elsif ($type eq '%' or $type eq "HASH")
+	{
+		if (!defined $content)
+		{
+			return {};
+		}
+		if (ref($content) eq "HASH")
+		{
+			return %$content;
+		}
+		elsif (ref($content) eq "LVALUE")
+		{
+			my %rt = {};
+			for my $line (split /\n/, $$content) {
+				my ($key, $value) = split /\t/, $line, 2;
+				$rt{ $key} = $value;
+			}
+			return %rt;
+		}
+		else
+		{
+			my %rt = {};
+			for my $line (split /\n/, $content) {
+				my ($key, $value) = split /\t/, $line, 2;
+				$rt{ $key} = $value;
+			}
+			return %rt;
 		}
 	}
 	else
@@ -109,17 +147,24 @@ sub issueRequest {
 		$req->content( $content);
 	}
 	my $res = $ua->request($req);
-	
+
+	my $rescode = 200;
+	if ($res->status_line =~ /^([0-9]+)[ ]/)
+	{
+		$rescode = $1;
+	}
 	if ($res->is_success) {
-		return from_json( $res->content);
+		return ($rescode, from_json( $res->content));
 	} else {
-		print $res->status_line, "\n";
-		exit 1;
+		return ($rescode, undef);
 	}
 }
 
 sub printResult {
 	my ($node, $indent) = @_;
+	if (!defined $indent) {
+		$indent = "";
+	}
 	my $nodetype = ref($node);
 	if ($nodetype eq "HASH") {
 		my %nodemap = %$node;
@@ -239,7 +284,7 @@ sub serializationToJson {
 			exit 1;
 		}
 	}
-	$rt .= "}\n";
+	$rt .= "\n}\n";
 	return $rt;
 }
 
@@ -250,7 +295,7 @@ sub selectResult {
 	if ($nodetype eq "HASH") {
 		if ($#selar < 0)
 		{
-			return undef;
+			return $node;
 		}
 		my $firstsel = $selar[ 0];
 		my @choice = split /,/, $firstsel;
