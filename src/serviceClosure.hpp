@@ -112,6 +112,10 @@ public:
 	{
 		return m_http_server_url;
 	}
+	const std::string& identifier() const
+	{
+		return m_identifier;
+	}
 
 private:
 	//\brief Destroy service, logging and command handler if initialized
@@ -137,6 +141,7 @@ private:
 	std::string m_http_script_name;
 	std::string m_http_server_url;
 	std::string m_put_configdir;
+	std::string m_identifier;
 	bool m_cors_enabled;
 	bool m_quit_enabled;
 	bool m_debug_enabled;

@@ -75,6 +75,8 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 		m_service = new (&m_service_mem) cppcms::service( config);
 		loadHtmlConfiguration( config);
 
+		m_identifier = config.get( "service.name", DefaultConstants::DefaultConstants::DEFAULT_SERVICE_NAME());
+
 		bool doLogCalls = config.get( "debug.log_calls", DefaultConstants::DO_LOG_CALLS());
 		bool doLogRequests = config.get( "debug.log_requests", DefaultConstants::DO_LOG_REQUESTS());
 		bool doLogActions = config.get( "debug.log_actions", DefaultConstants::DO_LOG_ACTIONS());

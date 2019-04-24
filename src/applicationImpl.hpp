@@ -38,6 +38,7 @@ private:/*Methods called by dispatcher:*/
 	void exec_ping();
 	void exec_version( std::string component);
 	void exec_version0();
+	void exec_service_identifier();
 	void exec_request( std::string path);
 
 private:
@@ -68,6 +69,9 @@ private:
 	void report_ok( const char* status, int httpstatus, const char* message);
 	/// \brief Report content
 	void report_answer( const strus::WebRequestAnswer& answer, bool with_content);
+
+	/// \brief Report a message (http status 200)
+	void report_message( const std::string& message);
 
 	/// \brief Initialize all dispatchers (called from constructor)
 	void init_dispatchers();

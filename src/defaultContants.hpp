@@ -36,6 +36,7 @@ struct DefaultConstants
 	static const int TRANSACTION_MAX_IDLE_TIME() {return 120;}
 	static const int TRANSACTION_MAP_SLOT_SIZE() {return 100;}
 	static const std::string CORS_AGE() {return "10";}
+	static const std::string DEFAULT_SERVICE_NAME() {return "strus";}
 	static const char* HTML_DEFAULT_STYLE()
 	{
 		return "div,span {\n\tfont-family: verdana,arial,courier;\n}"

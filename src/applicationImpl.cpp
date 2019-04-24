@@ -196,7 +196,7 @@ void Application::exec_ping()
 	try
 	{
 		if (!handle_preflight_cors() || !check_request_method("GET")) return;	
-		report_ok( "ok", 200, _TXT("service is up and running"));
+		report_message( _TXT("service is up and running"));
 	}
 	CATCH_EXEC_ERROR();
 }
@@ -213,13 +213,19 @@ void Application::exec_version( std::string component)
 	else if (component == "analyzer")	{versionstr = STRUS_ANALYZER_VERSION_STRING;}
 	else if (component == "storage")	{versionstr = STRUS_STORAGE_VERSION_STRING;}
 	else if (component == "base")		{versionstr = STRUS_BASE_VERSION_STRING;}
-	report_ok( "ok", 200, versionstr);
+	report_message( versionstr);
 }
 
 void Application::exec_version0()
 {
 	if (!handle_preflight_cors() || !check_request_method("GET")) return;
-	report_ok( "ok", 200, STRUS_WEBSERVICE_VERSION_STRING);
+	report_message( STRUS_WEBSERVICE_VERSION_STRING);
+}
+
+void Application::exec_service_identifier()
+{
+	if (!handle_preflight_cors() || !check_request_method("GET")) return;
+	report_message( m_service->identifier());
 }
 
 bool Application::handle_preflight_cors()
@@ -341,6 +347,38 @@ static std::string form_tojson( const cppcms::http::request::form_type& form)
 	}
 	content.append( "\n}}\n");
 	return content;
+}
+
+void Application::report_message( const std::string& message)
+{
+	strus::WebRequestAnswer answer;
+	std::string http_accept_charset = request().http_accept_charset();
+	std::string http_accept = request().http_accept();
+	std::string html_base_href;
+	if (!m_service->http_server_url().empty())
+	{
+		html_base_href = m_service->http_server_url();
+	}
+	else
+	{
+		html_base_href = std::string("http://") + request().http_host() + "/";
+	}
+	strus::unique_ptr<strus::WebRequestContextInterface> ctx(
+		m_service->requestHandler()->createContext( http_accept_charset.c_str(), http_accept.c_str(), html_base_href.c_str(), answer));
+	if (!ctx.get())
+	{
+		report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
+	}
+	else if (ctx->getMessageAnswer( message, answer))
+	{
+		BOOSTER_DEBUG( DefaultConstants::PACKAGE())
+			<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), http_accept.c_str(), http_accept_charset.c_str());
+		report_answer( answer, true/*do_reply_content*/);
+	}
+	else
+	{
+		report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
+	}
 }
 
 void Application::exec_request( std::string path)
@@ -477,6 +515,7 @@ void Application::init_dispatchers()
 	urlmap( "ping",		&Application::exec_ping);
 	urlmap( "version",	&Application::exec_version0);
 	urlmap( "version",	&Application::exec_version);
+	urlmap( "id",		&Application::exec_service_identifier);
 	if (m_service->quit_enabled())
 	{
 		urlmap( "quit", &Application::exec_quit);
