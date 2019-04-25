@@ -85,3 +85,11 @@ Install packages with 'apt-get'/aptitude.
 # Install
 	make install
 
+# Use the perl client
+	The perl client in ./client_perl/ needs the REST::Client perl module
+
+	apt install cpanminus
+	cpanm JSON
+	cpanm REST::Client
+
+
