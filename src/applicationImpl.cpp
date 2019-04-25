@@ -369,7 +369,7 @@ void Application::report_message( const std::string& key, const std::string& mes
 	{
 		report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
 	}
-	else if (ctx->getMessageAnswer( message, answer))
+	else if (ctx->getMessageAnswer( key, message, answer))
 	{
 		BOOSTER_DEBUG( DefaultConstants::PACKAGE())
 			<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), http_accept.c_str(), http_accept_charset.c_str());
