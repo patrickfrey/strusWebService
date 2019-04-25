@@ -71,7 +71,7 @@ private:
 	void report_answer( const strus::WebRequestAnswer& answer, bool with_content);
 
 	/// \brief Report a message (http status 200)
-	void report_message( const std::string& message);
+	void report_message( const std::string& key, const std::string& message);
 
 	/// \brief Initialize all dispatchers (called from constructor)
 	void init_dispatchers();

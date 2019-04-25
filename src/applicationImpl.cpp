@@ -196,7 +196,7 @@ void Application::exec_ping()
 	try
 	{
 		if (!handle_preflight_cors() || !check_request_method("GET")) return;	
-		report_message( _TXT("service is up and running"));
+		report_message( "reply", _TXT("service is up and running"));
 	}
 	CATCH_EXEC_ERROR();
 }
@@ -213,19 +213,19 @@ void Application::exec_version( std::string component)
 	else if (component == "analyzer")	{versionstr = STRUS_ANALYZER_VERSION_STRING;}
 	else if (component == "storage")	{versionstr = STRUS_STORAGE_VERSION_STRING;}
 	else if (component == "base")		{versionstr = STRUS_BASE_VERSION_STRING;}
-	report_message( versionstr);
+	report_message( "version", versionstr);
 }
 
 void Application::exec_version0()
 {
 	if (!handle_preflight_cors() || !check_request_method("GET")) return;
-	report_message( STRUS_WEBSERVICE_VERSION_STRING);
+	report_message( "version", STRUS_WEBSERVICE_VERSION_STRING);
 }
 
 void Application::exec_service_identifier()
 {
 	if (!handle_preflight_cors() || !check_request_method("GET")) return;
-	report_message( m_service->identifier());
+	report_message( "name", m_service->identifier());
 }
 
 bool Application::handle_preflight_cors()
@@ -349,7 +349,7 @@ static std::string form_tojson( const cppcms::http::request::form_type& form)
 	return content;
 }
 
-void Application::report_message( const std::string& message)
+void Application::report_message( const std::string& key, const std::string& message)
 {
 	strus::WebRequestAnswer answer;
 	std::string http_accept_charset = request().http_accept_charset();
