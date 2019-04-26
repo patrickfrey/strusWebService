@@ -40,9 +40,11 @@ sub printResultSearchIndex {
 	push( @result, ":searchindex","(" );
 	my @termtypes = getTermTypes( $storageurl);
 	foreach my $termtype( @termtypes) {
+		next if ($termtype eq "");
 		my @termvalues = Strus::Client::readResult( Strus::Client::selectResult( $reqresult[1], ("storage",$termtype,"value")), '@');
 		foreach my $termvalue( @termvalues)
 		{
+			next if ($termvalue eq "");
 			my $postingsurl = "$sindexurl/$termtype/$termvalue";
 			my @poreqresult = Strus::Client::issueRequest( "GET", "$postingsurl", undef);
 			if (!defined $poreqresult[1])
@@ -64,6 +66,7 @@ sub printResultForwardIndex {
 	push( @result, ":forwardindex","(" );
 	my @termtypes = getTermTypes( $storageurl);
 	foreach my $termtype( @termtypes) {
+		next if ($termtype eq "");
 		my $findexurl = "$storageurl/doc/$docid/findex/$termtype/list";
 		my @reqresult = Strus::Client::issueRequest( "GET", "$findexurl", undef);
 		if (!defined $reqresult[1])
@@ -105,6 +108,7 @@ sub printResultAttributes {
 		my %attributemap = Strus::Client::readResult( Strus::Client::selectResult( $reqresult[1], ("storage")), '%');
 		foreach my $attributekey( keys %attributemap)
 		{
+			next if ($attributekey eq "");
 			my $attributeval = $attributemap{ $attributekey};
 			push( @result, "(", ":name", "=$attributekey", ":value", "=$attributeval", ")");
 		}
@@ -127,6 +131,7 @@ sub printResultMetadata {
 		my %metadatamap = Strus::Client::readResult( Strus::Client::selectResult( $reqresult[1], ("storage")), '%');
 		foreach my $metadatakey( keys %metadatamap)
 		{
+			next if ($metadatakey eq "");
 			my $metadataval = $metadatamap{ $metadatakey};
 			push( @result, "(", ":name", "=$metadatakey", ":value", "=$metadataval", ")");
 		}
@@ -151,6 +156,7 @@ sub printResultAccess {
 			push( @result, ":access","(" );
 			foreach my $username( @usernames)
 			{
+				next if ($username eq "");
 				push( @result, "=$username" );
 			}
 			push( @result, ")" );

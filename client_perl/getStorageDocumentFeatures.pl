@@ -25,6 +25,7 @@ else
 	my @result = Strus::Client::readResult( Strus::Client::selectResult( $reqresult[1], ("storage","sindex",$feattype,"value")), '@');
 	foreach my $value( @result)
 	{
+		next if ($value eq "");
 		print "$value\n";
 	}
 }

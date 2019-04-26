@@ -22,6 +22,7 @@ push( @result, ":vstorage","(",":feature","(");
 foreach my $featurevalue( @featurevalues) {
 	$featurevalue = trim( $featurevalue);
 	next if ($featurevalue eq "");
+
 	my $url = "$storageurl/feature/$featurevalue";
 	my @valresult = Strus::Client::issueRequest( "GET", $url, undef);
 	if (!defined $valresult[1])
@@ -45,11 +46,18 @@ foreach my $featurevalue( @featurevalues) {
 			else
 			{
 				my @vector = Strus::Client::readResult( Strus::Client::selectResult( $vecresult[1], ("vstorage","value")), '@');
-				push( @result, "(", ":name", "=$featurevalue", ":type", "=$featuretype", ":vector", "(" );
-				foreach my $scalar (@vector) {
-					push( @result, "=$scalar" );
+				if ($#vector < 0)
+				{
+					push( @result, "(", ":name", "=$featurevalue", ":type", "=$featuretype");
 				}
-				push( @result, ")", ")" );
+				else
+				{
+					push( @result, "(", ":name", "=$featurevalue", ":type", "=$featuretype", ":vector", "(" );
+					foreach my $scalar (@vector) {
+						push( @result, "=$scalar" );
+					}
+					push( @result, ")", ")" );
+				}
 			}
 		}
 	}
