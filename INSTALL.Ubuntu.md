@@ -91,5 +91,7 @@ Install packages with 'apt-get'/aptitude.
 	apt install cpanminus
 	cpanm JSON
 	cpanm REST::Client
+	cpanm URI::Encode
+
 
 

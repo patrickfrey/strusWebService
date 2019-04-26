@@ -193,10 +193,20 @@ sub printResult {
 	}
 }
 
+
+my %jsonEncodeValueMap = (
+	"\b" => "\\b",
+	"\f" => "\\f",
+	"\n" => "\\n",
+	"\r" => "\\r",
+	"\t" => "\\t",
+	"\"" => "\\\"",
+	"\\" => "\\\\"
+);
+
 sub jsonEncodeValue {
 	my ($str) = @_;
-	 
-	$str =~ s/([\\][bfnrt"\\])/\\\\$1/g;
+	$str =~ s/([\b\f\n\r\t\"\\])/$jsonEncodeValueMap{$1}/g;
 	return $str;
 }
 
