@@ -21,7 +21,7 @@ push( @result, ":vstorage","(",":feature","(");
 
 foreach my $featurevalue( @featurevalues) {
 	$featurevalue = trim( $featurevalue);
-	if ($featurevalue eq "") next;
+	next if ($featurevalue eq "");
 	my $url = "$storageurl/feature/$featurevalue";
 	my @valresult = Strus::Client::issueRequest( "GET", $url, undef);
 	if (!defined $valresult[1])
@@ -34,7 +34,7 @@ foreach my $featurevalue( @featurevalues) {
 		foreach my $featuretype( @featuretypes)
 		{
 			$featuretype = trim( $featuretype);
-			if ($featuretype eq "") next;
+			next if ($featuretype eq "");
 
 			my $vecurl = "$url/$featuretype";
 			my @vecresult = Strus::Client::issueRequest( "GET", $vecurl, undef);
