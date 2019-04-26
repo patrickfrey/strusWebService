@@ -7,6 +7,8 @@ use warnings;
 
 use Strus::Client;
 
+sub  trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };
+
 # Main:
 if ($#ARGV <= 0) {
     print "usage: $0 <url> <inputfeatures>\n";
@@ -18,6 +20,8 @@ my @result = ();
 push( @result, ":vstorage","(",":feature","(");
 
 foreach my $featurevalue( @featurevalues) {
+	$featurevalue = trim( $featurevalue);
+	if ($featurevalue eq "") next;
 	my $url = "$storageurl/feature/$featurevalue";
 	my @valresult = Strus::Client::issueRequest( "GET", $url, undef);
 	if (!defined $valresult[1])
@@ -29,6 +33,9 @@ foreach my $featurevalue( @featurevalues) {
 		my @featuretypes = Strus::Client::readResult( Strus::Client::selectResult( $valresult[1], ("vstorage","link")), '@');
 		foreach my $featuretype( @featuretypes)
 		{
+			$featuretype = trim( $featuretype);
+			if ($featuretype eq "") next;
+
 			my $vecurl = "$url/$featuretype";
 			my @vecresult = Strus::Client::issueRequest( "GET", $vecurl, undef);
 			if (!defined $vecresult[1])
