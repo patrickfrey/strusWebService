@@ -6,6 +6,8 @@ use strict;
 use warnings;
 
 use Strus::Client;
+use URI::Encode;
+
 
 # Main:
 if ($#ARGV <= 0) {
@@ -14,6 +16,8 @@ if ($#ARGV <= 0) {
 }
 my $storageurl = $ARGV[0];
 my $docid = $ARGV[1];
+my $uri     = URI::Encode->new( { encode_reserved => 0 } );
+my $docurl = "$storageurl/doc/" . $uri->encode($docid);
 
 my @result = ();
 
@@ -27,10 +31,12 @@ sub getTermTypes {
 	}
 	return Strus::Client::readResult( Strus::Client::selectResult( $reqresult[1], ("storage","value")), '@');
 }
+my @termtypes = getTermTypes( $storageurl);
+
 
 sub printResultSearchIndex {
-	my ($storageurl, $docid) = @_;
-	my $sindexurl = "$storageurl/doc/$docid/sindex";
+	my ($docurl) = @_;
+	my $sindexurl = "$docurl/sindex";
 	my @reqresult = Strus::Client::issueRequest( "GET", "$sindexurl", undef);
 	if (!defined $reqresult[1])
 	{
@@ -38,7 +44,6 @@ sub printResultSearchIndex {
 		exit $reqresult[0];
 	}
 	push( @result, ":searchindex","(" );
-	my @termtypes = getTermTypes( $storageurl);
 	foreach my $termtype( @termtypes) {
 		next if ($termtype eq "");
 		my @termvalues = Strus::Client::readResult( Strus::Client::selectResult( $reqresult[1], ("storage",$termtype,"value")), '@');
@@ -62,12 +67,11 @@ sub printResultSearchIndex {
 }
 
 sub printResultForwardIndex {
-	my ($storageurl, $docid) = @_;
+	my ($docurl) = @_;
 	push( @result, ":forwardindex","(" );
-	my @termtypes = getTermTypes( $storageurl);
 	foreach my $termtype( @termtypes) {
 		next if ($termtype eq "");
-		my $findexurl = "$storageurl/doc/$docid/findex/$termtype/list";
+		my $findexurl = "$docurl/findex/$termtype/list";
 		my @reqresult = Strus::Client::issueRequest( "GET", "$findexurl", undef);
 		if (!defined $reqresult[1])
 		{
@@ -94,10 +98,10 @@ sub printResultForwardIndex {
 }
 
 sub printResultAttributes {
-	my ($storageurl, $docid) = @_;
+	my ($docurl) = @_;
 	push( @result, ":attribute","(" );
 
-	my $attributeurl = "$storageurl/doc/$docid/attribute";
+	my $attributeurl = "$docurl/attribute";
 	my @reqresult = Strus::Client::issueRequest( "GET", "$attributeurl", undef);
 	if (!defined $reqresult[1])
 	{
@@ -117,10 +121,10 @@ sub printResultAttributes {
 }
 
 sub printResultMetadata {
-	my ($storageurl, $docid) = @_;
+	my ($docurl) = @_;
 	push( @result, ":metadata","(" );
 
-	my $metadataurl = "$storageurl/doc/$docid/metadata";
+	my $metadataurl = "$docurl/metadata";
 	my @reqresult = Strus::Client::issueRequest( "GET", "$metadataurl", undef);
 	if (!defined $reqresult[1])
 	{
@@ -140,9 +144,9 @@ sub printResultMetadata {
 }
 
 sub printResultAccess {
-	my ($storageurl, $docid) = @_;
+	my ($docurl) = @_;
 
-	my $accessurl = "$storageurl/doc/$docid/access";
+	my $accessurl = "$docurl/access";
 	my @reqresult = Strus::Client::issueRequest( "GET", "$accessurl", undef);
 	if (!defined $reqresult[1])
 	{
@@ -168,11 +172,11 @@ sub printResultAccess {
 push( @result, ":storage", "(", ":document", "(" );
 push( @result, ":id", "=$docid" );
 
-printResultSearchIndex( $storageurl, $docid);
-printResultForwardIndex( $storageurl, $docid);
-printResultAttributes( $storageurl, $docid);
-printResultMetadata( $storageurl, $docid);
-printResultAccess( $storageurl, $docid);
+printResultSearchIndex( $docurl);
+printResultForwardIndex( $docurl);
+printResultAttributes( $docurl);
+printResultMetadata( $docurl);
+printResultAccess( $docurl);
 push( @result, ")", ")");
 
 print( Strus::Client::serializationToJson( @result));

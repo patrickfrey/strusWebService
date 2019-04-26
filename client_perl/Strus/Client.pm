@@ -193,16 +193,6 @@ sub printResult {
 	}
 }
 
-my %jsonEncodeValueMap = (
-	b => '\b',
-	f => '\f',
-	n => '\n',
-	r => '\r',
-	t => '\t',
-	'"' => '\"',
-	'\\' => '\\',
-);
-
 sub jsonEncodeValue {
 	my ($str) = @_;
 	 
