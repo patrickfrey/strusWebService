@@ -193,6 +193,23 @@ sub printResult {
 	}
 }
 
+my %jsonEncodeValueMap = (
+	b => '\b',
+	f => '\f',
+	n => '\n',
+	r => '\r',
+	t => '\t',
+	'"' => '\"',
+	'\\' => '\\',
+);
+
+sub jsonEncodeValue {
+	my ($str) = @_;
+	 
+	$str =~ s/([\\][bfnrt"\\])/\\\\$1/g;
+	return $str;
+}
+
 sub serializationToJson {
 	my (@serialization) = @_;
 	my $name = undef;
@@ -202,7 +219,7 @@ sub serializationToJson {
 	for (my $idx=0; $idx <= $#serialization; $idx++) {
 		my $elem = $serialization[ $idx];
 		my $tag = substr( $elem, 0, 1);
-		my $val = substr( $elem, 1);
+		my $val = jsonEncodeValue( substr( $elem, 1));
 		if ($tag eq "(")
 		{
 			if (defined $name)
