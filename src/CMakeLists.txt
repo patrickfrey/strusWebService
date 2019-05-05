@@ -3,6 +3,7 @@ set( source_files
 	strusWebService.cpp
 	configUtils.cpp
 	applicationImpl.cpp
+	requestContextImpl.cpp
 	serviceClosure.cpp
 	${WEBSERVICE_GEN_SOURCE_DIR}/internationalization.cpp
 )
