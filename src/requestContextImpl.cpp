@@ -12,8 +12,9 @@
 #include "requestContextImpl.hpp"
 #include "serviceClosure.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/unique_ptr.hpp"
+#include "strus/webRequestContextInterface.hpp"
 #include <cppcms/application.h>
-#include <cppcms/http_response.h>
 
 using namespace strus;
 using namespace strus::webservice;
@@ -117,7 +118,6 @@ void RequestContextImpl::report_error_fmt( int httpstatus, int apperrorcode, con
 	if (len >= sizeof(buf)) buf[ sizeof(buf)-1] = 0;
 	report_error( httpstatus, apperrorcode, buf);
 	va_end (ap);
-	response().finalize();
 }
 
 void RequestContextImpl::report_ok( const char* status, int httpstatus, const char* message)
@@ -148,6 +148,39 @@ void RequestContextImpl::report_answer( const strus::WebRequestAnswer& answer, b
 	}
 	response().finalize();
 }
+
+void RequestContextImpl::report_message( const std::string& key, const std::string& message)
+{
+	strus::WebRequestAnswer answer;
+	std::string http_accept_charset = request().http_accept_charset();
+	std::string http_accept = request().http_accept();
+	std::string html_base_href;
+	if (!m_serviceClosure->http_server_url().empty())
+	{
+		html_base_href = m_serviceClosure->http_server_url();
+	}
+	else
+	{
+		html_base_href = std::string("http://") + request().http_host() + "/";
+	}
+	strus::unique_ptr<strus::WebRequestContextInterface> ctx(
+		m_serviceClosure->requestHandler()->createContext( http_accept_charset.c_str(), http_accept.c_str(), html_base_href.c_str(), answer));
+	if (!ctx.get())
+	{
+		report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
+	}
+	else if (ctx->getMessageAnswer( key, message, answer))
+	{
+		BOOSTER_DEBUG( DefaultConstants::PACKAGE())
+			<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), http_accept.c_str(), http_accept_charset.c_str());
+		report_answer( answer, true/*do_reply_content*/);
+	}
+	else
+	{
+		report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
+	}
+}
+
 
 
 

@@ -27,11 +27,11 @@ namespace webservice {
 ///\brief Forward declaration
 class ServiceClosure;
 
-class Application
+class ApplicationImpl
 	:public cppcms::application
 {
 public:
-	explicit Application( cppcms::service& service_, ServiceClosure* serviceImpl_);
+	explicit ApplicationImpl( cppcms::service& service_, ServiceClosure* serviceImpl_);
 
 private:/*Methods called by dispatcher:*/
 	void exec_quit();
@@ -43,35 +43,13 @@ private:/*Methods called by dispatcher:*/
 
 private:
 	// Handler method variants distinguished by number of arguments:
-	typedef void(Application::*UrlHandlerMethod1)(std::string);
-	typedef void(Application::*UrlHandlerMethod0)();
+	typedef void(ApplicationImpl::*UrlHandlerMethod1)(std::string);
+	typedef void(ApplicationImpl::*UrlHandlerMethod0)();
 
 	/// \brief Map an URL with a main path dir and 1 string argument as subdirectory
 	void urlmap( const char* dir, UrlHandlerMethod1 handler, bool more=false);
 	/// \brief Map an URL with a main path dir and no string arguments as subdirectories
 	void urlmap( const char* dir, UrlHandlerMethod0 handler);
-
-	/// \brief Set response content
-	void response_content( const strus::WebRequestContent& content, bool with_content);
-
-	/// \brief Set response content header
-	void response_content_header( const char* charset, const char* doctype, std::size_t blobsize);
-	/// \brief Set response content
-	void response_content( const char* charset, const char* doctype, const char* blob, std::size_t blobsize);
-	/// \brief Set response message
-	void response_message( const char* messagetype, const char* messagestr);
-
-	/// \brief Report error reply
-	void report_error( int httpstatus, int apperror, const char* message);
-	/// \brief Report error reply
-	void report_error_fmt( int httpstatus, int apperror, const char* fmt, ...);
-	/// \brief Report successful protocol only command
-	void report_ok( const char* status, int httpstatus, const char* message);
-	/// \brief Report content
-	void report_answer( const strus::WebRequestAnswer& answer, bool with_content);
-
-	/// \brief Report a message (http status 200)
-	void report_message( const std::string& key, const std::string& message);
 
 	/// \brief Initialize all dispatchers (called from constructor)
 	void init_dispatchers();
@@ -88,7 +66,7 @@ private:
 	bool test_request_method( const char* type);
 
 private:
-	ServiceClosure* m_service;
+	ServiceClosure* m_serviceClosure;
 };
 
 }}//namespace strus::webservice

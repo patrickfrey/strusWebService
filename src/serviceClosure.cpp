@@ -233,7 +233,7 @@ void ServiceClosure::loadCorsConfiguration( const cppcms::json::value& config)
 
 void ServiceClosure::mount_applications()
 {
-	if (m_service) m_service->applications_pool().mount( cppcms::applications_factory<Application>( this));
+	if (m_service) m_service->applications_pool().mount( cppcms::applications_factory<ApplicationImpl>( this));
 }
 
 void ServiceClosure::clear()

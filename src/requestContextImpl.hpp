@@ -15,6 +15,8 @@
 #include "strus/webRequestContent.hpp"
 #include <cppcms/application.h>
 #include <cppcms/http_context.h>
+#include <cppcms/http_request.h>
+#include <cppcms/http_response.h>
 #include <string>
 
 namespace strus {
@@ -37,15 +39,31 @@ public:
 	{
 		return m_appContext->response();
 	}
+	cppcms::http::request& request() const
+	{
+		return m_appContext->request();
+	}
 
+	/// \brief Set response content header
 	void response_content_header( const char* charset, const char* doctype, std::size_t blobsize);
-	void response_content( const char* charset, const char* doctype, const char* blob, std::size_t blobsize);
+	/// \brief Set response content
 	void response_content( const strus::WebRequestContent& content, bool with_content);
+	/// \brief Set response content
+	void response_content( const char* charset, const char* doctype, const char* blob, std::size_t blobsize);
+	/// \brief Set response message
 	void response_message( const char* messagetype, const char* messagestr);
-	void report_error( int httpstatus, int apperrorcode, const char* message);
-	void report_error_fmt( int httpstatus, int apperrorcode, const char* fmt, ...);
+
+	/// \brief Report error reply
+	void report_error( int httpstatus, int apperror, const char* message);
+	/// \brief Report error reply
+	void report_error_fmt( int httpstatus, int apperror, const char* fmt, ...);
+	/// \brief Report successful protocol only command
 	void report_ok( const char* status, int httpstatus, const char* message);
+	/// \brief Report content
 	void report_answer( const strus::WebRequestAnswer& answer, bool with_content);
+
+	/// \brief Report a message (http status 200)
+	void report_message( const std::string& key, const std::string& message);
 
 private:
 	AppContext* m_appContext;
