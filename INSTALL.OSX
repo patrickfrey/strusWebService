@@ -5,11 +5,9 @@ OSX
 
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-# 1) Install required packages:
-
 # 2.1) Install required packages:
 
-brew install cmake boost snappy leveldb
+brew install cmake boost snappy leveldb curl-openssl
 
 # 2.2) Install packages required if strus vector is used:
 

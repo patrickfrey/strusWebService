@@ -13,7 +13,7 @@ Install packages with 'apt-get'/aptitude.
 
 ## Required packages
 	boost-all >= 1.57
-	snappy-dev leveldb-dev libuv-dev, cppcms >= 1.0, curl (e.g. libcurl4-openssl-dev)
+	snappy-dev leveldb-dev libuv-dev cppcms >= 1.0 libcurl4-openssl-dev
 
 ### Packages required by cppcms
 	zlib1g-dev

@@ -20,9 +20,13 @@ static void printUsage()
 }
 
 template <typename DATA>
-static CURLcode set_curl_opt( CURL *curl, CURLoption opt, const DATA& data)
+static void set_curl_opt( CURL *curl, CURLoption opt, const DATA& data)
 {
-	return curl_easy_setopt( curl, opt, data);
+	CURLcode res = curl_easy_setopt( curl, opt, data);
+	if (res != CURLE_OK)
+	{
+		throw std::runtime_error( strus::string_format( "failed set socket option: %s", curl_easy_strerror(res)));
+	}
 }
 
 static void set_http_header( struct curl_slist*& headers, const char* name, const std::string& value)
@@ -30,6 +34,7 @@ static void set_http_header( struct curl_slist*& headers, const char* name, cons
 	char buf[1024];
 	if ((int)sizeof(buf) < std::snprintf( buf, sizeof(buf), "%s: %s", name, value.c_str())) throw std::bad_alloc();
 	headers = curl_slist_append( headers, buf);
+	if (!headers) throw std::bad_alloc();
 	if (g_verbose) std::cerr << "* " << buf << std::endl;
 }
 
@@ -37,10 +42,16 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdat
 {
 	size_t nn = size*nmemb;
 	std::string* output = (std::string*)userdata;
-	output->append( (char*)ptr, nn);
+	try
+	{
+		output->append( (char*)ptr, nn);
+	}
+	catch (...)
+	{
+		return 0;
+	}
 	return nn;
 }
-
 
 
 struct Request
@@ -97,7 +108,6 @@ struct Request
 			set_curl_opt( curl, CURLOPT_HTTPHEADER, headers);
 			set_curl_opt( curl, CURLOPT_POSTFIELDSIZE, content.size());
 			set_curl_opt( curl, CURLOPT_POSTFIELDS, content.c_str());
-			std::string output;
 			set_curl_opt( curl, CURLOPT_WRITEDATA, &response.content);
 			set_curl_opt( curl, CURLOPT_WRITEFUNCTION, write_callback); 
 			set_curl_opt( curl, CURLOPT_FAILONERROR, 0);

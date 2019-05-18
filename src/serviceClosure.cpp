@@ -100,6 +100,9 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 		m_put_configdir = config.get( "data.configdir", DefaultConstants::DefaultConstants::AUTOSAVE_CONFIG_DIR());
 		m_http_server_name = config.get( "http.server", DefaultConstants::DefaultConstants::HTTP_SERVER_NAME());
 		m_http_script_name = config.get( "http.script", DefaultConstants::DefaultConstants::HTTP_SCRIPT_NAME());
+		int nofDelegateTotalConnections = config.get( "security.delegate_connections", DefaultConstants::DefaultConstants::MAX_DELEGATE_CONNECTIONS());
+		int nofDelegateHostConnections = nofDelegateTotalConnections; //... nof host conn same as total nof conn
+
 		if (!m_http_server_name.empty())
 		{
 			if (!url_has_protocol_prefix( m_http_server_name))
@@ -123,7 +126,10 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 		}
 		std::string requestLogFilename = config.get( "debug.request_file", DefaultConstants::REQUEST_LOG_FILE());
 		m_requestLogger = new strus::WebRequestLogger( requestLogFilename, verbose, logMask, logStructDepth, nofThreads+1, m_service->process_id(), nofProcs);
-		m_requestHandler = strus::createWebRequestHandler( m_requestLogger, m_html_head, m_put_configdir, configstr, max_idle_time, transactionmap_slot_size, m_errorhnd);
+		m_requestHandler = strus::createWebRequestHandler(
+					m_requestLogger, m_html_head, m_put_configdir, configstr,
+					max_idle_time, nofDelegateTotalConnections, nofDelegateHostConnections,
+					transactionmap_slot_size, m_errorhnd);
 		if (!m_requestHandler) throw std::runtime_error( m_errorhnd->fetchError());
 		loadCorsConfiguration( config);
 		loadProtocolConfiguration( config);

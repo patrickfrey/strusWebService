@@ -35,6 +35,7 @@ struct DefaultConstants
 	static const int HOUSKEEPING_TIMER_INTERVAL() {return 10;}
 	static const int TRANSACTION_MAX_IDLE_TIME() {return 120;}
 	static const int TRANSACTION_MAP_SLOT_SIZE() {return 100;}
+	static const int MAX_DELEGATE_CONNECTIONS() {return 32;}
 	static const std::string CORS_AGE() {return "10";}
 	static const std::string DEFAULT_SERVICE_NAME() {return "strus";}
 	static const char* HTML_DEFAULT_STYLE()
