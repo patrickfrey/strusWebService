@@ -106,8 +106,11 @@ for i in $DEPS; do
 	git submodule update --init --recursive
 	git submodule foreach --recursive git checkout master
 	git submodule foreach --recursive git pull
-
-	build_strus_project ""
+	if test "x_$i" = "x_strusBindings"; then
+		build_strus_project "-DWITH_WEBREQUST=YES"
+	else
+		build_strus_project ""
+	fi
 	cd ..
 done
 
