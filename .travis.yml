@@ -2,9 +2,11 @@ language: cpp
 matrix:
   include:
     - os: linux
+      dist: xenial
       compiler: gcc
       env: STRUS_WITH_VECTOR=NO STRUS_WITH_PATTERN=NO STRUS_WITH_WEBSERVICE=YES
     - os: linux
+      dist: xenial
       compiler: clang
       env: STRUS_WITH_VECTOR=NO STRUS_WITH_PATTERN=NO STRUS_WITH_WEBSERVICE=YES
     - os: osx
