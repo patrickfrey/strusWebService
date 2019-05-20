@@ -27,7 +27,8 @@ ln -s /usr/local/opt/gettext/bin/* /usr/local/bin/.
 # 4.1) Build and install cppcms version 1.0.5 from source
 
 # 4.2) Build dependent strus packages
-# See installation of projects strusBase,strusAnalyzer,strusPattern,strusVector,strusRpc,strusTrace,strusModule,strusBindings
+# See installation of projects strusBase,strusAnalyzer,strusPattern,strusVector,strusRpc,strusTrace,strusModule,strusBindings.
+# strusBindings has to be built with -DWITH_WEBREQUEST=YES
 
 # 5) Then build the strusWebservice as follows
 

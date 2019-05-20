@@ -28,7 +28,7 @@ Install packages with 'apt-get'/aptitude.
 	make install
 
 # Strus prerequisite packages to install before
-	strusBase strus strusAnalyzer strusTrace strusModule strusRpc strusBindings
+	strusBase strus strusAnalyzer strusTrace strusModule strusRpc strusBindings (built with -DWITH_WEBREQUEST=YES)
 
 # Configure build and install strus prerequisite packages with GNU C/C++
 	With strusVector and strusPattern enabled:
