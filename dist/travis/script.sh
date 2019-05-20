@@ -86,7 +86,7 @@ wget https://sourceforge.net/projects/cppcms/files/cppcms/1.0.5/cppcms-1.0.5.tar
 bzip2 -d cppcms-1.0.5.tar.bz2
 tar -xvf cppcms-1.0.5.tar
 cd cppcms-1.0.5
-cmake .
+cmake -DCMAKE_CXX_FLAGS="-Wno-error=deprecated-declarations" .
 sudo make install
 cd ..
 cd $PROJECT
