@@ -107,7 +107,7 @@ for i in $DEPS; do
 	git submodule foreach --recursive git checkout master
 	git submodule foreach --recursive git pull
 	if test "x_$i" = "x_strusBindings"; then
-		build_strus_project "-DWITH_WEBREQUST=YES"
+		build_strus_project "-DWITH_WEBREQUEST=YES"
 	else
 		build_strus_project ""
 	fi
