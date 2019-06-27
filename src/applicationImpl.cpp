@@ -18,6 +18,7 @@
 #include "strus/lib/error.hpp"
 #include "strus/webRequestAnswer.hpp"
 #include "strus/base/local_ptr.hpp"
+#include "strus/reference.hpp"
 #include "internationalization.hpp"
 #include "defaultContants.hpp"
 #include "versionWebService.hpp"
@@ -291,7 +292,7 @@ void ApplicationImpl::exec_request( std::string path)
 				html_base_href.push_back( '/');
 			}
 		}
-		strus::unique_ptr<strus::WebRequestContextInterface> ctx(
+		strus::Reference<strus::WebRequestContextInterface> ctx(
 			m_serviceClosure->requestHandler()->createContext( http_accept_charset.c_str(), http_accept.c_str(), html_base_href.c_str(), answer));
 		if (!ctx.get())
 		{
@@ -344,8 +345,9 @@ void ApplicationImpl::exec_request( std::string path)
 					_TXT("%s Request content type '%s', charset '%s'"),
 					request_method.c_str(), content.doctype(), content.charset());
 		}
+		std::vector<WebRequestDelegateRequest> delegates;
 		// Execute request:
-		if (ctx->executeRequest( request_method.c_str(), path.c_str(), content, answer))
+		if (ctx->executeRequest( request_method.c_str(), path.c_str(), content, answer, delegates))
 		{
 			BOOSTER_DEBUG( DefaultConstants::PACKAGE())
 				<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), http_accept.c_str(), http_accept_charset.c_str());
