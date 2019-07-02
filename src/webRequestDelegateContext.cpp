@@ -21,7 +21,7 @@ void WebRequestDelegateContext::putAnswer( const WebRequestAnswer& status)
 	{
 		if (status.ok() && status.httpstatus() >= 200 && status.httpstatus() < 300)
 		{
-			m_requestContext->executeSchemaPartialRequest( answerSchema.c_str(), status.content(), m_answer);
+			m_requestContext->returnDelegateRequestAnswer( answerSchema.c_str(), status.content(), m_answer);
 		}
 		else
 		{
@@ -35,7 +35,7 @@ void WebRequestDelegateContext::putAnswer( const WebRequestAnswer& status)
 		if (m_answer.ok())
 		{
 			//... last delegate request reply
-			m_requestContext->executeSchemaPartialRequest( answerSchema.c_str(), WebRequestContent(), m_answer);
+			m_requestContext->returnDelegateRequestAnswer( answerSchema.c_str(), WebRequestContent(), m_answer);
 		}
 		RequestContextImpl appcontext( *m_httpContext, m_serviceClosure);
 		appcontext.report_answer( m_answer, true);
