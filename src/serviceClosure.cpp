@@ -125,16 +125,23 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 			}
 		}
 		std::string requestLogFilename = config.get( "debug.request_file", DefaultConstants::REQUEST_LOG_FILE());
-		m_requestLogger = new strus::WebRequestLogger( requestLogFilename, verbose, logMask, logStructDepth, nofThreads+1, m_service->process_id(), nofProcs);
+		m_requestLogger = new strus::WebRequestLogger(
+					requestLogFilename,
+					verbose, logMask, logStructDepth, nofThreads+1,
+					m_service->process_id(), nofProcs);
+		int timeout = std::max( max_idle_time/20, 10);
+		m_eventloop = strus::createCurlEventLoop( 
+					m_requestLogger,
+					timeout, nofDelegateTotalConnections, nofDelegateHostConnections,
+					m_errorhnd);
 		m_requestHandler = strus::createWebRequestHandler(
-					m_requestLogger, m_html_head, m_put_configdir, configstr,
-					max_idle_time, nofDelegateTotalConnections, nofDelegateHostConnections,
-					transactionmap_slot_size, m_errorhnd);
+					m_eventloop, m_requestLogger, m_html_head, m_put_configdir, configstr,
+					max_idle_time, transactionmap_slot_size, m_errorhnd);
 		if (!m_requestHandler) throw std::runtime_error( m_errorhnd->fetchError());
 		loadCorsConfiguration( config);
 		loadProtocolConfiguration( config);
 
-		if (!m_requestHandler->start())
+		if (!m_eventloop->start())
 		{
 			throw std::runtime_error( _TXT("failed to start background process for garbage collector"));
 		}
@@ -247,6 +254,7 @@ void ServiceClosure::clear()
 	if (m_service) {m_service->~service(); m_service = 0;}
 	if (m_requestLogger) {delete m_requestLogger; m_requestLogger = 0;}
 	if (m_requestHandler) {delete m_requestHandler; m_requestHandler = 0;}
+	if (m_eventloop) {delete m_eventloop; m_eventloop=0;}
 	if (m_errorhnd) {delete m_errorhnd; m_errorhnd = 0;}
 
 	m_cors_hosts.clear();

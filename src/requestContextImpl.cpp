@@ -169,15 +169,12 @@ void RequestContextImpl::report_message( const std::string& key, const std::stri
 	{
 		report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
 	}
-	else if (ctx->getMessageAnswer( key, message, answer))
+	else
 	{
+		answer = ctx->buildSimpleRequestAnswer( key, message);
 		BOOSTER_DEBUG( DefaultConstants::PACKAGE())
 			<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), http_accept.c_str(), http_accept_charset.c_str());
 		report_answer( answer, true/*do_reply_content*/);
-	}
-	else
-	{
-		report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
 	}
 }
 

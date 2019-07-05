@@ -8,39 +8,52 @@
 /// \brief Implementation of the context of a delegated request (sub request to another server)
 /// \file "webRequestDelegateContext.cpp"
 #include "webRequestDelegateContext.hpp"
+#include "serviceClosure.hpp"
 #include "internationalization.hpp"
+#include "requestContextImpl.hpp"
 #include "strus/base/string_format.hpp"
 
 using namespace strus;
 
-WebRequestDelegateContext::~WebRequestDelegateContext(){}
 void WebRequestDelegateContext::putAnswer( const WebRequestAnswer& status)
 {
 	unsigned int rc = m_requestContext.refcnt();
-	if (m_answer.ok())
+	bool success = true;
+	if (!m_answer.ok()) return;
+
+	if (status.ok() && status.httpstatus() >= 200 && status.httpstatus() < 300)
 	{
-		if (status.ok() && status.httpstatus() >= 200 && status.httpstatus() < 300)
+		if (!m_requestContext->returnDelegateRequestAnswer( m_schema.c_str(), status.content(), m_answer))
 		{
-			m_requestContext->returnDelegateRequestAnswer( answerSchema.c_str(), status.content(), m_answer);
-		}
-		else
-		{
-			m_answer = status;
-			std::string msg( strus::string_format( _TXT( "delegate request to %s failed"), m_url.c_str()));
-			m_answer.explain( msg.c_str());
+			success = false;
 		}
 	}
-	if (rc <= 1)
+	else
 	{
-		if (m_answer.ok())
+		m_answer = status;
+		success = false;
+	}
+	if (success)
+	{
+		if (rc <= 1)
 		{
 			//... last delegate request reply
-			m_requestContext->returnDelegateRequestAnswer( answerSchema.c_str(), WebRequestContent(), m_answer);
+			m_answer = m_requestContext->getRequestAnswer();
+			webservice::RequestContextImpl appcontext( *m_httpContext, m_serviceClosure);
+			appcontext.report_answer( m_answer, true);
+			m_httpContext->complete_response();
 		}
-		RequestContextImpl appcontext( *m_httpContext, m_serviceClosure);
+	}
+	else
+	{
+		webservice::RequestContextImpl appcontext( *m_httpContext, m_serviceClosure);
+		std::string msg( strus::string_format( _TXT( "delegate request to %s failed"), m_url.c_str()));
+		m_answer.explain( msg.c_str());
 		appcontext.report_answer( m_answer, true);
 		m_httpContext->complete_response();
 	}
+	m_httpContext.reset();
+	m_requestContext.reset();
 }
 
 

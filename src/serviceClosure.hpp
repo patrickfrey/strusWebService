@@ -14,6 +14,7 @@
 #include "webRequestLogger.hpp"
 #include "defaultContants.hpp"
 #include "strus/webRequestHandlerInterface.hpp"
+#include "strus/webRequestEventLoopInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "internationalization.hpp"
 #include <cppcms/service.h>
@@ -32,7 +33,7 @@ class ServiceClosure
 {
 public:
 	ServiceClosure( const std::string& configdir_, const cppcms::json::value& config, bool verbose)
-		:m_service(0),m_requestLogger(0),m_requestHandler(0),m_errorhnd(0),m_configdir(configdir_)
+		:m_service(0),m_requestLogger(0),m_eventloop(0),m_requestHandler(0),m_errorhnd(0),m_configdir(configdir_)
 		,m_cors_hosts(),m_cors_age(),m_html_head(),m_http_server_name(),m_http_script_name(),m_http_server_url(),m_put_configdir()
 		,m_cors_enabled(true),m_quit_enabled(false),m_debug_enabled(false),m_pretty_print(false)
 	{
@@ -51,7 +52,7 @@ public:
 	}
 	void shutdown()
 	{
-		m_requestHandler->stop();
+		m_eventloop->stop();
 		if (m_service) m_service->shutdown();
 	}
 	int threads_no()
@@ -131,6 +132,7 @@ private:
 	int m_service_mem[ (sizeof(cppcms::service) + sizeof(int) -1) / sizeof(int)];
 	cppcms::service* m_service;
 	strus::WebRequestLogger* m_requestLogger;
+	strus::WebRequestEventLoopInterface* m_eventloop;
 	strus::WebRequestHandlerInterface* m_requestHandler;
 	strus::ErrorBufferInterface* m_errorhnd;
 	std::string m_configdir;

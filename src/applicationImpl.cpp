@@ -22,6 +22,7 @@
 #include "internationalization.hpp"
 #include "defaultContants.hpp"
 #include "versionWebService.hpp"
+#include "webRequestDelegateContext.hpp"
 #include "strus/versionStorage.hpp"
 #include "strus/versionModule.hpp"
 #include "strus/versionRpc.hpp"
@@ -257,7 +258,7 @@ void ApplicationImpl::exec_request( std::string path)
 {
 	try
 	{
-		RequestContextImpl appcontext( context(), m_serviceClosure);		
+		RequestContextImpl appcontext( context(), m_serviceClosure);
 
 		// Set default locale:
 		context().locale( "en_US.UTF-8"); 
@@ -347,14 +348,37 @@ void ApplicationImpl::exec_request( std::string path)
 		}
 		std::vector<WebRequestDelegateRequest> delegates;
 		// Execute request:
-		if (ctx->executeRequest( request_method.c_str(), path.c_str(), content, answer, delegates))
+		if (ctx->executeRequest( request_method.c_str(), path.c_str(), content, delegates))
 		{
-			BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-				<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), http_accept.c_str(), http_accept_charset.c_str());
-			appcontext.report_answer( answer, do_reply_content);
+			if (delegates.empty())
+			{
+				answer = ctx->getRequestAnswer();
+				BOOSTER_DEBUG( DefaultConstants::PACKAGE())
+					<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), http_accept.c_str(), http_accept_charset.c_str());
+				appcontext.report_answer( answer, do_reply_content);
+			}
+			else
+			{
+				booster::shared_ptr<cppcms::http::context> httpContext( release_context());
+				std::vector<strus::WebRequestDelegateRequest>::const_iterator di = delegates.begin(), de = delegates.end();
+				for (; di != de; ++di)
+				{
+					std::string delegateContent( di->contentstr(), di->contentlen());
+
+					strus::Reference<strus::WebRequestDelegateContext> receiver(
+						new strus::WebRequestDelegateContext( m_serviceClosure, httpContext, ctx, di->url(), di->schema()));
+
+					if (!m_serviceClosure->requestHandler()->delegateRequest( di->url(), di->method(), delegateContent, receiver.release()))
+					{
+						appcontext.report_error( 500, ErrorCodeOutOfMem, _TXT("delegate request failed, out of memory"));
+						return;
+					}
+				}
+			}
 		}
 		else
 		{
+			answer = ctx->getRequestAnswer();
 			appcontext.report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
 			return;
 		}
