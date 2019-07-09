@@ -21,7 +21,7 @@ void WebRequestDelegateContext::putAnswer( const WebRequestAnswer& status)
 	bool success = true;
 	if (!m_answer.ok()) return;
 
-	if (status.ok() && status.httpstatus() >= 200 && status.httpstatus() < 300)
+	else if (status.ok() && status.httpstatus() >= 200 && status.httpstatus() < 300)
 	{
 		if (!m_requestContext->returnDelegateRequestAnswer( m_schema.c_str(), status.content(), m_answer))
 		{

@@ -346,11 +346,11 @@ void ApplicationImpl::exec_request( std::string path)
 					_TXT("%s Request content type '%s', charset '%s'"),
 					request_method.c_str(), content.doctype(), content.charset());
 		}
-		std::vector<WebRequestDelegateRequest> delegates;
+		std::vector<WebRequestDelegateRequest> delegateRequests;
 		// Execute request:
-		if (ctx->executeRequest( request_method.c_str(), path.c_str(), content, delegates))
+		if (ctx->executeRequest( request_method.c_str(), path.c_str(), content, delegateRequests))
 		{
-			if (delegates.empty())
+			if (delegateRequests.empty())
 			{
 				answer = ctx->getRequestAnswer();
 				BOOSTER_DEBUG( DefaultConstants::PACKAGE())
@@ -360,18 +360,26 @@ void ApplicationImpl::exec_request( std::string path)
 			else
 			{
 				booster::shared_ptr<cppcms::http::context> httpContext( release_context());
-				std::vector<strus::WebRequestDelegateRequest>::const_iterator di = delegates.begin(), de = delegates.end();
+				std::vector<strus::WebRequestDelegateRequest>::const_iterator di = delegateRequests.begin(), de = delegateRequests.end();
+				std::vector<strus::Reference<strus::WebRequestDelegateContext> > receivers;
 				for (; di != de; ++di)
 				{
-					std::string delegateContent( di->contentstr(), di->contentlen());
-
 					strus::Reference<strus::WebRequestDelegateContext> receiver(
 						new strus::WebRequestDelegateContext( m_serviceClosure, httpContext, ctx, di->url(), di->schema()));
+					reveivers.push_back( receiver);
+				}
+				int didx = 0;
+				di = delegateRequests.begin();
+
+				for (; di != de; ++di,++didx)
+				{
+					std::string delegateContent( di->contentstr(), di->contentlen());
+					strus::Reference<strus::WebRequestDelegateContext> receiver = receivers[ didx];
+					receivers[ didx].reset();
 
 					if (!m_serviceClosure->requestHandler()->delegateRequest( di->url(), di->method(), delegateContent, receiver.release()))
 					{
-						appcontext.report_error( 500, ErrorCodeOutOfMem, _TXT("delegate request failed, out of memory"));
-						return;
+						break;
 					}
 				}
 			}

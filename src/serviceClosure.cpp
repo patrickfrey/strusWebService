@@ -87,7 +87,7 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 
 		int logStructDepth = config.get( "debug.struct_depth", DefaultConstants::LOG_STRUCT_DEPTH());
 		int max_idle_time = config.get( "transactions.max_idle_time", DefaultConstants::TRANSACTION_MAX_IDLE_TIME());
-		int transactionmap_slot_size = DefaultConstants::TRANSACTION_MAP_SLOT_SIZE();
+		int transactions_per_second = config.get( "transactions.nof_per_sec", DefaultConstants::TRANSACTION_MAP_SLOT_SIZE());
 		int nofThreads = m_service->threads_no();
 		int nofProcs = m_service->procs_no();
 		if (nofProcs > 1)
@@ -136,7 +136,7 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 					m_errorhnd);
 		m_requestHandler = strus::createWebRequestHandler(
 					m_eventloop, m_requestLogger, m_html_head, m_put_configdir, configstr,
-					max_idle_time, transactionmap_slot_size, m_errorhnd);
+					max_idle_time, transactions_per_second, m_errorhnd);
 		if (!m_requestHandler) throw std::runtime_error( m_errorhnd->fetchError());
 		loadCorsConfiguration( config);
 		loadProtocolConfiguration( config);
