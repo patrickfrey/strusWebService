@@ -17,7 +17,7 @@ my $storageurl = $ARGV[0];
 my $docid = $ARGV[1];
 my $feattype = $ARGV[2];
 
-my $uri     = URI::Encode->new( { encode_reserved => 0 } );
+my $uri     = URI::Encode->new( { encode_reserved => 1 } );
 my $docurl = "$storageurl/doc/" . $uri->encode($docid);
 
 my @reqresult = Strus::Client::issueRequest( "GET", $docurl, undef);

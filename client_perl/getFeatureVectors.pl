@@ -8,7 +8,7 @@ use warnings;
 use Strus::Client;
 use URI::Encode;
 
-my $uri = URI::Encode->new( { encode_reserved => 0 } );
+my $uri = URI::Encode->new( { encode_reserved => 1 } );
 sub  trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };
 
 # Main:
