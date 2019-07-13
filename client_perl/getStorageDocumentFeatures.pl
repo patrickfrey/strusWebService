@@ -24,6 +24,7 @@ my @reqresult = Strus::Client::issueRequest( "GET", $docurl, undef);
 if (!defined $reqresult[1])
 {
 	print STDERR "ERR $reqresult[0]\n";
+	exit 3;
 }
 else
 {

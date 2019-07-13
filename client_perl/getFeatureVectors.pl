@@ -6,7 +6,9 @@ use strict;
 use warnings;
 
 use Strus::Client;
+use URI::Encode;
 
+my $uri = URI::Encode->new( { encode_reserved => 0 } );
 sub  trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };
 
 # Main:
@@ -23,7 +25,7 @@ foreach my $featurevalue( @featurevalues) {
 	$featurevalue = trim( $featurevalue);
 	next if ($featurevalue eq "");
 
-	my $url = "$storageurl/feature/$featurevalue";
+	my $url = "$storageurl/feature/" . $uri->encode( $featurevalue);
 	my @valresult = Strus::Client::issueRequest( "GET", $url, undef);
 	if (!defined $valresult[1])
 	{
@@ -37,7 +39,7 @@ foreach my $featurevalue( @featurevalues) {
 			$featuretype = trim( $featuretype);
 			next if ($featuretype eq "");
 
-			my $vecurl = "$url/$featuretype";
+			my $vecurl = "$url/" . $uri->encode( $featuretype);
 			my @vecresult = Strus::Client::issueRequest( "GET", $vecurl, undef);
 			if (!defined $vecresult[1])
 			{
@@ -48,7 +50,7 @@ foreach my $featurevalue( @featurevalues) {
 				my @vector = Strus::Client::readResult( Strus::Client::selectResult( $vecresult[1], ("vstorage","value")), '@');
 				if ($#vector < 0)
 				{
-					push( @result, "(", ":name", "=$featurevalue", ":type", "=$featuretype");
+					push( @result, "(", ":name", "=$featurevalue", ":type", "=$featuretype", ")");
 				}
 				else
 				{
