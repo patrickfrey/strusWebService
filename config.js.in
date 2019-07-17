@@ -14,8 +14,6 @@
 	"extensions" : {
 		"directory" : "@STRUS_MODULE_PATH@",
 		"modules" : [
-			"modstrus_analyzer_pattern",
-			"modstrus_storage_vector_std"
 		]
 	},
 

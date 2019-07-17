@@ -62,6 +62,7 @@ set( WEBSERVICE_CONFIG_DIR                    "${CMAKE_CURRENT_BINARY_DIR}" )
 # Configure files
 set( STRUS_SERVER_PORT 8080 )
 set( STRUS_SERVER_ID  "strus" )
+
 configure_file( "${PROJECT_SOURCE_DIR}/config.js.in"  "${CMAKE_CURRENT_BINARY_DIR}/config.js"  @ONLY )
 install( FILES "${CMAKE_CURRENT_BINARY_DIR}/config.js" DESTINATION "${STRUS_DESTINATION_CONFIG}" COMPONENT config )
 
