@@ -10,14 +10,14 @@ use JSON;
 
 my $section = undef;
 my %sectionNameMap = (
-    "content" => "subcontent",
-    "document" => "subdoc",
+    "content" => "content",
+    "document" => "document",
     "searchindex" => "search",
     "forwardindex"  => "forward",
     "metadata"  => "metadata",
     "attribute"  => "attribute",
     "patternlexem" => "lexem",
-    "aggregator"  => "aggregate",
+    "aggregator"  => "aggregator",
     "patternmatch" => "NOT_IMPLEMENTED"
 );
 
@@ -41,8 +41,8 @@ sub OPEN {
 	push( @cntstk, 0);
 }
 sub CLOSE {
-	print( "\n$indentstr}");
 	$indentstr = substr( $indentstr, 0, -1);
+	print( "\n$indentstr}");
 	pop( @cntstk);
 }
 sub OPENAR {
@@ -51,8 +51,8 @@ sub OPENAR {
 	push( @cntstk, 0);
 }
 sub CLOSEAR {
-	print( "\n$indentstr]");
 	$indentstr = substr( $indentstr, 0, -1);
+	print( "\n$indentstr]");
 	pop( @cntstk);
 }
 sub DELIM {
@@ -256,6 +256,8 @@ sub DEF_FUNCTION
 STARTDOC();
 NAME( "analyzer"); OPEN();
 NAME( "doc"); OPEN();
+DELIM(); NAME( "class"); OPEN(); NAME( "mimetype"); VALUE("application/xml"); CLOSE();
+my $in_feature_section = 0;
 
 while (<>)
 {
@@ -284,6 +286,22 @@ while (<>)
 		if ($section eq "NOT_IMPLEMENTED")
 		{
 			die "not implemented section class name '$sectionName' at line $g_linecnt\n";
+		}
+		if ($section eq "patternmatch" || $section eq "content" || $section eq "document")
+		{
+			if ($in_feature_section)
+			{
+				CLOSE();
+				$in_feature_section = 0;
+			}
+		}
+		else
+		{
+			unless ($in_feature_section)
+			{
+				DELIM(); NAME("feature"); OPEN();
+				$in_feature_section = 1;
+			}
 		}
 		DELIM(); NAME( $section); OPENAR();
 	}
@@ -359,7 +377,7 @@ while (<>)
 			DELIM(); NAME( "select"); VALUE( $expression);
 			CLOSE();
 		}
-		elsif ($section eq "aggregate")
+		elsif ($section eq "aggregator")
 		{
 			my $name = lexerParseToken();
 			if (lexerParseToken() ne "=") { die "syntax error at line $g_linecnt, expected assignment operator '='"; }
@@ -387,7 +405,7 @@ while (<>)
 			CLOSE();
 			CLOSE();
 		}
-		elsif ($section eq "subcontent")
+		elsif ($section eq "content")
 		{
 			my $documentClass = lexerParseToken();
 			my $expression = lexerParseToken();
@@ -433,7 +451,7 @@ while (<>)
 			}
 			CLOSE();
 		}
-		elsif ($section eq "subdoc")
+		elsif ($section eq "document")
 		{
 			my $name = lexerParseToken();
 			if (lexerParseToken() ne "=") { die "syntax error at line $g_linecnt, expected assignment operator '='"; }
@@ -458,6 +476,10 @@ while (<>)
 if (defined $section)
 {
 	CLOSEAR();
+}
+if ($in_feature_section)
+{
+	CLOSE();
 }
 CLOSE();
 CLOSE();
