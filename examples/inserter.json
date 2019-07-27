@@ -1,7 +1,9 @@
 {
     "inserter" : {
-        "docanalyzer" : "reuters",
-        "storage" : "reuters"
+        "include": {
+            "analyzer" : "reuters",
+            "storage" : "reuters"
+        }
     }
 }
 
