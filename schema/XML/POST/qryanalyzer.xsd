@@ -1,15 +1,41 @@
 <?xml version="1.0"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
-<xs:element name="analyzer" minOccurs="1" maxOccurs="1">
+<xs:element name="qryanalyzer" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
-<xs:element name="query" minOccurs="1" maxOccurs="1">
+<xs:element name="vstorage" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
-<xs:element name="element" minOccurs="1" maxOccurs="1">
+<xs:element name="name" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="sentanalyzer" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
-<xs:element name="type" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="separator" type="xs:string minOccurs="0" maxOccurs="unbounded""/>
+<xs:element name="space" type="xs:string minOccurs="0" maxOccurs="unbounded""/>
+<xs:element name="link" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:any>
+<xs:element name="chr" type="xs:string minOccurs="1" maxOccurs="unbounded""/>
+<xs:element name="subst" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="sentence" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:any>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="weight" type="xs:decimal minOccurs="1" maxOccurs="1""/>
+<xs:element name="sentpattern" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:union>
+<xs:element ref="sentpattern" minOccurs="1" maxOccurs="1"/>
+<xs:element ref="sentterm" minOccurs="1" maxOccurs="1"/>
+</xs:union>
+</xs:complexType>
+</xs:element>
+</xs:any>
+</xs:complexType>
+</xs:element>
 <xs:element name="field" type="xs:string minOccurs="1" maxOccurs="1""/>
 <xs:element name="tokenizer" minOccurs="1" maxOccurs="1">
 <xs:complexType>
@@ -19,7 +45,7 @@
 </xs:any>
 </xs:complexType>
 </xs:element>
-<xs:element name="normalizer" minOccurs="1" maxOccurs="unbounded">
+<xs:element name="normalizer" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
 <xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
@@ -30,9 +56,13 @@
 </xs:any>
 </xs:complexType>
 </xs:element>
-<xs:element name="sentence" minOccurs="1" maxOccurs="1">
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="element" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
+<xs:element name="type" type="xs:string minOccurs="1" maxOccurs="1""/>
 <xs:element name="field" type="xs:string minOccurs="1" maxOccurs="1""/>
 <xs:element name="tokenizer" minOccurs="1" maxOccurs="1">
 <xs:complexType>
@@ -65,6 +95,29 @@
 </xs:complexType>
 </xs:element>
 </xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="sentterm" minOccurs="0" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="type" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="value" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="weight" type="xs:string minOccurs="0" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="sentpattern" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="op" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="min" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="max" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="arg" minOccurs="1" maxOccurs="unbounded">
+<xs:complexType>
+<xs:union>
+<xs:element ref="sentpattern" minOccurs="1" maxOccurs="1"/>
+<xs:element ref="sentterm" minOccurs="1" maxOccurs="1"/>
+</xs:union>
 </xs:complexType>
 </xs:element>
 </xs:any>

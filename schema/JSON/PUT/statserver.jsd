@@ -1,0 +1,23 @@
+{
+  "statserver": {
+    "type":"object",
+    "required":"false",
+    "properties": {
+        "storage": {
+          "type":"array",
+          "required":"false"
+          "items": {
+            "type":"string"
+          }
+        },
+        "blocks": {
+          "type":"string",
+          "required":"false"
+        },
+        "proc": {
+          "type":"string",
+          "required":"false"
+        }
+    }
+  }
+}

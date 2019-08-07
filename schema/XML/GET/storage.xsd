@@ -18,34 +18,57 @@
 <xs:element name="restriction" type="xs:string minOccurs="1" maxOccurs="1""/>
 <xs:element name="selection" type="xs:string minOccurs="1" maxOccurs="1""/>
 <xs:element name="exclusion" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="summarizer" minOccurs="1" maxOccurs="1">
-<xs:complexType>
-<xs:any>
-<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="arg" minOccurs="0" maxOccurs="unbounded">
-<xs:complexType>
-<xs:union>
-<xs:element ref="feature" minOccurs="1" maxOccurs="1"/>
-<xs:element ref="param" minOccurs="1" maxOccurs="1"/>
-</xs:union>
-</xs:complexType>
-</xs:element>
-<xs:element ref="result" minOccurs="0" maxOccurs="unbounded"/>
-</xs:any>
-</xs:complexType>
-</xs:element>
 <xs:element name="weighting" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
-<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="arg" minOccurs="0" maxOccurs="unbounded">
+<xs:element name="feature" minOccurs="0" maxOccurs="unbounded">
 <xs:complexType>
-<xs:union>
-<xs:element ref="feature" minOccurs="1" maxOccurs="1"/>
-<xs:element ref="param" minOccurs="1" maxOccurs="1"/>
-</xs:union>
+<xs:any>
+<xs:element name="role" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="set" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
 </xs:complexType>
 </xs:element>
+<xs:element name="param" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:any>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="summarizer" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="feature" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:any>
+<xs:element name="role" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="set" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="param" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:any>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="result" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:any>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
 </xs:any>
 </xs:complexType>
 </xs:element>
@@ -94,9 +117,38 @@
 </xs:any>
 </xs:complexType>
 </xs:element>
-<xs:element name="sentence" minOccurs="1" maxOccurs="1">
+<xs:element name="vstorage" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
+<xs:element name="sentanalyzer" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="separator" type="xs:string minOccurs="0" maxOccurs="unbounded""/>
+<xs:element name="space" type="xs:string minOccurs="0" maxOccurs="unbounded""/>
+<xs:element name="link" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:any>
+<xs:element name="chr" type="xs:string minOccurs="1" maxOccurs="unbounded""/>
+<xs:element name="subst" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="sentence" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:any>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="weight" type="xs:decimal minOccurs="1" maxOccurs="1""/>
+<xs:element name="sentpattern" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:union>
+<xs:element ref="sentpattern" minOccurs="1" maxOccurs="1"/>
+<xs:element ref="sentterm" minOccurs="1" maxOccurs="1"/>
+</xs:union>
+</xs:complexType>
+</xs:element>
+</xs:any>
+</xs:complexType>
+</xs:element>
 <xs:element name="field" type="xs:string minOccurs="1" maxOccurs="1""/>
 <xs:element name="tokenizer" minOccurs="1" maxOccurs="1">
 <xs:complexType>
@@ -106,11 +158,14 @@
 </xs:any>
 </xs:complexType>
 </xs:element>
-<xs:element name="normalizer" minOccurs="1" maxOccurs="unbounded">
+<xs:element name="normalizer" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
 <xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
 <xs:element name="arg" type="xs:string minOccurs="0" maxOccurs="unbounded""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
 </xs:any>
 </xs:complexType>
 </xs:element>
@@ -134,7 +189,7 @@
 <xs:element name="feature" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
-<xs:element name="content" minOccurs="1" maxOccurs="1">
+<xs:element name="analyzed" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:union>
 <xs:element ref="expression" minOccurs="1" maxOccurs="1"/>
@@ -148,7 +203,22 @@
 </xs:any>
 </xs:complexType>
 </xs:element>
-<xs:element name="restriction" minOccurs="0" maxOccurs="1">
+<xs:element name="restriction" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="analyzed" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="condition" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="op" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="union" minOccurs="0" maxOccurs="1">
 <xs:complexType>
 <xs:any>
 <xs:element name="condition" minOccurs="0" maxOccurs="unbounded">
@@ -160,21 +230,28 @@
 </xs:any>
 </xs:complexType>
 </xs:element>
-<xs:element name="union" minOccurs="0" maxOccurs="unbounded">
+</xs:any>
+</xs:complexType>
+</xs:element>
+</xs:any>
+</xs:complexType>
+</xs:element>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="termstats" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
-<xs:element name="condition" minOccurs="0" maxOccurs="unbounded">
-<xs:complexType>
-<xs:any>
-<xs:element name="op" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="type" type="xs:string minOccurs="1" maxOccurs="1""/>
 <xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="df" type="xs:integer minOccurs="1" maxOccurs="1""/>
 </xs:any>
 </xs:complexType>
 </xs:element>
-</xs:any>
-</xs:complexType>
-</xs:element>
+<xs:element name="globalstats" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="nofdocs" type="xs:integer minOccurs="1" maxOccurs="1""/>
 </xs:any>
 </xs:complexType>
 </xs:element>
@@ -186,32 +263,35 @@
 </xs:complexType>
 </xs:element>
 <xs:element name="nofranks" type="xs:integer minOccurs="1" maxOccurs="1""/>
+<xs:element name="debug" type="xs:boolean minOccurs="1" maxOccurs="1""/>
 <xs:element name="minrank" type="xs:integer minOccurs="1" maxOccurs="1""/>
 <xs:element name="access" type="xs:string minOccurs="1" maxOccurs="1""/>
 </xs:any>
 </xs:complexType>
 </xs:element>
-<xs:element name="result" minOccurs="1" maxOccurs="1">
+<xs:element name="sentterm" minOccurs="0" maxOccurs="1">
 <xs:complexType>
 <xs:any>
-<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="type" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="value" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="weight" type="xs:string minOccurs="0" maxOccurs="1""/>
 </xs:any>
 </xs:complexType>
 </xs:element>
-<xs:element name="param" minOccurs="1" maxOccurs="1">
+<xs:element name="sentpattern" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
-<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
-</xs:any>
+<xs:element name="op" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="min" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="max" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="arg" minOccurs="1" maxOccurs="unbounded">
+<xs:complexType>
+<xs:union>
+<xs:element ref="sentpattern" minOccurs="1" maxOccurs="1"/>
+<xs:element ref="sentterm" minOccurs="1" maxOccurs="1"/>
+</xs:union>
 </xs:complexType>
 </xs:element>
-<xs:element name="feature" minOccurs="1" maxOccurs="1">
-<xs:complexType>
-<xs:any>
-<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
-<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
 </xs:any>
 </xs:complexType>
 </xs:element>

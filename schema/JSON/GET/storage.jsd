@@ -37,67 +37,108 @@
                 "type":"string",
                 "required":"true"
               },
-              "summarizer": {
+              "weighting": {
                 "type":"object",
                 "required":"true",
                 "properties": {
-                    "name": {
-                      "type":"string",
-                      "required":"true"
-                    },
-                    "arg": {
+                    "feature": {
                       "type":"array",
                       "required":"false",
                       "items": {
                         "type":"object",
                         "properties": {
-                          "anyOf": [
-                              "feature": {
-                                "$ref":"#/feature",
-                                "required":"true"
-                              },
-                              "param": {
-                                "$ref":"#/param",
-                                "required":"true"
-                              }
-                          ]
+                            "role": {
+                              "type":"string",
+                              "required":"true"
+                            },
+                            "set": {
+                              "type":"string",
+                              "required":"true"
+                            }
+                        }
+                      }
+                    },
+                    "param": {
+                      "type":"array",
+                      "required":"false",
+                      "items": {
+                        "type":"object",
+                        "properties": {
+                            "name": {
+                              "type":"string",
+                              "required":"true"
+                            },
+                            "value": {
+                              "type":"string",
+                              "required":"true"
+                            }
+                        }
+                      }
+                    },
+                    "name": {
+                      "type":"string",
+                      "required":"true"
+                    }
+                }
+              },
+              "summarizer": {
+                "type":"object",
+                "required":"true",
+                "properties": {
+                    "feature": {
+                      "type":"array",
+                      "required":"false",
+                      "items": {
+                        "type":"object",
+                        "properties": {
+                            "role": {
+                              "type":"string",
+                              "required":"true"
+                            },
+                            "set": {
+                              "type":"string",
+                              "required":"true"
+                            }
+                        }
+                      }
+                    },
+                    "param": {
+                      "type":"array",
+                      "required":"false",
+                      "items": {
+                        "type":"object",
+                        "properties": {
+                            "name": {
+                              "type":"string",
+                              "required":"true"
+                            },
+                            "value": {
+                              "type":"string",
+                              "required":"true"
+                            }
                         }
                       }
                     },
                     "result": {
                       "type":"array",
-                      "items": {
-                        "$ref":"#/result"
-                    }
-                    }
-                }
-              },
-              "weighting": {
-                "type":"object",
-                "required":"true",
-                "properties": {
-                    "name": {
-                      "type":"string",
-                      "required":"true"
-                    },
-                    "arg": {
-                      "type":"array",
                       "required":"false",
                       "items": {
                         "type":"object",
                         "properties": {
-                          "anyOf": [
-                              "feature": {
-                                "$ref":"#/feature",
-                                "required":"true"
-                              },
-                              "param": {
-                                "$ref":"#/param",
-                                "required":"true"
-                              }
-                          ]
+                            "name": {
+                              "type":"string",
+                              "required":"true"
+                            },
+                            "value": {
+                              "type":"string",
+                              "required":"true"
+                            }
                         }
                       }
+                    },
+                    "name": {
+                      "type":"string",
+                      "required":"true"
                     }
                 }
               },
@@ -185,49 +226,119 @@
                     }
                 }
               },
-              "sentence": {
+              "vstorage": {
                 "type":"object",
                 "required":"true",
                 "properties": {
-                    "field": {
-                      "type":"string",
-                      "required":"true"
-                    },
-                    "tokenizer": {
+                    "sentanalyzer": {
                       "type":"object",
                       "required":"true",
                       "properties": {
-                          "name": {
-                            "type":"string",
-                            "required":"true"
-                          },
-                          "arg": {
+                          "separator": {
                             "type":"array",
                             "required":"false"
                             "items": {
                               "type":"string"
                             }
-                          }
-                      }
-                    },
-                    "normalizer": {
-                      "type":"array",
-                      "minItems":1,
-                      "items": {
-                        "type":"object",
-                        "properties": {
-                            "name": {
-                              "type":"string",
-                              "required":"true"
-                            },
-                            "arg": {
-                              "type":"array",
-                              "required":"false"
-                              "items": {
-                                "type":"string"
+                          },
+                          "space": {
+                            "type":"array",
+                            "required":"false"
+                            "items": {
+                              "type":"string"
+                            }
+                          },
+                          "link": {
+                            "type":"array",
+                            "required":"false",
+                            "items": {
+                              "type":"object",
+                              "properties": {
+                                  "chr": {
+                                    "type":"array",
+                                    "minItems":1,
+                                    "items": {
+                                      "type":"string"
+                                    }
+                                  },
+                                  "subst": {
+                                    "type":"string",
+                                    "required":"true"
+                                  }
                               }
                             }
-                        }
+                          },
+                          "sentence": {
+                            "type":"array",
+                            "required":"false",
+                            "items": {
+                              "type":"object",
+                              "properties": {
+                                  "name": {
+                                    "type":"string",
+                                    "required":"true"
+                                  },
+                                  "weight": {
+                                    "type":"number",
+                                    "required":"true"
+                                  },
+                                  "sentpattern": {
+                                    "type":"object",
+                                    "required":"true",
+                                    "properties": {
+                                      "anyOf": [
+                                          "sentpattern": {
+                                            "$ref":"#/sentpattern",
+                                            "required":"true"
+                                          },
+                                          "sentterm": {
+                                            "$ref":"#/sentterm",
+                                            "required":"true"
+                                          }
+                                      ]
+                                    }
+                                  }
+                              }
+                            }
+                          },
+                          "field": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "tokenizer": {
+                            "type":"object",
+                            "required":"true",
+                            "properties": {
+                                "name": {
+                                  "type":"string",
+                                  "required":"true"
+                                },
+                                "arg": {
+                                  "type":"array",
+                                  "required":"false"
+                                  "items": {
+                                    "type":"string"
+                                  }
+                                }
+                            }
+                          },
+                          "normalizer": {
+                            "type":"object",
+                            "required":"true",
+                            "properties": {
+                                "name": {
+                                  "type":"string",
+                                  "required":"true"
+                                },
+                                "arg": {
+                                  "type":"array",
+                                  "required":"false"
+                                  "items": {
+                                    "type":"string"
+                                  }
+                                }
+                            }
+                          }
                       }
                     }
                 }
@@ -264,7 +375,7 @@
           "type":"object",
           "required":"true",
           "properties": {
-              "content": {
+              "analyzed": {
                 "type":"object",
                 "required":"true",
                 "properties": {
@@ -296,58 +407,86 @@
         },
         "restriction": {
           "type":"object",
-          "required":"false",
+          "required":"true",
           "properties": {
-              "condition": {
-                "type":"array",
-                "required":"false",
-                "items": {
-                  "type":"object",
-                  "properties": {
-                      "op": {
-                        "type":"string",
-                        "required":"true"
-                      },
-                      "name": {
-                        "type":"string",
-                        "required":"true"
-                      },
-                      "value": {
-                        "type":"string",
-                        "required":"true"
-                      }
-                  }
-                }
-              },
-              "union": {
-                "type":"array",
-                "required":"false",
-                "items": {
-                  "type":"object",
-                  "properties": {
-                      "condition": {
-                        "type":"array",
-                        "required":"false",
-                        "items": {
-                          "type":"object",
-                          "properties": {
-                              "op": {
-                                "type":"string",
-                                "required":"true"
-                              },
-                              "name": {
-                                "type":"string",
-                                "required":"true"
-                              },
-                              "value": {
-                                "type":"string",
-                                "required":"true"
-                              }
+              "analyzed": {
+                "type":"object",
+                "required":"true",
+                "properties": {
+                    "condition": {
+                      "type":"object",
+                      "required":"true",
+                      "properties": {
+                          "op": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "name": {
+                            "type":"string",
+                            "required":"true"
+                          },
+                          "value": {
+                            "type":"string",
+                            "required":"true"
                           }
-                        }
                       }
-                  }
+                    },
+                    "union": {
+                      "type":"object",
+                      "required":"false",
+                      "properties": {
+                          "condition": {
+                            "type":"array",
+                            "required":"false",
+                            "items": {
+                              "type":"object",
+                              "properties": {
+                                  "op": {
+                                    "type":"string",
+                                    "required":"true"
+                                  },
+                                  "name": {
+                                    "type":"string",
+                                    "required":"true"
+                                  },
+                                  "value": {
+                                    "type":"string",
+                                    "required":"true"
+                                  }
+                              }
+                            }
+                          }
+                      }
+                    }
                 }
+              }
+          }
+        },
+        "termstats": {
+          "type":"object",
+          "required":"true",
+          "properties": {
+              "type": {
+                "type":"string",
+                "required":"true"
+              },
+              "value": {
+                "type":"string",
+                "required":"true"
+              },
+              "df": {
+                "type":"number",
+                "required":"true"
+              }
+          }
+        },
+        "globalstats": {
+          "type":"object",
+          "required":"true",
+          "properties": {
+              "nofdocs": {
+                "type":"number",
+                "required":"true"
               }
           }
         },
@@ -368,6 +507,10 @@
           "type":"number",
           "required":"true"
         },
+        "debug": {
+          "type":"boolean",
+          "required":"true"
+        },
         "minrank": {
           "type":"number",
           "required":"true"
@@ -378,45 +521,58 @@
         }
     }
   },
-  "result": {
+  "sentterm": {
     "type":"object",
-    "required":"true",
+    "required":"false",
     "properties": {
-        "name": {
+        "type": {
           "type":"string",
-          "required":"true"
+          "required":"false"
         },
         "value": {
           "type":"string",
-          "required":"true"
+          "required":"false"
+        },
+        "weight": {
+          "type":"string",
+          "required":"false"
         }
     }
   },
-  "param": {
+  "sentpattern": {
     "type":"object",
     "required":"true",
     "properties": {
-        "name": {
+        "op": {
           "type":"string",
-          "required":"true"
+          "required":"false"
         },
-        "value": {
+        "min": {
           "type":"string",
-          "required":"true"
-        }
-    }
-  },
-  "feature": {
-    "type":"object",
-    "required":"true",
-    "properties": {
-        "name": {
-          "type":"string",
-          "required":"true"
+          "required":"false"
         },
-        "value": {
+        "max": {
           "type":"string",
-          "required":"true"
+          "required":"false"
+        },
+        "arg": {
+          "type":"array",
+          "minItems":1,
+          "items": {
+            "type":"object",
+            "properties": {
+              "anyOf": [
+                  "sentpattern": {
+                    "$ref":"#/sentpattern",
+                    "required":"true"
+                  },
+                  "sentterm": {
+                    "$ref":"#/sentterm",
+                    "required":"true"
+                  }
+              ]
+            }
+          }
         }
     }
   },
