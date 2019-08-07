@@ -38,12 +38,13 @@ public:
 	virtual void logRequest( const char* reqstr);
 	virtual void logPutConfiguration( const char* type, const char* name, const std::string& configstr);
 	virtual void logAction( const char* type, const char* name, const char* action);
+	virtual void logContentEvent( const char* title, const char* item, const char* value);
 
 	virtual void logMethodCall(
-			const std::string& classname,
-			const std::string& methodname,
-			const std::string& arguments,
-			const std::string& result);
+			const char* classname,
+			const char* methodname,
+			const char* arguments,
+			const char* result);
 
 	virtual void logWarning( const char* errmsg);
 

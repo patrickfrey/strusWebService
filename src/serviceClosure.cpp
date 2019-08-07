@@ -80,10 +80,13 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 		bool doLogCalls = config.get( "debug.log_calls", DefaultConstants::DO_LOG_CALLS());
 		bool doLogRequests = config.get( "debug.log_requests", DefaultConstants::DO_LOG_REQUESTS());
 		bool doLogActions = config.get( "debug.log_actions", DefaultConstants::DO_LOG_ACTIONS());
+		bool doLogContentEvents = config.get( "debug.log_parse", DefaultConstants::DO_LOG_CONTENTEVENTS());
+
 		int logMask = 0;
 		if (doLogCalls) logMask |= (int)WebRequestLoggerInterface::LogMethodCalls;
 		if (doLogRequests) logMask |= (int)WebRequestLoggerInterface::LogRequests;
 		if (doLogActions) logMask |= (int)WebRequestLoggerInterface::LogAction | (int)WebRequestLoggerInterface::LogConfiguration;
+		if (doLogContentEvents) logMask |= (int)WebRequestLoggerInterface::LogContentEvents;
 
 		int logStructDepth = config.get( "debug.struct_depth", DefaultConstants::LOG_STRUCT_DEPTH());
 		int max_idle_time = config.get( "transactions.max_idle_time", DefaultConstants::TRANSACTION_MAX_IDLE_TIME());

@@ -108,23 +108,49 @@ void WebRequestLogger::logAction( const char* type, const char* name, const char
 	logMessage( _TXT("do %s %s '%s'"), action, type, name);
 }
 
-void WebRequestLogger::logMethodCall(
-		const std::string& classname,
-		const std::string& methodname,
-		const std::string& arguments,
-		const std::string& result)
+void WebRequestLogger::logContentEvent( const char* title, const char* item, const char* value)
 {
-	if (methodname.empty())
+	if (value)
 	{
-		logMessage( _TXT("new %s( %s)"), classname.c_str(), arguments.c_str());
-	}
-	else if (result.empty())
-	{
-		logMessage( _TXT("call %s::%s( %s)"), classname.c_str(), methodname.c_str(), arguments.c_str());
+		if (item && item[0])
+		{
+			logMessage( _TXT("event %s %s '%s'"), title, item, value);
+		}
+		else
+		{
+			logMessage( _TXT("event %s '%s'"), title, value);
+		}
 	}
 	else
 	{
-		logMessage( _TXT("call %s::%s( %s) returns %s"), classname.c_str(), methodname.c_str(), arguments.c_str(), result.c_str());
+		if (item && item[0])
+		{
+			logMessage( _TXT("event %s %s"), title, item);
+		}
+		else
+		{
+			logMessage( _TXT("event %s"), title);
+		}
+	}
+}
+
+void WebRequestLogger::logMethodCall(
+		const char* classname,
+		const char* methodname,
+		const char* arguments,
+		const char* result)
+{
+	if (!methodname || !methodname[0])
+	{
+		logMessage( _TXT("new %s( %s)"), classname, arguments);
+	}
+	else if (!result || !result[0])
+	{
+		logMessage( _TXT("call %s::%s( %s)"), classname, methodname, arguments);
+	}
+	else
+	{
+		logMessage( _TXT("call %s::%s( %s) returns %s"), classname, methodname, arguments, result);
 	}
 }
 

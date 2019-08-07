@@ -254,8 +254,7 @@ sub DEF_FUNCTION
 }
 
 STARTDOC();
-NAME( "analyzer"); OPEN();
-NAME( "doc"); OPEN();
+NAME( "docanalyzer"); OPEN();
 DELIM(); NAME( "class"); OPEN(); NAME( "mimetype"); VALUE("application/xml"); CLOSE();
 my $in_feature_section = 0;
 
@@ -481,7 +480,6 @@ if ($in_feature_section)
 {
 	CLOSE();
 }
-CLOSE();
 CLOSE();
 ENDDOC();
 
