@@ -66,7 +66,7 @@ bool ServiceClosure::storeSchemaDescriptions( const cppcms::json::value& config,
 	return rt;
 }
 		
-void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
+void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 {
 	try
 	{
@@ -130,7 +130,7 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 		std::string requestLogFilename = config.get( "debug.request_file", DefaultConstants::REQUEST_LOG_FILE());
 		m_requestLogger = new strus::WebRequestLogger(
 					requestLogFilename,
-					verbose, logMask, logStructDepth, nofThreads+1,
+					verbosity, logMask, logStructDepth, nofThreads+1,
 					m_service->process_id(), nofProcs);
 		int timeout = std::max( max_idle_time/20, 10);
 		m_eventloop = strus::createCurlEventLoop( 

@@ -32,12 +32,12 @@ namespace webservice {
 class ServiceClosure
 {
 public:
-	ServiceClosure( const std::string& configdir_, const cppcms::json::value& config, bool verbose)
+	ServiceClosure( const std::string& configdir_, const cppcms::json::value& config, int verbosity)
 		:m_service(0),m_requestLogger(0),m_eventloop(0),m_requestHandler(0),m_errorhnd(0),m_configdir(configdir_)
 		,m_cors_hosts(),m_cors_age(),m_html_head(),m_http_server_name(),m_http_script_name(),m_http_server_url(),m_put_configdir()
 		,m_cors_enabled(true),m_quit_enabled(false),m_debug_enabled(false),m_pretty_print(false)
 	{
-		init( config, verbose);
+		init( config, verbosity);
 	}
 	~ServiceClosure()
 	{
@@ -122,7 +122,7 @@ private:
 	//\brief Destroy service, logging and command handler if initialized
 	void clear();
 	//\brief Create service, logging and command handler
-	void init( const cppcms::json::value& config, bool verbose);
+	void init( const cppcms::json::value& config, int verbosity);
 
 	void loadHtmlConfiguration( const cppcms::json::value& config);
 	void loadCorsConfiguration( const cppcms::json::value& config);

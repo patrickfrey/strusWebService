@@ -46,14 +46,14 @@ static std::string getLogFilename( const std::string& logfilename, int procid, i
 	}
 }
 
-WebRequestLogger::WebRequestLogger( const std::string& logfilename_, bool verbose, int mask_, int structDepth_, int maxnofthreads, int procid_, int nofprocs_)
+WebRequestLogger::WebRequestLogger( const std::string& logfilename_, int verbosity, int mask_, int structDepth_, int maxnofthreads, int procid_, int nofprocs_)
 	:m_slots(new Slot[ maxnofthreads])
 	,m_nofslots(maxnofthreads?maxnofthreads:1)
 	,m_nofslotspow(nofslotspow(maxnofthreads))
 	,m_logfilename(getLogFilename(logfilename_,procid_,nofprocs_))
 	,m_logfile()
 	,m_logout(0)
-	,m_verbose(verbose)
+	,m_verbose(verbosity>0)
 	,m_structDepth(structDepth_)
 	,m_mask((WebRequestLoggerInterface::Mask)mask_)
 	,m_gotAlert(false)
@@ -73,9 +73,19 @@ WebRequestLogger::WebRequestLogger( const std::string& logfilename_, bool verbos
 		m_logfile.open( m_logfilename.c_str(), std::ofstream::out | std::ofstream::app);
 		m_logout = &m_logfile;
 	}
-	if (verbose)
+	if (verbosity)
 	{
-		m_mask = WebRequestLoggerInterface::LogAll;
+		int mm = m_mask;
+		switch (verbosity)
+		{
+			case 4: mm |= (LogContentEvents);
+			case 3: mm |= (LogMethodCalls|LogAction);
+			case 2: mm |= (LogRequests|LogConfiguration);
+			case 1: mm |= (LogError|LogWarning);
+			case 0: mm |= (LogNothing); break;
+			default: mm = LogAll;
+		}
+		m_mask = (WebRequestLoggerInterface::Mask)mm;
 	}
 	for (std::size_t si=0; si<m_nofslots; ++si)
 	{

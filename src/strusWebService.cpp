@@ -48,7 +48,7 @@ using namespace strus::webservice;
 #define WEBSERVICE_LIBRARY "cppcms"
 
 // Global flags:
-static bool g_verbose = false;
+static int g_verbosity = 0;
 static bool g_normal_termination = true;
 strus::shared_ptr<ServiceClosure> g_serviceClosure;
 
@@ -78,7 +78,7 @@ static void callService( const char* methodname, void (ServiceClosure::*method)(
 // Signal handler:
 static void signal_handler( int sig )
 {
-	if (g_verbose)
+	if (g_verbosity)
 	{
 		std::cerr << "got signal " << sig << std::endl;
 	}
@@ -161,11 +161,18 @@ static void printUsage()
 	std::cout << "    " << _TXT("Print 3rd party licences requiring reference") << std::endl;
 	std::cout << "-c|--config <CONFIG>" << std::endl;
 	std::cout << "    " << _TXT("Define the web service configuration file as <CONFIG>") << std::endl;
+	std::cout << "-P|--port <PORT>" << std::endl;
+	std::cout << "    " << _TXT("Define the port the service is listening on, overwrite") << std::endl;
+	std::cout << "    " << _TXT("  the configured value service.port with <PORT>.") << std::endl;
+	std::cout << "-N|--name <SERVICENAME>" << std::endl;
+	std::cout << "    " << _TXT("Define the name of the service, overwrite") << std::endl;
+	std::cout << "    " << _TXT("  the configured value service.name with <SERVICENAME>.") << std::endl;
 	std::cout << "-V|--verbose" << std::endl;
-	std::cout << "    " << _TXT("Do verbose logging and output") << std::endl;
+	std::cout << "    " << _TXT("Do increase verbosity level for logging and output.") << std::endl;
+	std::cout << "    " << _TXT("  may be repeated, e.g. -VVV for verbosity level 3.") << std::endl;
 	std::cout << "-M|--schema <TYPE>:<DIR>" << std::endl;
 	std::cout << "    " << _TXT("Do nothing but write the schemas of type <TYPE> ('xml' or 'json')") << std::endl;
-	std::cout << "    " << _TXT("to the directory specified by <DIR>") << std::endl;
+	std::cout << "    " << _TXT("  to the directory specified by <DIR>") << std::endl;
 }
 
 static std::string beautifyErrorMessage( const std::string& msg)
@@ -243,8 +250,9 @@ int main( int argc_, const char *argv_[] )
 
 		// Define configuration and usage:
 		strus::ProgramOptions opt(
-				errorhnd.get(), argc_, argv_, 6,
-				"h,help", "v,version", "X,schema:" ,"c,config:", "V,verbose", "license");
+				errorhnd.get(), argc_, argv_, 8,
+				"h,help", "v,version", "X,schema:" ,"c,config:", "P,port:", "N,name:",
+				"V,verbose+", "license");
 		if (errorhnd->hasError())
 		{
 			throw strus::runtime_error(_TXT("failed to parse program arguments"));
@@ -261,12 +269,18 @@ int main( int argc_, const char *argv_[] )
 			}
 		}
 		std::string configdir;
+		std::string opt_servicename;
+		int opt_port = 0;
+
 		if (opt("config"))
 		{
 			ec = strus::getParentPath( opt["config"], configdir);
 			if (ec) throw strus::runtime_error(_TXT("failed to get parent path of configuration: %s"), ::strerror(ec));
 		}
-		g_verbose = opt("verbose");
+		if (opt("verbose"))
+		{
+			g_verbosity = opt.asInt("verbose");
+		}
 		cppcms::json::value config = opt("config") ? configFromFile( opt[ "config"], rt) : configDefault();
 
 		if (opt("license"))
@@ -302,6 +316,15 @@ int main( int argc_, const char *argv_[] )
 			}
 			return rt;
 		}
+		if (opt("port"))
+		{
+			opt_port = opt.asInt( "port");
+			if (opt_port == 0) throw strus::runtime_error(_TXT("bad value for -P/--port configured"));
+		}
+		if (opt("name"))
+		{
+			opt_servicename = opt["name"];
+		}
 		if (printUsageAndExit)
 		{
 			printUsage();
@@ -325,7 +348,7 @@ int main( int argc_, const char *argv_[] )
 				config.set( "service.applications_pool_size", nofThreads);
 			}
 		}
-		if (g_verbose)
+		if (g_verbosity)
 		{
 			config.set( "logging.level", "debug");
 			std::cerr << "service configuration:" << std::endl << "---" << config.save( cppcms::json::readable) << std::endl << "---" << std::endl;
@@ -334,15 +357,27 @@ int main( int argc_, const char *argv_[] )
 		while( !g_terminate.test()) try
 		{
 			booster::log::logger::instance( ).remove_all_sinks();
-			if (g_verbose && config.get( "logging.stderr", false) == false)
+			if (g_verbosity && config.get( "logging.stderr", false) == false)
 			{
 				booster::shared_ptr<booster::log::sinks::standard_error> csink( new booster::log::sinks::standard_error());
 				booster::log::logger::instance().add_sink(csink);
 			}
-			int port = config.get( "service.port", 80);
-
+			int port;
+			if (opt_port)
+			{
+				port = opt_port;
+				config.set( "service.port", port);
+			}
+			else
+			{
+				port = config.get( "service.port", 80);
+			}
+			if (!opt_servicename.empty())
+			{
+				config.set( "service.name", opt_servicename);
+			}
 			g_serviceClosure.reset(); //... free old instance before creating new one
-			g_serviceClosure.reset( new ServiceClosure( configdir, config, g_verbose));
+			g_serviceClosure.reset( new ServiceClosure( configdir, config, g_verbosity));
 
 			BOOSTER_INFO( DefaultConstants::PACKAGE())
 					<< strus::string_format(
