@@ -138,11 +138,23 @@ void WebRequestLogger::logMethodCall(
 		const char* classname,
 		const char* methodname,
 		const char* arguments,
-		const char* result)
+		const char* result,
+		const char* resultvar)
 {
 	if (!methodname || !methodname[0])
 	{
-		logMessage( _TXT("new %s( %s)"), classname, arguments);
+		if (!classname || !classname[0])
+		{
+			logMessage( _TXT("assign %s := %s"), resultvar, result);
+		}
+		else if (!resultvar || !resultvar[0])
+		{
+			logMessage( _TXT("new %s( %s)"), classname, arguments);
+		}
+		else
+		{
+			logMessage( _TXT("new %s := %s( %s)"), classname, resultvar, arguments);
+		}
 	}
 	else if (!result || !result[0])
 	{
@@ -150,7 +162,14 @@ void WebRequestLogger::logMethodCall(
 	}
 	else
 	{
-		logMessage( _TXT("call %s::%s( %s) returns %s"), classname, methodname, arguments, result);
+		if (!resultvar || !resultvar[0])
+		{
+			logMessage( _TXT("call %s::%s( %s) returns %s := %s"), classname, methodname, arguments, resultvar, result);
+		}
+		else
+		{
+			logMessage( _TXT("call %s::%s( %s) returns %s"), classname, methodname, arguments, result);
+		}
 	}
 }
 

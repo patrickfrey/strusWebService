@@ -138,7 +138,7 @@ void ServiceClosure::init( const cppcms::json::value& config, bool verbose)
 					timeout, nofDelegateTotalConnections, nofDelegateHostConnections,
 					m_errorhnd);
 		m_requestHandler = strus::createWebRequestHandler(
-					m_eventloop, m_requestLogger, m_html_head, m_put_configdir, configstr,
+					m_eventloop, m_requestLogger, m_html_head, m_put_configdir, m_identifier, configstr,
 					max_idle_time, transactions_per_second, m_errorhnd);
 		if (!m_requestHandler) throw std::runtime_error( m_errorhnd->fetchError());
 		loadCorsConfiguration( config);

@@ -44,7 +44,8 @@ public:
 			const char* classname,
 			const char* methodname,
 			const char* arguments,
-			const char* result);
+			const char* result,
+			const char* resultvar);
 
 	virtual void logWarning( const char* errmsg);
 
