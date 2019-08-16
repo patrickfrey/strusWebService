@@ -36,6 +36,7 @@ public:
 	}
 
 	virtual void logRequest( const char* reqstr);
+	virtual void logDelegateRequest( const char* address, const char* method, const char* content);
 	virtual void logPutConfiguration( const char* type, const char* name, const std::string& configstr);
 	virtual void logAction( const char* type, const char* name, const char* action);
 	virtual void logContentEvent( const char* title, const char* item, const char* value);

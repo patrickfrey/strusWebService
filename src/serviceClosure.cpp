@@ -65,7 +65,7 @@ bool ServiceClosure::storeSchemaDescriptions( const cppcms::json::value& config,
 	if (errorhnd) delete errorhnd;
 	return rt;
 }
-		
+
 void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 {
 	try
@@ -84,7 +84,7 @@ void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 
 		int logMask = 0;
 		if (doLogCalls) logMask |= (int)WebRequestLoggerInterface::LogMethodCalls;
-		if (doLogRequests) logMask |= (int)WebRequestLoggerInterface::LogRequests;
+		if (doLogRequests) logMask |= (int)WebRequestLoggerInterface::LogRequests | (int)WebRequestLoggerInterface::LogDelegateRequests;
 		if (doLogActions) logMask |= (int)WebRequestLoggerInterface::LogAction | (int)WebRequestLoggerInterface::LogConfiguration;
 		if (doLogContentEvents) logMask |= (int)WebRequestLoggerInterface::LogContentEvents;
 

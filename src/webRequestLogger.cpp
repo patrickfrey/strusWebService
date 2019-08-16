@@ -12,6 +12,7 @@
 #include "internationalization.hpp"
 #include "strus/base/thread.hpp"
 #include "strus/base/fileio.hpp"
+#include "strus/base/utf8.hpp"
 #include <cstdarg>
 #include <cstring>
 #include <fstream>
@@ -80,7 +81,7 @@ WebRequestLogger::WebRequestLogger( const std::string& logfilename_, int verbosi
 		{
 			case 4: mm |= (LogContentEvents);
 			case 3: mm |= (LogMethodCalls|LogAction);
-			case 2: mm |= (LogRequests|LogConfiguration);
+			case 2: mm |= (LogRequests|LogDelegateRequests|LogConfiguration);
 			case 1: mm |= (LogError|LogWarning);
 			case 0: mm |= (LogNothing); break;
 			default: mm = LogAll;
@@ -106,6 +107,27 @@ WebRequestLogger::~WebRequestLogger()
 void WebRequestLogger::logRequest( const char* reqstr)
 {
 	logMessage( _TXT("request: {%s}"), reqstr);
+}
+
+void WebRequestLogger::logDelegateRequest( const char* address, const char* method, const char* content)
+{
+	std::size_t contentsize = std::strlen( content);
+	if (contentsize == 0)
+	{
+		logMessage( _TXT("delegate %s '%s'"), method, address);
+	}
+	else if (contentsize <= 100)
+	{
+		logMessage( _TXT("delegate %s '%s': '%s'"), method, address, content);
+	}
+	else
+	{
+		const char* contentend = strus::utf8prev( content + 100);
+		if (contentend < content) contentend = content;
+		std::string contentstr( content, contentend - content);
+
+		logMessage( _TXT("delegate %s '%s': '%s...'"), method, address, contentstr.c_str());
+	}
 }
 
 void WebRequestLogger::logPutConfiguration( const char* type, const char* name, const std::string& configstr)
