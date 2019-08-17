@@ -365,7 +365,7 @@ void ApplicationImpl::exec_request( std::string path)
 				for (; di != de; ++di)
 				{
 					strus::Reference<strus::WebRequestDelegateContext> receiver(
-						new strus::WebRequestDelegateContext( m_serviceClosure, httpContext, ctx, di->url(), di->schema()));
+						new strus::WebRequestDelegateContext( m_serviceClosure, httpContext, ctx, di->url(), di->receiverSchema()));
 					receivers.push_back( receiver);
 				}
 				int didx = 0;
