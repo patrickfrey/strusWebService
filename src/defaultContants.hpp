@@ -30,6 +30,7 @@ struct DefaultConstants
 	static const int LOG_STRUCT_DEPTH() {return 4;}
 	static const std::string REQUEST_LOG_FILE() {return "request.log";}
 	static const std::string SERVICE_LOG_FILE() {return "strusWebService.log";}
+	static const std::string LOGGING_DIR() {return "/var/log/strus";}
 	static const std::string AUTOSAVE_CONFIG_DIR() {return "/srv/strus/config";}
 	static const std::string HTTP_SERVER_NAME() {return "";}
 	static const std::string HTTP_SCRIPT_NAME() {return "";}

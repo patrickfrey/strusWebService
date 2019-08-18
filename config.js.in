@@ -41,9 +41,10 @@
 	},
 
 	"logging" : {
+	        "directory"  : "/var/log/strus",
 		"level" : "debug",
 		"file" : {
-			"name":		"./strusWebService.log",
+			"name":		"{logging.directory}/strusWebService.{service.name}.log",
 			"append":	true
 		}
 	},
@@ -51,7 +52,7 @@
 	"debug" : {
 		"log_requests": true,
 		"struct_depth": 4,
-		"request_file": "./requests.log",
+		"request_file": "{logging.directory}/requests.{service.name}.log",
 		"protocol" : {
 			"pretty_print":		true,
 			"quit_enabled":		true,

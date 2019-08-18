@@ -39,8 +39,8 @@ std::vector<std::string> webservice::getConfigArray( const cppcms::json::value& 
 	}
 	else if (configval.type() == cppcms::json::is_array)
 	{
-		std::vector<cppcms::json::value> ar = configval.array();
-		std::vector<cppcms::json::value>::const_iterator ai = ar.begin(), ae = ar.end();
+		cppcms::json::array ar = configval.array();
+		cppcms::json::array::const_iterator ai = ar.begin(), ae = ar.end();
 		for (; ai != ae; ++ai)
 		{
 			rt.push_back( ai->str());
@@ -53,22 +53,108 @@ std::vector<std::string> webservice::getConfigArray( const cppcms::json::value& 
 	return rt;
 }
 
-cppcms::json::value webservice::configFromFile( const std::string& configfile, int& errcode)
+static void substConfigReferenceVariables( const cppcms::json::value& root, cppcms::json::array& value);
+static void substConfigReferenceVariables( const cppcms::json::value& root, cppcms::json::object& map);
+static void substConfigReferenceVariables( const cppcms::json::value& root, std::string& str);
+
+static void substConfigReferenceVariables( const cppcms::json::value& root, cppcms::json::value& value)
+{
+	switch (value.type())
+	{
+		case cppcms::json::is_undefined:
+			break;
+		case cppcms::json::is_null:
+			break;
+		case cppcms::json::is_boolean:
+			break;
+		case cppcms::json::is_number:
+			break;
+		case cppcms::json::is_string:
+			substConfigReferenceVariables( root, value.str());
+			break;
+		case cppcms::json::is_object:
+			substConfigReferenceVariables( root, value.object());
+			break;
+		case cppcms::json::is_array:
+			substConfigReferenceVariables( root, value.array());
+			break;
+	}
+}
+
+static void substConfigReferenceVariables( const cppcms::json::value& root, std::string& str)
+{
+	std::string res;
+	char const* prev = str.c_str();
+	const char* si = std::strchr( str.c_str(), '{');
+	for (;si; si = std::strchr( si, '{'))
+	{
+		res.append( prev, si-prev);
+		prev = si;
+		++si;
+		for (; (unsigned char)*si <= 32; ++si){}
+		std::string variableref;
+		for (; (unsigned char)*si > 32 && *si != '}'; ++si){variableref.push_back(*si);}
+		for (; (unsigned char)*si <= 32; ++si){}
+		if (*si == '}' && !variableref.empty())
+		{
+			res.append( root.get( variableref, ""));
+			prev = ++si;
+		}
+		else
+		{
+			res.append( prev, si-prev);
+			prev = si;
+		}
+	}
+	res.append( prev);
+	str = res;
+}
+
+static void substConfigReferenceVariables( const cppcms::json::value& root, cppcms::json::array& ar)
+{
+	cppcms::json::array::iterator vi = ar.begin(), ve = ar.end();
+	for (; vi != ve; ++vi)
+	{
+		substConfigReferenceVariables( root, *vi);
+	}
+}
+
+static void substConfigReferenceVariables( const cppcms::json::value& root, cppcms::json::object& map)
+{
+	cppcms::json::object::iterator mi = map.begin(), me = map.end();
+	for (; mi != me; ++mi)
+	{
+		substConfigReferenceVariables( root, mi->second);
+	}
+}
+
+cppcms::json::value webservice::configFromFile( const std::string& configfile)
 {
 	cppcms::json::value config;
 	std::string configstr;
 	int ec = strus::readFile( configfile, configstr);
 	if (ec)
 	{
-		errcode = ec;
 		throw strus::runtime_error(_TXT("failed to read configuration file %s (errno %u): %s"), configfile.c_str(), ec, std::strerror(ec));
 	}
 	int line_number = 0;
 	std::istringstream configstream( configstr);
 	if (!config.load( configstream, false, &line_number))
 	{
-		errcode = strus::ErrorCodeSyntax;
 		throw strus::runtime_error(_TXT("failed to parse configuration file %s: syntax error on line %d"), configfile.c_str(), line_number);
+	}
+	substConfigReferenceVariables( config, config);
+	return config;
+}
+
+cppcms::json::value webservice::configFromString( const std::string& configstr)
+{
+	cppcms::json::value config;
+	int line_number = 0;
+	std::istringstream configstream( configstr);
+	if (!config.load( configstream, false, &line_number))
+	{
+		throw strus::runtime_error(_TXT("failed to parse configuration: syntax error on line %d"), line_number);
 	}
 	return config;
 }

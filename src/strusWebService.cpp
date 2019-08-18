@@ -251,7 +251,8 @@ int main( int argc_, const char *argv_[] )
 		// Define configuration and usage:
 		strus::ProgramOptions opt(
 				errorhnd.get(), argc_, argv_, 8,
-				"h,help", "v,version", "X,schema:" ,"c,config:", "P,port:", "N,name:",
+				"h,help", "v,version", "X,schema:", "c,config:",
+				"P,port:", "N,name:",
 				"V,verbose+", "license");
 		if (errorhnd->hasError())
 		{
@@ -269,20 +270,29 @@ int main( int argc_, const char *argv_[] )
 			}
 		}
 		std::string configdir;
+		std::string configfile;
 		std::string opt_servicename;
 		int opt_port = 0;
 
 		if (opt("config"))
 		{
-			ec = strus::getParentPath( opt["config"], configdir);
+			configfile = opt["config"];
+			ec = strus::getParentPath( configfile, configdir);
 			if (ec) throw strus::runtime_error(_TXT("failed to get parent path of configuration: %s"), ::strerror(ec));
 		}
 		if (opt("verbose"))
 		{
 			g_verbosity = opt.asInt("verbose");
 		}
-		cppcms::json::value config = opt("config") ? configFromFile( opt[ "config"], rt) : configDefault();
-
+		cppcms::json::value config;
+		if (!configfile.empty())
+		{
+			config = configFromFile( configfile);
+		}
+		else
+		{
+			config = configDefault();
+		}
 		if (opt("license"))
 		{
 			print3rdPartyLicenses( config, errorhnd.get());
@@ -331,10 +341,19 @@ int main( int argc_, const char *argv_[] )
 			return rt;
 		}
 		g_normal_termination = false;
-		
+
+		// Create logging directory if it not exists:
+		std::string requestLogDir = config.get( "logging.directory", DefaultConstants::LOGGING_DIR());
+		if (!requestLogDir.empty())
+		{
+			ec = strus::mkdirp( requestLogDir);
+			if (ec) throw strus::runtime_error( _TXT("failed to create logging directory %s: %s"), requestLogDir.c_str(), ::strerror(ec));
+		}
+
 		// Install signal handlers
 		signal( SIGHUP, signal_handler );
 
+		// Implicit evaluation of number of threads to use if not explicitely defined:
 		int nofCores = strus::platform::cores();
 		if (nofCores <= 0) nofCores = 4;
 		int nofThreads = config.get( "service.worker_threads", nofCores);
@@ -348,6 +367,7 @@ int main( int argc_, const char *argv_[] )
 				config.set( "service.applications_pool_size", nofThreads);
 			}
 		}
+		// Overwrite logging level with verbosity defined on command line:
 		if (g_verbosity)
 		{
 			config.set( "logging.level", "debug");
