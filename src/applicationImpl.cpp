@@ -362,10 +362,12 @@ void ApplicationImpl::exec_request( std::string path)
 				booster::shared_ptr<cppcms::http::context> httpContext( release_context());
 				std::vector<strus::WebRequestDelegateRequest>::const_iterator di = delegateRequests.begin(), de = delegateRequests.end();
 				std::vector<strus::Reference<strus::WebRequestDelegateContext> > receivers;
+				WebRequestDelegateContext::AliveFlag alive;
+
 				for (; di != de; ++di)
 				{
 					strus::Reference<strus::WebRequestDelegateContext> receiver(
-						new strus::WebRequestDelegateContext( m_serviceClosure, httpContext, ctx, di->url(), di->receiverSchema()));
+						new strus::WebRequestDelegateContext( m_serviceClosure, httpContext, ctx, alive, di->url(), di->receiverSchema()));
 					receivers.push_back( receiver);
 				}
 				int didx = 0;

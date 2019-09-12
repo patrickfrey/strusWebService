@@ -19,9 +19,11 @@ void WebRequestDelegateContext::putAnswer( const WebRequestAnswer& status)
 {
 	unsigned int rc = m_requestContext.refcnt();
 	bool success = true;
-	if (!m_answer.ok()) return;
+	if (!*m_alive) return;
 
-	else if (status.ok() && status.httpstatus() >= 200 && status.httpstatus() < 300)
+	/*[-]*/std::cerr << "+++ put answer in delegate context " << rc << " " << m_httpContext.use_count() << std::endl;
+
+	if (status.ok() && status.httpstatus() >= 200 && status.httpstatus() < 300)
 	{
 		if (!m_requestContext->pushDelegateRequestAnswer( m_schema.c_str(), status.content(), m_answer))
 		{
@@ -42,6 +44,7 @@ void WebRequestDelegateContext::putAnswer( const WebRequestAnswer& status)
 			webservice::RequestContextImpl appcontext( *m_httpContext, m_serviceClosure);
 			appcontext.report_answer( m_answer, true);
 			m_httpContext->complete_response();
+			*m_alive = false;
 		}
 	}
 	else
@@ -51,6 +54,7 @@ void WebRequestDelegateContext::putAnswer( const WebRequestAnswer& status)
 		m_answer.explain( msg.c_str());
 		appcontext.report_answer( m_answer, true);
 		m_httpContext->complete_response();
+		*m_alive = false;
 	}
 	m_httpContext.reset();
 	m_requestContext.reset();

@@ -48,8 +48,9 @@ public:
 			const char* result,
 			const char* resultvar);
 
-	virtual void logWarning( const char* errmsg);
+	virtual void logConnectionEvent( const char* content);
 
+	virtual void logWarning( const char* errmsg);
 	virtual void logError( const char* errmsg);
 
 	void reset();

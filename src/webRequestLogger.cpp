@@ -79,7 +79,7 @@ WebRequestLogger::WebRequestLogger( const std::string& logfilename_, int verbosi
 		int mm = m_mask;
 		switch (verbosity)
 		{
-			case 4: mm |= (LogContentEvents);
+			case 4: mm |= (LogContentEvents|LogConnectionEvents);
 			case 3: mm |= (LogMethodCalls|LogAction);
 			case 2: mm |= (LogRequests|LogDelegateRequests|LogConfiguration);
 			case 1: mm |= (LogError|LogWarning);
@@ -164,6 +164,11 @@ void WebRequestLogger::logContentEvent( const char* title, const char* item, con
 			logMessage( _TXT("event %s"), title);
 		}
 	}
+}
+
+void WebRequestLogger::logConnectionEvent( const char* content)
+{
+	logMessage( _TXT("curl %s"), content);
 }
 
 void WebRequestLogger::logMethodCall(
