@@ -15,46 +15,45 @@
 
 using namespace strus;
 
+void WebRequestDelegateContext::handleSuccess()
+{
+	WebRequestAnswer answer( m_requestContext->getRequestAnswer());
+	webservice::RequestContextImpl appcontext( *m_httpContext, m_serviceClosure);
+	appcontext.report_answer( answer, true);
+	m_httpContext->complete_response();
+	*m_alive = false;
+}
+
+void WebRequestDelegateContext::handleFailure( const WebRequestAnswer& status)
+{
+	WebRequestAnswer answer( status);
+	webservice::RequestContextImpl appcontext( *m_httpContext, m_serviceClosure);
+	std::string msg( strus::string_format( _TXT( "delegate request to %s failed"), m_url.c_str()));
+	answer.explain( msg.c_str());
+	appcontext.report_answer( answer, true);
+	m_httpContext->complete_response();
+	*m_alive = false;
+}
+
 void WebRequestDelegateContext::putAnswer( const WebRequestAnswer& status)
 {
-	unsigned int rc = m_requestContext.refcnt();
-	bool success = true;
 	if (!*m_alive) return;
-
-	/*[-]*/std::cerr << "+++ put answer in delegate context " << rc << " " << m_httpContext.use_count() << std::endl;
 
 	if (status.ok() && status.httpstatus() >= 200 && status.httpstatus() < 300)
 	{
-		if (!m_requestContext->pushDelegateRequestAnswer( m_schema.c_str(), status.content(), m_answer))
+		WebRequestAnswer answer;
+		if (m_requestContext->pushDelegateRequestAnswer( m_schema.c_str(), status.content(), answer))
 		{
-			success = false;
+			if (m_requestContext.refcnt() <= 1) handleSuccess();
+		}
+		else
+		{
+			handleFailure( answer);
 		}
 	}
 	else
 	{
-		m_answer = status;
-		success = false;
-	}
-	if (success)
-	{
-		if (rc <= 1)
-		{
-			//... last delegate request reply
-			m_answer = m_requestContext->getRequestAnswer();
-			webservice::RequestContextImpl appcontext( *m_httpContext, m_serviceClosure);
-			appcontext.report_answer( m_answer, true);
-			m_httpContext->complete_response();
-			*m_alive = false;
-		}
-	}
-	else
-	{
-		webservice::RequestContextImpl appcontext( *m_httpContext, m_serviceClosure);
-		std::string msg( strus::string_format( _TXT( "delegate request to %s failed"), m_url.c_str()));
-		m_answer.explain( msg.c_str());
-		appcontext.report_answer( m_answer, true);
-		m_httpContext->complete_response();
-		*m_alive = false;
+		handleFailure( status);
 	}
 	m_httpContext.reset();
 	m_requestContext.reset();

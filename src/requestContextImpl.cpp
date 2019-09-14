@@ -57,7 +57,8 @@ void RequestContextImpl::response_content( const strus::WebRequestContent& conte
 	if (with_content && !content.empty())
 	{
 		BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-			<< strus::string_format( _TXT("response content type '%s', charset '%s'"), content.doctype(), content.charset());
+			<< strus::string_format( _TXT("response content type '%s', charset '%s', bytes %lu"),
+				content.doctype(), content.charset(), (unsigned long)content.len()+1/*'\n'*/);
 		response_content( content.charset(), content.doctype(), content.str(), content.len());
 	}
 	else

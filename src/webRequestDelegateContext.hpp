@@ -41,25 +41,23 @@ public:
 		:m_serviceClosure(serviceClosure_)
 		,m_httpContext(httpContext_),m_requestContext(requestContext_),m_alive(alive_)
 		,m_url(url_),m_schema(schema_)
-		,m_answer()
-	{
-		/*[-]*/std::cerr << "+++ create delegate context " << m_httpContext.use_count() << std::endl;
-	}
+	{}
 
-	virtual ~WebRequestDelegateContext()
-	{
-		/*[-]*/std::cerr << "+++ delete delegate context " << m_httpContext.use_count() << std::endl;
-	}
+	virtual ~WebRequestDelegateContext(){}
+
 	virtual void putAnswer( const WebRequestAnswer& status);
 
 private:
-	webservice::ServiceClosure* m_serviceClosure;
-	booster::shared_ptr<cppcms::http::context> m_httpContext;
-	strus::Reference<WebRequestContextInterface> m_requestContext;
-	AliveFlag m_alive;
-	std::string m_url;
-	std::string m_schema;
-	WebRequestAnswer m_answer;
+	void handleFailure( const WebRequestAnswer& status);
+	void handleSuccess();
+
+private:
+	webservice::ServiceClosure* m_serviceClosure;			//< service closure needed by webserver context
+	booster::shared_ptr<cppcms::http::context> m_httpContext;	//< httpContext that hold the webserver connection context
+	strus::Reference<WebRequestContextInterface> m_requestContext;	//< request context that gets the answer
+	AliveFlag m_alive;						//< flag that if false marks if a connection has already been resumed and must not be touched anymore
+	std::string m_url;						//< url of the request for error messages
+	std::string m_schema;						//< schema used to intrepret the answer of the request
 };
 
 }//namespace
