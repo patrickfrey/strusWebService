@@ -1,6 +1,7 @@
 #include "strus/lib/webrequest.hpp"
 #include "strus/base/fileio.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/string_conv.hpp"
 #include "strus/base/numstring.hpp"
 #include <string>
 #include <iostream>
@@ -98,24 +99,29 @@ struct Request
 		curl = curl_easy_init();
 		if (curl) try
 		{
-			set_curl_opt( curl, CURLOPT_USERAGENT, user_agent.c_str());
-
 			set_http_header( headers, "Expect", "");
 			set_http_header( headers, "Content-Type", content_type);
 			set_http_header( headers, "Accept", accept);
 			set_http_header( headers, "Accept-Charset", accept_charset);
-			set_curl_opt( curl, CURLOPT_POST, 1);
+			if (content.empty() && strus::caseInsensitiveEquals( method, "GET"))
+			{
+				set_curl_opt( curl, CURLOPT_HTTPGET, 1);
+			}
+			else
+			{
+				set_curl_opt( curl, CURLOPT_CUSTOMREQUEST, method.c_str());
+				set_curl_opt( curl, CURLOPT_POST, 1);
+				set_curl_opt( curl, CURLOPT_POSTFIELDSIZE, content.size());
+				set_curl_opt( curl, CURLOPT_POSTFIELDS, content.c_str());
+			}
+			set_curl_opt( curl, CURLOPT_USERAGENT, user_agent.c_str());
 			set_curl_opt( curl, CURLOPT_HTTPHEADER, headers);
-			set_curl_opt( curl, CURLOPT_POSTFIELDSIZE, content.size());
-			set_curl_opt( curl, CURLOPT_POSTFIELDS, content.c_str());
 			set_curl_opt( curl, CURLOPT_WRITEDATA, &response.content);
 			set_curl_opt( curl, CURLOPT_WRITEFUNCTION, write_callback); 
 			set_curl_opt( curl, CURLOPT_FAILONERROR, 0);
 			set_curl_opt( curl, CURLOPT_ERRORBUFFER, response.errbuf);
 			set_curl_opt( curl, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_1_1);
-	
 			set_curl_opt( curl, CURLOPT_URL, url.c_str());
-			set_curl_opt( curl, CURLOPT_CUSTOMREQUEST, method.c_str());
 			if (port) set_curl_opt( curl, CURLOPT_PORT, port);
 			if (g_verbose) set_curl_opt( curl, CURLOPT_VERBOSE, 1);
 
