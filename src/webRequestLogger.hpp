@@ -35,17 +35,18 @@ public:
 		return m_structDepth;
 	}
 
-	virtual void logRequest( const char* reqstr);
-	virtual void logDelegateRequest( const char* address, const char* method, const char* content);
+	virtual void logRequest( const char* content, std::size_t contentsize);
+	virtual void logDelegateRequest( const char* address, const char* method, const char* content, std::size_t contentsize);
 	virtual void logPutConfiguration( const char* type, const char* name, const std::string& configstr);
 	virtual void logAction( const char* type, const char* name, const char* action);
-	virtual void logContentEvent( const char* title, const char* item, const char* value);
+	virtual void logContentEvent( const char* title, const char* item, const char* content, std::size_t contentsize);
 
 	virtual void logMethodCall(
 			const char* classname,
 			const char* methodname,
 			const char* arguments,
 			const char* result,
+			std::size_t resultsize,
 			const char* resultvar);
 
 	virtual void logConnectionEvent( const char* content);
@@ -54,6 +55,8 @@ public:
 	virtual void logError( const char* errmsg);
 
 	void reset();
+
+	enum {MaxLogContentSize=2048 /*2K*/};
 
 private:
 	void logMessageBuf( char* buf, size_t bufsize, const char* fmt, va_list ap);

@@ -138,12 +138,14 @@ void RequestContextImpl::report_answer( const strus::WebRequestAnswer& answer, b
 	else if (answer.messagetype() && answer.messagestr())
 	{
 		BOOSTER_DEBUG( DefaultConstants::PACKAGE() ) << answer.messagetype() << "=\"" << answer.messagestr() << "\" (status " << answer.httpstatus() << ") OK";
+
 		response().status( answer.httpstatus());
 		response_message( answer.messagetype(), answer.messagestr());
 	}
 	else
 	{
 		BOOSTER_DEBUG( DefaultConstants::PACKAGE() ) << "(status " << answer.httpstatus() << ") OK";
+
 		response().status( answer.httpstatus());
 		response_content( answer.content(), with_content);
 	}
@@ -173,8 +175,10 @@ void RequestContextImpl::report_message( const std::string& key, const std::stri
 	else
 	{
 		answer = ctx->buildSimpleRequestAnswer( key, message);
+
 		BOOSTER_DEBUG( DefaultConstants::PACKAGE())
 			<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), http_accept.c_str(), http_accept_charset.c_str());
+
 		report_answer( answer, true/*do_reply_content*/);
 	}
 }

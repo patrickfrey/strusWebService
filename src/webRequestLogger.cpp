@@ -47,6 +47,22 @@ static std::string getLogFilename( const std::string& logfilename, int procid, i
 	}
 }
 
+static const char* reduceContentSize( std::string& contentbuf, const char* content, std::size_t contentsize)
+{
+	if (contentsize > WebRequestLogger::MaxLogContentSize)
+	{
+		std::size_t endidx = WebRequestLogger::MaxLogContentSize;
+		for (;endidx > 0 && strus::utf8midchr( content[ endidx-1]); --endidx){}
+		contentbuf.append( content, endidx);
+		contentbuf.append( " ...");
+		return contentbuf.c_str();
+	}
+	else
+	{
+		return content;
+	}
+}
+
 WebRequestLogger::WebRequestLogger( const std::string& logfilename_, int verbosity, int mask_, int structDepth_, int maxnofthreads, int procid_, int nofprocs_)
 	:m_slots(new Slot[ maxnofthreads])
 	,m_nofslots(maxnofthreads?maxnofthreads:1)
@@ -104,29 +120,24 @@ WebRequestLogger::~WebRequestLogger()
 	delete [] m_slots;
 }
 
-void WebRequestLogger::logRequest( const char* reqstr)
+void WebRequestLogger::logRequest( const char* content, std::size_t contentsize)
 {
-	logMessage( _TXT("request: {%s}"), reqstr);
+	std::string contentbuf;
+	content = reduceContentSize( contentbuf, content, contentsize);
+	logMessage( _TXT("request [%s]"), content);
 }
 
-void WebRequestLogger::logDelegateRequest( const char* address, const char* method, const char* content)
+void WebRequestLogger::logDelegateRequest( const char* address, const char* method, const char* content, std::size_t contentsize)
 {
-	std::size_t contentsize = std::strlen( content);
 	if (contentsize == 0)
 	{
 		logMessage( _TXT("delegate %s '%s'"), method, address);
 	}
-	else if (contentsize <= 100)
-	{
-		logMessage( _TXT("delegate %s '%s': '%s'"), method, address, content);
-	}
 	else
 	{
-		const char* contentend = strus::utf8prev( content + 100);
-		if (contentend < content) contentend = content;
-		std::string contentstr( content, contentend - content);
-
-		logMessage( _TXT("delegate %s '%s': '%s...'"), method, address, contentstr.c_str());
+		std::string contentbuf;
+		content = reduceContentSize( contentbuf, content, contentsize);
+		logMessage( _TXT("delegate %s '%s': '%s'"), method, address, content);
 	}
 }
 
@@ -140,17 +151,19 @@ void WebRequestLogger::logAction( const char* type, const char* name, const char
 	logMessage( _TXT("do %s %s '%s'"), action, type, name);
 }
 
-void WebRequestLogger::logContentEvent( const char* title, const char* item, const char* value)
+void WebRequestLogger::logContentEvent( const char* title, const char* item, const char* content, std::size_t contentsize)
 {
-	if (value)
+	if (content)
 	{
+		std::string contentbuf;
+		content = reduceContentSize( contentbuf, content, contentsize);
 		if (item && item[0])
 		{
-			logMessage( _TXT("event %s %s '%s'"), title, item, value);
+			logMessage( _TXT("event %s %s '%s'"), title, item, content);
 		}
 		else
 		{
-			logMessage( _TXT("event %s '%s'"), title, value);
+			logMessage( _TXT("event %s '%s'"), title, content);
 		}
 	}
 	else
@@ -176,6 +189,7 @@ void WebRequestLogger::logMethodCall(
 		const char* methodname,
 		const char* arguments,
 		const char* result,
+		std::size_t resultsize,
 		const char* resultvar)
 {
 	if (!methodname || !methodname[0])
@@ -199,6 +213,8 @@ void WebRequestLogger::logMethodCall(
 	}
 	else
 	{
+		std::string resultbuf;
+		result = reduceContentSize( resultbuf, result, resultsize);
 		if (!resultvar || !resultvar[0])
 		{
 			logMessage( _TXT("call %s::%s( %s) returns %s := %s"), classname, methodname, arguments, resultvar, result);
