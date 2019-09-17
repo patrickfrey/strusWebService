@@ -16,6 +16,7 @@
 #include <cstdarg>
 #include <cstring>
 #include <fstream>
+#include <inttypes.h>
 
 using namespace strus;
 
@@ -47,11 +48,21 @@ static std::string getLogFilename( const std::string& logfilename, int procid, i
 	}
 }
 
-static const char* reduceContentSize( std::string& contentbuf, const char* content, std::size_t contentsize)
+static bool isReadableText( const char* sample, std::size_t samplesize)
 {
-	if (contentsize > WebRequestLogger::MaxLogContentSize)
+	int si = 0, se = samplesize;
+	for (; si != se; ++si)
 	{
-		std::size_t endidx = WebRequestLogger::MaxLogContentSize;
+		if ((unsigned char)sample[si] <= 32) return true;
+	}
+	return false;
+}
+
+static const char* reduceContentSize( std::string& contentbuf, const char* content, std::size_t contentsize, std::size_t maxsize)
+{
+	if (contentsize > maxsize)
+	{
+		std::size_t endidx = maxsize;
 		for (;endidx > 0 && strus::utf8midchr( content[ endidx-1]); --endidx){}
 		contentbuf.append( content, endidx);
 		contentbuf.append( " ...");
@@ -123,7 +134,7 @@ WebRequestLogger::~WebRequestLogger()
 void WebRequestLogger::logRequest( const char* content, std::size_t contentsize)
 {
 	std::string contentbuf;
-	content = reduceContentSize( contentbuf, content, contentsize);
+	content = reduceContentSize( contentbuf, content, contentsize, MaxLogContentSize);
 	logMessage( _TXT("request [%s]"), content);
 }
 
@@ -136,7 +147,7 @@ void WebRequestLogger::logDelegateRequest( const char* address, const char* meth
 	else
 	{
 		std::string contentbuf;
-		content = reduceContentSize( contentbuf, content, contentsize);
+		content = reduceContentSize( contentbuf, content, contentsize, MaxLogContentSize);
 		logMessage( _TXT("delegate %s '%s': '%s'"), method, address, content);
 	}
 }
@@ -156,7 +167,8 @@ void WebRequestLogger::logContentEvent( const char* title, const char* item, con
 	if (content)
 	{
 		std::string contentbuf;
-		content = reduceContentSize( contentbuf, content, contentsize);
+		std::size_t maxsize = isReadableText( content, 64) ? MaxLogReadableItemSize : MaxLogBinaryItemSize;
+		content = reduceContentSize( contentbuf, content, contentsize, maxsize);
 		if (item && item[0])
 		{
 			logMessage( _TXT("event %s %s '%s'"), title, item, content);
@@ -182,6 +194,24 @@ void WebRequestLogger::logContentEvent( const char* title, const char* item, con
 void WebRequestLogger::logConnectionEvent( const char* content)
 {
 	logMessage( _TXT("curl %s"), content);
+}
+
+void WebRequestLogger::logConnectionState( const char* state, void* conn, int ecode)
+{
+	if (conn)
+	{
+		char connid[ 64];
+		std::snprintf( connid, sizeof(connid), "%" PRIxPTR, (uintptr_t)conn);
+		logMessage( _TXT("curl connection %s state %s [%d]"), connid, state, ecode);
+	}
+	else if (ecode)
+	{
+		logMessage( _TXT("curl state %s [%d]"), state, ecode);
+	}
+	else
+	{
+		logMessage( _TXT("curl state %s"), state);
+	}
 }
 
 void WebRequestLogger::logMethodCall(
@@ -214,7 +244,7 @@ void WebRequestLogger::logMethodCall(
 	else
 	{
 		std::string resultbuf;
-		result = reduceContentSize( resultbuf, result, resultsize);
+		result = reduceContentSize( resultbuf, result, resultsize, MaxLogContentSize);
 		if (!resultvar || !resultvar[0])
 		{
 			logMessage( _TXT("call %s::%s( %s) returns %s := %s"), classname, methodname, arguments, resultvar, result);

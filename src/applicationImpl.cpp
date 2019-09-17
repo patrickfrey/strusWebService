@@ -343,8 +343,8 @@ void ApplicationImpl::exec_request( std::string path)
 		{
 			BOOSTER_DEBUG( DefaultConstants::PACKAGE())
 				<< strus::string_format(
-					_TXT("%s Request content type '%s', charset '%s'"),
-					request_method.c_str(), content.doctype(), content.charset());
+					_TXT("%s Request content type '%s', charset '%s', bytes %lu"),
+					request_method.c_str(), content.doctype(), content.charset(), (unsigned long)content.len());
 		}
 		std::vector<WebRequestDelegateRequest> delegateRequests;
 		// Execute request:

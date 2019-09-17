@@ -50,13 +50,18 @@ public:
 			const char* resultvar);
 
 	virtual void logConnectionEvent( const char* content);
+	virtual void logConnectionState( const char* state, void* conn, int ecode);
 
 	virtual void logWarning( const char* errmsg);
 	virtual void logError( const char* errmsg);
 
 	void reset();
 
-	enum {MaxLogContentSize=2048 /*2K*/};
+	enum {
+		MaxLogContentSize=2048/*2K*/,
+		MaxLogBinaryItemSize=32,
+		MaxLogReadableItemSize=256
+	};
 
 private:
 	void logMessageBuf( char* buf, size_t bufsize, const char* fmt, va_list ap);
