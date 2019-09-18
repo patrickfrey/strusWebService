@@ -21,7 +21,13 @@ void WebRequestDelegateContext::handleSuccess()
 	webservice::RequestContextImpl appcontext( *m_httpContext, m_serviceClosure);
 	appcontext.report_answer( answer, true);
 	m_httpContext->complete_response();
-	*m_alive = false;
+
+	strus::WebRequestLoggerInterface* logger = m_serviceClosure->requestLogger();
+	if (0 != (logger->logMask() & WebRequestLoggerInterface::LogConnectionEvents))
+	{
+		logger->logConnectionState( "completed delegate requests", m_requestCount);
+	}
+	*m_counter = 0;
 }
 
 void WebRequestDelegateContext::handleFailure( const WebRequestAnswer& status)
@@ -32,19 +38,26 @@ void WebRequestDelegateContext::handleFailure( const WebRequestAnswer& status)
 	answer.explain( msg.c_str());
 	appcontext.report_answer( answer, true);
 	m_httpContext->complete_response();
-	*m_alive = false;
+
+	strus::WebRequestLoggerInterface* logger = m_serviceClosure->requestLogger();
+	if (0 != (logger->logMask() & WebRequestLoggerInterface::LogConnectionEvents))
+	{
+		logger->logConnectionState( "failed delegate request", answer.httpstatus());
+	}
+	*m_counter = 0;
 }
 
 void WebRequestDelegateContext::putAnswer( const WebRequestAnswer& status)
 {
-	if (!*m_alive) return;
+	if (*m_counter <= 0) return;
 
 	if (status.ok() && status.httpstatus() >= 200 && status.httpstatus() < 300)
 	{
 		WebRequestAnswer answer;
 		if (m_requestContext->pushDelegateRequestAnswer( m_schema.c_str(), status.content(), answer))
 		{
-			if (m_requestContext.refcnt() <= 1) handleSuccess();
+			*m_counter -= 1;
+			if (!*m_counter) handleSuccess();
 		}
 		else
 		{

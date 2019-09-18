@@ -13,6 +13,7 @@
 #include "strus/webRequestContextInterface.hpp"
 #include "strus/reference.hpp"
 #include "strus/base/thread.hpp"
+#include "strus/base/shared_ptr.hpp"
 #include "serviceClosure.hpp"
 #include <cppcms/application.h>
 #include <iostream>
@@ -24,22 +25,16 @@ class WebRequestDelegateContext
 	:public WebRequestDelegateContextInterface
 {
 public:
-	class AliveFlag :public booster::shared_ptr<bool>
-	{
-	public:
-		AliveFlag() :booster::shared_ptr<bool>( new bool(true)){}
-	};
-
-public:
 	WebRequestDelegateContext(
 			webservice::ServiceClosure* serviceClosure_,
 			const booster::shared_ptr<cppcms::http::context>& httpContext_,
 			const strus::Reference<WebRequestContextInterface>& requestContext_,
-			const AliveFlag& alive_,
+			const strus::shared_ptr<int>& counter_,
 			const std::string& url_,
 			const std::string& schema_)
 		:m_serviceClosure(serviceClosure_)
-		,m_httpContext(httpContext_),m_requestContext(requestContext_),m_alive(alive_)
+		,m_httpContext(httpContext_),m_requestContext(requestContext_)
+		,m_counter(counter_),m_requestCount(*counter_)
 		,m_url(url_),m_schema(schema_)
 	{}
 
@@ -55,7 +50,8 @@ private:
 	webservice::ServiceClosure* m_serviceClosure;			//< service closure needed by webserver context
 	booster::shared_ptr<cppcms::http::context> m_httpContext;	//< httpContext that hold the webserver connection context
 	strus::Reference<WebRequestContextInterface> m_requestContext;	//< request context that gets the answer
-	AliveFlag m_alive;						//< flag that if false marks if a connection has already been resumed and must not be touched anymore
+	strus::shared_ptr<int> m_counter;				//< counter of open requests for book-keeping and determining when the request can be completed
+	int m_requestCount;						//< count of requests
 	std::string m_url;						//< url of the request for error messages
 	std::string m_schema;						//< schema used to intrepret the answer of the request
 };

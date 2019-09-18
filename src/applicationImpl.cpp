@@ -30,6 +30,7 @@
 #include "strus/versionAnalyzer.hpp"
 #include "strus/versionBase.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/shared_ptr.hpp"
 #include <cppcms/application.h>
 #include <cppcms/http_response.h>
 #include <cppcms/http_content_type.h>
@@ -360,16 +361,20 @@ void ApplicationImpl::exec_request( std::string path)
 			else
 			{
 				booster::shared_ptr<cppcms::http::context> httpContext( release_context());
+
+				strus::shared_ptr<int> counter = strus::make_shared<int>();
+				*counter = delegateRequests.size();
+
 				std::vector<strus::WebRequestDelegateRequest>::const_iterator di = delegateRequests.begin(), de = delegateRequests.end();
 				std::vector<strus::Reference<strus::WebRequestDelegateContext> > receivers;
-				WebRequestDelegateContext::AliveFlag alive;
 
 				for (; di != de; ++di)
 				{
 					strus::Reference<strus::WebRequestDelegateContext> receiver(
-						new strus::WebRequestDelegateContext( m_serviceClosure, httpContext, ctx, alive, di->url(), di->receiverSchema()));
+						new strus::WebRequestDelegateContext( m_serviceClosure, httpContext, ctx, counter, di->url(), di->receiverSchema()));
 					receivers.push_back( receiver);
 				}
+				httpContext.reset();
 				int didx = 0;
 				di = delegateRequests.begin();
 

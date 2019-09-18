@@ -193,24 +193,18 @@ void WebRequestLogger::logContentEvent( const char* title, const char* item, con
 
 void WebRequestLogger::logConnectionEvent( const char* content)
 {
-	logMessage( _TXT("curl %s"), content);
+	logMessage( _TXT("delegate connection event %s"), content);
 }
 
-void WebRequestLogger::logConnectionState( const char* state, void* conn, int ecode)
+void WebRequestLogger::logConnectionState( const char* state, int arg)
 {
-	if (conn)
+	if (arg)
 	{
-		char connid[ 64];
-		std::snprintf( connid, sizeof(connid), "%" PRIxPTR, (uintptr_t)conn);
-		logMessage( _TXT("curl connection %s state %s [%d]"), connid, state, ecode);
-	}
-	else if (ecode)
-	{
-		logMessage( _TXT("curl state %s [%d]"), state, ecode);
+		logMessage( _TXT("delegate connection state %s [%d]"), state, arg);
 	}
 	else
 	{
-		logMessage( _TXT("curl state %s"), state);
+		logMessage( _TXT("delegate connection state %s"), state);
 	}
 }
 
