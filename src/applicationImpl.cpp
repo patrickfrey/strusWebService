@@ -347,10 +347,10 @@ void ApplicationImpl::exec_request( std::string path)
 					_TXT("%s Request content type '%s', charset '%s', bytes %lu"),
 					request_method.c_str(), content.doctype(), content.charset(), (unsigned long)content.len());
 		}
-		std::vector<WebRequestDelegateRequest> delegateRequests;
 		// Execute request:
-		if (ctx->executeRequest( request_method.c_str(), path.c_str(), content, delegateRequests))
+		if (ctx->executeRequest( request_method.c_str(), path.c_str(), content))
 		{
+			std::vector<WebRequestDelegateRequest> delegateRequests = ctx->getFollowDelegateRequests();
 			if (delegateRequests.empty())
 			{
 				answer = ctx->getRequestAnswer();
@@ -361,34 +361,7 @@ void ApplicationImpl::exec_request( std::string path)
 			else
 			{
 				booster::shared_ptr<cppcms::http::context> httpContext( release_context());
-
-				strus::shared_ptr<int> counter = strus::make_shared<int>();
-				*counter = delegateRequests.size();
-
-				std::vector<strus::WebRequestDelegateRequest>::const_iterator di = delegateRequests.begin(), de = delegateRequests.end();
-				std::vector<strus::Reference<strus::WebRequestDelegateContext> > receivers;
-
-				for (; di != de; ++di)
-				{
-					strus::Reference<strus::WebRequestDelegateContext> receiver(
-						new strus::WebRequestDelegateContext( m_serviceClosure, httpContext, ctx, counter, di->url(), di->receiverSchema()));
-					receivers.push_back( receiver);
-				}
-				httpContext.reset();
-				int didx = 0;
-				di = delegateRequests.begin();
-
-				for (; di != de; ++di,++didx)
-				{
-					std::string delegateContent( di->contentstr(), di->contentlen());
-					strus::Reference<strus::WebRequestDelegateContext> receiver = receivers[ didx];
-					receivers[ didx].reset();
-
-					if (!m_serviceClosure->requestHandler()->delegateRequest( di->url(), di->method(), delegateContent, receiver.release()))
-					{
-						break;
-					}
-				}
+				WebRequestDelegateContext::issueDelegateRequests( m_serviceClosure, httpContext, ctx, delegateRequests);
 			}
 		}
 		else

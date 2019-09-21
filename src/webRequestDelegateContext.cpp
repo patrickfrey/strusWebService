@@ -12,20 +12,64 @@
 #include "internationalization.hpp"
 #include "requestContextImpl.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/errorCodes.hpp"
 
 using namespace strus;
 
+void WebRequestDelegateContext::issueDelegateRequests(
+		webservice::ServiceClosure* serviceClosure_,
+		const booster::shared_ptr<cppcms::http::context>& httpContext_,
+		const strus::Reference<WebRequestContextInterface>& requestContext_,
+		const std::vector<WebRequestDelegateRequest>& delegateRequests)
+{
+	strus::shared_ptr<int> counter = strus::make_shared<int>();
+	*counter = delegateRequests.size();
+
+	std::vector<strus::WebRequestDelegateRequest>::const_iterator di = delegateRequests.begin(), de = delegateRequests.end();
+	std::vector<strus::Reference<strus::WebRequestDelegateContext> > receivers;
+
+	for (; di != de; ++di)
+	{
+		strus::Reference<strus::WebRequestDelegateContext> receiver(
+			new strus::WebRequestDelegateContext( serviceClosure_, httpContext_, requestContext_, counter, di->url(), di->receiverSchema()));
+		receivers.push_back( receiver);
+	}
+	int didx = 0;
+	di = delegateRequests.begin();
+
+	for (; di != de; ++di,++didx)
+	{
+		std::string delegateContent( di->contentstr(), di->contentlen());
+		strus::Reference<strus::WebRequestDelegateContext> receiver = receivers[ didx];
+
+		if (!serviceClosure_->requestHandler()->delegateRequest( di->url(), di->method(), delegateContent, receiver.release()))
+		{
+			*counter = 0;
+			httpContext_->complete_response();
+			break;
+		}
+	}
+}
+
 void WebRequestDelegateContext::handleSuccess()
 {
-	WebRequestAnswer answer( m_requestContext->getRequestAnswer());
-	webservice::RequestContextImpl appcontext( *m_httpContext, m_serviceClosure);
-	appcontext.report_answer( answer, true);
-	m_httpContext->complete_response();
-
-	strus::WebRequestLoggerInterface* logger = m_serviceClosure->requestLogger();
-	if (0 != (logger->logMask() & WebRequestLoggerInterface::LogConnectionEvents))
+	std::vector<WebRequestDelegateRequest> followDelegateRequests = m_requestContext->getFollowDelegateRequests();
+	if (followDelegateRequests.empty())
 	{
-		logger->logConnectionState( "completed delegate requests", m_requestCount);
+		WebRequestAnswer answer( m_requestContext->getRequestAnswer());
+		webservice::RequestContextImpl appcontext( *m_httpContext, m_serviceClosure);
+		appcontext.report_answer( answer, true);
+		m_httpContext->complete_response();
+	
+		strus::WebRequestLoggerInterface* logger = m_serviceClosure->requestLogger();
+		if (0 != (logger->logMask() & WebRequestLoggerInterface::LogConnectionEvents))
+		{
+			logger->logConnectionState( "completed delegate requests", m_requestCount);
+		}
+	}
+	else
+	{
+		issueDelegateRequests( m_serviceClosure, m_httpContext, m_requestContext, followDelegateRequests);
 	}
 	*m_counter = 0;
 }
