@@ -1,15 +1,27 @@
 <?xml version="1.0"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
-<xs:element name="qryanalyzer" minOccurs="1" maxOccurs="1">
+<xs:element name="query" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
 <xs:element name="include" minOccurs="0" maxOccurs="1">
 <xs:complexType>
 <xs:any>
+<xs:element name="analyzer" type="xs:string minOccurs="0" maxOccurs="1""/>
 <xs:element name="vstorage" type="xs:string minOccurs="0" maxOccurs="1""/>
 </xs:any>
 </xs:complexType>
 </xs:element>
+<xs:element name="server" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="storage" type="xs:string minOccurs="0" maxOccurs="unbounded""/>
+<xs:element name="statserver" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="analyzer" minOccurs="0" maxOccurs="1">
+<xs:complexType>
+<xs:any>
 <xs:element name="element" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
@@ -103,6 +115,81 @@
 </xs:any>
 </xs:complexType>
 </xs:element>
+<xs:element name="feature" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="content" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:union>
+<xs:element ref="expression" minOccurs="1" maxOccurs="1"/>
+<xs:element ref="meta" minOccurs="1" maxOccurs="1"/>
+<xs:element ref="term" minOccurs="1" maxOccurs="1"/>
+</xs:union>
+</xs:complexType>
+</xs:element>
+<xs:element name="analyzed" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:union>
+<xs:element ref="expression" minOccurs="1" maxOccurs="1"/>
+<xs:element ref="meta" minOccurs="1" maxOccurs="1"/>
+<xs:element ref="term" minOccurs="1" maxOccurs="1"/>
+</xs:union>
+</xs:complexType>
+</xs:element>
+<xs:element name="set" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="weight" type="xs:decimal minOccurs="0" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="sentence" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="field" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="content" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="results" type="xs:decimal minOccurs="1" maxOccurs="1""/>
+<xs:element name="minweight" type="xs:decimal minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="restriction" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="content" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="condition" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="op" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="union" minOccurs="0" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="condition" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:any>
+<xs:element name="op" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="name" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+</xs:any>
+</xs:complexType>
+</xs:element>
+</xs:any>
+</xs:complexType>
+</xs:element>
+</xs:any>
+</xs:complexType>
+</xs:element>
+</xs:any>
+</xs:complexType>
+</xs:element>
 <xs:element name="sentterm" minOccurs="0" maxOccurs="1">
 <xs:complexType>
 <xs:any>
@@ -126,6 +213,42 @@
 </xs:union>
 </xs:complexType>
 </xs:element>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="term" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="variable" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="type" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="expression" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="variable" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="op" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="range" type="xs:integer minOccurs="0" maxOccurs="1""/>
+<xs:element name="cardinality" type="xs:integer minOccurs="0" maxOccurs="1""/>
+<xs:element name="arg" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:union>
+<xs:element ref="expression" minOccurs="1" maxOccurs="1"/>
+<xs:element ref="meta" minOccurs="1" maxOccurs="1"/>
+<xs:element ref="term" minOccurs="1" maxOccurs="1"/>
+</xs:union>
+</xs:complexType>
+</xs:element>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="meta" minOccurs="0" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="from" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="to" type="xs:string minOccurs="0" maxOccurs="1""/>
 </xs:any>
 </xs:complexType>
 </xs:element>

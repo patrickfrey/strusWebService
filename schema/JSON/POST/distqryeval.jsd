@@ -1,5 +1,5 @@
 {
-  "query": {
+  "distqryeval": {
     "type":"object",
     "required":"true",
     "properties": {
@@ -7,12 +7,33 @@
           "type":"object",
           "required":"false",
           "properties": {
+              "analyzer": {
+                "type":"string",
+                "required":"false"
+              },
               "vstorage": {
                 "type":"string",
                 "required":"false"
               }
           }
         },
+        "storage": {
+          "type":"array",
+          "required":"false"
+          "items": {
+            "type":"string"
+          }
+        },
+        "statserver": {
+          "type":"string",
+          "required":"true"
+        }
+    }
+  },
+  "query": {
+    "type":"object",
+    "required":"false",
+    "properties": {
         "analyzer": {
           "type":"object",
           "required":"false",
@@ -212,145 +233,6 @@
                 }
               }
           }
-        },
-        "feature": {
-          "type":"object",
-          "required":"true",
-          "properties": {
-              "content": {
-                "type":"array",
-                "required":"false",
-                "items": {
-                  "type":"object",
-                  "properties": {
-                    "anyOf": [
-                        "expression": {
-                          "$ref":"#/expression",
-                          "required":"true"
-                        },
-                        "meta": {
-                          "$ref":"#/meta",
-                          "required":"true"
-                        },
-                        "term": {
-                          "$ref":"#/term",
-                          "required":"true"
-                        }
-                    ]
-                  }
-                }
-              },
-              "analyzed": {
-                "type":"array",
-                "required":"false",
-                "items": {
-                  "type":"object",
-                  "properties": {
-                    "anyOf": [
-                        "expression": {
-                          "$ref":"#/expression",
-                          "required":"true"
-                        },
-                        "meta": {
-                          "$ref":"#/meta",
-                          "required":"true"
-                        },
-                        "term": {
-                          "$ref":"#/term",
-                          "required":"true"
-                        }
-                    ]
-                  }
-                }
-              },
-              "set": {
-                "type":"string",
-                "required":"true"
-              },
-              "weight": {
-                "type":"number",
-                "required":"false"
-              }
-          }
-        },
-        "sentence": {
-          "type":"object",
-          "required":"true",
-          "properties": {
-              "field": {
-                "type":"string",
-                "required":"true"
-              },
-              "content": {
-                "type":"string",
-                "required":"true"
-              },
-              "results": {
-                "type":"number",
-                "required":"true"
-              },
-              "minweight": {
-                "type":"number",
-                "required":"true"
-              }
-          }
-        },
-        "restriction": {
-          "type":"object",
-          "required":"true",
-          "properties": {
-              "content": {
-                "type":"object",
-                "required":"true",
-                "properties": {
-                    "condition": {
-                      "type":"object",
-                      "required":"true",
-                      "properties": {
-                          "op": {
-                            "type":"string",
-                            "required":"true"
-                          },
-                          "name": {
-                            "type":"string",
-                            "required":"true"
-                          },
-                          "value": {
-                            "type":"string",
-                            "required":"true"
-                          }
-                      }
-                    },
-                    "union": {
-                      "type":"object",
-                      "required":"false",
-                      "properties": {
-                          "condition": {
-                            "type":"array",
-                            "required":"false",
-                            "items": {
-                              "type":"object",
-                              "properties": {
-                                  "op": {
-                                    "type":"string",
-                                    "required":"true"
-                                  },
-                                  "name": {
-                                    "type":"string",
-                                    "required":"true"
-                                  },
-                                  "value": {
-                                    "type":"string",
-                                    "required":"true"
-                                  }
-                              }
-                            }
-                          }
-                      }
-                    }
-                }
-              }
-          }
         }
     }
   },
@@ -406,83 +288,6 @@
               ]
             }
           }
-        }
-    }
-  },
-  "term": {
-    "type":"object",
-    "required":"true",
-    "properties": {
-        "variable": {
-          "type":"string",
-          "required":"false"
-        },
-        "type": {
-          "type":"string",
-          "required":"true"
-        },
-        "value": {
-          "type":"string",
-          "required":"true"
-        }
-    }
-  },
-  "expression": {
-    "type":"object",
-    "required":"true",
-    "properties": {
-        "variable": {
-          "type":"string",
-          "required":"false"
-        },
-        "op": {
-          "type":"string",
-          "required":"true"
-        },
-        "range": {
-          "type":"number",
-          "required":"false"
-        },
-        "cardinality": {
-          "type":"number",
-          "required":"false"
-        },
-        "arg": {
-          "type":"array",
-          "required":"false",
-          "items": {
-            "type":"object",
-            "properties": {
-              "anyOf": [
-                  "expression": {
-                    "$ref":"#/expression",
-                    "required":"true"
-                  },
-                  "meta": {
-                    "$ref":"#/meta",
-                    "required":"true"
-                  },
-                  "term": {
-                    "$ref":"#/term",
-                    "required":"true"
-                  }
-              ]
-            }
-          }
-        }
-    }
-  },
-  "meta": {
-    "type":"object",
-    "required":"false",
-    "properties": {
-        "from": {
-          "type":"string",
-          "required":"false"
-        },
-        "to": {
-          "type":"string",
-          "required":"false"
         }
     }
   }

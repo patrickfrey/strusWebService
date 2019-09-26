@@ -7,6 +7,14 @@
           "type":"string",
           "required":"true"
         },
+        "database": {
+          "type":"string",
+          "required":"false"
+        },
+        "statsproc": {
+          "type":"string",
+          "required":"false"
+        },
         "metadata": {
           "type":"array",
           "required":"false",
@@ -23,6 +31,10 @@
                 }
             }
           }
+        },
+        "autocompact": {
+          "type":"boolean",
+          "required":"false"
         },
         "acl": {
           "type":"boolean",

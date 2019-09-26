@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:element name="query" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="feature" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="analyzed" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:union>
+<xs:element ref="expression" minOccurs="1" maxOccurs="1"/>
+<xs:element ref="term" minOccurs="1" maxOccurs="1"/>
+</xs:union>
+</xs:complexType>
+</xs:element>
+</xs:any>
+</xs:complexType>
+</xs:element>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="term" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="variable" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="type" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="value" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="expression" minOccurs="1" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="variable" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="op" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="range" type="xs:integer minOccurs="0" maxOccurs="1""/>
+<xs:element name="cardinality" type="xs:integer minOccurs="0" maxOccurs="1""/>
+<xs:element name="arg" minOccurs="0" maxOccurs="unbounded">
+<xs:complexType>
+<xs:union>
+<xs:element ref="expression" minOccurs="1" maxOccurs="1"/>
+<xs:element ref="term" minOccurs="1" maxOccurs="1"/>
+</xs:union>
+</xs:complexType>
+</xs:element>
+</xs:any>
+</xs:complexType>
+</xs:element>
+</xs:schema>

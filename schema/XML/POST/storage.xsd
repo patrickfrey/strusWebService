@@ -4,6 +4,8 @@
 <xs:complexType>
 <xs:any>
 <xs:element name="path" type="xs:string minOccurs="1" maxOccurs="1""/>
+<xs:element name="database" type="xs:string minOccurs="0" maxOccurs="1""/>
+<xs:element name="statsproc" type="xs:string minOccurs="0" maxOccurs="1""/>
 <xs:element name="metadata" minOccurs="0" maxOccurs="unbounded">
 <xs:complexType>
 <xs:any>
@@ -12,6 +14,7 @@
 </xs:any>
 </xs:complexType>
 </xs:element>
+<xs:element name="autocompact" type="xs:boolean minOccurs="0" maxOccurs="1""/>
 <xs:element name="acl" type="xs:boolean minOccurs="0" maxOccurs="1""/>
 <xs:element name="cachedterms" type="xs:string minOccurs="0" maxOccurs="1""/>
 <xs:element name="cache" type="xs:string minOccurs="0" maxOccurs="1""/>

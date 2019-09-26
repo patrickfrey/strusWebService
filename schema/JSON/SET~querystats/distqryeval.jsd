@@ -7,9 +7,30 @@
           "type":"object",
           "required":"false",
           "properties": {
+              "analyzer": {
+                "type":"string",
+                "required":"false"
+              },
               "vstorage": {
                 "type":"string",
                 "required":"false"
+              }
+          }
+        },
+        "server": {
+          "type":"object",
+          "required":"true",
+          "properties": {
+              "storage": {
+                "type":"array",
+                "required":"false"
+                "items": {
+                  "type":"string"
+                }
+              },
+              "statserver": {
+                "type":"string",
+                "required":"true"
               }
           }
         },

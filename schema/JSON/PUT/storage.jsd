@@ -7,16 +7,45 @@
           "type":"string",
           "required":"true"
         },
+        "database": {
+          "type":"string",
+          "required":"false"
+        },
+        "statsproc": {
+          "type":"string",
+          "required":"false"
+        },
+        "metadata": {
+          "type":"array",
+          "required":"false",
+          "items": {
+            "type":"object",
+            "properties": {
+                "name": {
+                  "type":"string",
+                  "required":"true"
+                },
+                "type": {
+                  "type":"string",
+                  "required":"true"
+                }
+            }
+          }
+        },
+        "autocompact": {
+          "type":"boolean",
+          "required":"false"
+        },
+        "acl": {
+          "type":"boolean",
+          "required":"false"
+        },
         "cachedterms": {
           "type":"string",
           "required":"false"
         },
         "cache": {
           "type":"string",
-          "required":"false"
-        },
-        "autocompact": {
-          "type":"boolean",
           "required":"false"
         },
         "compression": {

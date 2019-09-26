@@ -1,15 +1,27 @@
 <?xml version="1.0"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
-<xs:element name="qryanalyzer" minOccurs="1" maxOccurs="1">
+<xs:element name="distqryeval" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
 <xs:element name="include" minOccurs="0" maxOccurs="1">
 <xs:complexType>
 <xs:any>
+<xs:element name="analyzer" type="xs:string minOccurs="0" maxOccurs="1""/>
 <xs:element name="vstorage" type="xs:string minOccurs="0" maxOccurs="1""/>
 </xs:any>
 </xs:complexType>
 </xs:element>
+<xs:element name="storage" type="xs:string minOccurs="0" maxOccurs="unbounded""/>
+<xs:element name="statserver" type="xs:string minOccurs="1" maxOccurs="1""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
+<xs:element name="query" minOccurs="0" maxOccurs="1">
+<xs:complexType>
+<xs:any>
+<xs:element name="analyzer" minOccurs="0" maxOccurs="1">
+<xs:complexType>
+<xs:any>
 <xs:element name="element" minOccurs="1" maxOccurs="1">
 <xs:complexType>
 <xs:any>
@@ -97,6 +109,9 @@
 <xs:element name="range" type="xs:integer minOccurs="0" maxOccurs="1""/>
 <xs:element name="cardinality" type="xs:integer minOccurs="0" maxOccurs="1""/>
 <xs:attribute name="by" type="xs:string use="required""/>
+</xs:any>
+</xs:complexType>
+</xs:element>
 </xs:any>
 </xs:complexType>
 </xs:element>

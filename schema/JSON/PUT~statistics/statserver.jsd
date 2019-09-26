@@ -1,0 +1,12 @@
+{
+  "storage": {
+    "type":"object",
+    "required":"true",
+    "properties": {
+        "value": {
+          "type":"string",
+          "required":"true"
+        }
+    }
+  }
+}
