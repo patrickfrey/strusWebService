@@ -19,44 +19,60 @@ using namespace strus;
 void WebRequestDelegateContext::issueDelegateRequests(
 		webservice::ServiceClosure* serviceClosure_,
 		const booster::shared_ptr<cppcms::http::context>& httpContext_,
-		const strus::Reference<WebRequestContextInterface>& requestContext_,
+		strus::Reference<WebRequestContextInterface>& requestContext_,
 		const std::vector<WebRequestDelegateRequest>& delegateRequests)
 {
 	strus::shared_ptr<int> counter = strus::make_shared<int>();
 	*counter = delegateRequests.size();
 
 	std::vector<strus::WebRequestDelegateRequest>::const_iterator di = delegateRequests.begin(), de = delegateRequests.end();
-	std::vector<strus::Reference<strus::WebRequestDelegateContext> > receivers;
-
-	for (; di != de; ++di)
-	{
-		strus::Reference<strus::WebRequestDelegateContext> receiver(
-			new strus::WebRequestDelegateContext( serviceClosure_, httpContext_, requestContext_, counter, di->url(), di->receiverSchema()));
-		receivers.push_back( receiver);
-	}
-	int didx = 0;
-	di = delegateRequests.begin();
-
+	std::size_t didx = 0;
 	for (; di != de; ++di,++didx)
 	{
-		std::string delegateContent( di->contentstr(), di->contentlen());
-		strus::Reference<strus::WebRequestDelegateContext> receiver = receivers[ didx];
-
-		if (!serviceClosure_->requestHandler()->delegateRequest( di->url(), di->method(), delegateContent, receiver.release()))
+		std::string delegateContentStr( di->contentstr(), di->contentlen());
+		if (di->url())
 		{
-			*counter = 0;
-			httpContext_->complete_response();
-			break;
+			strus::WebRequestDelegateContext* receiver
+				= new strus::WebRequestDelegateContext( serviceClosure_, httpContext_, requestContext_, counter, di->url(), di->receiverSchema());
+			if (!serviceClosure_->requestHandler()->delegateRequest( di->url(), di->method(), delegateContentStr, receiver))
+			{
+				*counter = 0;
+				webservice::RequestContextImpl appcontext( *httpContext_, serviceClosure_);
+				appcontext.report_error_fmt( 500/*httpstatus*/, strus::ErrorCodeDelegateRequestFailed,  _TXT("delegate request send to %s failed"), di->url());
+				httpContext_->complete_response();
+	
+				strus::WebRequestLoggerInterface* logger = serviceClosure_->requestLogger();
+				if (0 != (logger->logMask() & WebRequestLoggerInterface::LogConnectionEvents))
+				{
+					logger->logConnectionState( "failed to send delegate request", 500/*httpstatus*/);
+				}
+				break;
+			}
+		}
+		else
+		{
+			// ... without receiver feed to itself with the receiver schema:
+			WebRequestContent delegateContent( "utf-8", "application/json", delegateContentStr.c_str(), delegateContentStr.size());
+			if (!requestContext_->putDelegateRequestAnswer( di->receiverSchema(), delegateContent))
+			{
+				WebRequestAnswer answer = requestContext_->getAnswer();
+				webservice::RequestContextImpl appcontext( *httpContext_, serviceClosure_);
+				appcontext.report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
+				*counter = 0;
+				httpContext_->complete_response();
+				break;
+			}
 		}
 	}
 }
 
 void WebRequestDelegateContext::handleSuccess()
 {
-	std::vector<WebRequestDelegateRequest> followDelegateRequests = m_requestContext->getFollowDelegateRequests();
+	std::vector<WebRequestDelegateRequest> followDelegateRequests = m_requestContext->getDelegateRequests();
 	if (followDelegateRequests.empty())
 	{
-		WebRequestAnswer answer( m_requestContext->getRequestAnswer());
+		(void)m_requestContext->complete();
+		WebRequestAnswer answer( m_requestContext->getAnswer());
 		webservice::RequestContextImpl appcontext( *m_httpContext, m_serviceClosure);
 		appcontext.report_answer( answer, true);
 		m_httpContext->complete_response();
@@ -97,15 +113,14 @@ void WebRequestDelegateContext::putAnswer( const WebRequestAnswer& status)
 
 	if (status.ok() && status.httpstatus() >= 200 && status.httpstatus() < 300)
 	{
-		WebRequestAnswer answer;
-		if (m_requestContext->pushDelegateRequestAnswer( m_schema.c_str(), status.content(), answer))
+		if (m_requestContext->putDelegateRequestAnswer( m_schema.c_str(), status.content()))
 		{
 			*m_counter -= 1;
 			if (!*m_counter) handleSuccess();
 		}
 		else
 		{
-			handleFailure( answer);
+			handleFailure( m_requestContext->getAnswer());
 		}
 	}
 	else

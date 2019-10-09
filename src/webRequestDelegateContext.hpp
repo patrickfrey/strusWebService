@@ -46,7 +46,7 @@ public:
 	static void issueDelegateRequests(
 			webservice::ServiceClosure* serviceClosure_,
 			const booster::shared_ptr<cppcms::http::context>& httpContext_,
-			const strus::Reference<WebRequestContextInterface>& requestContext_,
+			strus::Reference<WebRequestContextInterface>& requestContext_,
 			const std::vector<WebRequestDelegateRequest>& delegateRequests);
 
 private:

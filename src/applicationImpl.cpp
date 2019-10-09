@@ -295,7 +295,7 @@ void ApplicationImpl::exec_request( std::string path)
 			}
 		}
 		strus::Reference<strus::WebRequestContextInterface> ctx(
-			m_serviceClosure->requestHandler()->createContext( http_accept_charset.c_str(), http_accept.c_str(), html_base_href.c_str(), answer));
+			m_serviceClosure->requestHandler()->createRequestContext( http_accept_charset.c_str(), http_accept.c_str(), html_base_href.c_str(), request_method.c_str(), path.c_str(), answer));
 		if (!ctx.get())
 		{
 			appcontext.report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
@@ -338,24 +338,26 @@ void ApplicationImpl::exec_request( std::string path)
 		if (content.empty())
 		{
 			BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-				<< strus::string_format( _TXT("%s Request without content"), request_method.c_str());
+				<< strus::string_format( _TXT("%s Request without content, HTTP Accept: '%s', Accept-Charset: '%s'"), request_method.c_str(), http_accept.c_str(), http_accept_charset.c_str());
 		}
 		else
 		{
 			BOOSTER_DEBUG( DefaultConstants::PACKAGE())
 				<< strus::string_format(
-					_TXT("%s Request content type '%s', charset '%s', bytes %lu"),
-					request_method.c_str(), content.doctype(), content.charset(), (unsigned long)content.len());
+					_TXT("%s Request content type '%s', charset '%s', bytes %lu, HTTP Accept: '%s', Accept-Charset: '%s'"),
+					request_method.c_str(), content.doctype(), content.charset(), (unsigned long)content.len(), http_accept.c_str(), http_accept_charset.c_str());
 		}
 		// Execute request:
-		if (ctx->executeRequest( request_method.c_str(), path.c_str(), content))
+		if (ctx->execute( content))
 		{
-			std::vector<WebRequestDelegateRequest> delegateRequests = ctx->getFollowDelegateRequests();
+			BOOSTER_DEBUG( DefaultConstants::PACKAGE())
+					<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), http_accept.c_str(), http_accept_charset.c_str());
+
+			std::vector<WebRequestDelegateRequest> delegateRequests = ctx->getDelegateRequests();
 			if (delegateRequests.empty())
 			{
-				answer = ctx->getRequestAnswer();
-				BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-					<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), http_accept.c_str(), http_accept_charset.c_str());
+				(void)ctx->complete();
+				answer = ctx->getAnswer();
 				appcontext.report_answer( answer, do_reply_content);
 			}
 			else
@@ -366,7 +368,7 @@ void ApplicationImpl::exec_request( std::string path)
 		}
 		else
 		{
-			answer = ctx->getRequestAnswer();
+			answer = ctx->getAnswer();
 			appcontext.report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
 			return;
 		}

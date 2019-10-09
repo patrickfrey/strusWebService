@@ -166,21 +166,11 @@ void RequestContextImpl::report_message( const std::string& key, const std::stri
 	{
 		html_base_href = std::string("http://") + request().http_host() + "/";
 	}
-	strus::unique_ptr<strus::WebRequestContextInterface> ctx(
-		m_serviceClosure->requestHandler()->createContext( http_accept_charset.c_str(), http_accept.c_str(), html_base_href.c_str(), answer));
-	if (!ctx.get())
-	{
-		report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
-	}
-	else
-	{
-		answer = ctx->buildSimpleRequestAnswer( key, message);
+	answer = m_serviceClosure->requestHandler()->getSimpleRequestAnswer( http_accept_charset.c_str(), http_accept.c_str(), html_base_href.c_str(), key, message);
 
-		BOOSTER_DEBUG( DefaultConstants::PACKAGE())
+	BOOSTER_DEBUG( DefaultConstants::PACKAGE())
 			<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), http_accept.c_str(), http_accept_charset.c_str());
-
-		report_answer( answer, true/*do_reply_content*/);
-	}
+	report_answer( answer, true/*do_reply_content*/);
 }
 
 

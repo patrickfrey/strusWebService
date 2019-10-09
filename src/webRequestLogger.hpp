@@ -36,6 +36,7 @@ public:
 	}
 
 	virtual void logRequest( const char* content, std::size_t contentsize);
+	virtual void logRequestType( const char* title, const char* procdescr, const char* contextType, const char* contextName);
 	virtual void logDelegateRequest( const char* address, const char* method, const char* content, std::size_t contentsize);
 	virtual void logPutConfiguration( const char* type, const char* name, const std::string& configstr);
 	virtual void logAction( const char* type, const char* name, const char* action);

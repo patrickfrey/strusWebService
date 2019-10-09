@@ -138,6 +138,26 @@ void WebRequestLogger::logRequest( const char* content, std::size_t contentsize)
 	logMessage( _TXT("request [%s]"), content);
 }
 
+void WebRequestLogger::logRequestType( const char* title, const char* procdescr, const char* contextType, const char* contextName)
+{
+	if (contextName)
+	{
+		logMessage( _TXT("request type %s %s %s %s"), title, procdescr, contextType, contextName);
+	}
+	else if (contextType)
+	{
+		logMessage( _TXT("request type %s %s %s"), title, procdescr, contextType);
+	}
+	else if (procdescr)
+	{
+		logMessage( _TXT("request type %s %s"), title, procdescr);
+	}
+	else
+	{
+		logMessage( _TXT("request type %s"), title);
+	}
+}
+
 void WebRequestLogger::logDelegateRequest( const char* address, const char* method, const char* content, std::size_t contentsize)
 {
 	if (contentsize == 0)
@@ -171,11 +191,11 @@ void WebRequestLogger::logContentEvent( const char* title, const char* item, con
 		content = reduceContentSize( contentbuf, content, contentsize, maxsize);
 		if (item && item[0])
 		{
-			logMessage( _TXT("event %s %s '%s'"), title, item, content);
+			logMessage( _TXT("event %s %s: %s"), title, item, content);
 		}
 		else
 		{
-			logMessage( _TXT("event %s '%s'"), title, content);
+			logMessage( _TXT("event %s: %s"), title, content);
 		}
 	}
 	else
