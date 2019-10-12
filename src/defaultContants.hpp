@@ -44,19 +44,21 @@ struct DefaultConstants
 	{
 		return "div,span {\n\tfont-family: verdana,arial,courier;\n}"
 			"\ndiv {\n\tpadding:5px 15px;\n\tposition:relative;\n}"
+			"\ndiv.title {\n\tcolor: #09092a; font-size: larger; text-transform: capitalize;\n}"
 			"\n.info {\n\tcolor: green;\n}"
 			"\n.error {\n\tcolor: #e60000;\n}"
 			"\n.table {\n\tdisplay: table;\n}"
 			"\n.row {\n\tdisplay: table-row;\n}"
 			"\n.col {\n\tdisplay: table-cell;\n}"
 			"\n.list {\n\tdisplay: list;\n}"
+			"\n.title {\n\tdisplay: block; text-transform: capitalize;\n}"
 			"\n.elem {\n\tdisplay: list-item;\n\tlist-style: none;\n}"
-			"\nspan.title {\n\tcolor: #666666;\ntext-decoration: underline;\n}"
-			"\nspan.name {\n\tdisplay: inline;\n\tcolor: #669999;\n}"
+			"\nspan.title {\n\tcolor: #222299;\ntext-decoration: underline; text-transform: capitalize;\n}"
+			"\nspan.title:after {\n\tcontent: '\\A'\n}"
+			"\nspan.name {\n\tdisplay: inline;\n\tcolor: #669999; text-transform: capitalize;\n}"
 			"\nspan.name:after {\n\tcontent: \": \";\n}"
 			"\nspan.value {\n\tdisplay: inline;\n}"
-			"\nspan.value:after {\n\tcontent: '\\A';\n\twhite-space: pre\n}"
-			"\n";
+			"\nspan.value:after {\n\tcontent: '\\A';\n\twhite-space: pre\n}";
 	}
 };
 
