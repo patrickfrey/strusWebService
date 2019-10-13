@@ -170,6 +170,10 @@ static void printUsage()
 	std::cout << "-V|--verbose" << std::endl;
 	std::cout << "    " << _TXT("Do increase verbosity level for logging and output.") << std::endl;
 	std::cout << "    " << _TXT("  may be repeated, e.g. -VVV for verbosity level 3.") << std::endl;
+	std::cout << "--verbosity <N>" << std::endl;
+	std::cout << "    " << _TXT("Do increase verbosity level for logging and output by <N>.") << std::endl;
+	std::cout << "    " << _TXT("  This is a synonym for option -V,--verbose, another way to specify") << std::endl;
+	std::cout << "    " << _TXT("  -V,-VV,-VVV as a number") << std::endl;
 	std::cout << "-M|--schema <TYPE>:<DIR>" << std::endl;
 	std::cout << "    " << _TXT("Do nothing but write the schemas of type <TYPE> ('xml' or 'json')") << std::endl;
 	std::cout << "    " << _TXT("  to the directory specified by <DIR>") << std::endl;
@@ -250,10 +254,10 @@ int main( int argc_, const char *argv_[] )
 
 		// Define configuration and usage:
 		strus::ProgramOptions opt(
-				errorhnd.get(), argc_, argv_, 8,
+				errorhnd.get(), argc_, argv_, 9,
 				"h,help", "v,version", "X,schema:", "c,config:",
 				"P,port:", "N,name:",
-				"V,verbose+", "license");
+				"verbosity:", "V,verbose+", "license");
 		if (errorhnd->hasError())
 		{
 			throw strus::runtime_error(_TXT("failed to parse program arguments"));
@@ -280,9 +284,13 @@ int main( int argc_, const char *argv_[] )
 			ec = strus::getParentPath( configfile, configdir);
 			if (ec) throw strus::runtime_error(_TXT("failed to get parent path of configuration: %s"), ::strerror(ec));
 		}
+		if (opt("verbosity"))
+		{
+			g_verbosity += opt.asInt("verbosity");
+		}
 		if (opt("verbose"))
 		{
-			g_verbosity = opt.asInt("verbose");
+			g_verbosity += opt.asInt("verbose");
 		}
 		cppcms::json::value config;
 		if (!configfile.empty())
