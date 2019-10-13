@@ -74,6 +74,8 @@ void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 		std::memset( &m_service_mem, 0, sizeof(m_service_mem)); //... use private nulled mem to supress valgrind UMR message
 		m_service = new (&m_service_mem) cppcms::service( config);
 		loadHtmlConfiguration( config);
+		loadCorsConfiguration( config);
+		loadProtocolConfiguration( config);
 
 		m_identifier = config.get( "service.name", DefaultConstants::DefaultConstants::DEFAULT_SERVICE_NAME());
 
@@ -143,8 +145,6 @@ void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 					m_eventloop, m_requestLogger, m_html_head, m_put_configdir, m_identifier,
 					m_pretty_print, max_idle_time, transactions_per_second, m_errorhnd);
 		if (!m_requestHandler) throw std::runtime_error( m_errorhnd->fetchError());
-		loadCorsConfiguration( config);
-		loadProtocolConfiguration( config);
 
 		WebRequestAnswer answer;
 		if (!m_requestHandler->init( configstr, answer))
