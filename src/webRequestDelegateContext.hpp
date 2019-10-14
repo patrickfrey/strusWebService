@@ -11,6 +11,7 @@
 #define _STRUS_WEB_REQUEST_DELEGATE_CONTEXT_IMPL_HPP_INCLUDED
 #include "strus/webRequestDelegateContextInterface.hpp"
 #include "strus/webRequestContextInterface.hpp"
+#include "requestContextImpl.hpp"
 #include "strus/reference.hpp"
 #include "strus/base/thread.hpp"
 #include "strus/base/shared_ptr.hpp"
@@ -27,7 +28,7 @@ class WebRequestDelegateContext
 public:
 	WebRequestDelegateContext(
 			webservice::ServiceClosure* serviceClosure_,
-			const booster::shared_ptr<cppcms::http::context>& httpContext_,
+			const webservice::HttpContextRef& httpContext_,
 			const strus::Reference<WebRequestContextInterface>& requestContext_,
 			const strus::shared_ptr<int>& counter_,
 			const std::string& url_,
@@ -45,17 +46,23 @@ public:
 public:
 	static void issueDelegateRequests(
 			webservice::ServiceClosure* serviceClosure_,
-			const booster::shared_ptr<cppcms::http::context>& httpContext_,
+			const webservice::HttpContextRef& httpContext_,
 			strus::Reference<WebRequestContextInterface>& requestContext_,
 			const std::vector<WebRequestDelegateRequest>& delegateRequests);
 
 private:
+	void completeResponse();
+	static void completeResponse(
+			webservice::ServiceClosure* serviceClosure_,
+			const webservice::HttpContextRef& httpContext_,
+			strus::Reference<WebRequestContextInterface>& requestContext_,
+			int requestCount_);
 	void handleFailure( const WebRequestAnswer& status);
 	void handleSuccess();
 
 private:
 	webservice::ServiceClosure* m_serviceClosure;			//< service closure needed by webserver context
-	booster::shared_ptr<cppcms::http::context> m_httpContext;	//< httpContext that hold the webserver connection context
+	webservice::HttpContextRef m_httpContext;			//< httpContext that hold the webserver connection context
 	strus::Reference<WebRequestContextInterface> m_requestContext;	//< request context that gets the answer
 	strus::shared_ptr<int> m_counter;				//< counter of open requests for book-keeping and determining when the request can be completed
 	int m_requestCount;						//< count of requests

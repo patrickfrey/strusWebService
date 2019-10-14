@@ -19,17 +19,9 @@
 using namespace strus;
 using namespace strus::webservice;
 
-RequestContextImpl::RequestContextImpl( const AppContextRef& appContext_, ServiceClosure* serviceClosure_)
-	:m_appContextOwnership(appContext_),m_serviceClosure(serviceClosure_)
-{
-	m_appContext = m_appContextOwnership.get();
-}
-
-RequestContextImpl::RequestContextImpl( AppContext& appContext_, ServiceClosure* serviceClosure_)
-	:m_appContextOwnership(),m_serviceClosure(serviceClosure_)
-{
-	m_appContext = &appContext_;
-}
+RequestContextImpl::RequestContextImpl( const HttpContextRef& httpContext_, ServiceClosure* serviceClosure_)
+	:m_httpContext(httpContext_),m_serviceClosure(serviceClosure_)
+{}
 
 void RequestContextImpl::response_content_header( const char* charset, const char* doctype, std::size_t blobsize)
 {

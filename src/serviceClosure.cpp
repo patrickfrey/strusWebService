@@ -141,6 +141,11 @@ void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 					m_requestLogger,
 					timeout, nofDelegateTotalConnections, nofDelegateHostConnections,
 					m_errorhnd);
+		if (!m_eventloop->start())
+		{
+			throw std::runtime_error( _TXT("failed to start background process for garbage collector"));
+		}
+
 		m_requestHandler = strus::createWebRequestHandler(
 					m_eventloop, m_requestLogger, m_html_head, m_put_configdir, m_identifier,
 					m_pretty_print, max_idle_time, transactions_per_second, m_errorhnd);
@@ -152,15 +157,11 @@ void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 			const char* msg = answer.errorstr() ? answer.errorstr() : strus::errorCodeToString( answer.apperror());
 			throw strus::runtime_error( _TXT("failed to initialize request handler: %s"), msg);
 		}
-		if (!m_eventloop->start())
-		{
-			throw std::runtime_error( _TXT("failed to start background process for garbage collector"));
-		}
 	}
 	catch (const std::bad_alloc& err)
 	{
 		clear();
-		throw err;
+		throw std::bad_alloc();
 	}
 	catch (const std::runtime_error& err)
 	{

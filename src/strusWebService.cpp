@@ -275,8 +275,8 @@ int main( int argc_, const char *argv_[] )
 		}
 		std::string configdir;
 		std::string configfile;
-		std::string opt_servicename;
-		int opt_port = 0;
+		std::string servicename;
+		int port = 0;
 
 		if (opt("config"))
 		{
@@ -336,12 +336,12 @@ int main( int argc_, const char *argv_[] )
 		}
 		if (opt("port"))
 		{
-			opt_port = opt.asInt( "port");
-			if (opt_port == 0) throw strus::runtime_error(_TXT("bad value for -P/--port configured"));
+			port = opt.asInt( "port");
+			if (port == 0) throw strus::runtime_error(_TXT("bad value for -P/--port configured"));
 		}
 		if (opt("name"))
 		{
-			opt_servicename = opt["name"];
+			servicename = opt["name"];
 		}
 		if (printUsageAndExit)
 		{
@@ -390,29 +390,34 @@ int main( int argc_, const char *argv_[] )
 				booster::shared_ptr<booster::log::sinks::standard_error> csink( new booster::log::sinks::standard_error());
 				booster::log::logger::instance().add_sink(csink);
 			}
-			int port;
-			if (opt_port)
+			if (port)
 			{
-				port = opt_port;
 				config.set( "service.port", port);
 			}
 			else
 			{
 				port = config.get( "service.port", 80);
 			}
-			if (!opt_servicename.empty())
+			if (!servicename.empty())
 			{
-				config.set( "service.name", opt_servicename);
+				config.set( "service.name", servicename);
+			}
+			else
+			{
+				servicename = config.get( "service.name", DefaultConstants::DEFAULT_SERVICE_NAME());
 			}
 			g_serviceClosure.reset(); //... free old instance before creating new one
-			g_serviceClosure.reset( new ServiceClosure( configdir, config, g_verbosity));
+			g_serviceClosure.reset( new ServiceClosure( configdir));
 
 			BOOSTER_INFO( DefaultConstants::PACKAGE())
-					<< strus::string_format(
-							_TXT("starting strus web service (%d %s).."),
-							nofThreads, nofThreads==1?"thread":"threads");
+					<< strus::string_format( _TXT("initializing web service %s"), servicename.c_str());
+			g_serviceClosure->init( config, g_verbosity);
+
+			BOOSTER_INFO( DefaultConstants::PACKAGE())
+					<< strus::string_format( _TXT("starting strus web service (%d threads).."), nofThreads);
 			CALL_SERVICE( mount_applications)
-			BOOSTER_NOTICE( DefaultConstants::PACKAGE()) << strus::string_format( _TXT("service ready and listening on %d"), port);
+			BOOSTER_NOTICE( DefaultConstants::PACKAGE())
+					<< strus::string_format( _TXT("service ready and listening on %d"), port);
 
 			g_got_sighup.set( false);
 			CALL_SERVICE( run);
@@ -474,6 +479,7 @@ int main( int argc_, const char *argv_[] )
 		if (!rt) rt = strus::ErrorCodeUncaughtException;
 	}
 	g_normal_termination = true;
+	g_serviceClosure->shutdown();
 	g_serviceClosure.reset();
 	return rt;
 }

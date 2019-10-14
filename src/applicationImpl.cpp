@@ -54,17 +54,17 @@ ApplicationImpl::ApplicationImpl( cppcms::service& service_, ServiceClosure* ser
 #define CATCH_EXEC_ERROR() \
 	catch (const std::runtime_error& err)\
 	{\
-		RequestContextImpl appcontext( context(), m_serviceClosure);\
+		RequestContextImpl appcontext( get_context(), m_serviceClosure);\
 		appcontext.report_error_fmt( 500, -1, _TXT("error in request: %s"), err.what());\
 	}\
 	catch (const std::bad_alloc& err)\
 	{\
-		RequestContextImpl appcontext( context(), m_serviceClosure);\
+		RequestContextImpl appcontext( get_context(), m_serviceClosure);\
 		appcontext.report_error_fmt( 500, -1, _TXT("out of memory in request"));\
 	}\
 	catch (...)\
 	{\
-		RequestContextImpl appcontext( context(), m_serviceClosure);\
+		RequestContextImpl appcontext( get_context(), m_serviceClosure);\
 		appcontext.report_error_fmt( 500, -1, _TXT("uncaught error in request"));\
 	}
 
@@ -73,7 +73,7 @@ void ApplicationImpl::exec_quit()
 	try
 	{
 		if (!handle_preflight_cors() || !check_request_method("GET")) return;
-		RequestContextImpl appcontext( context(), m_serviceClosure);
+		RequestContextImpl appcontext( get_context(), m_serviceClosure);
 		appcontext.report_ok( "OK", 200, _TXT("service to shutdown"));
 		m_serviceClosure->shutdown();
 	}
@@ -85,7 +85,7 @@ void ApplicationImpl::exec_ping()
 	try
 	{
 		if (!handle_preflight_cors() || !check_request_method("GET")) return;	
-		RequestContextImpl appcontext( context(), m_serviceClosure);		
+		RequestContextImpl appcontext( get_context(), m_serviceClosure);		
 		appcontext.report_message( "reply", _TXT("service is up and running"));
 	}
 	CATCH_EXEC_ERROR();
@@ -96,7 +96,7 @@ void ApplicationImpl::exec_version( std::string component)
 	try
 	{
 		if (!handle_preflight_cors() || !check_request_method("GET")) return;
-		RequestContextImpl appcontext( context(), m_serviceClosure);		
+		RequestContextImpl appcontext( get_context(), m_serviceClosure);		
 	
 		const char* versionstr = 0;
 		if (component == "webservice")		{versionstr = STRUS_WEBSERVICE_VERSION_STRING;}
@@ -116,7 +116,7 @@ void ApplicationImpl::exec_version0()
 	try
 	{
 		if (!handle_preflight_cors() || !check_request_method("GET")) return;
-		RequestContextImpl appcontext( context(), m_serviceClosure);		
+		RequestContextImpl appcontext( get_context(), m_serviceClosure);		
 		appcontext.report_message( "version", STRUS_WEBSERVICE_VERSION_STRING);
 	}
 	CATCH_EXEC_ERROR();
@@ -127,7 +127,7 @@ void ApplicationImpl::exec_service_identifier()
 	try
 	{
 		if (!handle_preflight_cors() || !check_request_method("GET")) return;
-		RequestContextImpl appcontext( context(), m_serviceClosure);		
+		RequestContextImpl appcontext( get_context(), m_serviceClosure);		
 		appcontext.report_message( "name", m_serviceClosure->identifier());
 	}
 	CATCH_EXEC_ERROR();
@@ -170,7 +170,7 @@ bool ApplicationImpl::check_request_method( const char* type)
 {
 	if (request().request_method() != type)
 	{
-		RequestContextImpl appcontext( context(), m_serviceClosure);
+		RequestContextImpl appcontext( get_context(), m_serviceClosure);
 		appcontext.report_error_fmt( 405/*Method Not Allowed*/, 0, _TXT("expected HTTP method '%s'"), type);
 		return false;
 	}
@@ -195,11 +195,11 @@ static std::string json_value_encode( const std::string& value)
 		{
 			switch (*vi)
 			{
-				case '\n': entity = "n"; break;
-				case '\r': entity = "r"; break;
-				case '\b': entity = "b"; break;
-				case '\f': entity = "f"; break;
-				case '\t': entity = "t"; break;
+				case '\n': entity = "\\n"; break;
+				case '\r': entity = "\\r"; break;
+				case '\b': entity = "\\b"; break;
+				case '\f': entity = "\\f"; break;
+				case '\t': entity = "\\t"; break;
 				case '"': entity = "\\\""; break;
 				case '\\': entity = "\\\\"; break;
 				default: continue;
@@ -259,7 +259,7 @@ void ApplicationImpl::exec_request( std::string path)
 {
 	try
 	{
-		RequestContextImpl appcontext( context(), m_serviceClosure);
+		RequestContextImpl appcontext( get_context(), m_serviceClosure);
 
 		// Set default locale:
 		context().locale( "en_US.UTF-8"); 

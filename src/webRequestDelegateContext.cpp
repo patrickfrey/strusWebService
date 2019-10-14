@@ -10,7 +10,6 @@
 #include "webRequestDelegateContext.hpp"
 #include "serviceClosure.hpp"
 #include "internationalization.hpp"
-#include "requestContextImpl.hpp"
 #include "strus/base/string_format.hpp"
 #include "strus/errorCodes.hpp"
 
@@ -18,15 +17,18 @@ using namespace strus;
 
 void WebRequestDelegateContext::issueDelegateRequests(
 		webservice::ServiceClosure* serviceClosure_,
-		const booster::shared_ptr<cppcms::http::context>& httpContext_,
+		const webservice::HttpContextRef& httpContext_,
 		strus::Reference<WebRequestContextInterface>& requestContext_,
 		const std::vector<WebRequestDelegateRequest>& delegateRequests)
 {
 	strus::shared_ptr<int> counter = strus::make_shared<int>();
-	*counter = delegateRequests.size();
+	int requestCount = *counter = delegateRequests.size();
 
+	std::vector<strus::WebRequestDelegateRequest> followDelegateRequests;
 	std::vector<strus::WebRequestDelegateRequest>::const_iterator di = delegateRequests.begin(), de = delegateRequests.end();
 	std::size_t didx = 0;
+AGAIN:
+	/*[-]*/std::cerr << "+++ DELEGATE REQUESTS number " << requestCount << std::endl;
 	for (; di != de; ++di,++didx)
 	{
 		std::string delegateContentStr( di->contentstr(), di->contentlen());
@@ -37,7 +39,7 @@ void WebRequestDelegateContext::issueDelegateRequests(
 			if (!serviceClosure_->requestHandler()->delegateRequest( di->url(), di->method(), delegateContentStr, receiver))
 			{
 				*counter = 0;
-				webservice::RequestContextImpl appcontext( *httpContext_, serviceClosure_);
+				webservice::RequestContextImpl appcontext( httpContext_, serviceClosure_);
 				appcontext.report_error_fmt( 500/*httpstatus*/, strus::ErrorCodeDelegateRequestFailed,  _TXT("delegate request send to %s failed"), di->url());
 				httpContext_->complete_response();
 	
@@ -53,10 +55,37 @@ void WebRequestDelegateContext::issueDelegateRequests(
 		{
 			// ... without receiver feed to itself with the receiver schema:
 			WebRequestContent delegateContent( "utf-8", "application/json", delegateContentStr.c_str(), delegateContentStr.size());
-			if (!requestContext_->putDelegateRequestAnswer( di->receiverSchema(), delegateContent))
+			if (requestContext_->putDelegateRequestAnswer( di->receiverSchema(), delegateContent))
+			{
+				*counter -= 1;
+				if (*counter == 0)
+				{
+					if (didx+1 != delegateRequests.size())
+					{
+						WebRequestAnswer answer( 500, ErrorCodeLogicError, _TXT("race: bad counter value for delegate requests"));
+						webservice::RequestContextImpl appcontext( httpContext_, serviceClosure_);
+						appcontext.report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
+						httpContext_->complete_response();
+					}
+					followDelegateRequests = requestContext_->getDelegateRequests();
+					if (followDelegateRequests.empty())
+					{
+						/*[-]*/std::cerr << "+++ COMPLETE RESPONSE counter " << *counter << ", use " << httpContext_.use_count() << std::endl;
+						completeResponse( serviceClosure_, httpContext_, requestContext_, requestCount);
+					}
+					else
+					{
+						di = followDelegateRequests.begin(), de = followDelegateRequests.end();
+						didx = 0;
+						requestCount = *counter = delegateRequests.size();
+						goto AGAIN;
+					}
+				}
+			}
+			else
 			{
 				WebRequestAnswer answer = requestContext_->getAnswer();
-				webservice::RequestContextImpl appcontext( *httpContext_, serviceClosure_);
+				webservice::RequestContextImpl appcontext( httpContext_, serviceClosure_);
 				appcontext.report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
 				*counter = 0;
 				httpContext_->complete_response();
@@ -66,38 +95,57 @@ void WebRequestDelegateContext::issueDelegateRequests(
 	}
 }
 
+void WebRequestDelegateContext::completeResponse(
+		webservice::ServiceClosure* serviceClosure_,
+		const webservice::HttpContextRef& httpContext_,
+		strus::Reference<WebRequestContextInterface>& requestContext_,
+		int requestCount_)
+{
+	(void)requestContext_->complete();
+	WebRequestAnswer answer( requestContext_->getAnswer());
+	webservice::RequestContextImpl appcontext( httpContext_, serviceClosure_);
+	/*[-]*/std::cerr << "+++ REPORT ANSWER, use " << httpContext_.use_count() << std::endl;
+	appcontext.report_answer( answer, true);
+	httpContext_->complete_response();
+	/*[-]*/std::cerr << "+++ SEND ANSWER" << std::endl;
+
+	strus::WebRequestLoggerInterface* logger = serviceClosure_->requestLogger();
+	if (0 != (logger->logMask() & WebRequestLoggerInterface::LogConnectionEvents))
+	{
+		logger->logConnectionState( "completed delegate requests", requestCount_);
+	}
+}
+
+void WebRequestDelegateContext::completeResponse()
+{
+	/*[-]*/std::cerr << "+++ COMPLETE RESPONSE counter " << *m_counter << ", use " << m_httpContext.use_count() << std::endl;
+	completeResponse( m_serviceClosure, m_httpContext, m_requestContext, m_requestCount);
+}
+
 void WebRequestDelegateContext::handleSuccess()
 {
+	/*[-]*/std::cerr << "+++ HANDLE SUCCESS counter " << *m_counter << ", use " << m_httpContext.use_count() << std::endl;
 	std::vector<WebRequestDelegateRequest> followDelegateRequests = m_requestContext->getDelegateRequests();
 	if (followDelegateRequests.empty())
 	{
-		(void)m_requestContext->complete();
-		WebRequestAnswer answer( m_requestContext->getAnswer());
-		webservice::RequestContextImpl appcontext( *m_httpContext, m_serviceClosure);
-		appcontext.report_answer( answer, true);
-		m_httpContext->complete_response();
-	
-		strus::WebRequestLoggerInterface* logger = m_serviceClosure->requestLogger();
-		if (0 != (logger->logMask() & WebRequestLoggerInterface::LogConnectionEvents))
-		{
-			logger->logConnectionState( "completed delegate requests", m_requestCount);
-		}
+		completeResponse();
 	}
 	else
 	{
 		issueDelegateRequests( m_serviceClosure, m_httpContext, m_requestContext, followDelegateRequests);
 	}
-	*m_counter = 0;
 }
 
 void WebRequestDelegateContext::handleFailure( const WebRequestAnswer& status)
 {
+	/*[-]*/std::cerr << "+++ HANDLE FAILURE status " << status.httpstatus() << ", counter " << *m_counter << ", use " << m_httpContext.use_count() << std::endl;
 	WebRequestAnswer answer( status);
-	webservice::RequestContextImpl appcontext( *m_httpContext, m_serviceClosure);
+	webservice::RequestContextImpl appcontext( m_httpContext, m_serviceClosure);
 	std::string msg( strus::string_format( _TXT( "delegate request to %s failed"), m_url.c_str()));
 	answer.explain( msg.c_str());
 	appcontext.report_answer( answer, true);
 	m_httpContext->complete_response();
+	/*[-]*/std::cerr << "+++ SEND FAILURE ANSWER" << std::endl;
 
 	strus::WebRequestLoggerInterface* logger = m_serviceClosure->requestLogger();
 	if (0 != (logger->logMask() & WebRequestLoggerInterface::LogConnectionEvents))
@@ -109,6 +157,7 @@ void WebRequestDelegateContext::handleFailure( const WebRequestAnswer& status)
 
 void WebRequestDelegateContext::putAnswer( const WebRequestAnswer& status)
 {
+	/*[-]*/std::cerr << "+++ PUT ANSWER, count " << *m_counter << ", use " << m_httpContext.use_count() << std::endl;
 	if (*m_counter <= 0) return;
 
 	if (status.ok() && status.httpstatus() >= 200 && status.httpstatus() < 300)
@@ -116,7 +165,7 @@ void WebRequestDelegateContext::putAnswer( const WebRequestAnswer& status)
 		if (m_requestContext->putDelegateRequestAnswer( m_schema.c_str(), status.content()))
 		{
 			*m_counter -= 1;
-			if (!*m_counter) handleSuccess();
+			if (*m_counter == 0) handleSuccess();
 		}
 		else
 		{
@@ -127,8 +176,6 @@ void WebRequestDelegateContext::putAnswer( const WebRequestAnswer& status)
 	{
 		handleFailure( status);
 	}
-	m_httpContext.reset();
-	m_requestContext.reset();
 }
 
 

@@ -25,23 +25,23 @@ namespace webservice {
 ///\brief Forward declaration
 class ServiceClosure;
 
+typedef cppcms::http::context HttpContext;
+typedef booster::shared_ptr<cppcms::http::context> HttpContextRef;
+
 class RequestContextImpl
 {
 public:
-	typedef cppcms::http::context AppContext;
-	typedef booster::shared_ptr<cppcms::http::context> AppContextRef;
-
-	RequestContextImpl( AppContext& appContext_, ServiceClosure* serviceClosure_);
-	RequestContextImpl( const AppContextRef& appContext_, ServiceClosure* serviceClosure_);
+	// RequestContextImpl( HttpContext& httpContext_, ServiceClosure* serviceClosure_);
+	RequestContextImpl( const HttpContextRef& httpContext_, ServiceClosure* serviceClosure_);
 
 public:
 	cppcms::http::response& response() const
 	{
-		return m_appContext->response();
+		return m_httpContext->response();
 	}
 	cppcms::http::request& request() const
 	{
-		return m_appContext->request();
+		return m_httpContext->request();
 	}
 
 	/// \brief Set response content header
@@ -66,8 +66,8 @@ public:
 	void report_message( const std::string& key, const std::string& message);
 
 private:
-	AppContext* m_appContext;
-	AppContextRef m_appContextOwnership;
+	//HttpContext* m_httpContext;
+	HttpContextRef m_httpContext;
 	ServiceClosure* m_serviceClosure;
 };
 

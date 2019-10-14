@@ -51,7 +51,7 @@
 
 	"debug" : {
 		"log_requests": true,
-		"struct_depth": 4,
+		"struct_depth": 5,
 		"request_file": "{logging.directory}/requests.{service.name}.log",
 		"protocol" : {
 			"pretty_print":		true,
