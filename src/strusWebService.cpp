@@ -479,8 +479,11 @@ int main( int argc_, const char *argv_[] )
 		if (!rt) rt = strus::ErrorCodeUncaughtException;
 	}
 	g_normal_termination = true;
-	g_serviceClosure->shutdown();
-	g_serviceClosure.reset();
+	if (g_serviceClosure.get())
+	{
+		g_serviceClosure->shutdown();
+		g_serviceClosure.reset();
+	}
 	return rt;
 }
 

@@ -54,7 +54,7 @@ public:
 	/// \brief Shutdown service
 	void shutdown()
 	{
-		m_eventloop->stop();
+		if (m_eventloop) m_eventloop->stop();
 		if (m_service) m_service->shutdown();
 	}
 
