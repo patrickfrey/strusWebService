@@ -172,14 +172,25 @@ void WebRequestLogger::logDelegateRequest( const char* address, const char* meth
 	}
 }
 
-void WebRequestLogger::logPutConfiguration( const char* type, const char* name, const std::string& configstr)
+void WebRequestLogger::logPutConfiguration( const char* contextType, const char* contextName, const std::string& configstr)
 {
-	logMessage( _TXT("configuration %s '%s': {%s}"), type, name, configstr.c_str());
+	logMessage( _TXT("configuration %s '%s': {%s}"), contextType, contextName, configstr.c_str());
 }
 
-void WebRequestLogger::logAction( const char* type, const char* name, const char* action)
+void WebRequestLogger::logAction( const char* contextType, const char* contextName, const char* action)
 {
-	logMessage( _TXT("do %s %s '%s'"), action, type, name);
+	if (contextName)
+	{
+		logMessage( _TXT("do %s %s '%s'"), action, contextType, contextName);
+	}
+	else if (contextType)
+	{
+		logMessage( _TXT("do %s %s"), action, contextType);
+	}
+	else
+	{
+		logMessage( _TXT("do %s"), action);
+	}
 }
 
 void WebRequestLogger::logContentEvent( const char* title, const char* item, const char* content, std::size_t contentsize)
