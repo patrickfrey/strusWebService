@@ -157,7 +157,7 @@ void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 		}
 		m_requestHandler = strus::createWebRequestHandler(
 					m_eventloop, m_requestLogger, m_html_head,
-					m_put_configdir, m_identifier, ""/*rootid*/, m_port,
+					m_put_configdir, m_identifier, m_port,
 					m_pretty_print, max_idle_time, transactions_per_second, m_errorhnd);
 		if (!m_requestHandler) throw std::runtime_error( m_errorhnd->fetchError());
 
