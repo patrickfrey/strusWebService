@@ -40,6 +40,7 @@ struct DefaultConstants
 	static const int MAX_DELEGATE_CONNECTIONS() {return 32;}
 	static const std::string CORS_AGE() {return "10";}
 	static const std::string DEFAULT_SERVICE_NAME() {return "strus";}
+	static const int DEFAULT_HTTP_PORT() {return 80;}
 	static const char* HTML_DEFAULT_STYLE()
 	{
 		return "div,span {\n\tfont-family: verdana,arial,courier;\n}"

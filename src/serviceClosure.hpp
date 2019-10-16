@@ -35,14 +35,11 @@ public:
 	explicit ServiceClosure( const std::string& configdir_)
 		:m_service(0),m_requestLogger(0),m_eventloop(0),m_requestHandler(0),m_errorhnd(0),m_configdir(configdir_)
 		,m_cors_hosts(),m_cors_age(),m_html_head(),m_http_server_name(),m_http_script_name(),m_http_server_url()
-		,m_put_configdir(),m_identifier()
+		,m_put_configdir(),m_identifier(),m_port(0)
 		,m_cors_enabled(true),m_quit_enabled(false),m_debug_enabled(false),m_pretty_print(false)
 	{}
 
-	~ServiceClosure()
-	{
-		clear();
-	}
+	~ServiceClosure();
 
 	static bool storeSchemaDescriptions( const cppcms::json::value& config, const std::string& dir, const std::string& doctype);
 
@@ -125,9 +122,6 @@ public:
 	}
 
 private:
-	//\brief Destroy service, logging and command handler if initialized
-	void clear();
-
 	void loadHtmlConfiguration( const cppcms::json::value& config);
 	void loadCorsConfiguration( const cppcms::json::value& config);
 	void loadProtocolConfiguration( const cppcms::json::value& config);
@@ -148,6 +142,7 @@ private:
 	std::string m_http_server_url;
 	std::string m_put_configdir;
 	std::string m_identifier;
+	int m_port;
 	bool m_cors_enabled;
 	bool m_quit_enabled;
 	bool m_debug_enabled;

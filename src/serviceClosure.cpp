@@ -42,6 +42,15 @@ static bool url_has_protocol_prefix( const std::string& url)
 	return *si == ':';
 }
 
+ServiceClosure::~ServiceClosure()
+{
+	if (m_service) {m_service->~service(); m_service = 0;}
+	if (m_requestLogger) {delete m_requestLogger; m_requestLogger = 0;}
+	if (m_requestHandler) {delete m_requestHandler; m_requestHandler = 0;}
+	if (m_eventloop) {delete m_eventloop; m_eventloop=0;}
+	if (m_errorhnd) {delete m_errorhnd; m_errorhnd = 0;}
+}
+
 bool ServiceClosure::storeSchemaDescriptions( const cppcms::json::value& config, const std::string& dir, const std::string& doctype)
 {
 	ErrorBufferInterface* errorhnd = 0;
@@ -77,7 +86,8 @@ void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 		loadCorsConfiguration( config);
 		loadProtocolConfiguration( config);
 
-		m_identifier = config.get( "service.name", DefaultConstants::DefaultConstants::DEFAULT_SERVICE_NAME());
+		m_identifier = config.get( "service.name", DefaultConstants::DEFAULT_SERVICE_NAME());
+		m_port = config.get( "service.port", DefaultConstants::DEFAULT_HTTP_PORT());
 
 		bool doLogCalls = config.get( "debug.log_calls", DefaultConstants::DO_LOG_CALLS());
 		bool doLogRequests = config.get( "debug.log_requests", DefaultConstants::DO_LOG_REQUESTS());
@@ -145,9 +155,9 @@ void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 		{
 			throw std::runtime_error( _TXT("failed to start background process for garbage collector"));
 		}
-
 		m_requestHandler = strus::createWebRequestHandler(
-					m_eventloop, m_requestLogger, m_html_head, m_put_configdir, m_identifier,
+					m_eventloop, m_requestLogger, m_html_head,
+					m_put_configdir, m_identifier, ""/*rootid*/, m_port,
 					m_pretty_print, max_idle_time, transactions_per_second, m_errorhnd);
 		if (!m_requestHandler) throw std::runtime_error( m_errorhnd->fetchError());
 
@@ -160,7 +170,6 @@ void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 	}
 	catch (const std::bad_alloc& err)
 	{
-		clear();
 		throw std::bad_alloc();
 	}
 	catch (const std::runtime_error& err)
@@ -170,7 +179,6 @@ void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 			const char* msg = m_errorhnd->fetchError();
 			BOOSTER_ERROR( DefaultConstants::PACKAGE()) << msg;
 		}
-		clear();
 		throw strus::runtime_error(_TXT("error initialising service closure: %s"), err.what());
 	}
 }
@@ -261,24 +269,4 @@ void ServiceClosure::mount_applications()
 	if (m_service) m_service->applications_pool().mount( cppcms::applications_factory<ApplicationImpl>( this));
 }
 
-void ServiceClosure::clear()
-{
-	if (m_service) {m_service->~service(); m_service = 0;}
-	if (m_requestLogger) {delete m_requestLogger; m_requestLogger = 0;}
-	if (m_requestHandler) {delete m_requestHandler; m_requestHandler = 0;}
-	if (m_eventloop) {delete m_eventloop; m_eventloop=0;}
-	if (m_errorhnd) {delete m_errorhnd; m_errorhnd = 0;}
-
-	m_cors_hosts.clear();
-	m_cors_age.clear();
-	m_html_head.clear();
-	m_http_server_name.clear();
-	m_http_script_name.clear();
-	m_http_server_url.clear();
-	m_put_configdir.clear();
-	m_cors_enabled = true;
-	m_quit_enabled = false;
-	m_debug_enabled = false;
-	m_pretty_print = false;
-}
 
