@@ -41,10 +41,10 @@
 	},
 
 	"logging" : {
-	        "directory"  : "/var/log/strus",
 		"level" : "debug",
+		"directory"  : "/var/log/strus",
 		"file" : {
-			"name":		"{logging.directory}/strusWebService.{service.name}.log",
+			"name":		"strusWebService.{service.name}.log",
 			"append":	true
 		}
 	},
