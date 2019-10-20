@@ -135,14 +135,14 @@ void WebRequestLogger::logRequest( const char* content, std::size_t contentsize)
 {
 	std::string contentbuf;
 	content = reduceContentSize( contentbuf, content, contentsize, MaxLogContentSize);
-	logMessage( _TXT("request [%s]"), content);
+	logMessage( _TXT("request content [%s]"), content);
 }
 
 void WebRequestLogger::logRequestType( const char* title, const char* procdescr, const char* contextType, const char* contextName)
 {
-	if (contextName)
+	if (contextName && contextType && contextName != contextType)
 	{
-		logMessage( _TXT("request type %s %s %s %s"), title, procdescr, contextType, contextName);
+		logMessage( _TXT("request type %s %s %s '%s'"), title, procdescr, contextType, contextName);
 	}
 	else if (contextType)
 	{
@@ -155,6 +155,20 @@ void WebRequestLogger::logRequestType( const char* title, const char* procdescr,
 	else
 	{
 		logMessage( _TXT("request type %s"), title);
+	}
+}
+
+void WebRequestLogger::logRequestAnswer( const char* content, std::size_t contentsize)
+{
+	if (contentsize)
+	{
+		std::string contentbuf;
+		content = reduceContentSize( contentbuf, content, contentsize, MaxLogContentSize);
+		logMessage( _TXT("request answer content [%s]"), content);
+	}
+	else
+	{
+		logMessage( _TXT("request no answer content"));
 	}
 }
 
@@ -174,12 +188,19 @@ void WebRequestLogger::logDelegateRequest( const char* address, const char* meth
 
 void WebRequestLogger::logPutConfiguration( const char* contextType, const char* contextName, const std::string& configstr)
 {
-	logMessage( _TXT("configuration %s '%s': {%s}"), contextType, contextName, configstr.c_str());
+	if (contextName && contextType && contextName != contextType)
+	{
+		logMessage( _TXT("configuration %s '%s': {%s}"), contextType, contextName, configstr.c_str());
+	}
+	else
+	{
+		logMessage( _TXT("configuration %s: {%s}"), contextType, configstr.c_str());
+	}
 }
 
 void WebRequestLogger::logAction( const char* contextType, const char* contextName, const char* action)
 {
-	if (contextName)
+	if (contextName && contextType && contextName != contextType)
 	{
 		logMessage( _TXT("do %s %s '%s'"), action, contextType, contextName);
 	}
