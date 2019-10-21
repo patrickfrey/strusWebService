@@ -13,6 +13,7 @@
 #include "strus/base/thread.hpp"
 #include "strus/base/fileio.hpp"
 #include "strus/base/utf8.hpp"
+#include "strus/base/asciiCharSet.hpp"
 #include <cstdarg>
 #include <cstring>
 #include <fstream>
@@ -58,12 +59,22 @@ static bool isReadableText( const char* sample, std::size_t samplesize)
 	return false;
 }
 
+
+static const strus::AsciiCharSet g_base64Character( "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
+
 static const char* reduceContentSize( std::string& contentbuf, const char* content, std::size_t contentsize, std::size_t maxsize)
 {
 	if (contentsize > maxsize)
 	{
 		std::size_t endidx = maxsize;
 		for (;endidx > 0 && strus::utf8midchr( content[ endidx-1]); --endidx){}
+		{
+			// Cut large base64 strings in the log
+			std::size_t mid = endidx / 8;
+			std::size_t ei = endidx;
+			for (;ei > mid && g_base64Character.test( content[ ei-1]); --ei){}
+			if (ei <= mid * 4) endidx = ei + std::min( endidx - ei, (std::size_t)40);
+		}
 		contentbuf.append( content, endidx);
 		contentbuf.append( " ...");
 		return contentbuf.c_str();

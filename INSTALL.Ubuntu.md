@@ -13,17 +13,17 @@ Install packages with 'apt-get'/aptitude.
 
 ## Required packages
 	boost-all >= 1.57
-	snappy-dev leveldb-dev libuv-dev cppcms >= 1.0 libcurl4-openssl-dev
+	snappy-dev leveldb-dev libuv-dev cppcms >= 1.2 libcurl4-openssl-dev
 
 ### Packages required by cppcms
 	zlib1g-dev
 	libpcre3-dev
 
-### Download and install cppcms
-	wget https://sourceforge.net/projects/cppcms/files/cppcms/1.0.5/cppcms-1.0.5.tar.bz2
-	bzip2 -d cppcms-1.0.5.tar.bz2
-	tar -xvf cppcms-1.0.5.tar
-	cd cppcms-1.0.5
+### Download and install cppcms (version 1.2)
+	wget https://sourceforge.net/projects/cppcms/files/cppcms/1.2.1/cppcms-1.2.1.tar.bz2
+	bzip2 -d cppcms-1.2.1.tar.bz2
+	tar -xvf cppcms-1.2.1.tar
+	cd cppcms-1.2.1
 	cmake .
 	make install
 

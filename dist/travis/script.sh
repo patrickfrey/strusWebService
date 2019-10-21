@@ -82,10 +82,10 @@ build_strus_project() {
 
 # build pre-requisites
 cd ..
-wget https://sourceforge.net/projects/cppcms/files/cppcms/1.0.5/cppcms-1.0.5.tar.bz2
-bzip2 -d cppcms-1.0.5.tar.bz2
-tar -xvf cppcms-1.0.5.tar
-cd cppcms-1.0.5
+wget https://sourceforge.net/projects/cppcms/files/cppcms/1.2.1/cppcms-1.2.1.tar.bz2
+bzip2 -d cppcms-1.2.1.tar.bz2
+tar -xvf cppcms-1.2.1.tar
+cd cppcms-1.2.1
 cmake -DCMAKE_CXX_FLAGS="-Wno-deprecated -Wno-unused-local-typedefs" .
 sudo make install
 cd ..

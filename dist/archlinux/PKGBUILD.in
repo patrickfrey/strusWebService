@@ -9,7 +9,7 @@ pkgdesc='Library implementing the document and query analysis for a text search 
 license=('MPL2')
 arch=('i686' 'x86_64')
 url="http://project-strus.net"
-depends=('boost>=1.53' 'boost-libs>=1.53' 'struscppcms' "strusbase>=${_deppkgver}" "strus>=${_deppkgver}" "strusanalyzer>=${_deppkgver}" "strusmodule>=${_deppkgver}" "strusrpc>=${_deppkgver}")
+depends=('boost>=1.53' 'boost-libs>=1.53' 'cppcms>=1.2' "strusbase>=${_deppkgver}" "strus>=${_deppkgver}" "strusanalyzer>=${_deppkgver}" "strusmodule>=${_deppkgver}" "strusrpc>=${_deppkgver}")
 makedepends=('cmake' 'curl')
 backup=('etc/strusWebService/strusWebService.conf')
 install='struswebservice.install' 
