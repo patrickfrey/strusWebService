@@ -61,9 +61,10 @@ public:
 	void report_ok( const char* status, int httpstatus, const char* message);
 	/// \brief Report content
 	void report_answer( const strus::WebRequestAnswer& answer, bool with_content);
-
 	/// \brief Report a message (http status 200)
 	void report_message( const std::string& key, const std::string& message);
+	/// \brief Report temporal unavailability (http status 503)
+	void report_temporal_reject();
 
 private:
 	//HttpContext* m_httpContext;

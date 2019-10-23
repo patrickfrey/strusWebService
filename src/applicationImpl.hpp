@@ -57,6 +57,9 @@ private:
 	/// \brief Get a description of the current request for the log
 	std::string debug_request_description();
 
+public:/*ServiceClosure,this*/
+	void runRequest( strus::Reference<strus::WebRequestContextInterface>& ctx, const strus::WebRequestContent& content, bool do_reply_content);
+
 private:
 	bool handle_preflight_cors();
 

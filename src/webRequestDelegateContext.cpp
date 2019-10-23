@@ -41,7 +41,8 @@ AGAIN:
 				webservice::RequestContextImpl appcontext( httpContext_, serviceClosure_);
 				appcontext.report_error_fmt( 500/*httpstatus*/, strus::ErrorCodeDelegateRequestFailed,  _TXT("delegate request send to %s failed"), di->url());
 				httpContext_->complete_response();
-	
+				signalTermination( serviceClosure_);
+
 				strus::WebRequestLoggerInterface* logger = serviceClosure_->requestLogger();
 				if (0 != (logger->logMask() & WebRequestLoggerInterface::LogConnectionEvents))
 				{
@@ -63,8 +64,9 @@ AGAIN:
 					{
 						WebRequestAnswer answer( 500, ErrorCodeLogicError, _TXT("race: bad counter value for delegate requests"));
 						webservice::RequestContextImpl appcontext( httpContext_, serviceClosure_);
-						appcontext.report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
+						appcontext.report_error( answer.httpStatus(), answer.appErrorCode(), answer.errorStr());
 						httpContext_->complete_response();
+						signalTermination( serviceClosure_);
 					}
 					followDelegateRequests = requestContext_->getDelegateRequests();
 					if (followDelegateRequests.empty())
@@ -84,9 +86,10 @@ AGAIN:
 			{
 				WebRequestAnswer answer = requestContext_->getAnswer();
 				webservice::RequestContextImpl appcontext( httpContext_, serviceClosure_);
-				appcontext.report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
+				appcontext.report_error( answer.httpStatus(), answer.appErrorCode(), answer.errorStr());
 				*counter = 0;
 				httpContext_->complete_response();
+				signalTermination( serviceClosure_);
 				break;
 			}
 		}
@@ -104,6 +107,7 @@ void WebRequestDelegateContext::completeResponse(
 	webservice::RequestContextImpl appcontext( httpContext_, serviceClosure_);
 	appcontext.report_answer( answer, true);
 	httpContext_->complete_response();
+	signalTermination( serviceClosure_);
 
 	strus::WebRequestLoggerInterface* logger = serviceClosure_->requestLogger();
 	if (0 != (logger->logMask() & WebRequestLoggerInterface::LogConnectionEvents))
@@ -138,11 +142,12 @@ void WebRequestDelegateContext::handleFailure( const WebRequestAnswer& status)
 	answer.explain( msg.c_str());
 	appcontext.report_answer( answer, true);
 	m_httpContext->complete_response();
+	signalTermination( m_serviceClosure);
 
 	strus::WebRequestLoggerInterface* logger = m_serviceClosure->requestLogger();
 	if (0 != (logger->logMask() & WebRequestLoggerInterface::LogConnectionEvents))
 	{
-		logger->logConnectionState( "failed delegate request", answer.httpstatus());
+		logger->logConnectionState( "failed delegate request", answer.httpStatus());
 	}
 	*m_counter = 0;
 }
@@ -151,7 +156,7 @@ void WebRequestDelegateContext::putAnswer( const WebRequestAnswer& status)
 {
 	if (*m_counter <= 0) return;
 
-	if (status.ok() && status.httpstatus() >= 200 && status.httpstatus() < 300)
+	if (status.ok() && status.httpStatus() >= 200 && status.httpStatus() < 300)
 	{
 		if (m_requestContext->putDelegateRequestAnswer( m_schema.c_str(), status.content()))
 		{
@@ -166,6 +171,14 @@ void WebRequestDelegateContext::putAnswer( const WebRequestAnswer& status)
 	else
 	{
 		handleFailure( status);
+	}
+}
+
+void WebRequestDelegateContext::signalTermination( webservice::ServiceClosure* serviceClosure_)
+{
+	if (serviceClosure_->doneRunRequest() && serviceClosure_->haltedForMaintenance())
+	{
+		serviceClosure_->processWaitingRequests();
 	}
 }
 

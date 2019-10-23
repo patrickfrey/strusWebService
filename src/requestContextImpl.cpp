@@ -123,22 +123,22 @@ void RequestContextImpl::report_ok( const char* status, int httpstatus, const ch
 
 void RequestContextImpl::report_answer( const strus::WebRequestAnswer& answer, bool with_content)
 {
-	if (answer.errorstr() || answer.apperror())
+	if (answer.errorStr() || answer.appErrorCode())
 	{
-		report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
+		report_error( answer.httpStatus(), answer.appErrorCode(), answer.errorStr());
 	}
-	else if (answer.messagetype() && answer.messagestr())
+	else if (answer.messageType() && answer.messageStr())
 	{
-		BOOSTER_DEBUG( DefaultConstants::PACKAGE() ) << answer.messagetype() << "=\"" << answer.messagestr() << "\" (status " << answer.httpstatus() << ") OK";
+		BOOSTER_DEBUG( DefaultConstants::PACKAGE() ) << answer.messageType() << "=\"" << answer.messageStr() << "\" (status " << answer.httpStatus() << ") OK";
 
-		response().status( answer.httpstatus());
-		response_message( answer.messagetype(), answer.messagestr());
+		response().status( answer.httpStatus());
+		response_message( answer.messageType(), answer.messageStr());
 	}
 	else
 	{
-		BOOSTER_DEBUG( DefaultConstants::PACKAGE() ) << "(status " << answer.httpstatus() << ") OK";
+		BOOSTER_DEBUG( DefaultConstants::PACKAGE() ) << "(status " << answer.httpStatus() << ") OK";
 
-		response().status( answer.httpstatus());
+		response().status( answer.httpStatus());
 		response_content( answer.content(), with_content);
 	}
 	response().finalize();
@@ -165,6 +165,11 @@ void RequestContextImpl::report_message( const std::string& key, const std::stri
 	report_answer( answer, true/*do_reply_content*/);
 }
 
-
-
+void RequestContextImpl::report_temporal_reject()
+{
+	int httpstatus = 503/*Service unavailable (temporarily)*/;
+	response().status( httpstatus);
+	response().out() << response().status_to_string( httpstatus) << std::endl << std::flush;
+	response().finalize();
+}
 

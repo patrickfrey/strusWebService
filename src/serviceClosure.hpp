@@ -15,7 +15,10 @@
 #include "defaultContants.hpp"
 #include "strus/webRequestHandlerInterface.hpp"
 #include "strus/webRequestEventLoopInterface.hpp"
+#include "webRequestWaitingContext.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/base/atomic.hpp"
+#include "strus/base/thread.hpp"
 #include "internationalization.hpp"
 #include <cppcms/service.h>
 #include <booster/log.h>
@@ -37,6 +40,8 @@ public:
 		,m_cors_hosts(),m_cors_age(),m_html_head(),m_http_server_name(),m_http_script_name(),m_http_server_url()
 		,m_put_configdir(),m_identifier(),m_port(0)
 		,m_cors_enabled(true),m_quit_enabled(false),m_debug_enabled(false),m_pretty_print(false)
+		,m_waitForExclusiveAccess(false)
+		,m_runningRequestCounter(0)
 	{}
 
 	~ServiceClosure();
@@ -120,6 +125,25 @@ public:
 	{
 		return m_identifier;
 	}
+	bool haltedForMaintenance() const
+	{
+		return m_waitForExclusiveAccess.test();
+	}
+	void startRunRequest()
+	{
+		m_runningRequestCounter.increment();
+	}
+	bool doneRunRequest()
+	{
+		return 0==(m_runningRequestCounter.allocDecrement()-1);
+	}
+	void pushWaitingRequest( const WebRequestWaitingContext& o)
+	{
+		strus::unique_lock lock( m_mutex_waitingContextList);
+		m_waitForExclusiveAccess.set( true);
+		m_waitingContextList.push_back( o);
+	}
+	void processWaitingRequests();
 
 private:
 	void loadHtmlConfiguration( const cppcms::json::value& config);
@@ -147,6 +171,10 @@ private:
 	bool m_quit_enabled;
 	bool m_debug_enabled;
 	bool m_pretty_print;
+	strus::AtomicFlag m_waitForExclusiveAccess;
+	strus::AtomicCounter<int> m_runningRequestCounter;
+	strus::mutex m_mutex_waitingContextList;
+	std::vector<WebRequestWaitingContext> m_waitingContextList;
 };
 
 }}//namespace strus::webservice

@@ -59,7 +59,13 @@ private:
 			int requestCount_);
 	void handleFailure( const WebRequestAnswer& status);
 	void handleSuccess();
+	static void signalTermination( webservice::ServiceClosure* serviceClosure_);
 
+private:
+#if __cplusplus >= 201103L
+	WebRequestDelegateContext( WebRequestDelegateContext&) = delete;	//... non copyable
+	void operator=( WebRequestDelegateContext&) = delete;			//... non copyable
+#endif
 private:
 	webservice::ServiceClosure* m_serviceClosure;			//< service closure needed by webserver context
 	webservice::HttpContextRef m_httpContext;			//< httpContext that hold the webserver connection context

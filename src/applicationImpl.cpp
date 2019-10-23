@@ -255,6 +255,89 @@ static std::string form_tojson( const cppcms::http::request::form_type& form)
 	return content;
 }
 
+void ApplicationImpl::runRequest( strus::Reference<strus::WebRequestContextInterface>& ctx, const strus::WebRequestContent& content, bool do_reply_content)
+{
+	bool open = true;
+	m_serviceClosure->startRunRequest();
+	try
+	{
+		if (ctx->execute( content))
+		{
+			std::vector<WebRequestDelegateRequest> delegateRequests = ctx->getDelegateRequests();
+			if (delegateRequests.empty())
+			{
+				(void)ctx->complete();
+				strus::WebRequestAnswer answer = ctx->getAnswer();
+				RequestContextImpl appcontext( get_context(), m_serviceClosure);
+				appcontext.report_answer( answer, do_reply_content);
+	
+				open = false;
+				if (m_serviceClosure->doneRunRequest() && m_serviceClosure->haltedForMaintenance())
+				{
+					m_serviceClosure->processWaitingRequests();
+				}
+			}
+			else
+			{
+				booster::shared_ptr<cppcms::http::context> httpContext( release_context());
+				WebRequestDelegateContext::issueDelegateRequests( m_serviceClosure, httpContext, ctx, delegateRequests);
+			}
+		}
+		else
+		{
+			RequestContextImpl appcontext( get_context(), m_serviceClosure);
+			strus::WebRequestAnswer answer = ctx->getAnswer();
+			if (answer.httpStatus() == 503/*temporarily unavailable*/)
+			{
+				if (answer.appErrorCode() == ErrorCodeServiceTemporarilyUnavailable)
+				{
+					appcontext.report_temporal_reject();
+				}
+				else if (answer.appErrorCode() == ErrorCodeServiceNeedExclusiveAccess)
+				{
+					if (!do_reply_content)
+					{
+						appcontext.report_error( 405/*HEAD Method not allowed*/, ErrorCodeNotAllowed, _TXT("method HEAD cannot be executed for a resource needing exclusive access"));
+					}
+					else
+					{
+						booster::shared_ptr<cppcms::http::context> httpContext( release_context());
+						m_serviceClosure->pushWaitingRequest( WebRequestWaitingContext( m_serviceClosure, httpContext, ctx, content));
+					}
+				}
+				else
+				{
+					appcontext.report_error( answer.httpStatus(), answer.appErrorCode(), answer.errorStr());
+				}
+			}
+			else
+			{
+				appcontext.report_error( answer.httpStatus(), answer.appErrorCode(), answer.errorStr());
+			}
+			open = false;
+			if (m_serviceClosure->doneRunRequest() && m_serviceClosure->haltedForMaintenance())
+			{
+				m_serviceClosure->processWaitingRequests();
+			}
+		}
+	}
+	catch (const std::runtime_error& err)
+	{
+		if (open) (void)m_serviceClosure->doneRunRequest();
+		throw std::runtime_error( err.what());
+	}
+	catch (const std::bad_alloc& err)
+	{
+		if (open) (void)m_serviceClosure->doneRunRequest();
+		throw std::bad_alloc();
+	}
+	catch (...)
+	{
+		if (open) (void)m_serviceClosure->doneRunRequest();
+		throw std::runtime_error( _TXT("uncaught exception"));
+	}
+}
+
 void ApplicationImpl::exec_request( std::string path)
 {
 	try
@@ -263,7 +346,11 @@ void ApplicationImpl::exec_request( std::string path)
 
 		// Set default locale:
 		context().locale( "en_US.UTF-8"); 
-
+		if (m_serviceClosure->haltedForMaintenance())
+		{
+			appcontext.report_temporal_reject();
+			return;
+		}
 		// Interpret request and create request context data:
 		bool do_reply_content = true;
 		std::string request_method = request().request_method();
@@ -274,7 +361,7 @@ void ApplicationImpl::exec_request( std::string path)
 		}
 		BOOSTER_DEBUG( DefaultConstants::PACKAGE()) << debug_request_description();
 
-		strus::WebRequestAnswer answer;
+		// Get http header data:
 		std::string http_accept_charset = request().http_accept_charset();
 		std::string http_accept = request().http_accept();
 		std::string html_base_href;
@@ -294,11 +381,13 @@ void ApplicationImpl::exec_request( std::string path)
 				html_base_href.push_back( '/');
 			}
 		}
+		// Create request context:
+		strus::WebRequestAnswer answer;
 		strus::Reference<strus::WebRequestContextInterface> ctx(
 			m_serviceClosure->requestHandler()->createContext( http_accept_charset.c_str(), http_accept.c_str(), html_base_href.c_str(), request_method.c_str(), path.c_str(), answer));
 		if (!ctx.get())
 		{
-			appcontext.report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
+			appcontext.report_error( answer.httpStatus(), answer.appErrorCode(), answer.errorStr());
 			return;
 		}
 		cppcms::http::content_type content_type;
@@ -308,6 +397,7 @@ void ApplicationImpl::exec_request( std::string path)
 		strus::WebRequestContent content;
 		std::string contentstr;
 
+		// Initialize request content:
 		content_data = request().raw_post_data();
 		if (content_data.second == 0/*empty content*/)
 		{
@@ -348,30 +438,7 @@ void ApplicationImpl::exec_request( std::string path)
 					request_method.c_str(), content.doctype(), content.charset(), (unsigned long)content.len(), http_accept.c_str(), http_accept_charset.c_str());
 		}
 		// Execute request:
-		if (ctx->execute( content))
-		{
-			BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-					<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), http_accept.c_str(), http_accept_charset.c_str());
-
-			std::vector<WebRequestDelegateRequest> delegateRequests = ctx->getDelegateRequests();
-			if (delegateRequests.empty())
-			{
-				(void)ctx->complete();
-				answer = ctx->getAnswer();
-				appcontext.report_answer( answer, do_reply_content);
-			}
-			else
-			{
-				booster::shared_ptr<cppcms::http::context> httpContext( release_context());
-				WebRequestDelegateContext::issueDelegateRequests( m_serviceClosure, httpContext, ctx, delegateRequests);
-			}
-		}
-		else
-		{
-			answer = ctx->getAnswer();
-			appcontext.report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
-			return;
-		}
+		runRequest( ctx, content, do_reply_content);
 	}
 	CATCH_EXEC_ERROR()
 }

@@ -164,7 +164,7 @@ void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 		WebRequestAnswer answer;
 		if (!m_requestHandler->init( configstr, answer))
 		{
-			const char* msg = answer.errorstr() ? answer.errorstr() : strus::errorCodeToString( answer.apperror());
+			const char* msg = answer.errorStr() ? answer.errorStr() : strus::errorCodeToString( answer.appErrorCode());
 			throw strus::runtime_error( _TXT("failed to initialize request handler: %s"), msg);
 		}
 	}
@@ -267,6 +267,37 @@ void ServiceClosure::loadCorsConfiguration( const cppcms::json::value& config)
 void ServiceClosure::mount_applications()
 {
 	if (m_service) m_service->applications_pool().mount( cppcms::applications_factory<ApplicationImpl>( this));
+}
+
+void ServiceClosure::processWaitingRequests()
+{
+	strus::unique_lock lock( m_mutex_waitingContextList);
+	std::vector<WebRequestWaitingContext>::iterator ci = m_waitingContextList.begin(), ce = m_waitingContextList.end();
+	for (; ci != ce; ++ci)
+	{
+		RequestContextImpl appcontext( ci->httpContext(), this);
+		if (ci->requestContext()->execute( ci->content()))
+		{
+			std::vector<WebRequestDelegateRequest> delegateRequests = ci->requestContext()->getDelegateRequests();
+			if (delegateRequests.empty())
+			{
+				(void)ci->requestContext()->complete();
+				strus::WebRequestAnswer answer = ci->requestContext()->getAnswer();
+				appcontext.report_answer( answer, true/*do_reply_content*/);
+			}
+			else
+			{
+				appcontext.report_error( 500, ErrorCodeLogicError, _TXT("no delegate requests allowed in maintenance requests with exclusive access"));
+			}
+		}
+		else
+		{
+			strus::WebRequestAnswer answer = ci->requestContext()->getAnswer();
+			appcontext.report_error( answer.httpStatus(), answer.appErrorCode(), answer.errorStr());
+		}
+	}
+	m_waitingContextList.clear();
+	m_waitForExclusiveAccess.set( false);
 }
 
 
