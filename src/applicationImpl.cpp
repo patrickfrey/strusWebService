@@ -295,7 +295,7 @@ void ApplicationImpl::exec_request( std::string path)
 			}
 		}
 		strus::Reference<strus::WebRequestContextInterface> ctx(
-			m_serviceClosure->requestHandler()->createRequestContext( http_accept_charset.c_str(), http_accept.c_str(), html_base_href.c_str(), request_method.c_str(), path.c_str(), answer));
+			m_serviceClosure->requestHandler()->createContext( http_accept_charset.c_str(), http_accept.c_str(), html_base_href.c_str(), request_method.c_str(), path.c_str(), answer));
 		if (!ctx.get())
 		{
 			appcontext.report_error( answer.httpstatus(), answer.apperror(), answer.errorstr());
