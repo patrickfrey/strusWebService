@@ -5,7 +5,6 @@
 use strict;
 use warnings;
 
-use Strus::Client;
 use JSON;
 
 my $section = undef;
@@ -18,62 +17,78 @@ my %sectionNameMap = (
     "attribute"  => "attribute",
     "patternlexem" => "lexem",
     "aggregator"  => "aggregator",
+    "field"  => "field",
+    "structure"  => "structure",
     "patternmatch" => "NOT_IMPLEMENTED"
 );
 
 my $indentstr = "";
 my $json = JSON->new->allow_nonref;
-my @cntstk = ();
+my @cntstk = (1);
 
+my %outputmap = ();
+my $curchan = "search";
+
+sub print_chan
+{
+	my ($arg) = @_;
+	$outputmap{ $curchan} .= $arg;
+}
 sub STARTDOC {
-	print( "{");
+	print_chan( "{");
 }
 sub ENDDOC {
-	print( "\n}");
+	print_chan( "\n}");
 }
 sub NAME {
 	my ($tagname) = @_;
-	print( "\n$indentstr\"$tagname\": ");
+	print_chan( "\n$indentstr\"$tagname\": ");
 }
 sub OPEN {
-	print( "{");
+	print_chan( "{");
 	$indentstr = $indentstr . "\t";
 	push( @cntstk, 0);
 }
 sub CLOSE {
 	$indentstr = substr( $indentstr, 0, -1);
-	print( "\n$indentstr}");
+	print_chan( "\n$indentstr}");
 	pop( @cntstk);
 }
 sub OPENAR {
-	print( "[");
+	print_chan( "[");
 	$indentstr = $indentstr . "\t";
 	push( @cntstk, 0);
 }
 sub CLOSEAR {
 	$indentstr = substr( $indentstr, 0, -1);
-	print( "\n$indentstr]");
+	print_chan( "\n$indentstr]");
 	pop( @cntstk);
 }
 sub DELIM {
 	my $cnt = $cntstk[$#cntstk]; 
-	if ($cnt >= 1) { print( ","); }
+	if ($cnt >= 1) { print_chan( ","); }
 	++$cntstk[$#cntstk];
+}
+sub INIT_DELIM {
+	if (exists $outputmap{ $curchan})
+	{
+		DELIM();
+	}
 }
 sub VALUE {
 	my ($val) = @_;
 	if ($val =~ m/^[\-]{0,1}[0-9]+$/ )
 	{
-		print( $val);
+		print_chan( $val);
 	}
 	elsif ($val =~ m/^[\-]{0,1}[0-9]+[\.][0-9]{0,24}$/ )
 	{
-		print( $val);
+		print_chan( $val);
 	}
 	else
 	{
 		my $encval = $json->encode( $val);
-		print( $encval);
+		print_chan( $encval);
 	}
 }
 
@@ -125,9 +140,9 @@ sub lexerParseToken_
 			}
 		}
 	}
-	elsif ($g_src =~ m/^([\/].*)$/)
+	elsif ($g_src =~ m/^([\/\@][^;,{} ]*)(.*)$/)
 	{
-		lexerTok( $1, "");
+		lexerTok( $1, $2);
 	}
 	elsif ($g_src =~ m/^([\"][^\"]*[\"])(.*)$/)
 	{
@@ -253,67 +268,39 @@ sub DEF_FUNCTION
 	}
 }
 
-STARTDOC();
-NAME( "docanalyzer"); OPEN();
-DELIM(); NAME( "class"); OPEN(); NAME( "mimetype"); VALUE("application/xml"); CLOSE();
-my $in_feature_section = 0;
-
+# --- Parse input:
 while (<>)
 {
 	++$g_linecnt;
 	chomp;
 	my $ln = $_;
-	if (m/^[\#]/)
+
+	if (m/^\s*[\#]/)
 	{
 		next; # ... comment
 	}
-	elsif (m/^[\[]([^\]]*)[\]]$/)
+	elsif (m/^[\[]([^\]]*)[\]](.*)$/)
 	{
 		my $sectionName = lc( $1);
-		if ($g_src =~ m/\S/)
-		{
-			die "line not terminated at line $g_linecnt >> $g_src";
+		my $rest = $2;
+		$rest =~ s/^\s+|\s+$//g;
+		if ($rest ne "") {
+			die "line not terminated at line $g_linecnt >> $rest";
 		}
-		if (defined $section)
-		{
-			CLOSEAR();
-		}
-		$section = $sectionNameMap{ $sectionName};
-		unless (defined $section) {
+		$curchan = $sectionNameMap{ $sectionName};
+		unless (defined $curchan) {
 			die "unknown section class name '$sectionName' at line $g_linecnt\n";
 		}
-		if ($section eq "NOT_IMPLEMENTED")
+		if ($curchan eq "NOT_IMPLEMENTED")
 		{
 			die "not implemented section class name '$sectionName' at line $g_linecnt\n";
 		}
-		if ($section eq "patternmatch" || $section eq "content" || $section eq "document")
-		{
-			if ($in_feature_section)
-			{
-				CLOSE();
-				$in_feature_section = 0;
-			}
-		}
-		else
-		{
-			unless ($in_feature_section)
-			{
-				DELIM(); NAME("feature"); OPEN();
-				$in_feature_section = 1;
-			}
-		}
-		DELIM(); NAME( $section); OPENAR();
 	}
 	elsif (m/^(.*)[\;]$/)
 	{
 		$ln = $1;
 		lexerAddSource( $ln);
-		if (!defined $section)
-		{
-			$section = "search";
-			DELIM(); NAME( $section); OPENAR();
-		}
-		if ($section eq "forward" || $section eq "search" || $section eq "attribute" || $section eq "metadata" || $section eq "lexem")
+		if ($curchan eq "forward" || $curchan eq "search" || $curchan eq "attribute" || $curchan eq "metadata" || $curchan eq "lexem")
 		{
 			my $name = lexerParseToken();
 			my $priority = undef;
@@ -352,7 +339,7 @@ while (<>)
 			}
 			if (!lexerEof()) { die "unexpected tokens at end of expression at line $g_linecnt >> $g_src"; }
 
-			DELIM(); OPEN();
+			INIT_DELIM(); OPEN();
 			DELIM(); NAME( "type"); VALUE( $name); 
 			DELIM(); NAME( "tokenizer"); OPEN(); DEF_FUNCTION( $tokenizer); CLOSE();
 			DELIM(); NAME( "normalizer"); OPENAR(); 
@@ -376,12 +363,12 @@ while (<>)
 			DELIM(); NAME( "select"); VALUE( $expression);
 			CLOSE();
 		}
-		elsif ($section eq "aggregator")
+		elsif ($curchan eq "aggregator")
 		{
 			my $name = lexerParseToken();
 			if (lexerParseToken() ne "=") { die "syntax error at line $g_linecnt, expected assignment operator '='"; }
 			my $function = lexerParseToken();
-			DELIM(); OPEN(); 
+			INIT_DELIM(); OPEN(); 
 			DELIM(); NAME( "type"); VALUE( $name); 
 			DELIM(); NAME( "function"); OPEN();
 
@@ -403,8 +390,10 @@ while (<>)
 			}
 			CLOSE();
 			CLOSE();
+
+			if (!lexerEof()) { die "missing ';' at end of aggregator definition at line $g_linecnt >> $g_src"; }
 		}
-		elsif ($section eq "content")
+		elsif ($curchan eq "content")
 		{
 			my $documentClass = lexerParseToken();
 			my $expression = lexerParseToken();
@@ -430,7 +419,7 @@ while (<>)
 					$schema = $1;
 				}
 			}
-			DELIM(); OPEN();
+			INIT_DELIM(); OPEN();
 			DELIM(); NAME( "select"); VALUE( $expression); 
 			if (defined $mimetype)
 			{
@@ -449,21 +438,59 @@ while (<>)
 				DELIM(); NAME( "schema"); VALUE( $schema);
 			}
 			CLOSE();
+
+			if (!lexerEof()) { die "missing ';' at end of content definition at line $g_linecnt >> $g_src"; }
 		}
-		elsif ($section eq "document")
+		elsif ($curchan eq "document")
 		{
 			my $name = lexerParseToken();
 			if (lexerParseToken() ne "=") { die "syntax error at line $g_linecnt, expected assignment operator '='"; }
 			my $expression = lexerParseToken();
 
-			DELIM(); OPEN();
+			INIT_DELIM(); OPEN();
 			DELIM(); NAME( "name"); VALUE( $name); 
 			DELIM(); NAME( "select"); VALUE( $expression); 
+			CLOSE();
+
+			if (!lexerEof()) { die "missing ';' at end of document definition at line $g_linecnt >> $g_src"; }
+		}
+		elsif ($curchan eq "field")
+		{
+			my $name = lexerParseToken();
+			if (lexerParseToken() ne "=") { die "syntax error at line $g_linecnt, expected assignment operator '='"; }
+			my $scopeexpr = lexerParseToken();
+			my $selectexpr = lexerParseToken();
+			my $idexpr = "";
+			if (!lexerEof()) {$idexpr = lexerParseToken();}
+			if (!lexerEof()) { die "missing ';' at end of field definition at line $g_linecnt >> $g_src"; }
+
+			INIT_DELIM(); OPEN();
+			DELIM(); NAME( "name"); VALUE( $name); 
+			DELIM(); NAME( "scope"); VALUE( $scopeexpr); 
+			DELIM(); NAME( "select"); VALUE( $selectexpr); 
+			if ($idexpr ne "") {DELIM(); NAME( "key"); VALUE( $idexpr);}
+			CLOSE();
+		}
+		elsif ($curchan eq "structure")
+		{
+			my $name = lexerParseToken();
+			if (lexerParseToken() ne "=") { die "syntax error at line $g_linecnt, expected assignment operator '='"; }
+			my $headername = lexerParseToken();
+			my $contentname = lexerParseToken();
+			my $classname = lexerParseToken();
+
+			if (!lexerEof()) { die "missing ';' at end of structure definition at line $g_linecnt >> $g_src"; }
+	
+			INIT_DELIM(); OPEN();
+			DELIM(); NAME( "name"); VALUE( $name); 
+			DELIM(); NAME( "header"); VALUE( $headername);
+			DELIM(); NAME( "content"); VALUE( $contentname);
+			DELIM(); NAME( "class"); VALUE( $classname);
 			CLOSE();
 		}
 		else
 		{
-			die "unhandled section class name '$section' at line $g_linecnt\n";
+			die "unhandled section class name '$curchan' at line $g_linecnt\n";
 		}
 		$g_src = "";
 	}
@@ -472,14 +499,38 @@ while (<>)
 		lexerAddSource( $ln);
 	}
 }
-if (defined $section)
-{
-	CLOSEAR();
+
+$curchan = "ALL";
+
+sub print_section {
+	my ($arg) = @_;
+	if ($outputmap{ $arg}) {
+		my $content = $outputmap{ $arg};
+		$content =~ s/\n/\n\t$indentstr/g;
+		DELIM(); NAME( $arg); OPENAR(); print_chan( $content); CLOSEAR();
+	}
 }
-if ($in_feature_section)
-{
-	CLOSE();
-}
+
+# --- Output result:
+STARTDOC();
+NAME( "docanalyzer"); OPEN();
+DELIM(); NAME( "class"); OPEN(); 
+	NAME( "mimetype"); VALUE("application/xml");
+CLOSE();
+print_section( "content");
+print_section( "document");
+DELIM(); NAME("feature"); OPEN();
+	print_section( "forward");
+	print_section( "search");
+	print_section( "attribute");
+	print_section( "aggregator");
+	print_section( "metadata");
+	print_section( "lexem");
+CLOSE();
+print_section( "field");
+print_section( "structure");
 CLOSE();
 ENDDOC();
+
+print( $outputmap{ "ALL"} . "\n");
 
