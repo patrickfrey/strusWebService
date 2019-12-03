@@ -140,7 +140,7 @@ sub lexerParseToken_
 			}
 		}
 	}
-	elsif ($g_src =~ m/^([\/\@][^;,{} ]*)(.*)$/)
+	elsif ($g_src =~ m/^([\/\@][^; ]*)(.*)$/)
 	{
 		lexerTok( $1, $2);
 	}
