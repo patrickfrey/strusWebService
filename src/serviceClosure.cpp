@@ -300,4 +300,14 @@ void ServiceClosure::processWaitingRequests()
 	m_waitForExclusiveAccess.set( false);
 }
 
+void ServiceClosure::logInfoMessages()
+{
+	std::vector<std::string> infomsgs = m_errorhnd->fetchInfo();
+	std::vector<std::string>::const_iterator mi = infomsgs.begin(), me = infomsgs.end();
+	for (; mi != me; ++mi)
+	{
+		BOOSTER_INFO( DefaultConstants::PACKAGE() ) << *mi;
+	}
+}
+
 

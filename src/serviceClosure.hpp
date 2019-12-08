@@ -144,6 +144,7 @@ public:
 		m_waitingContextList.push_back( o);
 	}
 	void processWaitingRequests();
+	void logInfoMessages();
 
 private:
 	void loadHtmlConfiguration( const cppcms::json::value& config);

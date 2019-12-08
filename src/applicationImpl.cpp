@@ -263,6 +263,8 @@ void ApplicationImpl::runRequest( strus::Reference<strus::WebRequestContextInter
 	{
 		if (ctx->execute( content))
 		{
+			m_serviceClosure->logInfoMessages();
+
 			std::vector<WebRequestDelegateRequest> delegateRequests = ctx->getDelegateRequests();
 			if (delegateRequests.empty())
 			{
