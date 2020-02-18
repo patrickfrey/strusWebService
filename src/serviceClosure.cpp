@@ -248,7 +248,6 @@ void ServiceClosure::loadHtmlConfiguration( const cppcms::json::value& config)
 void ServiceClosure::loadProtocolConfiguration( const cppcms::json::value& config)
 {
 	m_quit_enabled = config.get( "debug.protocol.quit_enabled", DefaultConstants::DEBUG_PROTOCOL_QUIT_ENABLED());
-	m_debug_enabled = config.get( "debug.protocol.debug_enabled", DefaultConstants::DEBUG_PROTOCOL_DEBUG_ENABLED());
 	m_pretty_print = config.get( "debug.protocol.pretty_print", DefaultConstants::DEBUG_PROTOCOL_PRETTY_PRINT());
 }
 

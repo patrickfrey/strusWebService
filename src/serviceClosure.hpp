@@ -39,7 +39,7 @@ public:
 		:m_service(0),m_requestLogger(0),m_eventloop(0),m_requestHandler(0),m_errorhnd(0),m_configdir(configdir_)
 		,m_cors_hosts(),m_cors_age(),m_html_head(),m_http_server_name(),m_http_script_name(),m_http_server_url()
 		,m_put_configdir(),m_identifier(),m_port(0)
-		,m_cors_enabled(true),m_quit_enabled(false),m_debug_enabled(false),m_pretty_print(false)
+		,m_cors_enabled(true),m_quit_enabled(false),m_pretty_print(false)
 		,m_waitForExclusiveAccess(false)
 		,m_runningRequestCounter(0)
 	{}
@@ -96,10 +96,6 @@ public:
 	bool quit_enabled() const
 	{
 		return m_quit_enabled;
-	}
-	bool debug_enabled() const
-	{
-		return m_debug_enabled;
 	}
 	bool pretty_print() const
 	{
@@ -170,7 +166,6 @@ private:
 	int m_port;
 	bool m_cors_enabled;
 	bool m_quit_enabled;
-	bool m_debug_enabled;
 	bool m_pretty_print;
 	strus::AtomicFlag m_waitForExclusiveAccess;
 	strus::AtomicCounter<int> m_runningRequestCounter;
