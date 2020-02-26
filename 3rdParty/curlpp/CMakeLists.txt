@@ -21,5 +21,13 @@ set( curlpp_source_files
 	src/utilspp/PrivateMembers.cpp
 )
 
+# Build libcurl with older C++ because of use of deprecated constructs:
+string( REPLACE "-std=c++11"  ""  CMAKE_CXX_FLAGS  ${CMAKE_CXX_FLAGS} )
+string( REPLACE "-std=c++14"  ""  CMAKE_CXX_FLAGS  ${CMAKE_CXX_FLAGS} )
+string( REPLACE "-std=c++17"  ""  CMAKE_CXX_FLAGS  ${CMAKE_CXX_FLAGS} )
+string( REPLACE "-std=c++20"  ""  CMAKE_CXX_FLAGS  ${CMAKE_CXX_FLAGS} )
+set( CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}" )
+
 add_library( curlpp_static STATIC ${curlpp_source_files} )
+
 
