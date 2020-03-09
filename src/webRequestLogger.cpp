@@ -323,6 +323,11 @@ void WebRequestLogger::logWarning( const char* errmsg)
 	logMessage( _TXT("warning: %s"), errmsg);
 }
 
+void WebRequestLogger::logContextInfoMessages( const char* content)
+{
+	logMessage( _TXT("info: %s"), content);
+}
+
 int WebRequestLogger::logMask() const
 {
 	return m_mask;

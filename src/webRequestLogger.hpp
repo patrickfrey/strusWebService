@@ -57,6 +57,7 @@ public:
 
 	virtual void logWarning( const char* errmsg);
 	virtual void logError( const char* errmsg);
+	virtual void logContextInfoMessages( const char* content);
 
 	void reset();
 
