@@ -55,7 +55,8 @@ AGAIN:
 		{
 			// ... without receiver feed to itself with the receiver schema:
 			WebRequestContent delegateContent( "utf-8", "application/json", delegateContentStr.c_str(), delegateContentStr.size());
-			if (requestContext_->putDelegateRequestAnswer( di->receiverSchema(), delegateContent))
+			WebRequestAnswer delegateAnswer( delegateContent);
+			if (requestContext_->putDelegateRequestAnswer( di->receiverSchema(), delegateAnswer))
 			{
 				*counter -= 1;
 				if (*counter == 0)
@@ -158,7 +159,7 @@ void WebRequestDelegateContext::putAnswer( const WebRequestAnswer& status)
 
 	if (status.ok() && status.httpStatus() >= 200 && status.httpStatus() < 300)
 	{
-		if (m_requestContext->putDelegateRequestAnswer( m_schema.c_str(), status.content()))
+		if (m_requestContext->putDelegateRequestAnswer( m_schema.c_str(), status))
 		{
 			*m_counter -= 1;
 			if (*m_counter == 0) handleSuccess();
@@ -170,6 +171,7 @@ void WebRequestDelegateContext::putAnswer( const WebRequestAnswer& status)
 	}
 	else
 	{
+		m_requestContext->putDelegateRequestAnswer( m_schema.c_str(), status);
 		handleFailure( status);
 	}
 }
