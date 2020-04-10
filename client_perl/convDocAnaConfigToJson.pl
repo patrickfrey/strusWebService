@@ -349,7 +349,7 @@ while (<>)
 			}
 			CLOSEAR();
 			if (defined $priority) {
-				DELIM(); NAME( "option"); VALUE( $priority);
+				DELIM(); NAME( "priority"); VALUE( $priority);
 			}
 			if ($nofOptions != 0)
 			{
