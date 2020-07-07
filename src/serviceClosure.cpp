@@ -93,7 +93,10 @@ void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 		bool doLogRequests = config.get( "debug.log_requests", DefaultConstants::DO_LOG_REQUESTS());
 		bool doLogActions = config.get( "debug.log_actions", DefaultConstants::DO_LOG_ACTIONS());
 		bool doLogContentEvents = config.get( "debug.log_parse", DefaultConstants::DO_LOG_CONTENTEVENTS());
-		bool doLogConnectionEvents = config.get( "debug.log_curl", false);
+		bool doLogConnectionEvents = config.get( "debug.log_curl", DefaultConstants::DO_LOG_CURL());
+		bool doLogInfos = config.get( "debug.log_infos", DefaultConstants::DO_LOG_INFOS());
+		bool doLogWarnings = config.get( "debug.log_warnings", DefaultConstants::DO_LOG_WARNINGS()) | doLogInfos;
+		bool doLogErrors = config.get( "debug.log_errors", DefaultConstants::DO_LOG_ERRORS()) | doLogWarnings;
 
 		int logMask = 0;
 		if (doLogCalls) logMask |= (int)WebRequestLoggerInterface::LogMethodCalls;
@@ -101,6 +104,9 @@ void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 		if (doLogActions) logMask |= (int)WebRequestLoggerInterface::LogAction | (int)WebRequestLoggerInterface::LogConfiguration;
 		if (doLogContentEvents) logMask |= (int)WebRequestLoggerInterface::LogContentEvents;
 		if (doLogConnectionEvents) logMask |= (int)WebRequestLoggerInterface::LogConnectionEvents;
+		if (doLogInfos) logMask |= (int)WebRequestLoggerInterface::LogContextInfoMessages;
+		if (doLogWarnings) logMask |= (int)WebRequestLoggerInterface::LogWarning;
+		if (doLogErrors) logMask |= (int)WebRequestLoggerInterface::LogError;
 
 		int logStructDepth = config.get( "debug.struct_depth", DefaultConstants::LOG_STRUCT_DEPTH());
 		int max_idle_time = config.get( "transactions.max_idle_time", DefaultConstants::TRANSACTION_MAX_IDLE_TIME());

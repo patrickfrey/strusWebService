@@ -249,6 +249,9 @@ int main( int argc_, const char *argv_[] )
 	}
 	try
 	{
+		// Inject error buffer interface as singleton for bindings context:
+		strus::declareErrorBuffer_singleton( errorhnd.get());
+
 		// Install exit handler to catch and report abrupt termination by cppcms
 		int ec = std::atexit( exit_handler);
 
