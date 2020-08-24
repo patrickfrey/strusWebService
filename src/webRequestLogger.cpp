@@ -325,7 +325,7 @@ void WebRequestLogger::logWarning( const char* errmsg)
 
 void WebRequestLogger::logContextInfoMessages( const char* content)
 {
-	logMessage( _TXT("info: %s"), content);
+	logMessageDump( _TXT("info: "), content);
 }
 
 int WebRequestLogger::logMask() const
@@ -394,6 +394,24 @@ void WebRequestLogger::logMessage( const char* fmt, ...)
 		if (m_verbose && m_logout != &std::cerr && m_logout != &std::cout)
 		{
 			std::cerr << buf << std::endl;
+		}
+	}
+	catch (const std::exception& err)
+	{
+		alert( err.what());
+	}
+	va_end(ap);
+}
+
+void WebRequestLogger::logMessageDump( const char* header, const char* content)
+{
+	try
+	{
+		strus::unique_lock lock( m_mutex);
+		(*m_logout) << header << content << std::endl;
+		if (m_verbose && m_logout != &std::cerr && m_logout != &std::cout)
+		{
+			std::cerr << header << content << std::endl;
 		}
 	}
 	catch (const std::exception& err)

@@ -70,6 +70,7 @@ public:
 private:
 	void logMessageBuf( char* buf, size_t bufsize, const char* fmt, va_list ap);
 
+	void logMessageDump( const char* header, const char* content);
 	void logMessage( const char* fmt, ...)
 #ifdef __GNUC__
 	__attribute__ ((format (printf, 2, 3)))
