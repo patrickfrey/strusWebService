@@ -418,7 +418,6 @@ void WebRequestLogger::logMessageDump( const char* header, const char* content)
 	{
 		alert( err.what());
 	}
-	va_end(ap);
 }
 
 const char* WebRequestLogger::getThreadId()
