@@ -4,6 +4,7 @@ include_directories(
 )
 
 link_directories(
+	"${LIBBOOSTER_LIBRARY_DIR}"
 )
 
 add_executable( testCppCmsHelloWorld testCppCmsHelloWorld.cpp )
