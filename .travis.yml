@@ -9,9 +9,6 @@ matrix:
       dist: xenial
       compiler: clang
       env: STRUS_WITH_VECTOR=NO STRUS_WITH_PATTERN=NO STRUS_WITH_WEBSERVICE=YES
-    - os: osx
-      compiler: clang
-      env: STRUS_WITH_VECTOR=NO STRUS_WITH_PATTERN=NO STRUS_WITH_WEBSERVICE=YES
 sudo: required
 branches:
   only:
