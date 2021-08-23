@@ -8,7 +8,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-/// \brief Closure with all objects used by the cppcms service class for the strus webservice 
+/// \brief Closure with all objects used by the cppcms service class for the strus webservice
 #include "strus/lib/webrequest.hpp"
 #include "strus/lib/error.hpp"
 #include "serviceClosure.hpp"
@@ -153,7 +153,7 @@ void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 					verbosity, logMask, logStructDepth, nofThreads+1,
 					m_service->process_id(), nofProcs);
 		int timeout = std::max( max_idle_time/20, 10);
-		m_eventloop = strus::createCurlEventLoop( 
+		m_eventloop = strus::createCurlEventLoop(
 					m_requestLogger,
 					timeout, nofDelegateTotalConnections, nofDelegateHostConnections,
 					m_errorhnd);
