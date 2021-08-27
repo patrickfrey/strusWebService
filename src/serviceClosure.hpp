@@ -8,7 +8,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-/// \brief Closure with all objects used by the cppcms service class for the strus webservice 
+/// \brief Closure with all objects used by the cppcms service class for the strus webservice
 #ifndef _STRUS_WEBSERVICE_SERVICE_CLOSURE_HPP_INCLUDED
 #define _STRUS_WEBSERVICE_SERVICE_CLOSURE_HPP_INCLUDED
 #include "webRequestLogger.hpp"
@@ -31,7 +31,7 @@ namespace strus {
 namespace webservice {
 
 /// \class ServiceClosure
-/// \brief Closure with all objects used by the cppcms service class for the strus webservice 
+/// \brief Closure with all objects used by the cppcms service class for the strus webservice
 class ServiceClosure
 {
 public:
@@ -45,8 +45,6 @@ public:
 	{}
 
 	~ServiceClosure();
-
-	static bool storeSchemaDescriptions( const cppcms::json::value& config, const std::string& dir, const std::string& doctype);
 
 	void run()
 	{

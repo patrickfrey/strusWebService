@@ -174,9 +174,6 @@ static void printUsage()
 	std::cout << "    " << _TXT("Do increase verbosity level for logging and output by <N>.") << std::endl;
 	std::cout << "    " << _TXT("  This is a synonym for option -V,--verbose, another way to specify") << std::endl;
 	std::cout << "    " << _TXT("  -V,-VV,-VVV as a number") << std::endl;
-	std::cout << "-M|--schema <TYPE>:<DIR>" << std::endl;
-	std::cout << "    " << _TXT("Do nothing but write the schemas of type <TYPE> ('xml' or 'json')") << std::endl;
-	std::cout << "    " << _TXT("  to the directory specified by <DIR>") << std::endl;
 }
 
 static std::string beautifyErrorMessage( const std::string& msg)
@@ -311,30 +308,6 @@ int main( int argc_, const char *argv_[] )
 		if (opt( "version"))
 		{
 			printVersion();
-			return rt;
-		}
-		if (opt("schema"))
-		{
-			std::string schemadef = opt["schema"];
-			char const* dirstart = std::strchr( schemadef.c_str(), ':');
-			std::string doctype;
-			if (!dirstart)
-			{
-				dirstart = schemadef.c_str();
-				doctype = "XML";
-			}
-			else
-			{
-				doctype = std::string( schemadef.c_str(), dirstart - schemadef.c_str());
-				++dirstart;
-			}
-			std::string dir( dirstart);
-
-			std::cerr << "storing schema descriptions to " << dir << std::endl;
-			if (!ServiceClosure::storeSchemaDescriptions( config, dir, doctype))
-			{
-				rt = -1;
-			}
 			return rt;
 		}
 		if (opt("port"))

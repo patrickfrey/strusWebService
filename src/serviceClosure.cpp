@@ -51,30 +51,6 @@ ServiceClosure::~ServiceClosure()
 	if (m_errorhnd) {delete m_errorhnd; m_errorhnd = 0;}
 }
 
-bool ServiceClosure::storeSchemaDescriptions( const cppcms::json::value& config, const std::string& dir, const std::string& doctype)
-{
-	ErrorBufferInterface* errorhnd = 0;
-	bool rt = false;
-	try
-	{
-		errorhnd = strus::createErrorBuffer_standard( NULL, 1, NULL);
-		if (!errorhnd) throw std::runtime_error( _TXT( "error creating error handler"));
-		std::string configstr( config.save());
-		rt = storeWebRequestSchemaDescriptions( configstr, dir, doctype, errorhnd);
-		if (errorhnd->hasError()) throw std::runtime_error( errorhnd->fetchError());
-	}
-	catch (const std::bad_alloc& err)
-	{
-		std::cerr << _TXT("out of memory to writing schema descriptions") << std::endl;
-	}
-	catch (const std::runtime_error& err)
-	{
-		std::cerr << _TXT("failed to write schema descriptions: ") << err.what() << std::endl;
-	}
-	if (errorhnd) delete errorhnd;
-	return rt;
-}
-
 void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 {
 	try

@@ -61,18 +61,6 @@ ADD_CUSTOM_COMMAND(
 	TARGET debugrun
 )
 
-ADD_CUSTOM_COMMAND( 
-	 TARGET strusWebService POST_BUILD  
-	 COMMAND strusWebService
-	 ARGS  -X "XML:schema"
-	 COMMENT "webrequest XML schemas" VERBATIM )
-
-ADD_CUSTOM_COMMAND( 
-	 TARGET strusWebService POST_BUILD  
-	 COMMAND strusWebService
-	 ARGS  -X "JSON:schema"
-	 COMMENT "webrequest JSON schemas" VERBATIM )
-
 # Installation:
 install( TARGETS strusWebService
            RUNTIME DESTINATION sbin )
