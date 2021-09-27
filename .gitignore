@@ -53,3 +53,6 @@ build_clang
 # deploy to obs tar:
 strus-*.tar.gz
 
+# KDevelop project
+.kdev4/
+strusBindings.kdev4

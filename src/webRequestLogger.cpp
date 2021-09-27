@@ -118,7 +118,7 @@ WebRequestLogger::WebRequestLogger( const std::string& logfilename_, int verbosi
 		switch (verbosity)
 		{
 			case 4: mm |= (LogContentEvents|LogConnectionEvents);
-			case 3: mm |= (LogMethodCalls|LogAction);
+			case 3: mm |= (LogAction);
 			case 2: mm |= (LogRequests|LogDelegateRequests|LogConfiguration);
 			case 1: mm |= (LogError|LogWarning);
 			case 0: mm |= (LogNothing); break;
@@ -268,48 +268,6 @@ void WebRequestLogger::logConnectionState( const char* state, int arg)
 	else
 	{
 		logMessage( _TXT("delegate connection state %s"), state);
-	}
-}
-
-void WebRequestLogger::logMethodCall(
-		const char* classname,
-		const char* methodname,
-		const char* arguments,
-		const char* result,
-		std::size_t resultsize,
-		const char* resultvar)
-{
-	if (!methodname || !methodname[0])
-	{
-		if (!classname || !classname[0])
-		{
-			logMessage( _TXT("assign %s := %s"), resultvar, result);
-		}
-		else if (!resultvar || !resultvar[0])
-		{
-			logMessage( _TXT("new %s( %s)"), classname, arguments);
-		}
-		else
-		{
-			logMessage( _TXT("new %s := %s( %s)"), classname, resultvar, arguments);
-		}
-	}
-	else if (!result || !result[0])
-	{
-		logMessage( _TXT("call %s::%s( %s)"), classname, methodname, arguments);
-	}
-	else
-	{
-		std::string resultbuf;
-		result = reduceContentSize( resultbuf, result, resultsize, MaxLogContentSize);
-		if (!resultvar || !resultvar[0])
-		{
-			logMessage( _TXT("call %s::%s( %s) returns %s := %s"), classname, methodname, arguments, resultvar, result);
-		}
-		else
-		{
-			logMessage( _TXT("call %s::%s( %s) returns %s"), classname, methodname, arguments, result);
-		}
 	}
 }
 
