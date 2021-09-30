@@ -144,10 +144,9 @@ void RequestContextImpl::report_answer( const strus::WebRequestAnswer& answer, b
 	response().finalize();
 }
 
-void RequestContextImpl::report_message( const std::string& key, const std::string& message)
+void RequestContextImpl::report_message( const char* key, const std::string& message)
 {
 	strus::WebRequestAnswer answer;
-	std::string http_accept_charset = request().http_accept_charset();
 	std::string http_accept = request().http_accept();
 	std::string html_base_href;
 	if (!m_serviceClosure->http_server_url().empty())
@@ -158,10 +157,9 @@ void RequestContextImpl::report_message( const std::string& key, const std::stri
 	{
 		html_base_href = std::string("http://") + request().http_host() + "/";
 	}
-	answer = m_serviceClosure->requestHandler()->getSimpleRequestAnswer( http_accept_charset.c_str(), http_accept.c_str(), html_base_href.c_str(), key, message);
+	answer = m_serviceClosure->requestHandler()->getSimpleRequestAnswer( http_accept.c_str(), html_base_href.c_str(), key, message.c_str(), message.size());
 
-	BOOSTER_DEBUG( DefaultConstants::PACKAGE())
-			<< strus::string_format( _TXT("HTTP Accept: '%s', Accept-Charset: '%s'"), http_accept.c_str(), http_accept_charset.c_str());
+	BOOSTER_DEBUG( DefaultConstants::PACKAGE()) << strus::string_format( _TXT("HTTP Accept: '%s'"), http_accept.c_str());
 	report_answer( answer, true/*do_reply_content*/);
 }
 

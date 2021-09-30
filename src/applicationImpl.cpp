@@ -255,40 +255,16 @@ static std::string form_tojson( const cppcms::http::request::form_type& form)
 	return content;
 }
 
-void ApplicationImpl::runRequest( strus::Reference<strus::WebRequestContextInterface>& ctx, const strus::WebRequestContent& content, bool do_reply_content)
+void ApplicationImpl::runRequest( strus::Reference<strus::WebRequestContextInterface>& ctx, bool do_reply_content)
 {
-	bool open = true;
-	m_serviceClosure->startRunRequest();
 	try
 	{
-		if (ctx->execute( content))
+		if (ctx->execute())
 		{
 			m_serviceClosure->logInfoMessages();
 
-			std::vector<WebRequestDelegateRequest> delegateRequests = ctx->getDelegateRequests();
-			if (delegateRequests.empty())
-			{
-				(void)ctx->complete();
-				strus::WebRequestAnswer answer = ctx->getAnswer();
-				RequestContextImpl appcontext( get_context(), m_serviceClosure);
-				appcontext.report_answer( answer, do_reply_content);
-	
-				open = false;
-				if (m_serviceClosure->doneRunRequest() && m_serviceClosure->haltedForMaintenance())
-				{
-					m_serviceClosure->processWaitingRequests();
-				}
-			}
-			else
-			{
-				booster::shared_ptr<cppcms::http::context> httpContext( release_context());
-				WebRequestDelegateContext::issueDelegateRequests( m_serviceClosure, httpContext, ctx, delegateRequests);
-			}
-		}
-		else
-		{
-			RequestContextImpl appcontext( get_context(), m_serviceClosure);
 			strus::WebRequestAnswer answer = ctx->getAnswer();
+			RequestContextImpl appcontext( get_context(), m_serviceClosure);
 			if (answer.httpStatus() == 503/*temporarily unavailable*/)
 			{
 				if (answer.appErrorCode() == ErrorCodeServiceTemporarilyUnavailable)
@@ -304,7 +280,7 @@ void ApplicationImpl::runRequest( strus::Reference<strus::WebRequestContextInter
 					else
 					{
 						booster::shared_ptr<cppcms::http::context> httpContext( release_context());
-						m_serviceClosure->pushWaitingRequest( WebRequestWaitingContext( m_serviceClosure, httpContext, ctx, content));
+						m_serviceClosure->pushWaitingRequest( WebRequestWaitingContext( m_serviceClosure, httpContext, ctx));
 					}
 				}
 				else
@@ -316,27 +292,16 @@ void ApplicationImpl::runRequest( strus::Reference<strus::WebRequestContextInter
 			{
 				appcontext.report_error( answer.httpStatus(), answer.appErrorCode(), answer.errorStr());
 			}
-			open = false;
-			if (m_serviceClosure->doneRunRequest() && m_serviceClosure->haltedForMaintenance())
-			{
-				m_serviceClosure->processWaitingRequests();
-			}
 		}
-	}
-	catch (const std::runtime_error& err)
-	{
-		if (open) (void)m_serviceClosure->doneRunRequest();
-		throw std::runtime_error( err.what());
-	}
-	catch (const std::bad_alloc& err)
-	{
-		if (open) (void)m_serviceClosure->doneRunRequest();
-		throw std::bad_alloc();
+		else
+		{
+			booster::shared_ptr<cppcms::http::context> httpContext( release_context());
+			m_serviceClosure->pushWaitingRequest( WebRequestWaitingContext( m_serviceClosure, httpContext, ctx));
+		}
 	}
 	catch (...)
 	{
-		if (open) (void)m_serviceClosure->doneRunRequest();
-		throw std::runtime_error( _TXT("uncaught exception"));
+		throw;
 	}
 }
 
@@ -385,31 +350,22 @@ void ApplicationImpl::exec_request( std::string path)
 		}
 		// Create request context:
 		strus::WebRequestAnswer answer;
-		strus::Reference<strus::WebRequestContextInterface> ctx(
-			m_serviceClosure->requestHandler()->createContext( http_accept_charset.c_str(), http_accept.c_str(), html_base_href.c_str(), request_method.c_str(), path.c_str(), answer));
-		if (!ctx.get())
-		{
-			appcontext.report_error( answer.httpStatus(), answer.appErrorCode(), answer.errorStr());
-			return;
-		}
 		cppcms::http::content_type content_type;
 		std::pair<void*,size_t> content_data;
-		std::string doctype;
-		std::string charset;
-		strus::WebRequestContent content;
-		std::string contentstr;
+		std::string contentstrbuf;
 
 		// Initialize request content:
 		content_data = request().raw_post_data();
+		char const* contentstr = "";
+		size_t contentlen = 0;
+
 		if (content_data.second == 0/*empty content*/)
 		{
 			if (!request().get().empty())
 			{
-				contentstr = form_tojson( request().get());
-
-				content.setDoctype( "application/json");
-				content.setCharset( "UTF-8");
-				content.setContent( contentstr.c_str(), contentstr.size());
+				contentstrbuf = form_tojson( request().get());
+				contentstr = contentstrbuf.c_str();
+				contentlen = contentstrbuf.size();
 			}
 		}
 		else
@@ -420,14 +376,10 @@ void ApplicationImpl::exec_request( std::string path)
 				return;
 			}
 			content_type = request().content_type_parsed();
-			doctype = content_type.media_type();
-			charset = content_type.charset();
-
-			content.setDoctype( doctype.c_str());
-			content.setCharset( charset.empty() ? "UTF-8" : charset.c_str());
-			content.setContent( (const char*)content_data.first, content_data.second);
+			contentstr = (const char*)content_data.first;
+			contentlen = content_data.second;
 		}
-		if (content.empty())
+		if (contentlen == 0)
 		{
 			BOOSTER_DEBUG( DefaultConstants::PACKAGE())
 				<< strus::string_format( _TXT("%s Request without content, HTTP Accept: '%s', Accept-Charset: '%s'"), request_method.c_str(), http_accept.c_str(), http_accept_charset.c_str());
@@ -437,10 +389,18 @@ void ApplicationImpl::exec_request( std::string path)
 			BOOSTER_DEBUG( DefaultConstants::PACKAGE())
 				<< strus::string_format(
 					_TXT("%s Request content type '%s', charset '%s', bytes %lu, HTTP Accept: '%s', Accept-Charset: '%s'"),
-					request_method.c_str(), content.doctype(), content.charset(), (unsigned long)content.len(), http_accept.c_str(), http_accept_charset.c_str());
+					request_method.c_str(), content_type.media_type().c_str(), content_type.charset().c_str(), (unsigned long)contentlen, http_accept.c_str(), http_accept_charset.c_str());
 		}
+		strus::Reference<strus::WebRequestContextInterface> ctx(
+			m_serviceClosure->requestHandler()->createContext( http_accept.c_str(), html_base_href.c_str(), request_method.c_str(), path.c_str(), contentstr, contentlen, answer));
+		if (!ctx.get())
+		{
+			appcontext.report_error( answer.httpStatus(), answer.appErrorCode(), answer.errorStr());
+			return;
+		}
+
 		// Execute request:
-		runRequest( ctx, content, do_reply_content);
+		runRequest( ctx, do_reply_content);
 	}
 	CATCH_EXEC_ERROR()
 }

@@ -62,7 +62,7 @@ public:
 	/// \brief Report content
 	void report_answer( const strus::WebRequestAnswer& answer, bool with_content);
 	/// \brief Report a message (http status 200)
-	void report_message( const std::string& key, const std::string& message);
+	void report_message( const char* key, const std::string& message);
 	/// \brief Report temporal unavailability (http status 503)
 	void report_temporal_reject();
 

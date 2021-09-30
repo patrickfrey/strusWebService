@@ -28,52 +28,27 @@ public:
 
 	virtual ~WebRequestLogger();
 
-	virtual int logMask() const;
-
-	virtual int structDepth() const
+	virtual int level() const noexcept
 	{
-		return m_structDepth;
+		return m_level;
 	}
 
-	virtual void logRequest( const char* content, std::size_t contentsize);
-	virtual void logRequestType( const char* title, const char* procdescr, const char* contextType, const char* contextName);
-	virtual void logRequestAnswer( const char* content, std::size_t contentsize);
-
-	virtual void logDelegateRequest( const char* address, const char* method, const char* content, std::size_t contentsize);
-	virtual void logPutConfiguration( const char* contextType, const char* contextName, const std::string& configstr);
-	virtual void logAction( const char* contextType, const char* contextName, const char* action);
-	virtual void logContentEvent( const char* title, const char* item, const char* content, std::size_t contentsize);
-
-	virtual void logConnectionEvent( const char* content);
-	virtual void logConnectionState( const char* state, int arg);
-
-	virtual void logWarning( const char* errmsg);
-	virtual void logError( const char* errmsg);
-	virtual void logContextInfoMessages( const char* content);
-
-	void reset();
-
-	enum {
-		MaxLogContentSize=2048/*2K*/,
-		MaxLogBinaryItemSize=32,
-		MaxLogReadableItemSize=256
-	};
+	virtual void print( const Level level, const char* tag, const char* msg, size_t msglen) noexcept;
 
 private:
-	void logMessageBuf( char* buf, size_t bufsize, const char* fmt, va_list ap);
-
-	void logMessageDump( const char* header, const char* content);
 	void logMessage( const char* fmt, ...)
 #ifdef __GNUC__
 	__attribute__ ((format (printf, 2, 3)))
 #endif
 	;
+ 	void logMessageBuf( char* buf, size_t bufsize, const char* fmt, va_list ap);
 	const char* getThreadId();
 	void alert( const char* msg);
 	bool gotAlert() const
 	{
 		return m_gotAlert;
 	}
+	void reset();
 
 private:
 	strus::mutex m_mutex;
@@ -100,7 +75,7 @@ private:
 	std::ostream* m_logout;
 	bool m_verbose;
 	int m_structDepth;
-	Mask m_mask;
+	Level m_level;
 	bool m_gotAlert;
 	int m_procid;
 	int m_nofprocs;

@@ -253,32 +253,29 @@ void ServiceClosure::mount_applications()
 void ServiceClosure::processWaitingRequests()
 {
 	strus::unique_lock lock( m_mutex_waitingContextList);
+	std::vector<WebRequestWaitingContext> waitingContextList_new;
 	std::vector<WebRequestWaitingContext>::iterator ci = m_waitingContextList.begin(), ce = m_waitingContextList.end();
 	for (; ci != ce; ++ci)
 	{
 		RequestContextImpl appcontext( ci->httpContext(), this);
-		if (ci->requestContext()->execute( ci->content()))
+		if (ci->requestContext()->execute())
 		{
-			std::vector<WebRequestDelegateRequest> delegateRequests = ci->requestContext()->getDelegateRequests();
-			if (delegateRequests.empty())
+			strus::WebRequestAnswer answer = ci->requestContext()->getAnswer();
+			if (answer.ok())
 			{
-				(void)ci->requestContext()->complete();
-				strus::WebRequestAnswer answer = ci->requestContext()->getAnswer();
 				appcontext.report_answer( answer, true/*do_reply_content*/);
 			}
 			else
 			{
-				appcontext.report_error( 500, ErrorCodeLogicError, _TXT("no delegate requests allowed in maintenance requests with exclusive access"));
+				appcontext.report_error( answer.httpStatus(), answer.appErrorCode(), answer.errorStr());
 			}
 		}
 		else
 		{
-			strus::WebRequestAnswer answer = ci->requestContext()->getAnswer();
-			appcontext.report_error( answer.httpStatus(), answer.appErrorCode(), answer.errorStr());
+			waitingContextList_new.push_back( *ci);
 		}
 	}
-	m_waitingContextList.clear();
-	m_waitForExclusiveAccess.set( false);
+	std::swap( m_waitingContextList, waitingContextList_new);
 }
 
 void ServiceClosure::logInfoMessages()
