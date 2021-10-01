@@ -4,6 +4,8 @@
 		"workdir"   : "/srv/strus",
 		"configdir" : "/srv/strus/config",
 		"resources" : "/usr/share/strus"
+		"schemadir" : "/etc/strus/schema",
+		"scriptdir" : "/etc/strus/script",
 	},
 
 	"transactions" : {
@@ -50,8 +52,6 @@
 	},
 
 	"debug" : {
-		"log_requests": true,
-		"struct_depth": 5,
 		"request_file": "{logging.directory}/requests.{service.name}.log",
 		"protocol" : {
 			"pretty_print":		true,

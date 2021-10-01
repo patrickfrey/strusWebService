@@ -152,6 +152,7 @@ private:
 	std::string m_put_configdir;
 	std::string m_identifier;
 	int m_port;
+	int m_loglevel;
 	bool m_cors_enabled;
 	bool m_quit_enabled;
 	bool m_pretty_print;

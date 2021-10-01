@@ -64,27 +64,7 @@ void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 
 		m_identifier = config.get( "service.name", DefaultConstants::DEFAULT_SERVICE_NAME());
 		m_port = config.get( "service.port", DefaultConstants::DEFAULT_HTTP_PORT());
-
-		bool doLogCalls = config.get( "debug.log_calls", DefaultConstants::DO_LOG_CALLS());
-		bool doLogRequests = config.get( "debug.log_requests", DefaultConstants::DO_LOG_REQUESTS());
-		bool doLogActions = config.get( "debug.log_actions", DefaultConstants::DO_LOG_ACTIONS());
-		bool doLogContentEvents = config.get( "debug.log_parse", DefaultConstants::DO_LOG_CONTENTEVENTS());
-		bool doLogConnectionEvents = config.get( "debug.log_curl", DefaultConstants::DO_LOG_CURL());
-		bool doLogInfos = config.get( "debug.log_infos", DefaultConstants::DO_LOG_INFOS());
-		bool doLogWarnings = config.get( "debug.log_warnings", DefaultConstants::DO_LOG_WARNINGS()) | doLogInfos;
-		bool doLogErrors = config.get( "debug.log_errors", DefaultConstants::DO_LOG_ERRORS()) | doLogWarnings;
-
-		int logMask = 0;
-		if (doLogCalls) logMask |= (int)WebRequestLoggerInterface::LogMethodCalls;
-		if (doLogRequests) logMask |= (int)WebRequestLoggerInterface::LogRequests | (int)WebRequestLoggerInterface::LogDelegateRequests;
-		if (doLogActions) logMask |= (int)WebRequestLoggerInterface::LogAction | (int)WebRequestLoggerInterface::LogConfiguration;
-		if (doLogContentEvents) logMask |= (int)WebRequestLoggerInterface::LogContentEvents;
-		if (doLogConnectionEvents) logMask |= (int)WebRequestLoggerInterface::LogConnectionEvents;
-		if (doLogInfos) logMask |= (int)WebRequestLoggerInterface::LogContextInfoMessages;
-		if (doLogWarnings) logMask |= (int)WebRequestLoggerInterface::LogWarning;
-		if (doLogErrors) logMask |= (int)WebRequestLoggerInterface::LogError;
-
-		int logStructDepth = config.get( "debug.struct_depth", DefaultConstants::LOG_STRUCT_DEPTH());
+		m_loglevel = config.get( "logging.level", DefaultConstants::LOGGING_LEVEL());
 		int max_idle_time = config.get( "transactions.max_idle_time", DefaultConstants::TRANSACTION_MAX_IDLE_TIME());
 		int transactions_per_second = config.get( "transactions.nof_per_sec", DefaultConstants::TRANSACTION_MAP_SLOT_SIZE());
 		int nofThreads = m_service->threads_no();
@@ -124,10 +104,7 @@ void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 			}
 		}
 		std::string requestLogFilename = config.get( "debug.request_file", DefaultConstants::REQUEST_LOG_FILE());
-		m_requestLogger = new strus::WebRequestLogger(
-					requestLogFilename,
-					verbosity, logMask, logStructDepth, nofThreads+1,
-					m_service->process_id(), nofProcs);
+		m_requestLogger = new strus::WebRequestLogger( requestLogFilename, verbosity, m_loglevel, nofThreads+1, m_service->process_id(), nofProcs);
 		int timeout = std::max( max_idle_time/20, 10);
 		m_eventloop = strus::createCurlEventLoop(
 					m_requestLogger,
@@ -137,14 +114,17 @@ void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 		{
 			throw std::runtime_error( _TXT("failed to start background process for garbage collector"));
 		}
+		std::string script_dir;
+		std::string schema_dir;
+
 		m_requestHandler = strus::createWebRequestHandler(
 					m_eventloop, m_requestLogger, m_html_head,
-					m_put_configdir, m_identifier, m_port,
+					m_put_configdir, script_dir, schema_dir, m_identifier, m_port,
 					m_pretty_print, max_idle_time, transactions_per_second, m_errorhnd);
 		if (!m_requestHandler) throw std::runtime_error( m_errorhnd->fetchError());
 
 		WebRequestAnswer answer;
-		if (!m_requestHandler->init( configstr, answer))
+		if (!m_requestHandler->init( configstr.c_str(), configstr.size(), answer))
 		{
 			const char* msg = answer.errorStr() ? answer.errorStr() : strus::errorCodeToString( answer.appErrorCode());
 			throw strus::runtime_error( _TXT("failed to initialize request handler: %s"), msg);

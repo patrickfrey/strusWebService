@@ -36,7 +36,6 @@ public:
 	{}
 	virtual ~WebRequestWaitingContext(){}
 
-	webservice::ServiceClosure* serviceClosure()			{return m_serviceClosure;}
 	webservice::HttpContextRef httpContext()			{return m_httpContext;}
 	strus::Reference<WebRequestContextInterface> requestContext()	{return m_requestContext;}
 

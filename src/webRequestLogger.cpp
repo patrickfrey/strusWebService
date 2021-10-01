@@ -49,7 +49,7 @@ static std::string getLogFilename( const std::string& logfilename, int procid, i
 	}
 }
 
-WebRequestLogger::WebRequestLogger( const std::string& logfilename_, int verbosity, int level_, int structDepth_, int maxnofthreads, int procid_, int nofprocs_)
+WebRequestLogger::WebRequestLogger( const std::string& logfilename_, int verbosity, int level_, int maxnofthreads, int procid_, int nofprocs_)
 	:m_slots(new Slot[ maxnofthreads])
 	,m_nofslots(maxnofthreads?maxnofthreads:1)
 	,m_nofslotspow(nofslotspow(maxnofthreads))
@@ -57,7 +57,6 @@ WebRequestLogger::WebRequestLogger( const std::string& logfilename_, int verbosi
 	,m_logfile()
 	,m_logout(0)
 	,m_verbose(verbosity>0)
-	,m_structDepth(structDepth_)
 	,m_level((WebRequestLoggerInterface::Level)level_)
 	,m_gotAlert(false)
 	,m_procid(procid_)

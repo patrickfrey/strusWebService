@@ -4,7 +4,6 @@ set( source_files
 	configUtils.cpp
 	applicationImpl.cpp
 	requestContextImpl.cpp
-	webRequestDelegateContext.cpp
 	serviceClosure.cpp
 	${WEBSERVICE_GEN_SOURCE_DIR}/internationalization.cpp
 )

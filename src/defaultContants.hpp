@@ -24,16 +24,7 @@ struct DefaultConstants
 	static bool DEBUG_PROTOCOL_DEBUG_ENABLED() {return false;}
 	static bool DEBUG_PROTOCOL_QUIT_ENABLED() {return false;}
 
-	static const bool DO_LOG_CALLS() {return false;}
-	static const bool DO_LOG_REQUESTS() {return false;}
-	static const bool DO_LOG_ACTIONS() {return false;}
-	static const bool DO_LOG_CONTENTEVENTS() {return false;}
-	static const bool DO_LOG_CURL() {return false;}
-	static const bool DO_LOG_INFOS() {return false;}
-	static const bool DO_LOG_WARNINGS() {return true;}
-	static const bool DO_LOG_ERRORS() {return true;}
-
-	static const int LOG_STRUCT_DEPTH() {return 5;}
+	static const int LOGGING_LEVEL() {return 2;}
 	static const std::string REQUEST_LOG_FILE() {return "request.log";}
 	static const std::string SERVICE_LOG_FILE() {return "strusWebService.log";}
 	static const std::string LOGGING_DIR() {return "/var/log/strus";}

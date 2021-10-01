@@ -170,7 +170,6 @@ cppcms::json::value webservice::configDefault()
 	config.set( "logging.level", "debug");
 	config.set( "logging.file.name", DefaultConstants::SERVICE_LOG_FILE());
 	config.set( "logging.file.append", true);
-	config.set( "debug.log_requests", DefaultConstants::DO_LOG_REQUESTS());
 	config.set( "debug.request_file", DefaultConstants::REQUEST_LOG_FILE());
 	return config;
 }
