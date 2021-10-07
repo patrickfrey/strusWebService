@@ -114,8 +114,8 @@ void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 		{
 			throw std::runtime_error( _TXT("failed to start background process for garbage collector"));
 		}
-		std::string script_dir;
-		std::string schema_dir;
+		std::string script_dir = config.get( "data.scriptdir", DefaultConstants::DefaultConstants::SCRIPT_DIR());
+		std::string schema_dir = config.get( "data.schemadir", DefaultConstants::DefaultConstants::SCHEMA_DIR());
 
 		m_requestHandler = strus::createWebRequestHandler(
 					m_eventloop, m_requestLogger, m_html_head,

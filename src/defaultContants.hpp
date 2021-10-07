@@ -29,6 +29,8 @@ struct DefaultConstants
 	static const std::string SERVICE_LOG_FILE() {return "strusWebService.log";}
 	static const std::string LOGGING_DIR() {return "/var/log/strus";}
 	static const std::string AUTOSAVE_CONFIG_DIR() {return "/srv/strus/config";}
+	static const std::string SCRIPT_DIR() {return "/etc/strus/script";}
+	static const std::string SCHEMA_DIR() {return "/etc/strus/schema";}
 	static const std::string HTTP_SERVER_NAME() {return "";}
 	static const std::string HTTP_SCRIPT_NAME() {return "";}
 	static const int HOUSKEEPING_TIMER_INTERVAL() {return 10;}
