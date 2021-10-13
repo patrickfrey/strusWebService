@@ -167,6 +167,10 @@ static void printUsage()
 	std::cout << "-N|--name <SERVICENAME>" << std::endl;
 	std::cout << "    " << _TXT("Define the name of the service, overwrite") << std::endl;
 	std::cout << "    " << _TXT("  the configured value service.name with <SERVICENAME>.") << std::endl;
+	std::cout << "--cleanup" << std::endl;
+	std::cout << "    " << _TXT("Do cleanup of configuration before startup.") << std::endl;
+	std::cout << "--nostart" << std::endl;
+	std::cout << "    " << _TXT("Do not run the service but terminate after initialization.") << std::endl;
 	std::cout << "-V|--verbose" << std::endl;
 	std::cout << "    " << _TXT("Do increase verbosity level for logging and output.") << std::endl;
 	std::cout << "    " << _TXT("  may be repeated, e.g. -VVV for verbosity level 3.") << std::endl;
@@ -254,10 +258,11 @@ int main( int argc_, const char *argv_[] )
 
 		// Define configuration and usage:
 		strus::ProgramOptions opt(
-				errorhnd.get(), argc_, argv_, 9,
+				errorhnd.get(), argc_, argv_, 11,
 				"h,help", "v,version", "X,schema:", "c,config:",
 				"P,port:", "N,name:",
-				"verbosity:", "V,verbose+", "license");
+				"verbosity:", "V,verbose+", "license",
+				"nostart", "cleanup");
 		if (errorhnd->hasError())
 		{
 			throw strus::runtime_error(_TXT("failed to parse program arguments"));
@@ -277,6 +282,8 @@ int main( int argc_, const char *argv_[] )
 		std::string configfile;
 		std::string servicename;
 		int port = 0;
+		bool doStart = true;
+		bool doCleanup = false;
 
 		if (opt("config"))
 		{
@@ -300,6 +307,18 @@ int main( int argc_, const char *argv_[] )
 		else
 		{
 			config = configDefault();
+		}
+		if (opt("license"))
+		{
+			print3rdPartyLicenses( config, errorhnd.get());
+		}
+		if (opt("nostart"))
+		{
+			doStart = false;
+		}
+		if (opt("cleanup"))
+		{
+			doCleanup = true;
 		}
 		if (opt("license"))
 		{
@@ -388,6 +407,13 @@ int main( int argc_, const char *argv_[] )
 			BOOSTER_INFO( DefaultConstants::PACKAGE())
 					<< strus::string_format( _TXT("initializing web service %s"), servicename.c_str());
 			g_serviceClosure->init( config, g_verbosity);
+			if (doCleanup)
+			{
+				BOOSTER_INFO( DefaultConstants::PACKAGE())
+					<< strus::string_format( _TXT("configuration cleanup %s"), servicename.c_str());
+				g_serviceClosure->cleanupConfig();
+			}
+			if (!doStart) break;
 
 			BOOSTER_INFO( DefaultConstants::PACKAGE())
 					<< strus::string_format( _TXT("starting strus web service (%d threads).."), nofThreads);
@@ -397,7 +423,6 @@ int main( int argc_, const char *argv_[] )
 
 			g_got_sighup.set( false);
 			CALL_SERVICE( run);
-
 			if (g_got_sighup.test())
 			{
 				BOOSTER_INFO( DefaultConstants::PACKAGE() ) << _TXT("reloading configuration on SIGHUP..");
@@ -412,7 +437,14 @@ int main( int argc_, const char *argv_[] )
 			rt = strus::ErrorCodeUncaughtException;
 			g_terminate.set( true);
 		}
-		BOOSTER_INFO( DefaultConstants::PACKAGE() ) << _TXT("service terminated");
+		if (doStart)
+		{
+			BOOSTER_INFO( DefaultConstants::PACKAGE() ) << _TXT("service terminated");
+		}
+		else
+		{
+			BOOSTER_INFO( DefaultConstants::PACKAGE() ) << _TXT("service not started (--nostart), done.");
+		}
 	}
 	catch (const cppcms::json::bad_value_cast& e)
 	{

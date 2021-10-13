@@ -268,4 +268,8 @@ void ServiceClosure::logInfoMessages()
 	}
 }
 
+void ServiceClosure::cleanupConfig()
+{
+	strus::cleanupConfiguration( m_put_configdir, m_identifier);
+}
 

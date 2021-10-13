@@ -117,6 +117,7 @@ public:
 	{
 		return m_identifier;
 	}
+	void cleanupConfig();
 
 	void pushWaitingRequest( const WebRequestWaitingContext& o)
 	{
