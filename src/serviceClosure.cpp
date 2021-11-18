@@ -145,6 +145,11 @@ void ServiceClosure::init( const cppcms::json::value& config, int verbosity)
 	}
 }
 
+void ServiceClosure::synchronize()
+{
+	(void)m_requestHandler->synchronize();
+}
+
 static std::string css_style_include( const std::string& content)
 {
 	return std::string("<style>\n") + content + "</style>\n";

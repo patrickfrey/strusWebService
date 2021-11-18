@@ -417,6 +417,8 @@ int main( int argc_, const char *argv_[] )
 
 			BOOSTER_INFO( DefaultConstants::PACKAGE())
 					<< strus::string_format( _TXT("starting strus web service (%d threads).."), nofThreads);
+			g_serviceClosure->synchronize();
+
 			CALL_SERVICE( mount_applications)
 			BOOSTER_NOTICE( DefaultConstants::PACKAGE())
 					<< strus::string_format( _TXT("service ready and listening on %d"), port);

@@ -52,6 +52,9 @@ public:
 	/// \brief Intitialize service, start event loop and load configuration
 	void init( const cppcms::json::value& config, int verbosity);
 
+	/// \brief Connect to other services for synchronization
+	void synchronize();
+
 	/// \brief Shutdown service
 	void shutdown()
 	{
